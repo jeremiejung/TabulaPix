@@ -1,0 +1,11 @@
+:root { color-scheme: light dark; --accent: #c62828; }
+body { width: 260px; margin: 0; padding: 12px; font: 13px system-ui, sans-serif; }
+h1 { font-size: 15px; margin: 0 0 8px; }
+input[type=search] { width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 14px; }
+.bar { display: flex; gap: 6px; margin: 8px 0 4px; }
+.bar button { flex: 1; padding: 2px; font-size: 12px; }
+ul { list-style: none; margin: 0; padding: 0; }
+li label { display: flex; align-items: center; gap: 6px; padding: 3px 0; cursor: pointer; }
+li .hint { margin-left: auto; font-size: 11px; opacity: .6; }
+#go { width: 100%; margin-top: 8px; padding: 7px; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 4px; cursor: pointer; }
+#msg { margin: 8px 0 0; font-size: 12px; min-height: 1em; }

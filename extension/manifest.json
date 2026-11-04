@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Wire Sweep",
+  "version": "1.0.0",
+  "description": "Lance la même recherche sur toutes vos agences photo, un onglet par agence.",
+  "action": {
+    "default_title": "Wire Sweep",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage", "clipboardWrite"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'none'"
+  }
+}
