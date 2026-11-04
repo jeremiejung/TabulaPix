@@ -5,7 +5,7 @@ Chrome extension for photo editors: type your keywords once and search all your 
 
 ## Wire Sweep (en français)
 
-> **Branche `chrome-store`** : version destinée au Chrome Web Store. Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, adresses des agences (y compris l'encodage), agences personnalisées, sous-domaine Pixpalace. Cette branche n'est pas fusionnée dans `main`, qui reste la version d'origine.
+> Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, adresses des agences (y compris l'encodage), agences personnalisées avec détection automatique, sous-domaine Pixpalace.
 
 Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les agences, et Wire Sweep ouvre un onglet par agence avec la recherche déjà lancée. Les agences cochées sont mémorisées d'une utilisation à l'autre.
 
