@@ -27,6 +27,8 @@
  *   fill     { input: "sélecteur CSS du champ", submit: "sélecteur CSS du bouton" }
  *            L'extension ouvre la page, tape les mots-clés dans le champ puis
  *            clique sur le bouton (« submit » est facultatif : sinon, Entrée).
+ *            « delay » (facultatif, en millisecondes, 300 par défaut) : pause
+ *            avant de taper puis avant de cliquer, pour les sites lents.
  *            ⚠ Le domaine doit aussi figurer dans "host_permissions" du
  *            fichier manifest.json, sinon Chrome refuse de remplir le champ.
  *            Pour trouver un sélecteur : clic droit sur le champ → Inspecter →
@@ -51,7 +53,8 @@ const AGENCIES = [
     url: "https://mercury.bloomberg.com/search",
     fill: {
       input: "form.searchbar input.react-autosuggest__input",
-      submit: "form.searchbar button[type=submit]"
+      submit: ".search-go-button",
+      delay: 1200
     }
   },
   {
