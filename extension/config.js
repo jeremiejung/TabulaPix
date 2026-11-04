@@ -67,12 +67,15 @@ const AGENCIES = [
   {
     id: "getty-creative",
     name: "Getty Creative",
-    url: "https://www.gettyimages.fr/search/2/image-film?agreements=pa%3A243515&family=creative&phrase={q}&sort=best&phraseprocessing=default&excludenudity=false&suppressfamilycorrection=true"
+    url: "https://www.gettyimages.fr/search/2/image-film?family=creative&phrase={q}&sort=best&phraseprocessing=default&excludenudity=false&suppressfamilycorrection=true"
+    // Pour ne voir que les images couvertes par votre accord Getty, ajoutez
+    // « agreements=pa%3A243515& » juste après le « ? » de l'adresse.
   },
   {
     id: "getty-actu",
     name: "Getty Actu",
-    url: "https://www.gettyimages.fr/search/2/image?agreements=pa%3A243515&family=editorial&phrase={q}&sort=best&phraseprocessing=default&groupbyevent=false"
+    url: "https://www.gettyimages.fr/search/2/image?family=editorial&phrase={q}&sort=best&phraseprocessing=default&groupbyevent=false"
+    // Même chose ici pour filtrer sur votre accord : « agreements=pa%3A243515& » après le « ? ».
   },
   {
     id: "shutterstock",
