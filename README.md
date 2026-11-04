@@ -73,11 +73,13 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 }
 ```
 
+Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` (c'est le cas d'AFP (forum)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
+
 Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
 
 Les valeurs propres à une rédaction ne s'écrivent pas en dur : elles passent par une option, insérée dans l'adresse avec `{opt:nom}` (voir `OPTIONS` en bas de `config.js`).
 
-Certains sites (AFP, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
+Certains sites (AFP news, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
 
 Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Pour un nouveau site de ce type, ajoutez aussi son domaine dans `host_permissions` du fichier `extension/manifest.json`.
 

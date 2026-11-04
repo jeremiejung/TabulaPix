@@ -8,6 +8,7 @@
  * Champs d'une agence :
  *   id       identifiant unique, sans espace (sert à mémoriser la case cochée)
  *   name     nom affiché dans la popup
+ *   defaultChecked  (facultatif) false = décochée au premier lancement
  *   url      adresse de recherche. Marqueurs possibles :
  *              {q}        → les mots-clés, encodés pour une URL (cas le plus courant)
  *              {payload}  → le résultat du champ « payload » ci-dessous
@@ -44,10 +45,17 @@ const AGENCIES = [
   },
   {
     id: "afp",
-    name: "AFP",
+    name: "AFP (news)",
     url: "https://news.afp.com/#/c/main/search/photos?search={payload}",
     payload: '{"languages":["fr"],"sortOrder":"desc","searchTab":"photos","keywords":{"value":"{q}","lang":"fr"}}',
     encode: ["uri", "gzip", "base64", "uri"]
+  },
+  {
+    id: "afp-forum",
+    name: "AFP (forum)",
+    defaultChecked: false,
+    // Les paramètres sont répétés après le « # » : la page les relit de là.
+    url: "https://www.afpforum.com/AFPForum/Search/Results.aspx?pn=1&smd=8&mui=3&fst={q}&fto=3&t=2#pn=1&smd=8&mui=3&fst={q}&fto=3&t=2"
   },
   {
     id: "bloomberg",
