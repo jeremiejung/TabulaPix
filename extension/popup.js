@@ -5,9 +5,9 @@ const list = document.getElementById("list");
 const input = document.getElementById("q");
 const msg = document.getElementById("msg");
 
-// Une agence est « manuelle » si son URL ne contient aucun marqueur :
-// on ouvre la page et on copie les mots-clés dans le presse-papiers.
-const isManual = (a) => !a.url.includes("{q}") && !a.url.includes("{payload}");
+// Une agence est « manuelle » si ni son URL ni « fill » ne transmettent les
+// mots-clés : on ouvre la page et on copie les mots-clés dans le presse-papiers.
+const isManual = (a) => !a.fill && !a.url.includes("{q}") && !a.url.includes("{payload}");
 
 /* ---------- Construction des URL ---------- */
 
@@ -112,11 +112,10 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     try { await navigator.clipboard.writeText(q); } catch (_) { /* sans gravité */ }
   }
 
-  // Onglets ouverts en arrière-plan, puis on active le premier
-  // (activer un onglet ferme la popup).
-  const tabs = [];
-  for (const url of urls) tabs.push(await chrome.tabs.create({ url, active: false }));
-  chrome.tabs.update(tabs[0].id, { active: true });
+  // L'ouverture des onglets est confiée au script d'arrière-plan : la popup
+  // se ferme dès qu'un onglet passe au premier plan.
+  const jobs = selected.map((a, i) => ({ url: urls[i], fill: a.fill || null }));
+  chrome.runtime.sendMessage({ type: "sweep", jobs, q });
 });
 
 chrome.storage.local.get({ [STORAGE_KEY]: AGENCIES.map((a) => a.id) }, (data) => {

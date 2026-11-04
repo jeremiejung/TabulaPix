@@ -11,8 +11,8 @@
  *   url      adresse de recherche. Marqueurs possibles :
  *              {q}        → les mots-clés, encodés pour une URL (cas le plus courant)
  *              {payload}  → le résultat du champ « payload » ci-dessous
- *            Sans aucun marqueur, la page est simplement ouverte et les
- *            mots-clés sont copiés dans le presse-papiers (il suffit de coller).
+ *            Sans aucun marqueur (et sans « fill »), la page est simplement
+ *            ouverte et les mots-clés sont copiés dans le presse-papiers.
  *
  * Champs avancés (pour les sites qui « emballent » la recherche dans l'URL) :
  *   payload  texte modèle (souvent du JSON) contenant {q}. Ici {q} est inséré
@@ -22,6 +22,15 @@
  *              "hex"    → hexadécimal majuscule (UTF-8)
  *              "gzip"   → compression gzip (faite localement, sans réseau)
  *              "base64" → base64
+ *
+ * Pour les sites dont l'adresse ne peut pas contenir la recherche :
+ *   fill     { input: "sélecteur CSS du champ", submit: "sélecteur CSS du bouton" }
+ *            L'extension ouvre la page, tape les mots-clés dans le champ puis
+ *            clique sur le bouton (« submit » est facultatif : sinon, Entrée).
+ *            ⚠ Le domaine doit aussi figurer dans "host_permissions" du
+ *            fichier manifest.json, sinon Chrome refuse de remplir le champ.
+ *            Pour trouver un sélecteur : clic droit sur le champ → Inspecter →
+ *            clic droit sur la ligne surlignée → Copier → Copier le sélecteur.
  */
 const AGENCIES = [
   {
@@ -39,7 +48,11 @@ const AGENCIES = [
   {
     id: "bloomberg",
     name: "Bloomberg",
-    url: "https://mercury.bloomberg.com/search"
+    url: "https://mercury.bloomberg.com/search",
+    fill: {
+      input: "form.searchbar input.react-autosuggest__input",
+      submit: "form.searchbar button[type=submit]"
+    }
   },
   {
     id: "sipa",
@@ -66,7 +79,11 @@ const AGENCIES = [
   {
     id: "abacapress",
     name: "Abacapress",
-    url: "https://search.abacapress.com/recherche"
+    url: "https://search.abacapress.com/recherche",
+    fill: {
+      input: "#fullTextInput",
+      submit: "#simpleSearchForm button[type=submit]"
+    }
   },
   {
     id: "rea",
@@ -78,11 +95,18 @@ const AGENCIES = [
   {
     id: "pixpalace",
     name: "Pixpalace",
-    url: "https://lesechosleparisien.pixpalace.com/home"
+    url: "https://lesechosleparisien.pixpalace.com/home",
+    fill: {
+      input: "#search-field",
+      submit: "#pw_search_form input[type=submit]"
+    }
   },
   {
     id: "maxppp",
     name: "MaxPPP",
-    url: "https://maxppp.com/search#1"
+    url: "https://maxppp.com/search?p_p_id=listenersearchresults_WAR_searchportlet&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&_listenersearchresults_WAR_searchportlet_search={q}&_listenersearchresults_WAR_searchportlet_match=a&_listenersearchresults_WAR_searchportlet_sort=d&_listenersearchresults_WAR_searchportlet_struts.portlet.action=%2Fview%2FdisplaySearchResults"
+    // Si cette adresse ne marche pas, remplacez la ligne « url » ci-dessus par :
+    // url: "https://maxppp.com/search",
+    // fill: { input: "#search" }
   }
 ];

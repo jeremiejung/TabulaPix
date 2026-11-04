@@ -25,7 +25,9 @@ Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) 
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
 3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
 
-Pour les agences marquées **« coller »** (Bloomberg, Abacapress, Pixpalace, MaxPPP), l'adresse ne permet pas encore de transmettre le mot-clé : la page de recherche s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche du site.
+Pour **Bloomberg, Abacapress et Pixpalace**, l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus).
+
+Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automatique, elle est marquée **« coller »** : la page s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche.
 
 Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude : l'extension ne fait qu'ouvrir des onglets.
 
@@ -45,6 +47,8 @@ Astuce pour trouver l'adresse : faites une recherche sur le site avec un mot rar
 
 Certains sites (AFP, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
 
+Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Pour un nouveau site de ce type, ajoutez aussi son domaine dans `host_permissions` du fichier `extension/manifest.json`.
+
 Après toute modification : `chrome://extensions` → bouton **↻** (recharger) sur Wire Sweep.
 
 ### Confidentialité
@@ -52,4 +56,7 @@ Après toute modification : `chrome://extensions` → bouton **↻** (recharger)
 - Aucune collecte de données, aucun mot de passe, aucun compte.
 - Aucun appel réseau : l'extension se contente d'ouvrir des onglets (la politique de sécurité de l'extension interdit d'ailleurs toute requête : `connect-src 'none'`).
 - Seule donnée enregistrée : la liste des agences cochées, stockée localement dans Chrome (`chrome.storage.local`). Les mots-clés ne sont pas conservés.
-- Permissions demandées : `storage` (mémoriser les cases) et `clipboardWrite` (copier les mots-clés pour les sites « coller »).
+- Permissions demandées :
+  - `storage` : mémoriser les cases cochées ;
+  - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
+  - `scripting` + accès à `mercury.bloomberg.com`, `search.abacapress.com` et `*.pixpalace.com` : uniquement pour taper les mots-clés dans le champ de recherche de ces trois sites et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages. Chrome affichera pour cela un avertissement « lire et modifier vos données sur ces sites ».
