@@ -8,7 +8,16 @@
  * à la fermeture de Chrome), au cas où Chrome mettrait ce script en veille.
  */
 
+importScripts("config.js"); // AGENCIES : seule source des sites et des champs
+
 const PENDING = "pendingFills";
+const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
+
+// Nom de domaine d'une agence, d'après config.js (marqueurs neutralisés).
+function agencyHost(agency) {
+  try { return new URL(agency.url.replace(/\{(q|payload)\}/g, "x")).hostname; }
+  catch (_) { return null; }
+}
 const MAX_ATTEMPTS = 3; // ex. page de connexion avant la vraie page
 
 async function getPending() {
@@ -18,9 +27,28 @@ async function setPending(p) {
   await chrome.storage.session.set({ [PENDING]: p });
 }
 
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg && msg.type === "sweep") sweep(msg.jobs, msg.q);
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  // N'accepte que la popup de l'extension (pas une page web, pas une autre extension).
+  if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
+  if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
+  sweep(validJobs(msg.jobs), msg.q);
 });
+
+// Ne garde que les recherches qui pointent, en https, vers le site déclaré
+// dans config.js pour cette agence.
+function validJobs(jobs) {
+  const out = [];
+  for (const job of jobs) {
+    const agency = job && AGENCY_BY_ID.get(job.id);
+    if (!agency) continue;
+    let u;
+    try { u = new URL(job.url); } catch (_) { continue; }
+    const host = agencyHost(agency);
+    if (u.protocol !== "https:" || !host || u.hostname !== host) continue;
+    out.push({ id: agency.id, url: job.url, host, fill: agency.fill || null });
+  }
+  return out;
+}
 
 async function sweep(jobs, q) {
   const pending = await getPending();
@@ -45,7 +73,7 @@ async function sweep(jobs, q) {
     const tab = reuse[i]
       ? await chrome.tabs.update(reuse[i].id, { url: job.url })
       : await chrome.tabs.create({ url: job.url, active: false });
-    if (job.fill) pending[tab.id] = { q, fill: job.fill, attempts: 0 };
+    if (job.fill) pending[tab.id] = { q, id: job.id, host: job.host, attempts: 0 };
     tabs.push(tab);
   }
   await setPending(pending);
@@ -69,7 +97,7 @@ function findTab(tabs, url, claimed, minScore) {
   return tabs.find((t) => !claimed.has(t.id) && t.url && matchScore(t.url, target) >= minScore) || null;
 }
 
-chrome.tabs.onUpdated.addListener(async (tabId, info) => {
+chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   if (info.status !== "complete") return;
   const pending = await getPending();
   const job = pending[tabId];
@@ -78,12 +106,18 @@ chrome.tabs.onUpdated.addListener(async (tabId, info) => {
   delete pending[tabId];
   await setPending(pending);
 
+  // Si l'onglet a quitté le site de l'agence entre-temps, on ne tape rien.
+  let host = null;
+  try { host = new URL(tab.url).hostname; } catch (_) { /* adresse illisible */ }
+  const fill = AGENCY_BY_ID.get(job.id)?.fill;
+  if (host !== job.host || !fill) return;
+
   let ok = false;
   try {
     const [res] = await chrome.scripting.executeScript({
       target: { tabId },
       func: fillAndSubmit,
-      args: [job.q, job.fill]
+      args: [job.q, fill]
     });
     ok = res && res.result === true;
   } catch (_) { /* page non autorisée ou fermée */ }
