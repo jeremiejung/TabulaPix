@@ -99,6 +99,8 @@ async function detectSearchUrl(pageUrl, keywords) {
       const where = n > 1 ? `${n} endroits de l'adresse` : "l'adresse";
       if (/q=[^&#]*_\d/.test(out) || /search=\d{6,}/.test(out)) {
         warnings.push("L'adresse contient aussi un numéro de recherche enregistrée : il est possible qu'il faille le retirer.");
+      } else if (/[?&=/]\d{10,}(?=[&#/]|$)/.test(out)) {
+        warnings.push("L'adresse contient un long numéro (peut-être un numéro de session) : si la recherche cesse de fonctionner, essayez de le retirer de l'adresse.");
       }
       return { url: out, summary: `Mots-clés trouvés en clair dans ${where}.`, warnings };
     }

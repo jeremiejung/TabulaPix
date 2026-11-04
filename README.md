@@ -70,6 +70,8 @@ Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages d
   2. le site s'ouvre avec un bandeau Wire Sweep : cliquez sur le champ de recherche, puis sur le bouton qui lance la recherche (ou « Pas de bouton : utiliser Entrée ») ; le bouton **⇅** déplace le bandeau s'il cache le champ ;
   3. l'agence est enregistrée (mention « perso · champ ») : à chaque recherche, Wire Sweep ouvre la page, tape les mots-clés et clique sur le bouton, comme pour Bloomberg ou Abacapress.
 
+  Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, Wire Sweep utilise le premier visible et le bouton le plus proche du champ.
+
   Si le site change sa page, il suffit de refaire le repérage (✎ puis **Repérer sur le site…**). Supprimer l'agence retire aussi l'autorisation donnée pour son site.
 - **Encodage avancé** (dans l'ajout ou la modification) : pour les sites qui « emballent » la recherche dans l'adresse, comme AFP news, Sipa ou Rea. Mettez `{payload}` dans l'adresse, le texte modèle contenant `{q}` dans **Modèle**, et les **étapes d'encodage** à appliquer dans l'ordre, parmi `uri`, `hex`, `gzip`, `base64`. Exemple Sipa : adresse `https://www.sipa.com/search/fr/1/0x{payload}`, modèle `{"searchbar":"{q}","folding":"0"}`, étapes `hex`.
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.

@@ -258,25 +258,66 @@ function pickerUI(agencyName) {
   const isField = (el) => el && (el.matches("input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]), textarea"));
   const asButton = (el) => el.closest("button, input[type=submit], input[type=button], input[type=image], a, [role=button]") || el;
 
-  function selectorFor(el) {
-    const unique = (sel) => { try { const l = document.querySelectorAll(sel); return l.length === 1 && l[0] === el; } catch (_) { return false; } };
-    const tag = el.tagName.toLowerCase();
-    if (el.id && unique("#" + CSS.escape(el.id))) return "#" + CSS.escape(el.id);
-    for (const attr of ["name", "aria-label", "placeholder", "data-testid", "title", "type"]) {
-      const v = el.getAttribute(attr);
-      if (v) { const sel = `${tag}[${attr}="${CSS.escape(v)}"]`; if (unique(sel)) return sel; }
+  // Valeur « stable » : sans code généré (ex. « __bfac60392382 », « 63149406… »)
+  // qui changerait au prochain chargement de la page.
+  const unstableToken = (t) => /\d{4,}/.test(t)
+    || (t.length >= 6 && /^[0-9a-f]+$/i.test(t) && /\d/.test(t) && /[a-f]/i.test(t))
+    || (t.length >= 12 && /\d/.test(t) && /[a-z]/i.test(t));
+  const stable = (v) => Boolean(v) && v.length <= 200 && !String(v).split(/[^A-Za-z0-9]+/).some(unstableToken);
+  const stablePrefix = (v) => {
+    let out = "";
+    for (const part of String(v).match(/[A-Za-z0-9]+|[^A-Za-z0-9]+/g) || []) {
+      if (/^[A-Za-z0-9]+$/.test(part) && unstableToken(part)) break;
+      out += part;
     }
-    const parts = [];
+    return out;
+  };
+  const quote = (v) => `"${String(v).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+
+  // Sélecteur CSS qui retrouvera l'élément aux prochains chargements :
+  // uniquement des valeurs stables ; s'il en désigne plusieurs (formulaires
+  // identiques), la recherche prendra le premier visible.
+  function selectorFor(el) {
+    const tag = el.tagName.toLowerCase();
+    const count = (sel) => { try { return el.matches(sel) ? document.querySelectorAll(sel).length : 0; } catch (_) { return 0; } };
+    const parts = []; // morceaux combinables : [attr="…"], .classe
+    if (stable(el.id)) parts.push("#" + CSS.escape(el.id));
+    for (const attr of ["name", "aria-label", "placeholder", "data-testid", "title", "type", "role", "value"]) {
+      const v = el.getAttribute(attr);
+      if (v && stable(v) && !(attr === "value" && !/^(submit|button)$/i.test(el.type || ""))) parts.push(`[${attr}=${quote(v)}]`);
+    }
+    for (const c of [...el.classList].filter(stable).slice(0, 4)) parts.push("." + CSS.escape(c));
+    if (el.id && !stable(el.id) && stablePrefix(el.id).length >= 3) parts.push(`[id^=${quote(stablePrefix(el.id))}]`);
+
+    const candidates = [];
+    parts.forEach((a, i) => {
+      candidates.push(a.startsWith("#") ? a : tag + a);
+      parts.slice(i + 1).forEach((b) => { if (!a.startsWith("#") && !b.startsWith("#")) candidates.push(tag + a + b); });
+    });
+    // Dans un formulaire ou une zone de recherche repérable : on le précise.
+    const scope = el.closest("form[role=search], [role=search], form");
+    if (scope && scope !== el) {
+      const sTag = scope.tagName.toLowerCase();
+      const sParts = [...scope.classList].filter(stable).slice(0, 2).map((c) => "." + CSS.escape(c));
+      if (scope.getAttribute("role")) sParts.unshift(`[role=${quote(scope.getAttribute("role"))}]`);
+      if (stable(scope.id)) sParts.unshift("#" + CSS.escape(scope.id));
+      if (sParts.length) candidates.slice().forEach((c) => candidates.push(`${sTag}${sParts[0]} ${c}`));
+    }
+    const scored = candidates.map((sel) => ({ sel, n: count(sel) })).filter((c) => c.n > 0)
+      .sort((a, b) => a.n - b.n || a.sel.length - b.sel.length);
+    if (scored.length) return scored[0].sel;
+
+    // Dernier recours : chemin dans la page, sans identifiants générés.
+    const path = [];
     for (let cur = el; cur && cur.nodeType === 1 && cur !== document.documentElement; cur = cur.parentElement) {
-      if (cur !== el && cur.id) { parts.unshift("#" + CSS.escape(cur.id)); const sel = parts.join(" > "); if (unique(sel)) return sel; break; }
+      if (cur !== el && stable(cur.id)) { path.unshift("#" + CSS.escape(cur.id)); break; }
       let part = cur.tagName.toLowerCase();
       const same = cur.parentElement ? [...cur.parentElement.children].filter((c) => c.tagName === cur.tagName) : [];
       if (same.length > 1) part += `:nth-of-type(${same.indexOf(cur) + 1})`;
-      parts.unshift(part);
-      const sel = parts.join(" > ");
-      if (unique(sel)) return sel;
+      path.unshift(part);
+      if (count(path.join(" > ")) === 1) break;
     }
-    return parts.join(" > ");
+    return path.join(" > ");
   }
 
   function render(message, isError) {
@@ -362,7 +403,18 @@ function pickerUI(agencyName) {
 // Exécutée DANS la page de l'agence.
 async function fillAndSubmit(q, fill) {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  const find = (sel) => { try { return document.querySelector(sel); } catch (_) { return null; } };
+  const all = (sel, root = document) => { try { return [...root.querySelectorAll(sel)]; } catch (_) { return []; } };
+  const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+  // Premier élément visible (un site peut avoir plusieurs formulaires identiques).
+  const find = (sel) => { const list = all(sel); return list.find(visible) || list[0] || null; };
+  // Bouton le plus proche du champ : dans son formulaire, sinon en remontant.
+  const nearest = (sel, from) => {
+    for (let node = from.parentElement; node; node = node.parentElement) {
+      const list = all(sel, node);
+      if (list.length) return list.find(visible) || list[0];
+    }
+    return null;
+  };
   const deadline = Date.now() + 15000; // les sites « applications » s'affichent après coup
   let input;
   while (!(input = find(fill.input))) {
@@ -381,7 +433,7 @@ async function fillAndSubmit(q, fill) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
   await sleep(delay);
 
-  const button = fill.submit && find(fill.submit);
+  const button = fill.submit && nearest(fill.submit, input);
   if (button) {
     button.click();
   } else if (input.form) {
