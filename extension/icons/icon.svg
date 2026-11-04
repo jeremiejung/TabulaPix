@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Wire Sweep : cadre arrondi, curseur de texte, loupe en bas à droite -->
+  <mask id="cut">
+    <rect width="128" height="128" fill="#fff"/>
+    <!-- marge transparente autour de la loupe -->
+    <circle cx="94" cy="94" r="28" fill="#000"/>
+    <line x1="106" y1="106" x2="120" y2="120" stroke="#000" stroke-width="24" stroke-linecap="round"/>
+  </mask>
+  <!-- fond blanc (intérieur du cadre + pastille de la loupe), pour rester lisible en thème sombre -->
+  <g fill="#fff">
+    <rect x="9" y="9" width="110" height="110" rx="24"/>
+    <circle cx="94" cy="94" r="28"/>
+    <line x1="106" y1="106" x2="120" y2="120" stroke="#fff" stroke-width="24" stroke-linecap="round"/>
+  </g>
+  <g mask="url(#cut)" fill="none" stroke="#111111" stroke-linecap="round">
+    <rect x="9" y="9" width="110" height="110" rx="24" stroke-width="11"/>
+    <!-- curseur de texte (I) -->
+    <path d="M38 28h24M50 28v52M38 80h24" stroke-width="10"/>
+  </g>
+  <g fill="none" stroke="#D7141A" stroke-linecap="round">
+    <circle cx="94" cy="94" r="15" stroke-width="9"/>
+    <line x1="105" y1="105" x2="115" y2="115" stroke-width="11"/>
+  </g>
+</svg>

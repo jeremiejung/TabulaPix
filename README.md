@@ -52,6 +52,10 @@ Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plut
 
 Après toute modification : `chrome://extensions` → bouton **↻** (recharger) sur Wire Sweep.
 
+### Icône
+
+Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombre), avec une loupe rouge en bas à droite. Sources dans `extension/icons/` : `icon.svg` (32 à 128 px) et `icon-16.svg`, une version simplifiée dessinée pour 16 px. Les PNG `icon-16/32/48/128.png` en sont l'export à taille réelle. Pour modifier l'icône, éditez les SVG puis réexportez-les aux mêmes tailles, sur fond transparent.
+
 ### Confidentialité
 
 - Aucune collecte de données, aucun mot de passe, aucun compte.
