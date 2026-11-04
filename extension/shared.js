@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Outils partagés par la popup, la page Options et le script d'arrière-plan :
+ * Outils partagés par la popup et le script d'arrière-plan :
  * lecture des options et insertion dans les adresses ({opt:id}).
  */
 
@@ -19,12 +19,7 @@ function optionValue(id, values) {
 
 // Remplace les {opt:id} d'une adresse.
 function applyOptions(url, values) {
-  return url.replace(/\{opt:([A-Za-z0-9_]+)\}/g, (_, id) => {
-    const def = OPTION_BY_ID.get(id);
-    const v = optionValue(id, values);
-    if (def && def.template) return v ? def.template.split("{value}").join(encodeURIComponent(v)) : "";
-    return encodeURIComponent(v);
-  });
+  return url.replace(/\{opt:([A-Za-z0-9_]+)\}/g, (_, id) => encodeURIComponent(optionValue(id, values)));
 }
 
 async function loadOptions() {

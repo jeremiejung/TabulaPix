@@ -20,3 +20,14 @@ li.dragging { opacity: .4; background: color-mix(in srgb, currentColor 10%, tran
 li .hint { margin-left: auto; font-size: 11px; opacity: .6; }
 #go { width: 100%; margin-top: 8px; padding: 7px; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 4px; cursor: pointer; }
 #msg { margin: 8px 0 0; font-size: 12px; min-height: 1em; }
+
+/* Vue Options */
+[hidden] { display: none !important; }
+.intro { margin: 0 0 10px; font-size: 12px; opacity: .7; }
+.field { margin: 0 0 10px; }
+.field label { display: block; font-weight: 600; margin-bottom: 3px; }
+.field input { width: 100%; box-sizing: border-box; padding: 5px 7px; font-size: 13px; }
+.field input:invalid { border-color: var(--accent); outline-color: var(--accent); }
+.field .help { margin: 3px 0 0; font-size: 11px; opacity: .7; }
+#save { font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 4px; cursor: pointer; }
+#settingsMsg { margin: 8px 0 0; font-size: 12px; min-height: 1em; }

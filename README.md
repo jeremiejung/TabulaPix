@@ -55,10 +55,9 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 ### Options
 
-Le bouton **⚙** de la popup (ou **Détails → Options de l'extension** dans `chrome://extensions`) ouvre les réglages propres à votre rédaction :
+Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages propres à votre rédaction, directement dans la popup ; **← Retour** revient à la recherche.
 
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
-- **Numéro d'accord Getty** (facultatif) : pour ne voir que les images couvertes par l'accord de votre rédaction, le nombre qui suit `pa%3A` dans vos adresses Getty. Vide = tous les résultats.
 
 Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
 

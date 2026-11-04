@@ -21,6 +21,19 @@
     <button type="submit" id="go">Lancer la recherche</button>
     <p id="msg" role="status"></p>
   </form>
+
+  <form id="settingsForm" hidden>
+    <header>
+      <h1>Options</h1>
+    </header>
+    <p class="intro">Réglages propres à votre rédaction, gardés dans Chrome sur cet ordinateur.</p>
+    <div id="fields"></div>
+    <div class="bar">
+      <button type="button" id="back">← Retour</button>
+      <button type="submit" id="save">Enregistrer</button>
+    </div>
+    <p id="settingsMsg" role="status"></p>
+  </form>
   <script src="config.js"></script>
   <script src="shared.js"></script>
   <script src="popup.js"></script>
