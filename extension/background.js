@@ -1,7 +1,7 @@
 "use strict";
 /*
- * Ouvre les onglets demandés par la popup (ou réutilise l'onglet de
- * l'agence s'il est déjà ouvert) et, pour les agences « fill »,
+ * Ouvre en arrière-plan les onglets demandés par la popup (ou réutilise
+ * l'onglet de l'agence s'il est déjà ouvert) et, pour les agences « fill »,
  * tape les mots-clés dans le champ de recherche une fois la page chargée.
  * Aucune requête réseau : seulement chrome.tabs et chrome.scripting.
  * Les recherches en attente sont gardées en mémoire de session (effacée
@@ -18,7 +18,7 @@ function agencyHost(agency) {
   try { return new URL(agency.url.replace(/\{(q|payload)\}/g, "x")).hostname; }
   catch (_) { return null; }
 }
-const MAX_ATTEMPTS = 3; // ex. page de connexion avant la vraie page
+const MAX_ATTEMPTS = 5; // ex. page de connexion ou d'erreur avant la vraie page
 
 async function getPending() {
   return (await chrome.storage.session.get({ [PENDING]: {} }))[PENDING];
@@ -27,11 +27,12 @@ async function setPending(p) {
   await chrome.storage.session.set({ [PENDING]: p });
 }
 
-chrome.runtime.onMessage.addListener((msg, sender) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // N'accepte que la popup / le panneau de l'extension (pas une page web, pas une autre extension).
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
   if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
   sweep(validJobs(msg.jobs), msg.q);
+  sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
 });
 
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré
@@ -51,7 +52,6 @@ function validJobs(jobs) {
 }
 
 async function sweep(jobs, q) {
-  const pending = await getPending();
   const existing = await chrome.tabs.query({ windowType: "normal" });
 
   // Onglet à réutiliser pour chaque agence : d'abord ceux qui sont sur la
@@ -68,18 +68,17 @@ async function sweep(jobs, q) {
     });
   }
 
-  const tabs = [];
+  // Les onglets s'ouvrent en arrière-plan : l'utilisateur reste sur son onglet.
   for (const [i, job] of jobs.entries()) {
     const tab = reuse[i]
       ? await chrome.tabs.update(reuse[i].id, { url: job.url })
       : await chrome.tabs.create({ url: job.url, active: false });
-    if (job.fill) pending[tab.id] = { q, id: job.id, host: job.host, attempts: 0 };
-    tabs.push(tab);
-  }
-  await setPending(pending);
-  if (tabs.length) {
-    chrome.tabs.update(tabs[0].id, { active: true });
-    chrome.windows.update(tabs[0].windowId, { focused: true });
+    if (job.fill) {
+      // Enregistré tout de suite, avant que la page ait fini de charger.
+      const current = await getPending();
+      current[tab.id] = { q, id: job.id, host: job.host, attempts: 0 };
+      await setPending(current);
+    }
   }
 }
 
@@ -106,21 +105,24 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   delete pending[tabId];
   await setPending(pending);
 
-  // Si l'onglet a quitté le site de l'agence entre-temps, on ne tape rien.
+  // On ne tape que si l'onglet est bien sur le site de l'agence (sinon :
+  // page de connexion, page d'erreur… on réessaiera au prochain chargement).
   let host = null;
   try { host = new URL(tab.url).hostname; } catch (_) { /* adresse illisible */ }
   const fill = AGENCY_BY_ID.get(job.id)?.fill;
-  if (host !== job.host || !fill) return;
+  if (!fill) return;
 
   let ok = false;
-  try {
-    const [res] = await chrome.scripting.executeScript({
-      target: { tabId },
-      func: fillAndSubmit,
-      args: [job.q, fill]
-    });
-    ok = res && res.result === true;
-  } catch (_) { /* page non autorisée ou fermée */ }
+  if (host === job.host) {
+    try {
+      const [res] = await chrome.scripting.executeScript({
+        target: { tabId },
+        func: fillAndSubmit,
+        args: [job.q, fill]
+      });
+      ok = res && res.result === true;
+    } catch (_) { /* page non autorisée ou fermée */ }
+  }
 
   if (!ok && job.attempts + 1 < MAX_ATTEMPTS) {
     const again = await getPending();
