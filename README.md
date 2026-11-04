@@ -24,6 +24,7 @@ Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) 
 1. Cliquez sur l'icône Wire Sweep.
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
 3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
+   Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus.
 
 Pour **Bloomberg, Abacapress et Pixpalace**, l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus).
 
@@ -59,4 +60,5 @@ Après toute modification : `chrome://extensions` → bouton **↻** (recharger)
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
+  - `tabs` : voir les adresses des onglets ouverts, pour réutiliser celui d'une agence déjà ouverte au lieu d'en ouvrir un nouveau. Rien n'est enregistré ni transmis. Chrome affiche pour cela l'avertissement « Lire votre historique de navigation ».
   - `scripting` + accès à `mercury.bloomberg.com`, `search.abacapress.com` et `*.pixpalace.com` : uniquement pour taper les mots-clés dans le champ de recherche de ces trois sites et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages. Chrome affichera pour cela un avertissement « lire et modifier vos données sur ces sites ».
