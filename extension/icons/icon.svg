@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Wire Sweep : cadre photo traversé par un balayage radar partant du coin bas gauche -->
+  <mask id="rings">
+    <rect width="128" height="128" fill="#fff"/>
+    <circle cx="18" cy="110" r="58" fill="none" stroke="#000" stroke-width="9"/>
+  </mask>
+  <path d="M18 110L46.12 11.95A102 102 0 0 1 109.68 65.29Z" fill="#D7141A" mask="url(#rings)"/>
+  <rect x="18" y="26" width="96" height="84" rx="14" fill="none" stroke="#111111" stroke-width="11"/>
+  <circle cx="18" cy="110" r="12" fill="#111111"/>
+</svg>
