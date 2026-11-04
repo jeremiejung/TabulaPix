@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Wire Sweep",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Lance la même recherche sur toutes vos agences photo, un onglet par agence.",
   "action": {
     "default_title": "Wire Sweep",
@@ -10,7 +10,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "clipboardWrite", "scripting"],
+  "permissions": ["storage", "clipboardWrite", "scripting", "tabs"],
   "host_permissions": [
     "https://mercury.bloomberg.com/*",
     "https://search.abacapress.com/*",

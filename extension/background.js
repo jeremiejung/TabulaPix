@@ -1,6 +1,7 @@
 "use strict";
 /*
- * Ouvre les onglets demandés par la popup et, pour les agences « fill »,
+ * Ouvre les onglets demandés par la popup (ou réutilise l'onglet de
+ * l'agence s'il est déjà ouvert) et, pour les agences « fill »,
  * tape les mots-clés dans le champ de recherche une fois la page chargée.
  * Aucune requête réseau : seulement chrome.tabs et chrome.scripting.
  * Les recherches en attente sont gardées en mémoire de session (effacée
@@ -23,14 +24,49 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 async function sweep(jobs, q) {
   const pending = await getPending();
+  const existing = await chrome.tabs.query({ windowType: "normal" });
+
+  // Onglet à réutiliser pour chaque agence : d'abord ceux qui sont sur la
+  // même page (même site + même chemin), puis ceux qui sont juste sur le
+  // même site. Un onglet ne sert qu'à une seule agence (ex. Getty Creative
+  // et Getty Actu partagent le même site).
+  const claimed = new Set();
+  const reuse = new Array(jobs.length).fill(null);
+  for (const minScore of [2, 1]) {
+    jobs.forEach((job, i) => {
+      if (reuse[i]) return;
+      const t = findTab(existing, job.url, claimed, minScore);
+      if (t) { reuse[i] = t; claimed.add(t.id); }
+    });
+  }
+
   const tabs = [];
-  for (const job of jobs) {
-    const tab = await chrome.tabs.create({ url: job.url, active: false });
+  for (const [i, job] of jobs.entries()) {
+    const tab = reuse[i]
+      ? await chrome.tabs.update(reuse[i].id, { url: job.url })
+      : await chrome.tabs.create({ url: job.url, active: false });
     if (job.fill) pending[tab.id] = { q, fill: job.fill, attempts: 0 };
     tabs.push(tab);
   }
   await setPending(pending);
-  if (tabs.length) chrome.tabs.update(tabs[0].id, { active: true });
+  if (tabs.length) {
+    chrome.tabs.update(tabs[0].id, { active: true });
+    chrome.windows.update(tabs[0].windowId, { focused: true });
+  }
+}
+
+// Score 2 : même site et même chemin ; 1 : même site ; 0 : autre site.
+function matchScore(tabUrl, target) {
+  let u;
+  try { u = new URL(tabUrl); } catch (_) { return 0; }
+  if (u.hostname !== target.hostname) return 0;
+  return u.pathname === target.pathname ? 2 : 1;
+}
+
+function findTab(tabs, url, claimed, minScore) {
+  let target;
+  try { target = new URL(url); } catch (_) { return null; }
+  return tabs.find((t) => !claimed.has(t.id) && t.url && matchScore(t.url, target) >= minScore) || null;
 }
 
 chrome.tabs.onUpdated.addListener(async (tabId, info) => {
