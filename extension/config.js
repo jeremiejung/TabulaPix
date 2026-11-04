@@ -80,6 +80,11 @@ const AGENCIES = [
     url: "https://www.shutterstock.com/fr/search/{q}?image_type=photo"
   },
   {
+    id: "adobe-stock",
+    name: "Adobe Stock",
+    url: "https://stock.adobe.com/fr/search?k={q}"
+  },
+  {
     id: "abacapress",
     name: "Abacapress",
     url: "https://search.abacapress.com/recherche",
