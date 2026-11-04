@@ -1,6 +1,7 @@
 "use strict";
 
 const STORAGE_KEY = "checkedAgencies";
+const QUERY_KEY = "lastQuery";
 const list = document.getElementById("list");
 const input = document.getElementById("q");
 const msg = document.getElementById("msg");
@@ -197,11 +198,19 @@ document.getElementById("form").addEventListener("submit", async (e) => {
 
   // L'ouverture des onglets est confiée au script d'arrière-plan : la popup
   // se ferme dès qu'un onglet passe au premier plan.
+  chrome.storage.local.set({ [QUERY_KEY]: q });
   const jobs = selected.map((a, i) => ({ id: a.id, url: urls[i] }));
-  chrome.runtime.sendMessage({ type: "sweep", jobs, q });
-  if (!isPopup) { input.select(); msg.textContent = ""; } // panneau : prêt pour la suivante
+  await chrome.runtime.sendMessage({ type: "sweep", jobs, q });
+  if (isPopup) {
+    window.close(); // on reste sur l'onglet en cours
+  } else {
+    input.select(); // panneau : prêt pour la recherche suivante
+    msg.textContent = "";
+  }
 });
 
-chrome.storage.local.get({ [STORAGE_KEY]: AGENCIES.map((a) => a.id), [ORDER_KEY]: [] }, (data) => {
+chrome.storage.local.get({ [STORAGE_KEY]: AGENCIES.map((a) => a.id), [ORDER_KEY]: [], [QUERY_KEY]: "" }, (data) => {
   render(orderedAgencies(data[ORDER_KEY]), data[STORAGE_KEY]);
+  // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
+  if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
 });
