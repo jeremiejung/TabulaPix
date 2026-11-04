@@ -13,12 +13,8 @@ importScripts("config.js", "shared.js"); // AGENCIES/OPTIONS : seule source des 
 const PENDING = "pendingFills";
 const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
 
-// Nom de domaine d'une agence, d'après config.js et les options
-// (marqueurs de recherche neutralisés).
-function agencyHost(agency, options) {
-  try { return new URL(applyOptions(agency.url, options).replace(/\{(q|payload)\}/g, "x")).hostname; }
-  catch (_) { return null; }
-}
+// Nom de domaine d'une agence, d'après son adresse effective et les options.
+const agencyHost = (agency, options) => hostOf(agency.url, options);
 const MAX_ATTEMPTS = 5; // ex. page de connexion ou d'erreur avant la vraie page
 
 async function getPending() {
@@ -29,19 +25,35 @@ async function setPending(p) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  // N'accepte que la popup / le panneau de l'extension (pas une page web, pas une autre extension).
-  if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
-  if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
-  loadOptions().then((options) => sweep(validJobs(msg.jobs, options), msg.q));
-  sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
+  if (sender.id !== chrome.runtime.id || !msg) return;
+
+  // Messages de la popup / du panneau de l'extension.
+  if (sender.url === chrome.runtime.getURL("popup.html")) {
+    if (msg.type === "sweep" && Array.isArray(msg.jobs) && typeof msg.q === "string") {
+      loadOptions()
+        .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)));
+      sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
+    } else if (msg.type === "pick") {
+      startPick(msg.draft).then(sendResponse);
+      return true;
+    }
+    return;
+  }
+
+  // Messages du bandeau de repérage, depuis l'onglet du site.
+  if (sender.tab && (msg.type === "picked" || msg.type === "pickCancel")) {
+    handlePicked(sender, msg).then(sendResponse);
+    return true;
+  }
 });
 
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré
-// dans config.js pour cette agence.
-function validJobs(jobs, options) {
+// pour cette agence (config.js ou agence ajoutée par l'utilisateur).
+function validJobs(jobs, options, agencies) {
+  const byId = new Map(agencies.map((a) => [a.id, a]));
   const out = [];
   for (const job of jobs) {
-    const agency = job && AGENCY_BY_ID.get(job.id);
+    const agency = job && byId.get(job.id);
     if (!agency) continue;
     let u;
     try { u = new URL(job.url); } catch (_) { continue; }
@@ -99,6 +111,7 @@ function findTab(tabs, url, claimed, minScore) {
 
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   if (info.status !== "complete") return;
+  injectPickerIfNeeded(tabId, tab);
   const pending = await getPending();
   const job = pending[tabId];
   if (!job) return;
@@ -110,7 +123,8 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   // page de connexion, page d'erreur… on réessaiera au prochain chargement).
   let host = null;
   try { host = new URL(tab.url).hostname; } catch (_) { /* adresse illisible */ }
-  const fill = AGENCY_BY_ID.get(job.id)?.fill;
+  const fill = AGENCY_BY_ID.get(job.id)?.fill
+    || (await loadAgencies()).custom.find((a) => a.id === job.id)?.fill;
   if (!fill) return;
 
   let ok = false;
@@ -137,19 +151,280 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   if (pending[tabId]) { delete pending[tabId]; await setPending(pending); }
 });
 
+/* ---------- Repérage du champ et du bouton d'un site ---------- */
+/*
+ * La popup enregistre un brouillon (nom, adresse), demande l'autorisation
+ * Chrome pour ce site, puis demande le repérage. Si la popup s'est fermée
+ * pendant la demande d'autorisation, l'ajout de l'autorisation déclenche le
+ * repérage à sa place (chrome.permissions.onAdded).
+ */
+const DRAFT_KEY = "fillDraft";
+const PICK_KEY = "pickSession";
+
+function cleanDraft(d) {
+  const agency = cleanCustomAgency({ ...(d || {}), fill: { input: "x" } });
+  if (!agency) return null;
+  const host = hostOf(agency.url, {});
+  return host ? { id: agency.id, name: agency.name, url: agency.url, host } : null;
+}
+
+async function startPick(rawDraft) {
+  const draft = cleanDraft(rawDraft);
+  if (!draft) return { ok: false, error: "Agence invalide." };
+  if (!(await chrome.permissions.contains({ origins: [originPattern(draft.host)] }))) {
+    return { ok: false, error: "Autorisation refusée pour ce site." };
+  }
+  const { [PICK_KEY]: current } = await chrome.storage.session.get(PICK_KEY);
+  if (current && current.draft.id === draft.id) {
+    try { await chrome.tabs.get(current.tabId); return { ok: true }; } catch (_) { /* onglet fermé : on recommence */ }
+  }
+  const tab = await chrome.tabs.create({ url: draft.url, active: true });
+  await chrome.storage.session.set({ [PICK_KEY]: { tabId: tab.id, draft } });
+  return { ok: true };
+}
+
+chrome.permissions.onAdded.addListener(async (perms) => {
+  const { [DRAFT_KEY]: draft } = await chrome.storage.session.get(DRAFT_KEY);
+  const clean = cleanDraft(draft);
+  if (clean && (perms.origins || []).includes(originPattern(clean.host))) startPick(clean);
+});
+
+async function injectPickerIfNeeded(tabId, tab) {
+  const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
+  if (!pick || pick.tabId !== tabId) return;
+  let host = null;
+  try { host = new URL(tab.url).hostname; } catch (_) { return; }
+  if (host !== pick.draft.host) return; // page de connexion… : on attend le retour sur le site
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, func: pickerUI, args: [pick.draft.name] });
+  } catch (_) { /* autorisation retirée ou onglet fermé */ }
+}
+
+async function handlePicked(sender, msg) {
+  const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
+  if (!pick || pick.tabId !== sender.tab.id) return { ok: false, error: "Repérage expiré : recommencez depuis Wire Sweep." };
+  let host = null;
+  try { host = new URL(sender.url).hostname; } catch (_) { /* rien */ }
+  if (host !== pick.draft.host) return { ok: false, error: "Ce n'est pas le site prévu." };
+  if (msg.type === "pickCancel") {
+    await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
+    return { ok: true };
+  }
+  const agency = cleanCustomAgency({ ...pick.draft, fill: { input: msg.input, submit: msg.submit } });
+  if (!agency) return { ok: false, error: "Repérage invalide : recommencez." };
+  const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], checkedAgencies: null });
+  const custom = Array.isArray(data[CUSTOM_KEY]) ? data[CUSTOM_KEY] : [];
+  const exists = custom.some((c) => c && c.id === agency.id);
+  if (!exists && custom.length >= MAX_CUSTOM) return { ok: false, error: `${MAX_CUSTOM} agences personnalisées au maximum.` };
+  const update = { [CUSTOM_KEY]: exists ? custom.map((c) => (c && c.id === agency.id ? agency : c)) : custom.concat(agency) };
+  if (!exists) {
+    const checked = Array.isArray(data.checkedAgencies)
+      ? data.checkedAgencies
+      : AGENCIES.filter((a) => a.defaultChecked !== false).map((a) => a.id); // cases par défaut
+    update.checkedAgencies = checked.concat(agency.id); // cochée d'office
+  }
+  await chrome.storage.local.set(update);
+  await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
+  return { ok: true, name: agency.name };
+}
+
+// Exécutée DANS la page du site : bandeau qui guide le repérage.
+function pickerUI(agencyName) {
+  if (window.__wireSweepPicker) return;
+  window.__wireSweepPicker = true;
+
+  const host = document.createElement("div");
+  host.style.cssText = "all:initial;position:fixed;inset:0;z-index:2147483647;pointer-events:none;";
+  const root = host.attachShadow({ mode: "closed" });
+  root.innerHTML = `<style>
+    .panel{pointer-events:auto;position:fixed;top:12px;left:50%;transform:translateX(-50%);max-width:520px;
+      background:#111;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:12px 16px;border-radius:8px;
+      box-shadow:0 4px 18px rgba(0,0,0,.35);border-left:5px solid #D7141A}
+    .t{font-weight:700;margin-bottom:4px}.msg{margin:2px 0 8px}.err{color:#ff8a80}
+    button{font:600 13px system-ui,sans-serif;margin-right:6px;padding:4px 10px;border-radius:4px;border:0;cursor:pointer}
+    .alt{background:#444;color:#fff}.ok{background:#D7141A;color:#fff}
+    .panel.bottom{top:auto;bottom:12px}
+    .box{position:fixed;border:3px solid #D7141A;background:rgba(215,20,26,.12);border-radius:3px;display:none}
+  </style>
+  <div class="box"></div>
+  <div class="panel"><div class="t"></div><div class="msg"></div><div class="actions"></div></div>`;
+  document.documentElement.append(host);
+  const $ = (s) => root.querySelector(s);
+  const box = $(".box");
+
+  let step = "input";
+  let picked = { input: "", submit: "" };
+
+  const isField = (el) => el && (el.matches("input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]), textarea"));
+  const asButton = (el) => el.closest("button, input[type=submit], input[type=button], input[type=image], a, [role=button]") || el;
+
+  // Valeur « stable » : sans code généré (ex. « __bfac60392382 », « 63149406… »)
+  // qui changerait au prochain chargement de la page.
+  const unstableToken = (t) => /\d{4,}/.test(t)
+    || (t.length >= 6 && /^[0-9a-f]+$/i.test(t) && /\d/.test(t) && /[a-f]/i.test(t))
+    || (t.length >= 12 && /\d/.test(t) && /[a-z]/i.test(t));
+  const stable = (v) => Boolean(v) && v.length <= 200 && !String(v).split(/[^A-Za-z0-9]+/).some(unstableToken);
+  const stablePrefix = (v) => {
+    let out = "";
+    for (const part of String(v).match(/[A-Za-z0-9]+|[^A-Za-z0-9]+/g) || []) {
+      if (/^[A-Za-z0-9]+$/.test(part) && unstableToken(part)) break;
+      out += part;
+    }
+    return out;
+  };
+  const quote = (v) => `"${String(v).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+
+  // Sélecteur CSS qui retrouvera l'élément aux prochains chargements :
+  // uniquement des valeurs stables ; s'il en désigne plusieurs (formulaires
+  // identiques), la recherche prendra le premier visible.
+  function selectorFor(el) {
+    const tag = el.tagName.toLowerCase();
+    const count = (sel) => { try { return el.matches(sel) ? document.querySelectorAll(sel).length : 0; } catch (_) { return 0; } };
+    const parts = []; // morceaux combinables : [attr="…"], .classe
+    if (stable(el.id)) parts.push("#" + CSS.escape(el.id));
+    for (const attr of ["name", "aria-label", "placeholder", "data-testid", "title", "type", "role", "value"]) {
+      const v = el.getAttribute(attr);
+      if (v && stable(v) && !(attr === "value" && !/^(submit|button)$/i.test(el.type || ""))) parts.push(`[${attr}=${quote(v)}]`);
+    }
+    for (const c of [...el.classList].filter(stable).slice(0, 4)) parts.push("." + CSS.escape(c));
+    if (el.id && !stable(el.id) && stablePrefix(el.id).length >= 3) parts.push(`[id^=${quote(stablePrefix(el.id))}]`);
+
+    const candidates = [];
+    parts.forEach((a, i) => {
+      candidates.push(a.startsWith("#") ? a : tag + a);
+      parts.slice(i + 1).forEach((b) => { if (!a.startsWith("#") && !b.startsWith("#")) candidates.push(tag + a + b); });
+    });
+    // Dans un formulaire ou une zone de recherche repérable : on le précise.
+    const scope = el.closest("form[role=search], [role=search], form");
+    if (scope && scope !== el) {
+      const sTag = scope.tagName.toLowerCase();
+      const sParts = [...scope.classList].filter(stable).slice(0, 2).map((c) => "." + CSS.escape(c));
+      if (scope.getAttribute("role")) sParts.unshift(`[role=${quote(scope.getAttribute("role"))}]`);
+      if (stable(scope.id)) sParts.unshift("#" + CSS.escape(scope.id));
+      if (sParts.length) candidates.slice().forEach((c) => candidates.push(`${sTag}${sParts[0]} ${c}`));
+    }
+    const scored = candidates.map((sel) => ({ sel, n: count(sel) })).filter((c) => c.n > 0)
+      .sort((a, b) => a.n - b.n || a.sel.length - b.sel.length);
+    if (scored.length) return scored[0].sel;
+
+    // Dernier recours : chemin dans la page, sans identifiants générés.
+    const path = [];
+    for (let cur = el; cur && cur.nodeType === 1 && cur !== document.documentElement; cur = cur.parentElement) {
+      if (cur !== el && stable(cur.id)) { path.unshift("#" + CSS.escape(cur.id)); break; }
+      let part = cur.tagName.toLowerCase();
+      const same = cur.parentElement ? [...cur.parentElement.children].filter((c) => c.tagName === cur.tagName) : [];
+      if (same.length > 1) part += `:nth-of-type(${same.indexOf(cur) + 1})`;
+      path.unshift(part);
+      if (count(path.join(" > ")) === 1) break;
+    }
+    return path.join(" > ");
+  }
+
+  function render(message, isError) {
+    $(".t").textContent = `Wire Sweep — « ${agencyName} »`;
+    const m = $(".msg");
+    m.className = "msg" + (isError ? " err" : "");
+    const actions = $(".actions");
+    actions.textContent = "";
+    const btn = (label, cls, fn, title) => { const b = document.createElement("button"); b.className = cls; b.textContent = label; if (title) b.title = title; b.addEventListener("click", fn); actions.append(b); };
+    const moveBtn = () => btn("⇅", "alt", () => $(".panel").classList.toggle("bottom"), "Déplacer ce bandeau en haut / en bas de l'écran");
+    if (step === "input") {
+      m.textContent = message || "1/2 — Cliquez sur le champ de recherche du site.";
+      btn("Annuler", "alt", cancel);
+      moveBtn();
+    } else if (step === "submit") {
+      m.textContent = message || "2/2 — Cliquez sur le bouton qui lance la recherche (loupe, « Rechercher »…).";
+      btn("Pas de bouton : utiliser Entrée", "alt", () => finish(""));
+      btn("Annuler", "alt", cancel);
+      moveBtn();
+    } else {
+      m.textContent = message;
+      btn("Fermer", "ok", stop);
+    }
+  }
+
+  function highlight(el) {
+    if (!el) { box.style.display = "none"; return; }
+    const r = el.getBoundingClientRect();
+    Object.assign(box.style, { display: "block", left: r.left - 3 + "px", top: r.top - 3 + "px", width: r.width + "px", height: r.height + "px" });
+  }
+
+  const inPanel = (e) => e.composedPath().includes(host);
+  const target = (e) => (step === "input" ? (isField(e.target) ? e.target : null) : asButton(e.target));
+
+  function onMove(e) { if (step === "done" || inPanel(e)) return; highlight(target(e)); }
+  function block(e) {
+    if (step === "done" || inPanel(e)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+  }
+  function onClick(e) {
+    if (step === "done" || inPanel(e)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (step === "input") {
+      if (!isField(e.target)) return render("Ce n'est pas un champ de saisie : cliquez dans la zone où l'on tape la recherche.", true);
+      picked.input = selectorFor(e.target);
+      step = "submit";
+      highlight(null);
+      render();
+    } else if (step === "submit") {
+      finish(selectorFor(asButton(e.target)));
+    }
+  }
+
+  const events = [["mousemove", onMove], ["click", onClick], ["mousedown", block], ["mouseup", block], ["pointerdown", block], ["pointerup", block], ["submit", block]];
+  events.forEach(([t, fn]) => document.addEventListener(t, fn, true));
+
+  function stop() {
+    events.forEach(([t, fn]) => document.removeEventListener(t, fn, true));
+    host.remove();
+    window.__wireSweepPicker = false;
+  }
+
+  async function finish(submitSelector) {
+    picked.submit = submitSelector;
+    step = "done";
+    highlight(null);
+    events.forEach(([t, fn]) => document.removeEventListener(t, fn, true));
+    let res;
+    try { res = await chrome.runtime.sendMessage({ type: "picked", ...picked }); } catch (_) { res = null; }
+    render(res && res.ok
+      ? `✓ « ${res.name} » est prête dans Wire Sweep. Vous pouvez fermer cet onglet.`
+      : "✗ " + ((res && res.error) || "Enregistrement impossible : recommencez depuis Wire Sweep."), !(res && res.ok));
+  }
+
+  async function cancel() {
+    try { await chrome.runtime.sendMessage({ type: "pickCancel" }); } catch (_) { /* rien */ }
+    stop();
+  }
+
+  render();
+}
+
 // Exécutée DANS la page de l'agence.
 async function fillAndSubmit(q, fill) {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const all = (sel, root = document) => { try { return [...root.querySelectorAll(sel)]; } catch (_) { return []; } };
+  const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+  // Premier élément visible (un site peut avoir plusieurs formulaires identiques).
+  const find = (sel) => { const list = all(sel); return list.find(visible) || list[0] || null; };
+  // Bouton le plus proche du champ : dans son formulaire, sinon en remontant.
+  const nearest = (sel, from) => {
+    for (let node = from.parentElement; node; node = node.parentElement) {
+      const list = all(sel, node);
+      if (list.length) return list.find(visible) || list[0];
+    }
+    return null;
+  };
   const deadline = Date.now() + 15000; // les sites « applications » s'affichent après coup
   let input;
-  while (!(input = document.querySelector(fill.input))) {
+  while (!(input = find(fill.input))) {
     if (Date.now() > deadline) return false;
     await sleep(250);
   }
   // Laisse au site le temps de finir de s'initialiser (ex. Bloomberg).
   const delay = Number.isFinite(fill.delay) ? fill.delay : 300;
   await sleep(delay);
-  input = document.querySelector(fill.input) || input; // le champ a pu être recréé
+  input = find(fill.input) || input; // le champ a pu être recréé
   input.focus();
   // Passe par le « setter » natif pour que React & co voient la saisie.
   const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
@@ -158,7 +433,7 @@ async function fillAndSubmit(q, fill) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
   await sleep(delay);
 
-  const button = fill.submit && document.querySelector(fill.submit);
+  const button = fill.submit && nearest(fill.submit, input);
   if (button) {
     button.click();
   } else if (input.form) {

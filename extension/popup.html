@@ -22,20 +22,77 @@
     <p id="msg" role="status"></p>
   </form>
 
-  <form id="settingsForm" hidden>
+  <section id="settingsView" hidden>
     <header>
       <h1>Options</h1>
-    </header>
-    <p class="intro">Réglages propres à votre rédaction, gardés dans Chrome sur cet ordinateur.</p>
-    <div id="fields"></div>
-    <div class="bar">
       <button type="button" id="back">← Retour</button>
-      <button type="submit" id="save">Enregistrer</button>
-    </div>
-    <p id="settingsMsg" role="status"></p>
-  </form>
+    </header>
+
+    <h2>Agences affichées</h2>
+    <p class="intro">Décochez celles que vous n'utilisez pas : elles disparaissent de la liste.</p>
+    <ul id="manageList"></ul>
+
+    <h2 id="editorTitle">Ajouter une agence</h2>
+    <form id="addForm" novalidate>
+      <fieldset class="detect">
+        <legend>Détection automatique</legend>
+        <p class="help">Faites une recherche sur le site, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés : l'adresse et l'encodage sont remplis pour vous.</p>
+        <div class="field">
+          <label for="detUrl">Adresse de la page de résultats</label>
+          <input id="detUrl" autocomplete="off" spellcheck="false" placeholder="https://…">
+        </div>
+        <div class="field">
+          <label for="detQ">Mots-clés cherchés</label>
+          <input id="detQ" autocomplete="off" placeholder="ex. voyage avion">
+        </div>
+        <button type="button" id="detectBtn">Détecter</button>
+        <p id="detectMsg" class="status" role="status"></p>
+      </fieldset>
+      <div class="fillbox" id="fillBox" hidden>
+        <p class="help">Wire Sweep ouvrira la page ci-dessous, tapera les mots-clés dans le champ de recherche du site et cliquera sur son bouton. « Repérer sur le site… » ouvre le site pour que vous lui montriez le champ et le bouton (Chrome vous demandera l'autorisation pour ce site).</p>
+        <p class="help" id="fillInfo" hidden></p>
+        <button type="button" id="backToUrl" class="link">Utiliser plutôt une adresse de recherche avec {q}</button>
+      </div>
+      <div class="field">
+        <label for="newName">Nom</label>
+        <input id="newName" maxlength="40" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="newUrl" id="urlLabel">Adresse de recherche</label>
+        <input id="newUrl" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…">
+        <p class="help" id="urlHelp">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code> (ou <code>{q:slug}</code> si le site sépare les mots par des tirets, ex. <code>emmanuel-macron</code>). Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
+      </div>
+      <details id="advanced">
+        <summary>Encodage avancé</summary>
+        <p class="help">Pour les sites qui « emballent » la recherche dans l'adresse (comme AFP news, Sipa, Rea) : mettez <code>{payload}</code> dans l'adresse, et ici le texte modèle contenant <code>{q}</code>.</p>
+        <div class="field">
+          <label for="newPayload">Modèle (payload)</label>
+          <textarea id="newPayload" rows="3" maxlength="2000" spellcheck="false" placeholder='{"searchbar":"{q}"}'></textarea>
+        </div>
+        <div class="field">
+          <label for="newEncode">Étapes d'encodage</label>
+          <input id="newEncode" autocomplete="off" spellcheck="false" placeholder="ex. hex   ou   uri, gzip, base64, uri">
+          <p class="help">Appliquées au modèle, dans l'ordre : <code>uri</code> (encodage URL), <code>hex</code> (hexadécimal), <code>gzip</code> (compression), <code>base64</code>.</p>
+        </div>
+      </details>
+      <div class="bar">
+        <button type="submit" id="agencySubmit" class="primary">Ajouter</button>
+        <button type="button" id="resetAgency" hidden>Rétablir l'original</button>
+        <button type="button" id="cancelEdit" hidden>Annuler</button>
+      </div>
+      <p id="addMsg" class="status" role="status"></p>
+    </form>
+
+    <h2>Réglages</h2>
+    <form id="settingsForm">
+      <div id="fields"></div>
+      <button type="submit" id="save" class="primary">Enregistrer</button>
+    </form>
+    <p id="settingsMsg" class="status" role="status"></p>
+  </section>
   <script src="config.js"></script>
   <script src="shared.js"></script>
+  <script src="detect.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

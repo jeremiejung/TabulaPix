@@ -5,6 +5,8 @@ Chrome extension for photo editors: type your keywords once and search all your 
 
 ## Wire Sweep (en français)
 
+> Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, adresses des agences (y compris l'encodage), agences personnalisées avec détection automatique, sous-domaine Pixpalace.
+
 Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les agences, et Wire Sweep ouvre un onglet par agence avec la recherche déjà lancée. Les agences cochées sont mémorisées d'une utilisation à l'autre.
 
 HTML/JavaScript simple : aucune dépendance, aucune compilation.
@@ -55,11 +57,28 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 ### Options
 
-Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages propres à votre rédaction, directement dans la popup ; **← Retour** revient à la recherche.
+Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
 
+- **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez).
+- **Détection automatique** (en haut du formulaire d'ajout ou de modification) : faites une recherche sur le site, collez l'adresse de la page de résultats et les mots-clés que vous avez tapés, puis cliquez sur **Détecter**.
+  - Si les mots-clés sont dans l'adresse (en clair, avec des tirets, ou emballés : encodage URL, hexadécimal, base64, gzip et leurs combinaisons), l'adresse, le modèle et les étapes d'encodage sont remplis.
+  - Sinon (recherche enregistrée côté serveur, comme Pixpalace, ou page qui ne change pas d'adresse), le formulaire passe de lui-même en **remplissage du champ de recherche du site** : il ne reste qu'à vérifier le nom et cliquer sur **Repérer sur le site…** (voir ci-dessous). Le lien « Utiliser plutôt une adresse de recherche avec {q} » permet de revenir à une adresse saisie à la main.
+- **Modifier une agence** (bouton **✎**) : change l'adresse de recherche et son encodage. Pour les agences fournies, le nom reste le même, la mention « modifiée » apparaît et **Rétablir l'original** revient à la configuration livrée. Pour Bloomberg, Abacapress et Pixpalace, l'adresse doit rester sur le même site (le remplissage automatique n'est autorisé que là).
+- **Ajouter une agence** : un nom et une adresse de recherche. Faites une recherche sur le site, copiez l'adresse de la page de résultats et remplacez vos mots-clés par `{q}` (ex. `https://www.alamy.com/search.html?qt={q}`). Si le site sépare les mots par des tirets (`…/photos/emmanuel-macron`), utilisez `{q:slug}` à la place : « emmanuel macron » devient `emmanuel-macron`. Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. L'adresse doit commencer par `https://`. Les agences ajoutées portent la mention « perso » et se suppriment avec ✕. Elles sont cochées d'office et se réordonnent comme les autres.
+- **Remplir le champ de recherche du site** (proposé par la détection quand l'adresse ne contient pas les mots-clés) : après **Repérer sur le site…** :
+  1. Chrome demande l'autorisation d'accéder à ce site (et à lui seul) ;
+  2. le site s'ouvre avec un bandeau Wire Sweep : cliquez sur le champ de recherche, puis sur le bouton qui lance la recherche (ou « Pas de bouton : utiliser Entrée ») ; le bouton **⇅** déplace le bandeau s'il cache le champ ;
+  3. l'agence est enregistrée (mention « perso · champ ») : à chaque recherche, Wire Sweep ouvre la page, tape les mots-clés et clique sur le bouton, comme pour Bloomberg ou Abacapress.
+
+  Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, Wire Sweep utilise le premier visible et le bouton le plus proche du champ.
+
+  Si le site change sa page, il suffit de refaire le repérage (✎ puis **Repérer sur le site…**). Supprimer l'agence retire aussi l'autorisation donnée pour son site.
+- **Encodage avancé** (dans l'ajout ou la modification) : pour les sites qui « emballent » la recherche dans l'adresse, comme AFP news, Sipa ou Rea. Mettez `{payload}` dans l'adresse, le texte modèle contenant `{q}` dans **Modèle**, et les **étapes d'encodage** à appliquer dans l'ordre, parmi `uri`, `hex`, `gzip`, `base64`. Exemple Sipa : adresse `https://www.sipa.com/search/fr/1/0x{payload}`, modèle `{"searchbar":"{q}","folding":"0"}`, étapes `hex`.
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
 
 Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
+
+Le remplissage automatique d'un champ de recherche (comme pour Bloomberg, Abacapress, Pixpalace) n'est pas disponible pour les agences ajoutées : il demande une autorisation d'accès au site, déclarée à l'avance dans l'extension.
 
 ### Modifier les agences
 
@@ -93,18 +112,20 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 
 - Aucune collecte de données, aucun mot de passe, aucun compte.
 - Aucun appel réseau : l'extension se contente d'ouvrir des onglets (la politique de sécurité de l'extension interdit d'ailleurs toute requête : `connect-src 'none'`).
-- Seules données enregistrées : la liste des agences cochées, leur ordre, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
+- Seules données enregistrées : la liste des agences cochées, leur ordre, les agences masquées, modifiées ou ajoutées, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
   - `sidePanel` : afficher Wire Sweep dans la colonne de droite.
   - `tabs` : voir les adresses des onglets ouverts, pour réutiliser celui d'une agence déjà ouverte au lieu d'en ouvrir un nouveau. Rien n'est enregistré ni transmis. Chrome affiche pour cela l'avertissement « Lire votre historique de navigation ».
+  - accès à un site supplémentaire, demandé au cas par cas (fenêtre de Chrome) uniquement quand vous ajoutez une agence de type « Remplir le champ de recherche du site », et retiré quand vous la supprimez ;
   - `scripting` + accès à `mercury.bloomberg.com`, `search.abacapress.com` et `*.pixpalace.com` : uniquement pour taper les mots-clés dans le champ de recherche de ces trois sites et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages. Chrome affichera pour cela un avertissement « lire et modifier vos données sur ces sites ».
 
 ### Sécurité
 
 - Les sites et les champs à remplir viennent uniquement de `config.js`, livré avec l'extension : rien n'est téléchargé.
-- Le script d'arrière-plan n'accepte que les demandes de sa propre popup, et n'ouvre que des adresses `https` correspondant au site déclaré pour chaque agence.
+- Le script d'arrière-plan n'accepte que les demandes de sa propre popup, et n'ouvre que des adresses `https` correspondant au site déclaré pour chaque agence (y compris les agences ajoutées, dont l'adresse est vérifiée à l'ajout puis à chaque lecture).
 - Avant de remplir un champ, il vérifie que l'onglet est toujours sur le site de l'agence.
+- Repérage d'un champ sur un site ajouté : le bandeau n'est affiché que dans l'onglet ouvert pour ce repérage ; le résultat n'est accepté que de cet onglet, sur ce site, et ne contient que l'emplacement du champ et du bouton (aucun contenu de la page n'est lu ni conservé).
 - Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
 - Mises à jour : l'extension ne se met jamais à jour toute seule. Ne remplacez le dossier que par une version venant de ce dépôt, et protégez le compte GitHub par la double authentification.

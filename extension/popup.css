@@ -26,8 +26,35 @@ li .hint { margin-left: auto; font-size: 11px; opacity: .6; }
 .intro { margin: 0 0 10px; font-size: 12px; opacity: .7; }
 .field { margin: 0 0 10px; }
 .field label { display: block; font-weight: 600; margin-bottom: 3px; }
-.field input { width: 100%; box-sizing: border-box; padding: 5px 7px; font-size: 13px; }
-.field input:invalid { border-color: var(--accent); outline-color: var(--accent); }
-.field .help { margin: 3px 0 0; font-size: 11px; opacity: .7; }
-#save { font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 4px; cursor: pointer; }
-#settingsMsg { margin: 8px 0 0; font-size: 12px; min-height: 1em; }
+.field input, .field textarea { width: 100%; box-sizing: border-box; padding: 5px 7px; font-size: 13px; }
+.field textarea { font: 12px ui-monospace, monospace; resize: vertical; }
+.field input:disabled { opacity: .6; }
+details { margin: 0 0 10px; }
+summary { cursor: pointer; font-size: 12px; margin-bottom: 6px; }
+#manageList .edit { padding: 0 5px; border: 0; background: none; font-size: 13px; cursor: pointer; opacity: .7; }
+#manageList .edit:hover { opacity: 1; }
+#manageList li.editing { outline: 1px solid var(--accent); }
+.field input:user-invalid { border-color: var(--accent); outline-color: var(--accent); }
+.help { margin: 3px 0 6px; font-size: 11px; opacity: .7; }
+.primary { padding: 5px 12px; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 4px; cursor: pointer; }
+#back { margin-left: auto; padding: 2px 8px; font-size: 12px; cursor: pointer; }
+h2 { font-size: 13px; margin: 14px 0 4px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
+h2:first-of-type { border-top: 0; padding-top: 0; }
+#manageList li label { padding: 2px 0; }
+#manageList .tag { font-size: 10px; opacity: .6; }
+#manageList .edit { margin-left: auto; }
+#manageList .del { padding: 0 6px; border: 0; background: none; color: var(--accent); font-size: 14px; cursor: pointer; }
+code { font-size: 11px; }
+.status { margin: 6px 0 0; font-size: 12px; min-height: 1em; }
+
+/* Détection automatique */
+.detect { margin: 0 0 12px; padding: 8px 10px; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 6px; }
+.detect legend { font-weight: 600; font-size: 12px; padding: 0 4px; }
+#detectBtn { padding: 4px 12px; font-weight: 600; cursor: pointer; }
+#detectMsg { white-space: pre-line; }
+#detectMsg.ok { color: #2e7d32; }
+#detectMsg.err { color: var(--accent); }
+
+/* Agence « remplir le champ » */
+.fillbox { margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.link { display: block; text-align: left; padding: 0; border: 0; background: none; color: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; opacity: .8; }
