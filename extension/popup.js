@@ -141,8 +141,9 @@ async function buildUrl(agency, q, options) {
 const ORDER_KEY = "agencyOrder";
 const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
 
-// Ordre choisi par l'utilisateur ; les agences ajoutées depuis dans
-// config.js viennent à la fin, celles retirées sont ignorées.
+// Ordre choisi par l'utilisateur ; une agence ajoutée depuis dans config.js
+// se place juste après celle qui la précède dans config.js (sinon en tête),
+// les agences retirées sont ignorées.
 function orderedAgencies(order) {
   const seen = new Set();
   const out = [];
@@ -150,7 +151,12 @@ function orderedAgencies(order) {
     const a = AGENCY_BY_ID.get(id);
     if (a && !seen.has(id)) { out.push(a); seen.add(id); }
   }
-  for (const a of AGENCIES) if (!seen.has(a.id)) out.push(a);
+  AGENCIES.forEach((a, i) => {
+    if (seen.has(a.id)) return;
+    const prev = i > 0 ? out.indexOf(AGENCIES[i - 1]) : -1;
+    out.splice(prev + 1, 0, a);
+    seen.add(a.id);
+  });
   return out;
 }
 
@@ -271,7 +277,8 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   }
 });
 
-chrome.storage.local.get({ [STORAGE_KEY]: AGENCIES.map((a) => a.id), [ORDER_KEY]: [], [QUERY_KEY]: "" }, (data) => {
+const DEFAULT_CHECKED = AGENCIES.filter((a) => a.defaultChecked !== false).map((a) => a.id);
+chrome.storage.local.get({ [STORAGE_KEY]: DEFAULT_CHECKED, [ORDER_KEY]: [], [QUERY_KEY]: "" }, (data) => {
   render(orderedAgencies(data[ORDER_KEY]), data[STORAGE_KEY]);
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
