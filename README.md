@@ -26,6 +26,8 @@ Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) 
 3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
    Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus.
 
+**Garder ouvert :** le bouton **Garder ouvert ⇥** en haut de la popup affiche Wire Sweep dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
+
 Pour **Bloomberg, Abacapress et Pixpalace**, l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus).
 
 Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automatique, elle est marquée **« coller »** : la page s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche.
@@ -64,6 +66,7 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
+  - `sidePanel` : afficher Wire Sweep dans la colonne de droite.
   - `tabs` : voir les adresses des onglets ouverts, pour réutiliser celui d'une agence déjà ouverte au lieu d'en ouvrir un nouveau. Rien n'est enregistré ni transmis. Chrome affiche pour cela l'avertissement « Lire votre historique de navigation ».
   - `scripting` + accès à `mercury.bloomberg.com`, `search.abacapress.com` et `*.pixpalace.com` : uniquement pour taper les mots-clés dans le champ de recherche de ces trois sites et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages. Chrome affichera pour cela un avertissement « lire et modifier vos données sur ces sites ».
 
