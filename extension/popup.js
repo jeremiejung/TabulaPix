@@ -31,6 +31,11 @@ document.getElementById("pin").addEventListener("click", () => {
   });
 });
 
+document.getElementById("settings").addEventListener("click", () => {
+  chrome.runtime.openOptionsPage();
+  if (isPopup) window.close();
+});
+
 /* ---------- Construction des URL ---------- */
 
 const utf8 = (s) => new TextEncoder().encode(s);
@@ -65,8 +70,8 @@ async function applySteps(text, steps) {
   return typeof value === "string" ? value : toBase64(value);
 }
 
-async function buildUrl(agency, q) {
-  let url = agency.url.split("{q}").join(encodeURIComponent(q));
+async function buildUrl(agency, q, options) {
+  let url = applyOptions(agency.url, options).split("{q}").join(encodeURIComponent(q));
   if (url.includes("{payload}")) {
     const jsonSafe = JSON.stringify(q).slice(1, -1); // échappe " et \
     const payload = (agency.payload || "").split("{q}").join(jsonSafe);
@@ -186,7 +191,8 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   const selected = ids.map((id) => AGENCY_BY_ID.get(id)); // dans l'ordre affiché
   let urls;
   try {
-    urls = await Promise.all(selected.map((a) => buildUrl(a, q)));
+    const options = await loadOptions();
+    urls = await Promise.all(selected.map((a) => buildUrl(a, q, options)));
   } catch (err) {
     msg.textContent = "Erreur de configuration : " + err.message;
     return;

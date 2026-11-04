@@ -8,14 +8,15 @@
  * à la fermeture de Chrome), au cas où Chrome mettrait ce script en veille.
  */
 
-importScripts("config.js"); // AGENCIES : seule source des sites et des champs
+importScripts("config.js", "shared.js"); // AGENCIES/OPTIONS : seule source des sites et des champs
 
 const PENDING = "pendingFills";
 const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
 
-// Nom de domaine d'une agence, d'après config.js (marqueurs neutralisés).
-function agencyHost(agency) {
-  try { return new URL(agency.url.replace(/\{(q|payload)\}/g, "x")).hostname; }
+// Nom de domaine d'une agence, d'après config.js et les options
+// (marqueurs de recherche neutralisés).
+function agencyHost(agency, options) {
+  try { return new URL(applyOptions(agency.url, options).replace(/\{(q|payload)\}/g, "x")).hostname; }
   catch (_) { return null; }
 }
 const MAX_ATTEMPTS = 5; // ex. page de connexion ou d'erreur avant la vraie page
@@ -31,20 +32,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // N'accepte que la popup / le panneau de l'extension (pas une page web, pas une autre extension).
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
   if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
-  sweep(validJobs(msg.jobs), msg.q);
+  loadOptions().then((options) => sweep(validJobs(msg.jobs, options), msg.q));
   sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
 });
 
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré
 // dans config.js pour cette agence.
-function validJobs(jobs) {
+function validJobs(jobs, options) {
   const out = [];
   for (const job of jobs) {
     const agency = job && AGENCY_BY_ID.get(job.id);
     if (!agency) continue;
     let u;
     try { u = new URL(job.url); } catch (_) { continue; }
-    const host = agencyHost(agency);
+    const host = agencyHost(agency, options);
     if (u.protocol !== "https:" || !host || u.hostname !== host) continue;
     out.push({ id: agency.id, url: job.url, host, fill: agency.fill || null });
   }

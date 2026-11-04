@@ -16,6 +16,7 @@ HTML/JavaScript simple : aucune dépendance, aucune compilation.
 3. Activez le **Mode développeur** (interrupteur en haut à droite).
 4. Cliquez sur **Charger l'extension non empaquetée** et choisissez le dossier `extension` du dépôt.
 5. Épinglez l'extension : icône puzzle 🧩 dans la barre d'outils → épingle à côté de **Wire Sweep**.
+6. Réglez vos **options** (bouton ⚙ de la popup) : notamment le sous-domaine de votre espace Pixpalace (voir « Options » ci-dessous).
 
 Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) via leur page d'extensions équivalente.
 
@@ -52,6 +53,15 @@ Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automa
 
 Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude : l'extension ne fait qu'ouvrir des onglets.
 
+### Options
+
+Le bouton **⚙** de la popup (ou **Détails → Options de l'extension** dans `chrome://extensions`) ouvre les réglages propres à votre rédaction :
+
+- **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
+- **Numéro d'accord Getty** (facultatif) : pour ne voir que les images couvertes par l'accord de votre rédaction, le nombre qui suit `pa%3A` dans vos adresses Getty. Vide = tous les résultats.
+
+Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
+
 ### Modifier les agences
 
 Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adresse où le mot-clé est remplacé par `{q}` :
@@ -65,6 +75,8 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 ```
 
 Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
+
+Les valeurs propres à une rédaction ne s'écrivent pas en dur : elles passent par une option, insérée dans l'adresse avec `{opt:nom}` (voir `OPTIONS` en bas de `config.js`).
 
 Certains sites (AFP, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
 
@@ -80,7 +92,7 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 
 - Aucune collecte de données, aucun mot de passe, aucun compte.
 - Aucun appel réseau : l'extension se contente d'ouvrir des onglets (la politique de sécurité de l'extension interdit d'ailleurs toute requête : `connect-src 'none'`).
-- Seules données enregistrées : la liste des agences cochées, leur ordre et la dernière recherche lancée, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
+- Seules données enregistrées : la liste des agences cochées, leur ordre, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;

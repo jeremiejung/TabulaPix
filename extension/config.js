@@ -11,7 +11,9 @@
  *   url      adresse de recherche. Marqueurs possibles :
  *              {q}        → les mots-clés, encodés pour une URL (cas le plus courant)
  *              {payload}  → le résultat du champ « payload » ci-dessous
- *            Sans aucun marqueur (et sans « fill »), la page est simplement
+ *              {opt:xxx}  → la valeur de l'option « xxx » (voir OPTIONS en bas
+ *                           du fichier), réglable par chacun dans la page Options
+ *            Sans {q} ni {payload} (et sans « fill »), la page est simplement
  *            ouverte et les mots-clés sont copiés dans le presse-papiers.
  *
  * Champs avancés (pour les sites qui « emballent » la recherche dans l'URL) :
@@ -67,15 +69,12 @@ const AGENCIES = [
   {
     id: "getty-creative",
     name: "Getty Creative",
-    url: "https://www.gettyimages.fr/search/2/image-film?family=creative&phrase={q}&sort=best&phraseprocessing=default&excludenudity=false&suppressfamilycorrection=true"
-    // Pour ne voir que les images couvertes par votre accord Getty, ajoutez
-    // « agreements=pa%3A243515& » juste après le « ? » de l'adresse.
+    url: "https://www.gettyimages.fr/search/2/image-film?{opt:gettyAgreement}family=creative&phrase={q}&sort=best&phraseprocessing=default&excludenudity=false&suppressfamilycorrection=true"
   },
   {
     id: "getty-actu",
     name: "Getty Actu",
-    url: "https://www.gettyimages.fr/search/2/image?family=editorial&phrase={q}&sort=best&phraseprocessing=default&groupbyevent=false"
-    // Même chose ici pour filtrer sur votre accord : « agreements=pa%3A243515& » après le « ? ».
+    url: "https://www.gettyimages.fr/search/2/image?{opt:gettyAgreement}family=editorial&phrase={q}&sort=best&phraseprocessing=default&groupbyevent=false"
   },
   {
     id: "shutterstock",
@@ -106,7 +105,7 @@ const AGENCIES = [
   {
     id: "pixpalace",
     name: "Pixpalace",
-    url: "https://lesechosleparisien.pixpalace.com/home",
+    url: "https://{opt:pixpalaceSubdomain}.pixpalace.com/home",
     fill: {
       input: "#search-field",
       submit: "#pw_search_form input[type=submit]"
@@ -119,5 +118,35 @@ const AGENCIES = [
     // Si cette adresse ne marche pas, remplacez la ligne « url » ci-dessus par :
     // url: "https://maxppp.com/search",
     // fill: { input: "#search" }
+  }
+];
+
+/*
+ * Options réglables par chaque utilisateur (page Options de l'extension),
+ * pour les valeurs propres à une rédaction. Elles s'insèrent dans les
+ * adresses ci-dessus avec {opt:id}.
+ *   id        nom utilisé dans {opt:id}
+ *   label     intitulé dans la page Options
+ *   help      explication affichée sous le champ
+ *   default   valeur par défaut
+ *   pattern   valeurs autorisées (expression régulière) ; sinon : défaut
+ *   template  (facultatif) texte inséré quand l'option est remplie,
+ *             {value} y est remplacé par la valeur ; option vide → rien
+ */
+const OPTIONS = [
+  {
+    id: "pixpalaceSubdomain",
+    label: "Sous-domaine Pixpalace",
+    help: "La partie avant « .pixpalace.com » dans l'adresse de votre espace Pixpalace (ex. « www » ou le nom de votre rédaction).",
+    default: "www",
+    pattern: "^[a-z0-9]([a-z0-9\\-]{0,61}[a-z0-9])?$"
+  },
+  {
+    id: "gettyAgreement",
+    label: "Numéro d'accord Getty (facultatif)",
+    help: "Pour ne voir que les images couvertes par l'accord de votre rédaction : le nombre qui suit « pa%3A » (ou « pa: ») dans vos adresses Getty. Laisser vide pour tout voir.",
+    default: "",
+    pattern: "^[0-9]{1,12}$",
+    template: "agreements=pa%3A{value}&"
   }
 ];
