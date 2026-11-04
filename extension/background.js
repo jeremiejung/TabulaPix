@@ -32,16 +32,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // N'accepte que la popup / le panneau de l'extension (pas une page web, pas une autre extension).
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
   if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
-  loadOptions().then((options) => sweep(validJobs(msg.jobs, options), msg.q));
+  Promise.all([loadOptions(), loadAgencies()])
+    .then(([options, agencies]) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q));
   sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
 });
 
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré
-// dans config.js pour cette agence.
-function validJobs(jobs, options) {
+// pour cette agence (config.js ou agence ajoutée par l'utilisateur).
+function validJobs(jobs, options, agencies) {
+  const byId = new Map(agencies.map((a) => [a.id, a]));
   const out = [];
   for (const job of jobs) {
-    const agency = job && AGENCY_BY_ID.get(job.id);
+    const agency = job && byId.get(job.id);
     if (!agency) continue;
     let u;
     try { u = new URL(job.url); } catch (_) { continue; }

@@ -22,18 +22,38 @@
     <p id="msg" role="status"></p>
   </form>
 
-  <form id="settingsForm" hidden>
+  <section id="settingsView" hidden>
     <header>
       <h1>Options</h1>
-    </header>
-    <p class="intro">Réglages propres à votre rédaction, gardés dans Chrome sur cet ordinateur.</p>
-    <div id="fields"></div>
-    <div class="bar">
       <button type="button" id="back">← Retour</button>
-      <button type="submit" id="save">Enregistrer</button>
-    </div>
-    <p id="settingsMsg" role="status"></p>
-  </form>
+    </header>
+
+    <h2>Agences affichées</h2>
+    <p class="intro">Décochez celles que vous n'utilisez pas : elles disparaissent de la liste.</p>
+    <ul id="manageList"></ul>
+
+    <h2>Ajouter une agence</h2>
+    <form id="addForm">
+      <div class="field">
+        <label for="newName">Nom</label>
+        <input id="newName" maxlength="40" autocomplete="off" required>
+      </div>
+      <div class="field">
+        <label for="newUrl">Adresse de recherche</label>
+        <input id="newUrl" type="url" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…" required>
+        <p class="help">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code>. Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
+      </div>
+      <button type="submit" class="primary">Ajouter</button>
+      <p id="addMsg" class="status" role="status"></p>
+    </form>
+
+    <h2>Réglages</h2>
+    <form id="settingsForm">
+      <div id="fields"></div>
+      <button type="submit" id="save" class="primary">Enregistrer</button>
+    </form>
+    <p id="settingsMsg" class="status" role="status"></p>
+  </section>
   <script src="config.js"></script>
   <script src="shared.js"></script>
   <script src="popup.js"></script>

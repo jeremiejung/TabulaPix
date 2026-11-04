@@ -34,12 +34,67 @@ document.getElementById("pin").addEventListener("click", () => {
 /* ---------- Vue Options (dans la popup / le panneau) ---------- */
 
 const mainForm = document.getElementById("form");
+const settingsView = document.getElementById("settingsView");
 const settingsForm = document.getElementById("settingsForm");
+const addForm = document.getElementById("addForm");
+const manageList = document.getElementById("manageList");
 const fields = document.getElementById("fields");
 const settingsMsg = document.getElementById("settingsMsg");
+const addMsg = document.getElementById("addMsg");
 
-async function showSettings() {
-  const values = await loadOptions();
+function flash(text, el = settingsMsg) {
+  el.textContent = text;
+  setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
+}
+
+// Liste « Agences affichées » : case = visible ; ✕ = supprimer (agences perso).
+async function renderManageList() {
+  const ag = await loadAgencies();
+  const { [ORDER_KEY]: order = [] } = await chrome.storage.local.get(ORDER_KEY);
+  ALL = ag.all;
+  AGENCY_BY_ID = new Map(ALL.map((a) => [a.id, a]));
+  manageList.textContent = "";
+  for (const a of orderedAgencies(order)) {
+    const li = document.createElement("li");
+    const label = document.createElement("label");
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = !ag.hidden.has(a.id);
+    box.addEventListener("change", async () => {
+      const { [HIDDEN_KEY]: hidden = [] } = await chrome.storage.local.get(HIDDEN_KEY);
+      const set = new Set(hidden);
+      box.checked ? set.delete(a.id) : set.add(a.id);
+      await chrome.storage.local.set({ [HIDDEN_KEY]: [...set] });
+    });
+    label.append(box, a.name);
+    if (a.custom) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "perso";
+      label.append(" ", tag);
+    }
+    li.append(label);
+    if (a.custom) {
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "del";
+      del.textContent = "✕";
+      del.title = `Supprimer « ${a.name} »`;
+      del.setAttribute("aria-label", del.title);
+      del.addEventListener("click", async () => {
+        if (!confirm(`Supprimer l'agence « ${a.name} » ?`)) return;
+        const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
+        await chrome.storage.local.set({ [CUSTOM_KEY]: custom.filter((c) => c && c.id !== a.id) });
+        await renderManageList();
+        flash(`« ${a.name} » supprimée.`, addMsg);
+      });
+      li.append(del);
+    }
+    manageList.append(li);
+  }
+}
+
+function renderOptionFields(values) {
   fields.textContent = "";
   for (const o of OPTIONS) {
     const div = document.createElement("div");
@@ -60,14 +115,20 @@ async function showSettings() {
     div.append(label, field, help);
     fields.append(div);
   }
-  settingsMsg.textContent = "";
-  mainForm.hidden = true;
-  settingsForm.hidden = false;
-  fields.querySelector("input")?.focus();
 }
 
-function showMain() {
-  settingsForm.hidden = true;
+async function showSettings() {
+  await renderManageList();
+  renderOptionFields(await loadOptions());
+  settingsMsg.textContent = addMsg.textContent = "";
+  mainForm.hidden = true;
+  settingsView.hidden = false;
+  document.getElementById("back").focus();
+}
+
+async function showMain() {
+  await refreshList();
+  settingsView.hidden = true;
   mainForm.hidden = false;
   input.focus();
 }
@@ -75,21 +136,39 @@ function showMain() {
 document.getElementById("settings").addEventListener("click", showSettings);
 document.getElementById("back").addEventListener("click", showMain);
 
+addForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const id = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const agency = cleanCustomAgency({
+    id,
+    name: document.getElementById("newName").value,
+    url: document.getElementById("newUrl").value
+  });
+  if (!agency) { flash("Adresse invalide : elle doit commencer par https:// (et le nom faire 40 caractères au plus).", addMsg); return; }
+  const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: DEFAULT_CHECKED });
+  if (data[CUSTOM_KEY].length >= MAX_CUSTOM) { flash(`${MAX_CUSTOM} agences personnalisées au maximum.`, addMsg); return; }
+  await chrome.storage.local.set({
+    [CUSTOM_KEY]: data[CUSTOM_KEY].concat(agency),
+    [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
+  });
+  addForm.reset();
+  await renderManageList();
+  flash(`« ${agency.name} » ajoutée.`, addMsg);
+});
+
 settingsForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const values = {};
   for (const o of OPTIONS) {
     const v = document.getElementById("opt-" + o.id).value.trim();
     if (v !== "" && !new RegExp(o.pattern).test(v)) {
-      settingsMsg.textContent = `Valeur invalide pour « ${o.label} ».`;
+      flash(`Valeur invalide pour « ${o.label} ».`);
       return;
     }
     values[o.id] = v;
   }
   await chrome.storage.local.set({ [OPTIONS_KEY]: values });
-  showMain();
-  msg.textContent = "Options enregistrées.";
-  setTimeout(() => { if (msg.textContent === "Options enregistrées.") msg.textContent = ""; }, 2500);
+  flash("Réglages enregistrés.");
 });
 
 /* ---------- Construction des URL ---------- */
@@ -139,7 +218,9 @@ async function buildUrl(agency, q, options) {
 /* ---------- Interface ---------- */
 
 const ORDER_KEY = "agencyOrder";
-const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
+let ALL = AGENCIES; // intégrées + personnalisées (complété au chargement)
+let AGENCY_BY_ID = new Map(ALL.map((a) => [a.id, a]));
+let fullOrder = []; // ordre de toutes les agences, masquées comprises
 
 // Ordre choisi par l'utilisateur ; une agence ajoutée depuis dans config.js
 // se place juste après celle qui la précède dans config.js (sinon en tête),
@@ -151,9 +232,9 @@ function orderedAgencies(order) {
     const a = AGENCY_BY_ID.get(id);
     if (a && !seen.has(id)) { out.push(a); seen.add(id); }
   }
-  AGENCIES.forEach((a, i) => {
+  ALL.forEach((a, i) => {
     if (seen.has(a.id)) return;
-    const prev = i > 0 ? out.indexOf(AGENCIES[i - 1]) : -1;
+    const prev = i > 0 ? out.indexOf(ALL[i - 1]) : -1;
     out.splice(prev + 1, 0, a);
     seen.add(a.id);
   });
@@ -231,8 +312,19 @@ function save() {
   chrome.storage.local.set({ [STORAGE_KEY]: checkedIds() });
 }
 
+// Les visibles prennent l'ordre affiché ; chaque agence masquée reste juste
+// après celle qui la précédait.
 function saveOrder() {
-  chrome.storage.local.set({ [ORDER_KEY]: boxes().map((b) => b.value) });
+  const visible = boxes().map((b) => b.value);
+  const shown = new Set(visible);
+  const out = [...visible];
+  fullOrder.forEach((id, i) => {
+    if (shown.has(id)) return;
+    const pos = i > 0 ? out.indexOf(fullOrder[i - 1]) : -1;
+    out.splice(pos + 1, 0, id);
+  });
+  fullOrder = out;
+  chrome.storage.local.set({ [ORDER_KEY]: fullOrder });
 }
 
 function setAll(state) {
@@ -278,8 +370,21 @@ document.getElementById("form").addEventListener("submit", async (e) => {
 });
 
 const DEFAULT_CHECKED = AGENCIES.filter((a) => a.defaultChecked !== false).map((a) => a.id);
-chrome.storage.local.get({ [STORAGE_KEY]: DEFAULT_CHECKED, [ORDER_KEY]: [], [QUERY_KEY]: "" }, (data) => {
-  render(orderedAgencies(data[ORDER_KEY]), data[STORAGE_KEY]);
+
+// (Re)construit la liste : agences intégrées + personnalisées, sans les masquées.
+async function refreshList() {
+  const ag = await loadAgencies();
+  ALL = ag.all;
+  AGENCY_BY_ID = new Map(ALL.map((a) => [a.id, a]));
+  const data = await chrome.storage.local.get({ [STORAGE_KEY]: DEFAULT_CHECKED, [ORDER_KEY]: [], [QUERY_KEY]: "" });
+  const ordered = orderedAgencies(data[ORDER_KEY]);
+  fullOrder = ordered.map((a) => a.id);
+  list.textContent = "";
+  render(ordered.filter((a) => !ag.hidden.has(a.id)), data[STORAGE_KEY]);
+  return data;
+}
+
+refreshList().then((data) => {
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
 });

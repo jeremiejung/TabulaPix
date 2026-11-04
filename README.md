@@ -5,6 +5,8 @@ Chrome extension for photo editors: type your keywords once and search all your 
 
 ## Wire Sweep (en français)
 
+> **Branche `chrome-store`** : version destinée au Chrome Web Store. Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, agences personnalisées, sous-domaine Pixpalace. Cette branche n'est pas fusionnée dans `main`, qui reste la version d'origine.
+
 Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les agences, et Wire Sweep ouvre un onglet par agence avec la recherche déjà lancée. Les agences cochées sont mémorisées d'une utilisation à l'autre.
 
 HTML/JavaScript simple : aucune dépendance, aucune compilation.
@@ -55,11 +57,15 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 ### Options
 
-Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages propres à votre rédaction, directement dans la popup ; **← Retour** revient à la recherche.
+Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
 
+- **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez).
+- **Ajouter une agence** : un nom et une adresse de recherche. Faites une recherche sur le site, copiez l'adresse de la page de résultats et remplacez vos mots-clés par `{q}` (ex. `https://www.alamy.com/search.html?qt={q}`). Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. L'adresse doit commencer par `https://`. Les agences ajoutées portent la mention « perso » et se suppriment avec ✕. Elles sont cochées d'office et se réordonnent comme les autres.
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
 
 Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
+
+Le remplissage automatique d'un champ de recherche (comme pour Bloomberg, Abacapress, Pixpalace) n'est pas disponible pour les agences ajoutées : il demande une autorisation d'accès au site, déclarée à l'avance dans l'extension.
 
 ### Modifier les agences
 
@@ -93,7 +99,7 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 
 - Aucune collecte de données, aucun mot de passe, aucun compte.
 - Aucun appel réseau : l'extension se contente d'ouvrir des onglets (la politique de sécurité de l'extension interdit d'ailleurs toute requête : `connect-src 'none'`).
-- Seules données enregistrées : la liste des agences cochées, leur ordre, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
+- Seules données enregistrées : la liste des agences cochées, leur ordre, les agences masquées ou ajoutées, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
@@ -104,7 +110,7 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 ### Sécurité
 
 - Les sites et les champs à remplir viennent uniquement de `config.js`, livré avec l'extension : rien n'est téléchargé.
-- Le script d'arrière-plan n'accepte que les demandes de sa propre popup, et n'ouvre que des adresses `https` correspondant au site déclaré pour chaque agence.
+- Le script d'arrière-plan n'accepte que les demandes de sa propre popup, et n'ouvre que des adresses `https` correspondant au site déclaré pour chaque agence (y compris les agences ajoutées, dont l'adresse est vérifiée à l'ajout puis à chaque lecture).
 - Avant de remplir un champ, il vérifie que l'onglet est toujours sur le site de l'agence.
 - Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
 - Mises à jour : l'extension ne se met jamais à jour toute seule. Ne remplacez le dossier que par une version venant de ce dépôt, et protégez le compte GitHub par la double authentification.
