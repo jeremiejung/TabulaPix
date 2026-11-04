@@ -3,7 +3,7 @@
  * Détection automatique : à partir de l'adresse d'une page de résultats et
  * des mots-clés cherchés, retrouve où sont les mots-clés (en clair, ou
  * emballés en hexadécimal, base64, gzip, encodage URL…) et en déduit
- * l'adresse avec {q} ou {payload}, le modèle et les étapes d'encodage.
+ * l'adresse avec {q}, {q:slug} ou {payload}, le modèle et les étapes d'encodage.
  * Tout se fait localement, sans réseau.
  */
 
@@ -104,6 +104,20 @@ async function detectSearchUrl(pageUrl, keywords) {
     }
   }
 
+  // 1 bis. Mots séparés par des tirets (« emmanuel-macron »), si plusieurs mots.
+  const words = q.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    const re = new RegExp(words.map((w) => escapeRe(encodeURIComponent(w))).join("-"), "gi");
+    const n = (url.match(re) || []).length;
+    if (n) {
+      return {
+        url: url.replace(re, "{q:slug}"),
+        summary: "Mots-clés trouvés avec des tirets à la place des espaces (marqueur {q:slug}).",
+        warnings
+      };
+    }
+  }
+
   // 2. Mots-clés emballés dans un morceau de l'adresse.
   const pieces = new Set();
   for (const part of url.split(/[\/?&=#]/)) {
@@ -129,8 +143,5 @@ async function detectSearchUrl(pageUrl, keywords) {
   }
 
   // 3. Rien trouvé.
-  if (url.toLowerCase().includes(q.toLowerCase().replace(/ /g, "-"))) {
-    return { error: "Les mots-clés sont écrits avec des tirets à la place des espaces : ce format n'est pas pris en charge. Essayez avec un seul mot-clé." };
-  }
   return { error: "Mots-clés introuvables dans l'adresse. Ce site ne les y met peut-être pas (recherche enregistrée côté serveur) : il faudra coller les mots-clés à la main." };
 }

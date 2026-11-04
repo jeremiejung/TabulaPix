@@ -8,7 +8,7 @@ const msg = document.getElementById("msg");
 
 // Une agence est « manuelle » si ni son URL ni « fill » ne transmettent les
 // mots-clés : on ouvre la page et on copie les mots-clés dans le presse-papiers.
-const isManual = (a) => !a.fill && !a.url.includes("{q}") && !a.url.includes("{payload}");
+const isManual = (a) => !a.fill && !/\{(q|q:slug|payload)\}/.test(a.url);
 
 /* ---------- Popup ou panneau latéral ---------- */
 
@@ -325,7 +325,9 @@ async function applySteps(text, steps) {
 }
 
 async function buildUrl(agency, q, options) {
-  let url = applyOptions(agency.url, options).split("{q}").join(encodeURIComponent(q));
+  // {q:slug} : mots séparés par des tirets (ex. « emmanuel-macron »).
+  const slug = q.split(/\s+/).filter(Boolean).map(encodeURIComponent).join("-");
+  let url = applyOptions(agency.url, options).split("{q:slug}").join(slug).split("{q}").join(encodeURIComponent(q));
   if (url.includes("{payload}")) {
     const jsonSafe = JSON.stringify(q).slice(1, -1); // échappe " et \
     const payload = (agency.payload || "").split("{q}").join(jsonSafe);

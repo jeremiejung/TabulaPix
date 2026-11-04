@@ -53,10 +53,10 @@ function checkSpec(raw, { allowOptions = false } = {}) {
   if (payload.length > 2000) return { error: "Modèle trop long (2000 caractères au plus)." };
   if (!encode) return { error: `Étapes d'encodage inconnues : utilisez ${ENCODE_STEPS.join(", ")}.` };
   for (const [, inner] of url.matchAll(/\{([^}]*)\}/g)) {
-    if (inner === "q" || inner === "payload") continue;
+    if (inner === "q" || inner === "q:slug" || inner === "payload") continue;
     const opt = inner.match(/^opt:([A-Za-z0-9_]+)$/);
     if (opt && allowOptions && OPTION_BY_ID.has(opt[1])) continue;
-    return { error: `Marqueur inconnu dans l'adresse : {${inner}}. Utilisez {q} (ou {payload}).` };
+    return { error: `Marqueur inconnu dans l'adresse : {${inner}}. Utilisez {q}, {q:slug} (ou {payload}).` };
   }
   if (url.includes("{payload}") && !payload) return { error: "L'adresse contient {payload} : renseignez le modèle." };
   let u;
@@ -79,7 +79,7 @@ function cleanCustomAgency(a) {
 
 // Nom de domaine d'une adresse (marqueurs neutralisés, options appliquées).
 function hostOf(url, options) {
-  try { return new URL(applyOptions(url, options).replace(/\{(q|payload)\}/g, "x")).hostname; }
+  try { return new URL(applyOptions(url, options).replace(/\{(q|q:slug|payload)\}/g, "x")).hostname; }
   catch (_) { return null; }
 }
 
