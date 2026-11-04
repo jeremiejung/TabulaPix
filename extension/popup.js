@@ -70,7 +70,7 @@ async function renderManageList() {
     if (a.custom || a.modified) {
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = a.custom ? "perso" : "modifiée";
+      tag.textContent = a.custom ? (a.fill ? "perso · champ" : "perso") : "modifiée";
       label.append(" ", tag);
     }
     li.append(label);
@@ -93,7 +93,9 @@ async function renderManageList() {
       del.addEventListener("click", async () => {
         if (!confirm(`Supprimer l'agence « ${a.name} » ?`)) return;
         const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
-        await chrome.storage.local.set({ [CUSTOM_KEY]: custom.filter((c) => c && c.id !== a.id) });
+        const rest = custom.filter((c) => c && c.id !== a.id);
+        await chrome.storage.local.set({ [CUSTOM_KEY]: rest });
+        if (a.fill) releasePermission(a, rest);
         if (editing === a.id) endEdit();
         await renderManageList();
         flash(`« ${a.name} » supprimée.`, addMsg);
@@ -163,6 +165,35 @@ const ed = {
 };
 let editing = null; // id de l'agence en cours de modification, sinon null
 
+/* Type d'agence : adresse de recherche, ou remplissage du champ du site */
+const modeBox = document.getElementById("modeBox");
+const modeRadios = [...document.querySelectorAll("input[name=mode]")];
+const fillInfo = document.getElementById("fillInfo");
+const detectBox = document.querySelector(".detect");
+const mode = () => modeRadios.find((r) => r.checked).value;
+
+function setMode(value) {
+  modeRadios.forEach((r) => (r.checked = r.value === value));
+  const fill = value === "fill";
+  document.getElementById("fillHelp").hidden = !fill;
+  detectBox.hidden = fill;
+  ed.advanced.hidden = fill;
+  document.getElementById("urlHelp").hidden = fill;
+  document.getElementById("urlLabel").textContent = fill ? "Adresse de la page avec le champ de recherche" : "Adresse de recherche";
+  ed.url.placeholder = fill ? "https://…" : "https://…{q}…";
+  ed.submit.textContent = fill ? "Repérer sur le site…" : (editing ? "Enregistrer" : "Ajouter");
+}
+modeRadios.forEach((r) => r.addEventListener("change", () => setMode(mode())));
+
+// Retire l'autorisation d'un site quand plus aucune agence ajoutée ne le remplit
+// (jamais pour les sites des agences intégrées, autorisés d'office).
+async function releasePermission(agency, remaining) {
+  const host = hostOf(agency.url, {});
+  if (!host || AGENCIES.some((b) => b.fill && hostOf(b.url, {}) === host)) return;
+  if (remaining.some((c) => c && c.fill && hostOf(c.url, {}) === host)) return;
+  try { await chrome.permissions.remove({ origins: [originPattern(host)] }); } catch (_) { /* déjà retirée */ }
+}
+
 function startEdit(a) {
   editing = a.id;
   ed.title.textContent = `Modifier « ${a.name} »`;
@@ -172,9 +203,12 @@ function startEdit(a) {
   ed.payload.value = a.payload || "";
   ed.encode.value = (a.encode || []).join(", ");
   ed.advanced.open = Boolean(a.payload);
-  ed.submit.textContent = "Enregistrer";
   ed.cancel.hidden = false;
   ed.reset.hidden = !a.modified;
+  modeBox.hidden = !a.custom; // les agences intégrées gardent leur type
+  setMode(a.custom && a.fill ? "fill" : "url");
+  fillInfo.hidden = !a.fill || !a.custom;
+  if (a.fill && a.custom) fillInfo.textContent = `Repéré : champ « ${a.fill.input} »${a.fill.submit ? `, bouton « ${a.fill.submit} »` : ", touche Entrée"}. « Repérer sur le site… » pour refaire.`;
   addMsg.textContent = "";
   renderManageList();
   ed.title.scrollIntoView({ block: "start" });
@@ -188,8 +222,10 @@ function endEdit() {
   ed.title.textContent = "Ajouter une agence";
   ed.name.disabled = false;
   ed.advanced.open = false;
-  ed.submit.textContent = "Ajouter";
   ed.cancel.hidden = ed.reset.hidden = true;
+  modeBox.hidden = false;
+  fillInfo.hidden = true;
+  setMode("url");
 }
 
 ed.cancel.addEventListener("click", async () => { endEdit(); await renderManageList(); });
@@ -221,8 +257,30 @@ ed.reset.addEventListener("click", async () => {
   flash(`« ${ORIGINAL_BY_ID.get(id).name} » : adresse d'origine rétablie.`, addMsg);
 });
 
+// Mode « remplir le champ » : brouillon, autorisation Chrome, puis repérage
+// sur le site (fait par le script d'arrière-plan, même si la popup se ferme).
+function startFillPick() {
+  const name = ed.name.value.trim();
+  if (!name || name.length > 40) return flash("Nom manquant (40 caractères au plus).", addMsg);
+  const id = editing || "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const { spec, error } = checkSpec({ url: ed.url.value });
+  if (error) return flash(error, addMsg);
+  const host = hostOf(spec.url, {});
+  const draft = { id, name, url: spec.url };
+  chrome.storage.session.set({ fillDraft: draft }); // relu si la popup se ferme pendant la demande
+  // La demande d'autorisation doit partir directement du clic.
+  chrome.permissions.request({ origins: [originPattern(host)] }).then(async (granted) => {
+    if (!granted) return flash(`Autorisation refusée pour ${host} : impossible de remplir son champ de recherche.`, addMsg);
+    const res = await chrome.runtime.sendMessage({ type: "pick", draft });
+    if (!res || !res.ok) return flash((res && res.error) || "Repérage impossible.", addMsg);
+    flash(`Le site s'ouvre : cliquez sur son champ de recherche, puis sur son bouton.`, addMsg);
+    if (isPopup) window.close();
+  });
+}
+
 addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (mode() === "fill") return startFillPick();
   const name = ed.name.value.trim();
   const raw = { url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value };
   const original = editing && ORIGINAL_BY_ID.get(editing);
@@ -254,7 +312,10 @@ addForm.addEventListener("submit", async (e) => {
   // Agence personnalisée existante : remplacée sur place.
   if (editing) {
     const agency = cleanCustomAgency({ id: editing, name, ...raw });
-    await chrome.storage.local.set({ [CUSTOM_KEY]: data[CUSTOM_KEY].map((c) => (c && c.id === editing ? agency : c)) });
+    const before = data[CUSTOM_KEY].find((c) => c && c.id === editing);
+    const after = data[CUSTOM_KEY].map((c) => (c && c.id === editing ? agency : c));
+    await chrome.storage.local.set({ [CUSTOM_KEY]: after });
+    if (before && before.fill) releasePermission(before, after);
     endEdit();
     await renderManageList();
     return flash(`« ${agency.name} » modifiée.`, addMsg);
@@ -508,4 +569,10 @@ async function refreshList() {
 refreshList().then((data) => {
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
+});
+
+// Une agence enregistrée par le repérage (arrière-plan) : on met la liste à jour.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "local" || !changes[CUSTOM_KEY]) return;
+  if (!settingsView.hidden) renderManageList(); else refreshList();
 });

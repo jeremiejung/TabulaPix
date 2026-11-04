@@ -25,12 +25,26 @@ async function setPending(p) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  // N'accepte que la popup / le panneau de l'extension (pas une page web, pas une autre extension).
-  if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
-  if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
-  loadOptions()
-    .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)));
-  sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
+  if (sender.id !== chrome.runtime.id || !msg) return;
+
+  // Messages de la popup / du panneau de l'extension.
+  if (sender.url === chrome.runtime.getURL("popup.html")) {
+    if (msg.type === "sweep" && Array.isArray(msg.jobs) && typeof msg.q === "string") {
+      loadOptions()
+        .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)));
+      sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
+    } else if (msg.type === "pick") {
+      startPick(msg.draft).then(sendResponse);
+      return true;
+    }
+    return;
+  }
+
+  // Messages du bandeau de repérage, depuis l'onglet du site.
+  if (sender.tab && (msg.type === "picked" || msg.type === "pickCancel")) {
+    handlePicked(sender, msg).then(sendResponse);
+    return true;
+  }
 });
 
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré
@@ -97,6 +111,7 @@ function findTab(tabs, url, claimed, minScore) {
 
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   if (info.status !== "complete") return;
+  injectPickerIfNeeded(tabId, tab);
   const pending = await getPending();
   const job = pending[tabId];
   if (!job) return;
@@ -108,7 +123,8 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   // page de connexion, page d'erreur… on réessaiera au prochain chargement).
   let host = null;
   try { host = new URL(tab.url).hostname; } catch (_) { /* adresse illisible */ }
-  const fill = AGENCY_BY_ID.get(job.id)?.fill;
+  const fill = AGENCY_BY_ID.get(job.id)?.fill
+    || (await loadAgencies()).custom.find((a) => a.id === job.id)?.fill;
   if (!fill) return;
 
   let ok = false;
@@ -135,19 +151,228 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
   if (pending[tabId]) { delete pending[tabId]; await setPending(pending); }
 });
 
+/* ---------- Repérage du champ et du bouton d'un site ---------- */
+/*
+ * La popup enregistre un brouillon (nom, adresse), demande l'autorisation
+ * Chrome pour ce site, puis demande le repérage. Si la popup s'est fermée
+ * pendant la demande d'autorisation, l'ajout de l'autorisation déclenche le
+ * repérage à sa place (chrome.permissions.onAdded).
+ */
+const DRAFT_KEY = "fillDraft";
+const PICK_KEY = "pickSession";
+
+function cleanDraft(d) {
+  const agency = cleanCustomAgency({ ...(d || {}), fill: { input: "x" } });
+  if (!agency) return null;
+  const host = hostOf(agency.url, {});
+  return host ? { id: agency.id, name: agency.name, url: agency.url, host } : null;
+}
+
+async function startPick(rawDraft) {
+  const draft = cleanDraft(rawDraft);
+  if (!draft) return { ok: false, error: "Agence invalide." };
+  if (!(await chrome.permissions.contains({ origins: [originPattern(draft.host)] }))) {
+    return { ok: false, error: "Autorisation refusée pour ce site." };
+  }
+  const { [PICK_KEY]: current } = await chrome.storage.session.get(PICK_KEY);
+  if (current && current.draft.id === draft.id) {
+    try { await chrome.tabs.get(current.tabId); return { ok: true }; } catch (_) { /* onglet fermé : on recommence */ }
+  }
+  const tab = await chrome.tabs.create({ url: draft.url, active: true });
+  await chrome.storage.session.set({ [PICK_KEY]: { tabId: tab.id, draft } });
+  return { ok: true };
+}
+
+chrome.permissions.onAdded.addListener(async (perms) => {
+  const { [DRAFT_KEY]: draft } = await chrome.storage.session.get(DRAFT_KEY);
+  const clean = cleanDraft(draft);
+  if (clean && (perms.origins || []).includes(originPattern(clean.host))) startPick(clean);
+});
+
+async function injectPickerIfNeeded(tabId, tab) {
+  const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
+  if (!pick || pick.tabId !== tabId) return;
+  let host = null;
+  try { host = new URL(tab.url).hostname; } catch (_) { return; }
+  if (host !== pick.draft.host) return; // page de connexion… : on attend le retour sur le site
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, func: pickerUI, args: [pick.draft.name] });
+  } catch (_) { /* autorisation retirée ou onglet fermé */ }
+}
+
+async function handlePicked(sender, msg) {
+  const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
+  if (!pick || pick.tabId !== sender.tab.id) return { ok: false, error: "Repérage expiré : recommencez depuis Wire Sweep." };
+  let host = null;
+  try { host = new URL(sender.url).hostname; } catch (_) { /* rien */ }
+  if (host !== pick.draft.host) return { ok: false, error: "Ce n'est pas le site prévu." };
+  if (msg.type === "pickCancel") {
+    await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
+    return { ok: true };
+  }
+  const agency = cleanCustomAgency({ ...pick.draft, fill: { input: msg.input, submit: msg.submit } });
+  if (!agency) return { ok: false, error: "Repérage invalide : recommencez." };
+  const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], checkedAgencies: null });
+  const custom = Array.isArray(data[CUSTOM_KEY]) ? data[CUSTOM_KEY] : [];
+  const exists = custom.some((c) => c && c.id === agency.id);
+  if (!exists && custom.length >= MAX_CUSTOM) return { ok: false, error: `${MAX_CUSTOM} agences personnalisées au maximum.` };
+  const update = { [CUSTOM_KEY]: exists ? custom.map((c) => (c && c.id === agency.id ? agency : c)) : custom.concat(agency) };
+  if (!exists) {
+    const checked = Array.isArray(data.checkedAgencies)
+      ? data.checkedAgencies
+      : AGENCIES.filter((a) => a.defaultChecked !== false).map((a) => a.id); // cases par défaut
+    update.checkedAgencies = checked.concat(agency.id); // cochée d'office
+  }
+  await chrome.storage.local.set(update);
+  await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
+  return { ok: true, name: agency.name };
+}
+
+// Exécutée DANS la page du site : bandeau qui guide le repérage.
+function pickerUI(agencyName) {
+  if (window.__wireSweepPicker) return;
+  window.__wireSweepPicker = true;
+
+  const host = document.createElement("div");
+  host.style.cssText = "all:initial;position:fixed;inset:0;z-index:2147483647;pointer-events:none;";
+  const root = host.attachShadow({ mode: "closed" });
+  root.innerHTML = `<style>
+    .panel{pointer-events:auto;position:fixed;top:12px;left:50%;transform:translateX(-50%);max-width:520px;
+      background:#111;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:12px 16px;border-radius:8px;
+      box-shadow:0 4px 18px rgba(0,0,0,.35);border-left:5px solid #D7141A}
+    .t{font-weight:700;margin-bottom:4px}.msg{margin:2px 0 8px}.err{color:#ff8a80}
+    button{font:600 13px system-ui,sans-serif;margin-right:6px;padding:4px 10px;border-radius:4px;border:0;cursor:pointer}
+    .alt{background:#444;color:#fff}.ok{background:#D7141A;color:#fff}
+    .panel.bottom{top:auto;bottom:12px}
+    .box{position:fixed;border:3px solid #D7141A;background:rgba(215,20,26,.12);border-radius:3px;display:none}
+  </style>
+  <div class="box"></div>
+  <div class="panel"><div class="t"></div><div class="msg"></div><div class="actions"></div></div>`;
+  document.documentElement.append(host);
+  const $ = (s) => root.querySelector(s);
+  const box = $(".box");
+
+  let step = "input";
+  let picked = { input: "", submit: "" };
+
+  const isField = (el) => el && (el.matches("input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]), textarea"));
+  const asButton = (el) => el.closest("button, input[type=submit], input[type=button], input[type=image], a, [role=button]") || el;
+
+  function selectorFor(el) {
+    const unique = (sel) => { try { const l = document.querySelectorAll(sel); return l.length === 1 && l[0] === el; } catch (_) { return false; } };
+    const tag = el.tagName.toLowerCase();
+    if (el.id && unique("#" + CSS.escape(el.id))) return "#" + CSS.escape(el.id);
+    for (const attr of ["name", "aria-label", "placeholder", "data-testid", "title", "type"]) {
+      const v = el.getAttribute(attr);
+      if (v) { const sel = `${tag}[${attr}="${CSS.escape(v)}"]`; if (unique(sel)) return sel; }
+    }
+    const parts = [];
+    for (let cur = el; cur && cur.nodeType === 1 && cur !== document.documentElement; cur = cur.parentElement) {
+      if (cur !== el && cur.id) { parts.unshift("#" + CSS.escape(cur.id)); const sel = parts.join(" > "); if (unique(sel)) return sel; break; }
+      let part = cur.tagName.toLowerCase();
+      const same = cur.parentElement ? [...cur.parentElement.children].filter((c) => c.tagName === cur.tagName) : [];
+      if (same.length > 1) part += `:nth-of-type(${same.indexOf(cur) + 1})`;
+      parts.unshift(part);
+      const sel = parts.join(" > ");
+      if (unique(sel)) return sel;
+    }
+    return parts.join(" > ");
+  }
+
+  function render(message, isError) {
+    $(".t").textContent = `Wire Sweep — « ${agencyName} »`;
+    const m = $(".msg");
+    m.className = "msg" + (isError ? " err" : "");
+    const actions = $(".actions");
+    actions.textContent = "";
+    const btn = (label, cls, fn, title) => { const b = document.createElement("button"); b.className = cls; b.textContent = label; if (title) b.title = title; b.addEventListener("click", fn); actions.append(b); };
+    const moveBtn = () => btn("⇅", "alt", () => $(".panel").classList.toggle("bottom"), "Déplacer ce bandeau en haut / en bas de l'écran");
+    if (step === "input") {
+      m.textContent = message || "1/2 — Cliquez sur le champ de recherche du site.";
+      btn("Annuler", "alt", cancel);
+      moveBtn();
+    } else if (step === "submit") {
+      m.textContent = message || "2/2 — Cliquez sur le bouton qui lance la recherche (loupe, « Rechercher »…).";
+      btn("Pas de bouton : utiliser Entrée", "alt", () => finish(""));
+      btn("Annuler", "alt", cancel);
+      moveBtn();
+    } else {
+      m.textContent = message;
+      btn("Fermer", "ok", stop);
+    }
+  }
+
+  function highlight(el) {
+    if (!el) { box.style.display = "none"; return; }
+    const r = el.getBoundingClientRect();
+    Object.assign(box.style, { display: "block", left: r.left - 3 + "px", top: r.top - 3 + "px", width: r.width + "px", height: r.height + "px" });
+  }
+
+  const inPanel = (e) => e.composedPath().includes(host);
+  const target = (e) => (step === "input" ? (isField(e.target) ? e.target : null) : asButton(e.target));
+
+  function onMove(e) { if (step === "done" || inPanel(e)) return; highlight(target(e)); }
+  function block(e) {
+    if (step === "done" || inPanel(e)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+  }
+  function onClick(e) {
+    if (step === "done" || inPanel(e)) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (step === "input") {
+      if (!isField(e.target)) return render("Ce n'est pas un champ de saisie : cliquez dans la zone où l'on tape la recherche.", true);
+      picked.input = selectorFor(e.target);
+      step = "submit";
+      highlight(null);
+      render();
+    } else if (step === "submit") {
+      finish(selectorFor(asButton(e.target)));
+    }
+  }
+
+  const events = [["mousemove", onMove], ["click", onClick], ["mousedown", block], ["mouseup", block], ["pointerdown", block], ["pointerup", block], ["submit", block]];
+  events.forEach(([t, fn]) => document.addEventListener(t, fn, true));
+
+  function stop() {
+    events.forEach(([t, fn]) => document.removeEventListener(t, fn, true));
+    host.remove();
+    window.__wireSweepPicker = false;
+  }
+
+  async function finish(submitSelector) {
+    picked.submit = submitSelector;
+    step = "done";
+    highlight(null);
+    events.forEach(([t, fn]) => document.removeEventListener(t, fn, true));
+    let res;
+    try { res = await chrome.runtime.sendMessage({ type: "picked", ...picked }); } catch (_) { res = null; }
+    render(res && res.ok
+      ? `✓ « ${res.name} » est prête dans Wire Sweep. Vous pouvez fermer cet onglet.`
+      : "✗ " + ((res && res.error) || "Enregistrement impossible : recommencez depuis Wire Sweep."), !(res && res.ok));
+  }
+
+  async function cancel() {
+    try { await chrome.runtime.sendMessage({ type: "pickCancel" }); } catch (_) { /* rien */ }
+    stop();
+  }
+
+  render();
+}
+
 // Exécutée DANS la page de l'agence.
 async function fillAndSubmit(q, fill) {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const find = (sel) => { try { return document.querySelector(sel); } catch (_) { return null; } };
   const deadline = Date.now() + 15000; // les sites « applications » s'affichent après coup
   let input;
-  while (!(input = document.querySelector(fill.input))) {
+  while (!(input = find(fill.input))) {
     if (Date.now() > deadline) return false;
     await sleep(250);
   }
   // Laisse au site le temps de finir de s'initialiser (ex. Bloomberg).
   const delay = Number.isFinite(fill.delay) ? fill.delay : 300;
   await sleep(delay);
-  input = document.querySelector(fill.input) || input; // le champ a pu être recréé
+  input = find(fill.input) || input; // le champ a pu être recréé
   input.focus();
   // Passe par le « setter » natif pour que React & co voient la saisie.
   const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
@@ -156,7 +381,7 @@ async function fillAndSubmit(q, fill) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
   await sleep(delay);
 
-  const button = fill.submit && document.querySelector(fill.submit);
+  const button = fill.submit && find(fill.submit);
   if (button) {
     button.click();
   } else if (input.form) {

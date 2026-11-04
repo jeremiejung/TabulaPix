@@ -34,6 +34,13 @@
 
     <h2 id="editorTitle">Ajouter une agence</h2>
     <form id="addForm" novalidate>
+      <fieldset class="mode" id="modeBox">
+        <legend>Type</legend>
+        <label><input type="radio" name="mode" value="url" checked> Adresse de recherche</label>
+        <label><input type="radio" name="mode" value="fill"> Remplir le champ de recherche du site</label>
+        <p class="help" id="fillHelp" hidden>Pour les sites dont l'adresse ne contient pas les mots-clés. Indiquez la page où se trouve le champ de recherche : le site s'ouvrira et vous montrerez à Wire Sweep le champ et le bouton. Chrome vous demandera l'autorisation pour ce site.</p>
+        <p class="help" id="fillInfo" hidden></p>
+      </fieldset>
       <fieldset class="detect">
         <legend>Détection automatique</legend>
         <p class="help">Faites une recherche sur le site, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés : l'adresse et l'encodage sont remplis pour vous.</p>
@@ -53,9 +60,9 @@
         <input id="newName" maxlength="40" autocomplete="off">
       </div>
       <div class="field">
-        <label for="newUrl">Adresse de recherche</label>
+        <label for="newUrl" id="urlLabel">Adresse de recherche</label>
         <input id="newUrl" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…">
-        <p class="help">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code> (ou <code>{q:slug}</code> si le site sépare les mots par des tirets, ex. <code>emmanuel-macron</code>). Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
+        <p class="help" id="urlHelp">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code> (ou <code>{q:slug}</code> si le site sépare les mots par des tirets, ex. <code>emmanuel-macron</code>). Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
       </div>
       <details id="advanced">
         <summary>Encodage avancé</summary>

@@ -67,15 +67,30 @@ function checkSpec(raw, { allowOptions = false } = {}) {
   return { spec };
 }
 
+// Champ et bouton repérés sur un site (sélecteurs CSS) : copie propre, ou null.
+function cleanFill(f) {
+  if (!f || typeof f !== "object") return null;
+  const input = String(f.input || "").trim();
+  const submit = String(f.submit || "").trim();
+  if (!input || input.length > 500 || submit.length > 500) return null;
+  return submit ? { input, submit } : { input };
+}
+
 // Agence ajoutée par l'utilisateur : copie propre, ou null.
 function cleanCustomAgency(a) {
   if (!a || typeof a !== "object") return null;
   const id = String(a.id || "");
   const name = String(a.name || "").trim();
   if (!/^custom-[a-z0-9]{4,20}$/.test(id) || !name || name.length > 40) return null;
+  const fill = a.fill ? cleanFill(a.fill) : null;
+  if (a.fill && !fill) return null;
   const { spec } = checkSpec(a);
-  return spec ? { id, name, ...spec, custom: true } : null;
+  if (!spec) return null;
+  return fill ? { id, name, ...spec, fill, custom: true } : { id, name, ...spec, custom: true };
 }
+
+// Origine (pour l'autorisation Chrome) d'une agence à remplissage.
+const originPattern = (host) => `https://${host}/*`;
 
 // Nom de domaine d'une adresse (marqueurs neutralisés, options appliquées).
 function hostOf(url, options) {
