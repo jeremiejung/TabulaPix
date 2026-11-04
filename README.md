@@ -5,7 +5,7 @@ Chrome extension for photo editors: type your keywords once and search all your 
 
 ## Wire Sweep (en français)
 
-> **Branche `chrome-store`** : version destinée au Chrome Web Store. Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, agences personnalisées, sous-domaine Pixpalace. Cette branche n'est pas fusionnée dans `main`, qui reste la version d'origine.
+> **Branche `chrome-store`** : version destinée au Chrome Web Store. Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, adresses des agences (y compris l'encodage), agences personnalisées, sous-domaine Pixpalace. Cette branche n'est pas fusionnée dans `main`, qui reste la version d'origine.
 
 Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les agences, et Wire Sweep ouvre un onglet par agence avec la recherche déjà lancée. Les agences cochées sont mémorisées d'une utilisation à l'autre.
 
@@ -60,7 +60,9 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
 
 - **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez).
+- **Modifier une agence** (bouton **✎**) : change l'adresse de recherche et son encodage. Pour les agences fournies, le nom reste le même, la mention « modifiée » apparaît et **Rétablir l'original** revient à la configuration livrée. Pour Bloomberg, Abacapress et Pixpalace, l'adresse doit rester sur le même site (le remplissage automatique n'est autorisé que là).
 - **Ajouter une agence** : un nom et une adresse de recherche. Faites une recherche sur le site, copiez l'adresse de la page de résultats et remplacez vos mots-clés par `{q}` (ex. `https://www.alamy.com/search.html?qt={q}`). Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. L'adresse doit commencer par `https://`. Les agences ajoutées portent la mention « perso » et se suppriment avec ✕. Elles sont cochées d'office et se réordonnent comme les autres.
+- **Encodage avancé** (dans l'ajout ou la modification) : pour les sites qui « emballent » la recherche dans l'adresse, comme AFP news, Sipa ou Rea. Mettez `{payload}` dans l'adresse, le texte modèle contenant `{q}` dans **Modèle**, et les **étapes d'encodage** à appliquer dans l'ordre, parmi `uri`, `hex`, `gzip`, `base64`. Exemple Sipa : adresse `https://www.sipa.com/search/fr/1/0x{payload}`, modèle `{"searchbar":"{q}","folding":"0"}`, étapes `hex`.
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
 
 Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
@@ -99,7 +101,7 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 
 - Aucune collecte de données, aucun mot de passe, aucun compte.
 - Aucun appel réseau : l'extension se contente d'ouvrir des onglets (la politique de sécurité de l'extension interdit d'ailleurs toute requête : `connect-src 'none'`).
-- Seules données enregistrées : la liste des agences cochées, leur ordre, les agences masquées ou ajoutées, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
+- Seules données enregistrées : la liste des agences cochées, leur ordre, les agences masquées, modifiées ou ajoutées, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;

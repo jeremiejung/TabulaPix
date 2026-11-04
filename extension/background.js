@@ -13,12 +13,8 @@ importScripts("config.js", "shared.js"); // AGENCIES/OPTIONS : seule source des 
 const PENDING = "pendingFills";
 const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
 
-// Nom de domaine d'une agence, d'après config.js et les options
-// (marqueurs de recherche neutralisés).
-function agencyHost(agency, options) {
-  try { return new URL(applyOptions(agency.url, options).replace(/\{(q|payload)\}/g, "x")).hostname; }
-  catch (_) { return null; }
-}
+// Nom de domaine d'une agence, d'après son adresse effective et les options.
+const agencyHost = (agency, options) => hostOf(agency.url, options);
 const MAX_ATTEMPTS = 5; // ex. page de connexion ou d'erreur avant la vraie page
 
 async function getPending() {
@@ -32,8 +28,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // N'accepte que la popup / le panneau de l'extension (pas une page web, pas une autre extension).
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
   if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
-  Promise.all([loadOptions(), loadAgencies()])
-    .then(([options, agencies]) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q));
+  loadOptions()
+    .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)));
   sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
 });
 

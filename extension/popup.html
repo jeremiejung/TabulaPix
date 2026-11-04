@@ -32,18 +32,35 @@
     <p class="intro">Décochez celles que vous n'utilisez pas : elles disparaissent de la liste.</p>
     <ul id="manageList"></ul>
 
-    <h2>Ajouter une agence</h2>
-    <form id="addForm">
+    <h2 id="editorTitle">Ajouter une agence</h2>
+    <form id="addForm" novalidate>
       <div class="field">
         <label for="newName">Nom</label>
-        <input id="newName" maxlength="40" autocomplete="off" required>
+        <input id="newName" maxlength="40" autocomplete="off">
       </div>
       <div class="field">
         <label for="newUrl">Adresse de recherche</label>
-        <input id="newUrl" type="url" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…" required>
+        <input id="newUrl" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…">
         <p class="help">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code>. Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
       </div>
-      <button type="submit" class="primary">Ajouter</button>
+      <details id="advanced">
+        <summary>Encodage avancé</summary>
+        <p class="help">Pour les sites qui « emballent » la recherche dans l'adresse (comme AFP news, Sipa, Rea) : mettez <code>{payload}</code> dans l'adresse, et ici le texte modèle contenant <code>{q}</code>.</p>
+        <div class="field">
+          <label for="newPayload">Modèle (payload)</label>
+          <textarea id="newPayload" rows="3" maxlength="2000" spellcheck="false" placeholder='{"searchbar":"{q}"}'></textarea>
+        </div>
+        <div class="field">
+          <label for="newEncode">Étapes d'encodage</label>
+          <input id="newEncode" autocomplete="off" spellcheck="false" placeholder="ex. hex   ou   uri, gzip, base64, uri">
+          <p class="help">Appliquées au modèle, dans l'ordre : <code>uri</code> (encodage URL), <code>hex</code> (hexadécimal), <code>gzip</code> (compression), <code>base64</code>.</p>
+        </div>
+      </details>
+      <div class="bar">
+        <button type="submit" id="agencySubmit" class="primary">Ajouter</button>
+        <button type="button" id="resetAgency" hidden>Rétablir l'original</button>
+        <button type="button" id="cancelEdit" hidden>Annuler</button>
+      </div>
       <p id="addMsg" class="status" role="status"></p>
     </form>
 

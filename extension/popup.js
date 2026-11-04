@@ -67,13 +67,22 @@ async function renderManageList() {
       await chrome.storage.local.set({ [HIDDEN_KEY]: [...set] });
     });
     label.append(box, a.name);
-    if (a.custom) {
+    if (a.custom || a.modified) {
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = "perso";
+      tag.textContent = a.custom ? "perso" : "modifiée";
       label.append(" ", tag);
     }
     li.append(label);
+    if (a.id === editing) li.classList.add("editing");
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "edit";
+    edit.textContent = "✎";
+    edit.title = `Modifier « ${a.name} »`;
+    edit.setAttribute("aria-label", edit.title);
+    edit.addEventListener("click", () => startEdit(a));
+    li.append(edit);
     if (a.custom) {
       const del = document.createElement("button");
       del.type = "button";
@@ -85,6 +94,7 @@ async function renderManageList() {
         if (!confirm(`Supprimer l'agence « ${a.name} » ?`)) return;
         const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
         await chrome.storage.local.set({ [CUSTOM_KEY]: custom.filter((c) => c && c.id !== a.id) });
+        if (editing === a.id) endEdit();
         await renderManageList();
         flash(`« ${a.name} » supprimée.`, addMsg);
       });
@@ -118,6 +128,7 @@ function renderOptionFields(values) {
 }
 
 async function showSettings() {
+  endEdit();
   await renderManageList();
   renderOptionFields(await loadOptions());
   settingsMsg.textContent = addMsg.textContent = "";
@@ -136,22 +147,111 @@ async function showMain() {
 document.getElementById("settings").addEventListener("click", showSettings);
 document.getElementById("back").addEventListener("click", showMain);
 
+/* Éditeur d'agence : ajout, ou modification d'une agence existante */
+
+const ORIGINAL_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
+const ed = {
+  title: document.getElementById("editorTitle"),
+  name: document.getElementById("newName"),
+  url: document.getElementById("newUrl"),
+  payload: document.getElementById("newPayload"),
+  encode: document.getElementById("newEncode"),
+  advanced: document.getElementById("advanced"),
+  submit: document.getElementById("agencySubmit"),
+  reset: document.getElementById("resetAgency"),
+  cancel: document.getElementById("cancelEdit")
+};
+let editing = null; // id de l'agence en cours de modification, sinon null
+
+function startEdit(a) {
+  editing = a.id;
+  ed.title.textContent = `Modifier « ${a.name} »`;
+  ed.name.value = a.name;
+  ed.name.disabled = !a.custom; // le nom des agences intégrées ne change pas
+  ed.url.value = a.url;
+  ed.payload.value = a.payload || "";
+  ed.encode.value = (a.encode || []).join(", ");
+  ed.advanced.open = Boolean(a.payload);
+  ed.submit.textContent = "Enregistrer";
+  ed.cancel.hidden = false;
+  ed.reset.hidden = !a.modified;
+  addMsg.textContent = "";
+  renderManageList();
+  ed.title.scrollIntoView({ block: "start" });
+  ed.url.focus();
+}
+
+function endEdit() {
+  editing = null;
+  addForm.reset();
+  ed.title.textContent = "Ajouter une agence";
+  ed.name.disabled = false;
+  ed.advanced.open = false;
+  ed.submit.textContent = "Ajouter";
+  ed.cancel.hidden = ed.reset.hidden = true;
+}
+
+ed.cancel.addEventListener("click", async () => { endEdit(); await renderManageList(); });
+
+ed.reset.addEventListener("click", async () => {
+  const id = editing;
+  const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
+  delete overrides[id];
+  await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
+  endEdit();
+  await renderManageList();
+  flash(`« ${ORIGINAL_BY_ID.get(id).name} » : adresse d'origine rétablie.`, addMsg);
+});
+
 addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const id = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const agency = cleanCustomAgency({
-    id,
-    name: document.getElementById("newName").value,
-    url: document.getElementById("newUrl").value
-  });
-  if (!agency) { flash("Adresse invalide : elle doit commencer par https:// (et le nom faire 40 caractères au plus).", addMsg); return; }
+  const name = ed.name.value.trim();
+  const raw = { url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value };
+  const original = editing && ORIGINAL_BY_ID.get(editing);
+
+  // Agence intégrée : on enregistre seulement une modification de son adresse.
+  if (original) {
+    const { spec, error } = checkSpec(raw, { allowOptions: true });
+    if (error) return flash(error, addMsg);
+    const options = await loadOptions();
+    const host = hostOf(original.url, options);
+    if (original.fill && hostOf(spec.url, options) !== host) {
+      return flash(`Pour ${original.name}, l'adresse doit rester sur ${host} (remplissage automatique du champ de recherche).`, addMsg);
+    }
+    const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
+    const same = spec.url === original.url && (spec.payload || "") === (original.payload || "")
+      && (spec.encode || []).join() === (original.encode || []).join();
+    if (same) delete overrides[editing]; else overrides[editing] = spec;
+    await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
+    endEdit();
+    await renderManageList();
+    return flash(same ? `« ${original.name} » : adresse d'origine.` : `« ${original.name} » modifiée.`, addMsg);
+  }
+
+  if (!name || name.length > 40) return flash("Nom manquant (40 caractères au plus).", addMsg);
+  const { error } = checkSpec(raw);
+  if (error) return flash(error, addMsg);
   const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: DEFAULT_CHECKED });
-  if (data[CUSTOM_KEY].length >= MAX_CUSTOM) { flash(`${MAX_CUSTOM} agences personnalisées au maximum.`, addMsg); return; }
+
+  // Agence personnalisée existante : remplacée sur place.
+  if (editing) {
+    const agency = cleanCustomAgency({ id: editing, name, ...raw });
+    await chrome.storage.local.set({ [CUSTOM_KEY]: data[CUSTOM_KEY].map((c) => (c && c.id === editing ? agency : c)) });
+    endEdit();
+    await renderManageList();
+    return flash(`« ${agency.name} » modifiée.`, addMsg);
+  }
+
+  // Nouvelle agence.
+  if (data[CUSTOM_KEY].length >= MAX_CUSTOM) return flash(`${MAX_CUSTOM} agences personnalisées au maximum.`, addMsg);
+  const id = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const agency = cleanCustomAgency({ id, name, ...raw });
   await chrome.storage.local.set({
     [CUSTOM_KEY]: data[CUSTOM_KEY].concat(agency),
     [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
   });
   addForm.reset();
+  ed.advanced.open = false;
   await renderManageList();
   flash(`« ${agency.name} » ajoutée.`, addMsg);
 });
