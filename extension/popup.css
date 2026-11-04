@@ -55,7 +55,6 @@ code { font-size: 11px; }
 #detectMsg.ok { color: #2e7d32; }
 #detectMsg.err { color: var(--accent); }
 
-/* Type d'agence */
-.mode { margin: 0 0 10px; padding: 6px 10px; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 6px; }
-.mode legend { font-weight: 600; font-size: 12px; padding: 0 4px; }
-.mode label { display: flex; align-items: center; gap: 6px; padding: 2px 0; cursor: pointer; }
+/* Agence « remplir le champ » */
+.fillbox { margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.link { display: block; text-align: left; padding: 0; border: 0; background: none; color: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; opacity: .8; }

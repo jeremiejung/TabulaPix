@@ -143,5 +143,5 @@ async function detectSearchUrl(pageUrl, keywords) {
   }
 
   // 3. Rien trouvé.
-  return { error: "Mots-clés introuvables dans l'adresse. Ce site ne les y met peut-être pas (recherche enregistrée côté serveur) : il faudra coller les mots-clés à la main." };
+  return { notFound: true, error: "Mots-clés introuvables dans l'adresse : ce site ne les y met pas (recherche enregistrée côté serveur, ou page qui ne change pas d'adresse)." };
 }

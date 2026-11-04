@@ -165,25 +165,29 @@ const ed = {
 };
 let editing = null; // id de l'agence en cours de modification, sinon null
 
-/* Type d'agence : adresse de recherche, ou remplissage du champ du site */
-const modeBox = document.getElementById("modeBox");
-const modeRadios = [...document.querySelectorAll("input[name=mode]")];
+/* Type d'agence : adresse de recherche (par défaut), ou remplissage du champ
+   du site — proposé d'office quand la détection ne trouve pas les mots-clés
+   dans l'adresse. */
+const fillBox = document.getElementById("fillBox");
 const fillInfo = document.getElementById("fillInfo");
-const detectBox = document.querySelector(".detect");
-const mode = () => modeRadios.find((r) => r.checked).value;
+let fillMode = false;
+const mode = () => (fillMode ? "fill" : "url");
 
 function setMode(value) {
-  modeRadios.forEach((r) => (r.checked = r.value === value));
-  const fill = value === "fill";
-  document.getElementById("fillHelp").hidden = !fill;
-  detectBox.hidden = fill;
-  ed.advanced.hidden = fill;
-  document.getElementById("urlHelp").hidden = fill;
-  document.getElementById("urlLabel").textContent = fill ? "Adresse de la page avec le champ de recherche" : "Adresse de recherche";
-  ed.url.placeholder = fill ? "https://…" : "https://…{q}…";
-  ed.submit.textContent = fill ? "Repérer sur le site…" : (editing ? "Enregistrer" : "Ajouter");
+  fillMode = value === "fill";
+  fillBox.hidden = !fillMode;
+  ed.advanced.hidden = fillMode;
+  document.getElementById("urlHelp").hidden = fillMode;
+  document.getElementById("urlLabel").textContent = fillMode ? "Page avec le champ de recherche" : "Adresse de recherche";
+  ed.url.placeholder = fillMode ? "https://…" : "https://…{q}…";
+  ed.submit.textContent = fillMode ? "Repérer sur le site…" : (editing ? "Enregistrer" : "Ajouter");
 }
-modeRadios.forEach((r) => r.addEventListener("change", () => setMode(mode())));
+
+document.getElementById("backToUrl").addEventListener("click", () => {
+  setMode("url");
+  fillInfo.hidden = true;
+  ed.url.focus();
+});
 
 // Retire l'autorisation d'un site quand plus aucune agence ajoutée ne le remplit
 // (jamais pour les sites des agences intégrées, autorisés d'office).
@@ -205,7 +209,6 @@ function startEdit(a) {
   ed.advanced.open = Boolean(a.payload);
   ed.cancel.hidden = false;
   ed.reset.hidden = !a.modified;
-  modeBox.hidden = !a.custom; // les agences intégrées gardent leur type
   setMode(a.custom && a.fill ? "fill" : "url");
   fillInfo.hidden = !a.fill || !a.custom;
   if (a.fill && a.custom) fillInfo.textContent = `Repéré : champ « ${a.fill.input} »${a.fill.submit ? `, bouton « ${a.fill.submit} »` : ", touche Entrée"}. « Repérer sur le site… » pour refaire.`;
@@ -223,7 +226,6 @@ function endEdit() {
   ed.name.disabled = false;
   ed.advanced.open = false;
   ed.cancel.hidden = ed.reset.hidden = true;
-  modeBox.hidden = false;
   fillInfo.hidden = true;
   setMode("url");
 }
@@ -235,8 +237,21 @@ const detectMsg = document.getElementById("detectMsg");
 document.getElementById("detectBtn").addEventListener("click", async () => {
   const pageUrl = document.getElementById("detUrl").value;
   const r = await detectSearchUrl(pageUrl, document.getElementById("detQ").value);
+  const isBuiltin = editing && ORIGINAL_BY_ID.has(editing);
+  if (r.notFound && !isBuiltin) {
+    // Mots-clés absents de l'adresse : on remplira le champ de recherche du site.
+    setMode("fill");
+    fillInfo.hidden = true;
+    ed.url.value = pageUrl.trim();
+    if (!ed.name.value.trim()) ed.name.value = new URL(pageUrl.trim()).hostname.replace(/^(www|search|stock)\./, "");
+    detectMsg.className = "status ok";
+    detectMsg.textContent = `Les mots-clés ne figurent pas dans l'adresse : Wire Sweep remplira plutôt le champ de recherche du site.\nVérifiez le nom, puis cliquez sur « ${ed.submit.textContent} ».`;
+    return;
+  }
   detectMsg.className = "status " + (r.error ? "err" : "ok");
   if (r.error) { detectMsg.textContent = r.error; return; }
+  setMode("url");
+  fillInfo.hidden = true;
   ed.url.value = r.url;
   ed.payload.value = r.payload || "";
   ed.encode.value = (r.encode || []).join(", ");
