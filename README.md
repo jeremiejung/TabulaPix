@@ -19,6 +19,21 @@ HTML/JavaScript simple : aucune dépendance, aucune compilation.
 
 Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) via leur page d'extensions équivalente.
 
+> **Ne déplacez pas, ne renommez pas et ne supprimez pas le dossier après l'installation.** Chrome lit l'extension directement dans ce dossier : s'il change de place, l'extension ne se charge plus (elle est désactivée, avec une erreur dans `chrome://extensions`).
+> Choisissez donc un emplacement durable avant d'installer (par exemple `Documents/WireSweep`), pas le dossier Téléchargements ni le Bureau.
+> Si le dossier a été déplacé : supprimez Wire Sweep dans `chrome://extensions`, puis refaites l'étape 4 en choisissant le dossier `extension` à son nouvel emplacement. Chrome la considère alors comme une nouvelle extension : les agences cochées et leur ordre sont à refaire.
+
+### Mettre à jour une version déjà installée
+
+1. Téléchargez la nouvelle version (bouton **Code → Download ZIP**) et décompressez-la.
+2. Copiez le **contenu** de son dossier `extension` dans le dossier `extension` déjà installé, en remplaçant les fichiers existants. Gardez le même dossier, au même endroit : c'est ce qui conserve vos agences cochées et leur ordre.
+3. Dans `chrome://extensions`, cliquez sur le bouton **↻** (recharger) de la carte Wire Sweep.
+4. Si Chrome affiche un avertissement sur de nouvelles autorisations, acceptez-le : la section « Confidentialité » ci-dessous explique chacune.
+
+Si vous avez installé avec `git clone` : `git pull` dans le dossier du dépôt, puis **↻** dans `chrome://extensions`.
+
+Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les fichiers, puis reportez-les dans le nouveau `config.js`.
+
 ### Utilisation
 
 1. Cliquez sur l'icône Wire Sweep.
