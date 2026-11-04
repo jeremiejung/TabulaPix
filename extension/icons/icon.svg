@@ -6,6 +6,12 @@
     <circle cx="94" cy="94" r="28" fill="#000"/>
     <line x1="106" y1="106" x2="120" y2="120" stroke="#000" stroke-width="24" stroke-linecap="round"/>
   </mask>
+  <!-- fond blanc (intérieur du cadre + pastille de la loupe), pour rester lisible en thème sombre -->
+  <g fill="#fff">
+    <rect x="9" y="9" width="110" height="110" rx="24"/>
+    <circle cx="94" cy="94" r="28"/>
+    <line x1="106" y1="106" x2="120" y2="120" stroke="#fff" stroke-width="24" stroke-linecap="round"/>
+  </g>
   <g mask="url(#cut)" fill="none" stroke="#111111" stroke-linecap="round">
     <rect x="9" y="9" width="110" height="110" rx="24" stroke-width="11"/>
     <!-- curseur de texte (I) -->
