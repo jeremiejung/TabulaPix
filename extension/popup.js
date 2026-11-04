@@ -9,6 +9,27 @@ const msg = document.getElementById("msg");
 // mots-clés : on ouvre la page et on copie les mots-clés dans le presse-papiers.
 const isManual = (a) => !a.fill && !a.url.includes("{q}") && !a.url.includes("{payload}");
 
+/* ---------- Popup ou panneau latéral ---------- */
+
+// Le même fichier sert de popup et de panneau latéral.
+const isPopup = chrome.extension.getViews({ type: "popup" }).includes(window);
+if (!isPopup) document.documentElement.classList.add("panel");
+
+// L'identifiant de la fenêtre est lu dès l'ouverture : Chrome n'autorise
+// l'ouverture du panneau que directement dans le clic.
+let windowId = null;
+chrome.windows.getCurrent().then((w) => { windowId = w.id; });
+
+document.getElementById("pin").addEventListener("click", () => {
+  if (windowId === null || !chrome.sidePanel) {
+    msg.textContent = "Panneau latéral indisponible (Chrome 116 ou plus récent requis).";
+    return;
+  }
+  chrome.sidePanel.open({ windowId }).then(() => window.close(), () => {
+    msg.textContent = "Impossible d'ouvrir le panneau latéral.";
+  });
+});
+
 /* ---------- Construction des URL ---------- */
 
 const utf8 = (s) => new TextEncoder().encode(s);
@@ -116,6 +137,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   // se ferme dès qu'un onglet passe au premier plan.
   const jobs = selected.map((a, i) => ({ id: a.id, url: urls[i] }));
   chrome.runtime.sendMessage({ type: "sweep", jobs, q });
+  if (!isPopup) { input.select(); msg.textContent = ""; } // panneau : prêt pour la suivante
 });
 
 chrome.storage.local.get({ [STORAGE_KEY]: AGENCIES.map((a) => a.id) }, (data) => {

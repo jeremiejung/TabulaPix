@@ -28,7 +28,7 @@ async function setPending(p) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender) => {
-  // N'accepte que la popup de l'extension (pas une page web, pas une autre extension).
+  // N'accepte que la popup / le panneau de l'extension (pas une page web, pas une autre extension).
   if (sender.id !== chrome.runtime.id || sender.url !== chrome.runtime.getURL("popup.html")) return;
   if (!msg || msg.type !== "sweep" || !Array.isArray(msg.jobs) || typeof msg.q !== "string") return;
   sweep(validJobs(msg.jobs), msg.q);
