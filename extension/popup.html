@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Wire Sweep</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <form id="form">
+    <h1>Wire Sweep</h1>
+    <input id="q" type="search" placeholder="Mots-clés…" autocomplete="off" autofocus required>
+    <div class="bar">
+      <button type="button" id="all">Tout</button>
+      <button type="button" id="none">Aucune</button>
+    </div>
+    <ul id="list"></ul>
+    <button type="submit" id="go">Lancer la recherche</button>
+    <p id="msg" role="status"></p>
+  </form>
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
