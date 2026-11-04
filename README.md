@@ -44,7 +44,7 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 }
 ```
 
-Astuce pour trouver l'adresse : faites une recherche sur le site avec un mot rare (ex. `macron`), copiez l'URL de la page de résultats et remplacez le mot par `{q}`.
+Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
 
 Certains sites (AFP, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
 
