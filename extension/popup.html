@@ -34,6 +34,20 @@
 
     <h2 id="editorTitle">Ajouter une agence</h2>
     <form id="addForm" novalidate>
+      <fieldset class="detect">
+        <legend>Détection automatique</legend>
+        <p class="help">Faites une recherche sur le site, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés : l'adresse et l'encodage sont remplis pour vous.</p>
+        <div class="field">
+          <label for="detUrl">Adresse de la page de résultats</label>
+          <input id="detUrl" autocomplete="off" spellcheck="false" placeholder="https://…">
+        </div>
+        <div class="field">
+          <label for="detQ">Mots-clés cherchés</label>
+          <input id="detQ" autocomplete="off" placeholder="ex. voyage avion">
+        </div>
+        <button type="button" id="detectBtn">Détecter</button>
+        <p id="detectMsg" class="status" role="status"></p>
+      </fieldset>
       <div class="field">
         <label for="newName">Nom</label>
         <input id="newName" maxlength="40" autocomplete="off">
@@ -73,6 +87,7 @@
   </section>
   <script src="config.js"></script>
   <script src="shared.js"></script>
+  <script src="detect.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

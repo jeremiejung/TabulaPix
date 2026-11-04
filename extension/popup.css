@@ -35,7 +35,7 @@ summary { cursor: pointer; font-size: 12px; margin-bottom: 6px; }
 #manageList .edit:hover { opacity: 1; }
 #manageList li.editing { outline: 1px solid var(--accent); }
 .field input:user-invalid { border-color: var(--accent); outline-color: var(--accent); }
-.field .help { margin: 3px 0 0; font-size: 11px; opacity: .7; }
+.help { margin: 3px 0 6px; font-size: 11px; opacity: .7; }
 .primary { padding: 5px 12px; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 4px; cursor: pointer; }
 #back { margin-left: auto; padding: 2px 8px; font-size: 12px; cursor: pointer; }
 h2 { font-size: 13px; margin: 14px 0 4px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, currentColor 15%, transparent); }
@@ -46,3 +46,11 @@ h2:first-of-type { border-top: 0; padding-top: 0; }
 #manageList .del { padding: 0 6px; border: 0; background: none; color: var(--accent); font-size: 14px; cursor: pointer; }
 code { font-size: 11px; }
 .status { margin: 6px 0 0; font-size: 12px; min-height: 1em; }
+
+/* Détection automatique */
+.detect { margin: 0 0 12px; padding: 8px 10px; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 6px; }
+.detect legend { font-weight: 600; font-size: 12px; padding: 0 4px; }
+#detectBtn { padding: 4px 12px; font-weight: 600; cursor: pointer; }
+#detectMsg { white-space: pre-line; }
+#detectMsg.ok { color: #2e7d32; }
+#detectMsg.err { color: var(--accent); }

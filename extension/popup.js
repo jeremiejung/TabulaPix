@@ -184,6 +184,7 @@ function startEdit(a) {
 function endEdit() {
   editing = null;
   addForm.reset();
+  detectMsg.textContent = "";
   ed.title.textContent = "Ajouter une agence";
   ed.name.disabled = false;
   ed.advanced.open = false;
@@ -192,6 +193,23 @@ function endEdit() {
 }
 
 ed.cancel.addEventListener("click", async () => { endEdit(); await renderManageList(); });
+
+// Détection automatique : remplit adresse, modèle et encodage.
+const detectMsg = document.getElementById("detectMsg");
+document.getElementById("detectBtn").addEventListener("click", async () => {
+  const pageUrl = document.getElementById("detUrl").value;
+  const r = await detectSearchUrl(pageUrl, document.getElementById("detQ").value);
+  detectMsg.className = "status " + (r.error ? "err" : "ok");
+  if (r.error) { detectMsg.textContent = r.error; return; }
+  ed.url.value = r.url;
+  ed.payload.value = r.payload || "";
+  ed.encode.value = (r.encode || []).join(", ");
+  ed.advanced.open = Boolean(r.payload);
+  if (!ed.name.disabled && !ed.name.value.trim()) {
+    ed.name.value = new URL(pageUrl.trim()).hostname.replace(/^(www|search|stock)\./, "");
+  }
+  detectMsg.textContent = [r.summary, ...r.warnings.map((w) => "⚠ " + w), `Vérifiez, puis cliquez sur « ${ed.submit.textContent} ».`].join("\n");
+});
 
 ed.reset.addEventListener("click", async () => {
   const id = editing;
@@ -251,6 +269,7 @@ addForm.addEventListener("submit", async (e) => {
     [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
   });
   addForm.reset();
+  detectMsg.textContent = "";
   ed.advanced.open = false;
   await renderManageList();
   flash(`« ${agency.name} » ajoutée.`, addMsg);
