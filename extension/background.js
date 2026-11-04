@@ -143,13 +143,17 @@ async function fillAndSubmit(q, fill) {
     if (Date.now() > deadline) return false;
     await sleep(250);
   }
+  // Laisse au site le temps de finir de s'initialiser (ex. Bloomberg).
+  const delay = Number.isFinite(fill.delay) ? fill.delay : 300;
+  await sleep(delay);
+  input = document.querySelector(fill.input) || input; // le champ a pu être recréé
   input.focus();
   // Passe par le « setter » natif pour que React & co voient la saisie.
   const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
   Object.getOwnPropertyDescriptor(proto, "value").set.call(input, q);
   input.dispatchEvent(new Event("input", { bubbles: true }));
   input.dispatchEvent(new Event("change", { bubbles: true }));
-  await sleep(300);
+  await sleep(delay);
 
   const button = fill.submit && document.querySelector(fill.submit);
   if (button) {
