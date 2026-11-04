@@ -76,15 +76,47 @@ async function buildUrl(agency, q) {
 
 /* ---------- Interface ---------- */
 
-function render(checked) {
-  for (const a of AGENCIES) {
+const ORDER_KEY = "agencyOrder";
+const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
+
+// Ordre choisi par l'utilisateur ; les agences ajoutées depuis dans
+// config.js viennent à la fin, celles retirées sont ignorées.
+function orderedAgencies(order) {
+  const seen = new Set();
+  const out = [];
+  for (const id of order) {
+    const a = AGENCY_BY_ID.get(id);
+    if (a && !seen.has(id)) { out.push(a); seen.add(id); }
+  }
+  for (const a of AGENCIES) if (!seen.has(a.id)) out.push(a);
+  return out;
+}
+
+function render(agencies, checked) {
+  for (const a of agencies) {
     const li = document.createElement("li");
+    li.dataset.id = a.id;
+    li.draggable = true;
+    const handle = document.createElement("span");
+    handle.className = "handle";
+    handle.textContent = "⋮⋮";
+    handle.title = "Glisser pour réordonner (ou Alt + ↑ / ↓ sur la case)";
+    handle.setAttribute("aria-hidden", "true");
     const label = document.createElement("label");
     const box = document.createElement("input");
     box.type = "checkbox";
     box.value = a.id;
     box.checked = checked.includes(a.id);
     box.addEventListener("change", save);
+    box.addEventListener("keydown", (e) => {
+      if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+      e.preventDefault();
+      const other = e.key === "ArrowUp" ? li.previousElementSibling : li.nextElementSibling;
+      if (!other) return;
+      e.key === "ArrowUp" ? other.before(li) : other.after(li);
+      box.focus();
+      saveOrder();
+    });
     label.append(box, a.name);
     if (isManual(a)) {
       const hint = document.createElement("span");
@@ -93,16 +125,46 @@ function render(checked) {
       hint.title = "Mots-clés copiés dans le presse-papiers : collez-les (Ctrl/Cmd+V) dans le champ de recherche du site.";
       label.append(hint);
     }
-    li.append(label);
+    li.append(handle, label);
     list.append(li);
   }
 }
 
+/* Glisser-déposer */
+let dragged = null;
+list.addEventListener("dragstart", (e) => {
+  dragged = e.target.closest("li");
+  if (!dragged) return;
+  dragged.classList.add("dragging");
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", dragged.dataset.id);
+});
+list.addEventListener("dragover", (e) => {
+  if (!dragged) return;
+  e.preventDefault();
+  const over = e.target.closest("li");
+  if (!over || over === dragged) return;
+  const box = over.getBoundingClientRect();
+  e.clientY < box.top + box.height / 2 ? over.before(dragged) : over.after(dragged);
+});
+list.addEventListener("drop", (e) => e.preventDefault());
+list.addEventListener("dragend", () => {
+  if (!dragged) return;
+  dragged.classList.remove("dragging");
+  dragged = null;
+  saveOrder();
+});
+
+// Cases et ordre sont lus dans la liste affichée.
 const boxes = () => Array.from(list.querySelectorAll("input[type=checkbox]"));
 const checkedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);
 
 function save() {
   chrome.storage.local.set({ [STORAGE_KEY]: checkedIds() });
+}
+
+function saveOrder() {
+  chrome.storage.local.set({ [ORDER_KEY]: boxes().map((b) => b.value) });
 }
 
 function setAll(state) {
@@ -120,7 +182,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   if (!q) return input.focus();
   if (!ids.length) { msg.textContent = "Cochez au moins une agence."; return; }
 
-  const selected = AGENCIES.filter((a) => ids.includes(a.id));
+  const selected = ids.map((id) => AGENCY_BY_ID.get(id)); // dans l'ordre affiché
   let urls;
   try {
     urls = await Promise.all(selected.map((a) => buildUrl(a, q)));
@@ -140,6 +202,6 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   if (!isPopup) { input.select(); msg.textContent = ""; } // panneau : prêt pour la suivante
 });
 
-chrome.storage.local.get({ [STORAGE_KEY]: AGENCIES.map((a) => a.id) }, (data) => {
-  render(data[STORAGE_KEY]);
+chrome.storage.local.get({ [STORAGE_KEY]: AGENCIES.map((a) => a.id), [ORDER_KEY]: [] }, (data) => {
+  render(orderedAgencies(data[ORDER_KEY]), data[STORAGE_KEY]);
 });

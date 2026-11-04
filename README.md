@@ -23,6 +23,7 @@ Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) 
 
 1. Cliquez sur l'icône Wire Sweep.
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
+   Pour changer l'ordre des agences, faites-les glisser par la poignée **⋮⋮** à gauche (ou, au clavier, **Alt + ↑ / ↓** sur une case). L'ordre est mémorisé et les onglets s'ouvrent dans cet ordre.
 3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
    Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus.
 
@@ -62,7 +63,7 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 
 - Aucune collecte de données, aucun mot de passe, aucun compte.
 - Aucun appel réseau : l'extension se contente d'ouvrir des onglets (la politique de sécurité de l'extension interdit d'ailleurs toute requête : `connect-src 'none'`).
-- Seule donnée enregistrée : la liste des agences cochées, stockée localement dans Chrome (`chrome.storage.local`). Les mots-clés ne sont pas conservés.
+- Seules données enregistrées : la liste des agences cochées et leur ordre, stockées localement dans Chrome (`chrome.storage.local`). Les mots-clés ne sont pas conservés.
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
