@@ -114,7 +114,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
 
   // L'ouverture des onglets est confiée au script d'arrière-plan : la popup
   // se ferme dès qu'un onglet passe au premier plan.
-  const jobs = selected.map((a, i) => ({ url: urls[i], fill: a.fill || null }));
+  const jobs = selected.map((a, i) => ({ id: a.id, url: urls[i] }));
   chrome.runtime.sendMessage({ type: "sweep", jobs, q });
 });
 
