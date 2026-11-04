@@ -31,9 +31,65 @@ document.getElementById("pin").addEventListener("click", () => {
   });
 });
 
-document.getElementById("settings").addEventListener("click", () => {
-  chrome.runtime.openOptionsPage();
-  if (isPopup) window.close();
+/* ---------- Vue Options (dans la popup / le panneau) ---------- */
+
+const mainForm = document.getElementById("form");
+const settingsForm = document.getElementById("settingsForm");
+const fields = document.getElementById("fields");
+const settingsMsg = document.getElementById("settingsMsg");
+
+async function showSettings() {
+  const values = await loadOptions();
+  fields.textContent = "";
+  for (const o of OPTIONS) {
+    const div = document.createElement("div");
+    div.className = "field";
+    const label = document.createElement("label");
+    label.htmlFor = "opt-" + o.id;
+    label.textContent = o.label;
+    const field = document.createElement("input");
+    field.id = "opt-" + o.id;
+    field.autocomplete = "off";
+    field.spellcheck = false;
+    field.value = values[o.id] ?? o.default;
+    field.placeholder = o.default;
+    field.pattern = o.pattern.replace(/^\^|\$$/g, ""); // l'attribut HTML ajoute ^…$ lui-même
+    const help = document.createElement("p");
+    help.className = "help";
+    help.textContent = o.help;
+    div.append(label, field, help);
+    fields.append(div);
+  }
+  settingsMsg.textContent = "";
+  mainForm.hidden = true;
+  settingsForm.hidden = false;
+  fields.querySelector("input")?.focus();
+}
+
+function showMain() {
+  settingsForm.hidden = true;
+  mainForm.hidden = false;
+  input.focus();
+}
+
+document.getElementById("settings").addEventListener("click", showSettings);
+document.getElementById("back").addEventListener("click", showMain);
+
+settingsForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const values = {};
+  for (const o of OPTIONS) {
+    const v = document.getElementById("opt-" + o.id).value.trim();
+    if (v !== "" && !new RegExp(o.pattern).test(v)) {
+      settingsMsg.textContent = `Valeur invalide pour « ${o.label} ».`;
+      return;
+    }
+    values[o.id] = v;
+  }
+  await chrome.storage.local.set({ [OPTIONS_KEY]: values });
+  showMain();
+  msg.textContent = "Options enregistrées.";
+  setTimeout(() => { if (msg.textContent === "Options enregistrées.") msg.textContent = ""; }, 2500);
 });
 
 /* ---------- Construction des URL ---------- */

@@ -12,7 +12,7 @@
  *              {q}        → les mots-clés, encodés pour une URL (cas le plus courant)
  *              {payload}  → le résultat du champ « payload » ci-dessous
  *              {opt:xxx}  → la valeur de l'option « xxx » (voir OPTIONS en bas
- *                           du fichier), réglable par chacun dans la page Options
+ *                           du fichier), réglable par chacun via le bouton ⚙
  *            Sans {q} ni {payload} (et sans « fill »), la page est simplement
  *            ouverte et les mots-clés sont copiés dans le presse-papiers.
  *
@@ -69,12 +69,12 @@ const AGENCIES = [
   {
     id: "getty-creative",
     name: "Getty Creative",
-    url: "https://www.gettyimages.fr/search/2/image-film?{opt:gettyAgreement}family=creative&phrase={q}&sort=best&phraseprocessing=default&excludenudity=false&suppressfamilycorrection=true"
+    url: "https://www.gettyimages.fr/search/2/image-film?family=creative&phrase={q}&sort=best&phraseprocessing=default&excludenudity=false&suppressfamilycorrection=true"
   },
   {
     id: "getty-actu",
     name: "Getty Actu",
-    url: "https://www.gettyimages.fr/search/2/image?{opt:gettyAgreement}family=editorial&phrase={q}&sort=best&phraseprocessing=default&groupbyevent=false"
+    url: "https://www.gettyimages.fr/search/2/image?family=editorial&phrase={q}&sort=best&phraseprocessing=default&groupbyevent=false"
   },
   {
     id: "shutterstock",
@@ -122,7 +122,7 @@ const AGENCIES = [
 ];
 
 /*
- * Options réglables par chaque utilisateur (page Options de l'extension),
+ * Options réglables par chaque utilisateur (bouton ⚙ de la popup),
  * pour les valeurs propres à une rédaction. Elles s'insèrent dans les
  * adresses ci-dessus avec {opt:id}.
  *   id        nom utilisé dans {opt:id}
@@ -130,8 +130,6 @@ const AGENCIES = [
  *   help      explication affichée sous le champ
  *   default   valeur par défaut
  *   pattern   valeurs autorisées (expression régulière) ; sinon : défaut
- *   template  (facultatif) texte inséré quand l'option est remplie,
- *             {value} y est remplacé par la valeur ; option vide → rien
  */
 const OPTIONS = [
   {
@@ -140,13 +138,5 @@ const OPTIONS = [
     help: "La partie avant « .pixpalace.com » dans l'adresse de votre espace Pixpalace (ex. « www » ou le nom de votre rédaction).",
     default: "www",
     pattern: "^[a-z0-9]([a-z0-9\\-]{0,61}[a-z0-9])?$"
-  },
-  {
-    id: "gettyAgreement",
-    label: "Numéro d'accord Getty (facultatif)",
-    help: "Pour ne voir que les images couvertes par l'accord de votre rédaction : le nombre qui suit « pa%3A » (ou « pa: ») dans vos adresses Getty. Laisser vide pour tout voir.",
-    default: "",
-    pattern: "^[0-9]{1,12}$",
-    template: "agreements=pa%3A{value}&"
   }
 ];
