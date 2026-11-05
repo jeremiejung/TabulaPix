@@ -134,15 +134,13 @@ On agency sites the extension is allowed to access, injects a small function tha
 Lets the user keep TabulaPix open in Chrome's side panel ("Keep open" button) to chain several searches.
 ```
 
-**Autorisations d'hôte** (*Host permissions*) — `https://mercury.bloomberg.com/*`, `https://search.abacapress.com/*`, `https://*.pixpalace.com/*`
+**Justification de l'autorisation d'accès à l'hôte** (une seule boîte pour les deux groupes ; 722 caractères sur 1000)
 
 ```text
+https://mercury.bloomberg.com/*, https://search.abacapress.com/*, https://*.pixpalace.com/*
 These three built-in agencies do not accept the search in their URL, so TabulaPix types the keywords into their search field and clicks their search button (see "scripting"). Pixpalace uses a wildcard because each newsroom has its own subdomain (set by the user). Used only on these sites, only after the user launches a search.
-```
 
-**Autorisations d'hôte facultatives** (*Optional host permissions*) — `https://*/*`
-
-```text
+https://*/*
 Never requested at install. Requested at runtime, for one single site at a time, only when the user adds a custom agency whose search must be typed into the site's search field; Chrome shows its permission prompt for that site. The permission is removed when the user deletes that agency.
 ```
 
@@ -180,22 +178,13 @@ https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md
 
 ## 4. Instructions pour l'examen (*Test instructions*)
 
-À coller dans le champ prévu pour l'équipe d'examen (aucun identifiant n'est nécessaire) :
+À coller dans le champ prévu pour l'équipe d'examen (500 caractères au plus ; ce texte en fait 482) :
 
 ```text
-TabulaPix needs no account by itself. Most built-in agencies require a professional subscription, so here is how to test with public sites only:
-
-1. Search: click the TabulaPix icon, type "Estonia border", click "None", tick Getty Creative, Shutterstock and Adobe Stock (public sites), click "Search". One tab per agency opens in the background with the results; you stay on your current tab. Searching again reuses those tabs.
-
-2. Side panel: click "Keep open ⇥" in the popup.
-
-3. Add an agency from a URL: click the gear icon. On https://www.alamy.com search for "estonia border", copy the results page address, paste it in "Results page" with the keywords "estonia border", click "Detect", then "Try" (a test tab opens), then "Add the agency".
-
-4. Add an agency by filling its search field (uses the optional host permission): in "Results page" paste https://www.alamy.com/ (an address without the keywords) with the keywords "estonia border" and click "Detect": the form switches to field filling. Click "Locate the field on the site", accept Chrome's permission prompt for that site, then on the page click the search box and the search button. Back in TabulaPix, click "Add the agency". Deleting the agency (✕) removes the permission.
-
-5. Language: Settings → Language (Automatic / Français / English).
-
-The extension makes no network requests (connect-src 'none') and collects no data.
+No account needed; most agencies need a subscription, so test with public sites:
+1. Type "Estonia border", click None, tick Getty Creative, Shutterstock, Adobe Stock, click Search: one tab per agency opens.
+2. Gear icon: paste an alamy.com results URL and its keywords, click Detect, then Add the agency.
+3. Paste https://www.alamy.com/ with "estonia border", click Detect, then "Locate the field on the site", accept Chrome's prompt, click the search box then its button, then Add.
 ```
 
 ---
