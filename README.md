@@ -130,3 +130,11 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 - Repérage d'un champ sur un site ajouté : le bandeau n'est affiché que dans l'onglet ouvert pour ce repérage ; le résultat n'est accepté que de cet onglet, sur ce site, et ne contient que l'emplacement du champ et du bouton (aucun contenu de la page n'est lu ni conservé).
 - Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
 - Mises à jour : l'extension ne se met jamais à jour toute seule. Ne remplacez le dossier que par une version venant de ce dépôt, et protégez le compte GitHub par la double authentification.
+
+### Licence
+
+TabulaPix est distribué sous **licence MIT** (voir le fichier [`LICENSE`](LICENSE)) : vous pouvez l'utiliser, le modifier et le partager librement, à condition de conserver la mention de l'auteur et de la licence. Le logiciel est fourni « tel quel », sans garantie.
+
+TabulaPix est un outil indépendant, sans lien avec les agences citées. Les noms AFP, Reuters, Getty Images, Sipa, Shutterstock, Adobe Stock, Abacapress, Rea, Pixpalace, MaxPPP, Bloomberg et les autres sont des marques de leurs propriétaires respectifs.
+
+*License: MIT — see [`LICENSE`](LICENSE). TabulaPix is an independent tool, not affiliated with the agencies mentioned; their names are trademarks of their respective owners.*
