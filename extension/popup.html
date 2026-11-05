@@ -105,20 +105,23 @@
 
     <h2 data-i18n="opt.settings">Réglages</h2>
     <form id="settingsForm">
-      <div class="field">
-        <label for="langSelect" data-i18n="opt.lang">Langue</label>
-        <select id="langSelect">
-          <option value="auto" data-i18n="opt.lang.auto">Automatique (langue du navigateur)</option>
-          <option value="fr">Français</option>
-          <option value="en">English</option>
-        </select>
-      </div>
       <div id="fields"></div>
       <button type="submit" id="save" class="primary" data-i18n="opt.save">Enregistrer</button>
     </form>
+    <div class="field lang">
+      <label for="langSelect" data-i18n="opt.lang">Langue</label>
+      <select id="langSelect">
+        <option value="auto" data-i18n="opt.lang.auto">Automatique (langue du navigateur)</option>
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+      </select>
+    </div>
     <p id="settingsMsg" class="status" role="status"></p>
   </section>
-  <footer class="credit">Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/" target="_blank" rel="noopener">Jérémie</a>.</footer>
+  <footer class="credit">
+    <p>Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/" target="_blank" rel="noopener">Jérémie</a>.</p>
+    <p><a href="https://github.com/jeremiejung/TabulaPix" target="_blank" rel="noopener" data-i18n="footer.source">Code source sur GitHub</a></p>
+  </footer>
 
   <script src="config.js"></script>
   <script src="i18n.js"></script>
