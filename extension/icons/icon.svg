@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <!-- Wire Sweep : cadre arrondi, curseur de texte, loupe en bas à droite -->
+  <!-- TabulaPix : cadre arrondi, curseur de texte, loupe en bas à droite -->
   <mask id="cut">
     <rect width="128" height="128" fill="#fff"/>
     <!-- marge transparente autour de la loupe -->

@@ -1,9 +1,9 @@
 /*
- * Wire Sweep — configuration des agences
+ * TabulaPix — configuration des agences
  * ======================================
  *
  * Pour ajouter, retirer ou modifier une agence, éditez uniquement ce fichier,
- * puis rechargez l'extension (chrome://extensions → bouton ↻ de Wire Sweep).
+ * puis rechargez l'extension (chrome://extensions → bouton ↻ de TabulaPix).
  *
  * Champs d'une agence :
  *   id       identifiant unique, sans espace (sert à mémoriser la case cochée)

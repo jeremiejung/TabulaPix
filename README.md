@@ -1,13 +1,16 @@
-# wireSweep
-Chrome extension for photo editors: type your keywords once and search all your news picture agencies at the same time (AFP, Reuters, Getty, Sipa, Abaca, MaxPPP, PixPalace…). Opens one tab per agency with results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored.
+# TabulaPix
+
+**Une recherche, toutes vos agences photo.** — *One search, all your picture agencies.*
+
+Chrome extension for photo editors: type your keywords once and search all your news picture agencies at the same time (AFP, Reuters, Getty, Sipa, Abaca, MaxPPP, PixPalace…). TabulaPix opens one tab per agency with results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored.
 
 ---
 
-## Wire Sweep (en français)
+## TabulaPix (en français)
 
 > Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, adresses des agences (y compris l'encodage), agences personnalisées avec détection automatique, sous-domaine Pixpalace.
 
-Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les agences, et Wire Sweep ouvre un onglet par agence avec la recherche déjà lancée. Les agences cochées sont mémorisées d'une utilisation à l'autre.
+Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les agences, et TabulaPix ouvre un onglet par agence avec la recherche déjà lancée. Les agences cochées sont mémorisées d'une utilisation à l'autre.
 
 HTML/JavaScript simple : aucune dépendance, aucune compilation.
 
@@ -17,20 +20,20 @@ HTML/JavaScript simple : aucune dépendance, aucune compilation.
 2. Dans Chrome, ouvrez `chrome://extensions`.
 3. Activez le **Mode développeur** (interrupteur en haut à droite).
 4. Cliquez sur **Charger l'extension non empaquetée** et choisissez le dossier `extension` du dépôt.
-5. Épinglez l'extension : icône puzzle 🧩 dans la barre d'outils → épingle à côté de **Wire Sweep**.
+5. Épinglez l'extension : icône puzzle 🧩 dans la barre d'outils → épingle à côté de **TabulaPix**.
 6. Réglez vos **options** (bouton ⚙ de la popup) : notamment le sous-domaine de votre espace Pixpalace (voir « Options » ci-dessous).
 
 Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) via leur page d'extensions équivalente.
 
 > **Ne déplacez pas, ne renommez pas et ne supprimez pas le dossier après l'installation.** Chrome lit l'extension directement dans ce dossier : s'il change de place, l'extension ne se charge plus (elle est désactivée, avec une erreur dans `chrome://extensions`).
-> Choisissez donc un emplacement durable avant d'installer (par exemple `Documents/WireSweep`), pas le dossier Téléchargements ni le Bureau.
-> Si le dossier a été déplacé : supprimez Wire Sweep dans `chrome://extensions`, puis refaites l'étape 4 en choisissant le dossier `extension` à son nouvel emplacement. Chrome la considère alors comme une nouvelle extension : les agences cochées et leur ordre sont à refaire.
+> Choisissez donc un emplacement durable avant d'installer (par exemple `Documents/TabulaPix`), pas le dossier Téléchargements ni le Bureau.
+> Si le dossier a été déplacé : supprimez TabulaPix dans `chrome://extensions`, puis refaites l'étape 4 en choisissant le dossier `extension` à son nouvel emplacement. Chrome la considère alors comme une nouvelle extension : les agences cochées et leur ordre sont à refaire.
 
 ### Mettre à jour une version déjà installée
 
 1. Téléchargez la nouvelle version (bouton **Code → Download ZIP**) et décompressez-la.
 2. Copiez le **contenu** de son dossier `extension` dans le dossier `extension` déjà installé, en remplaçant les fichiers existants. Gardez le même dossier, au même endroit : c'est ce qui conserve vos agences cochées et leur ordre.
-3. Dans `chrome://extensions`, cliquez sur le bouton **↻** (recharger) de la carte Wire Sweep.
+3. Dans `chrome://extensions`, cliquez sur le bouton **↻** (recharger) de la carte TabulaPix.
 4. Si Chrome affiche un avertissement sur de nouvelles autorisations, acceptez-le : la section « Confidentialité » ci-dessous explique chacune.
 
 Si vous avez installé avec `git clone` : `git pull` dans le dossier du dépôt, puis **↻** dans `chrome://extensions`.
@@ -39,7 +42,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 
 ### Utilisation
 
-1. Cliquez sur l'icône Wire Sweep.
+1. Cliquez sur l'icône TabulaPix.
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
    Pour changer l'ordre des agences, faites-les glisser par la poignée **⋮⋮** à gauche (ou, au clavier, **Alt + ↑ / ↓** sur une case). L'ordre est mémorisé et les onglets s'ouvrent dans cet ordre.
 3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
@@ -47,7 +50,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
    Les derniers mots-clés lancés sont réaffichés (déjà sélectionnés) à la prochaine ouverture : tapez directement pour les remplacer.
    Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus.
 
-**Garder ouvert :** le bouton **Garder ouvert ⇥** en haut de la popup affiche Wire Sweep dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
+**Garder ouvert :** le bouton **Garder ouvert ⇥** en haut de la popup affiche TabulaPix dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
 
 Pour **Bloomberg, Abacapress et Pixpalace**, l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus).
 
@@ -67,10 +70,10 @@ Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages d
 - **Ajouter une agence** : un nom et une adresse de recherche. Faites une recherche sur le site, copiez l'adresse de la page de résultats et remplacez vos mots-clés par `{q}` (ex. `https://www.alamy.com/search.html?qt={q}`). Si le site sépare les mots par des tirets (`…/photos/estonie-frontiere`), utilisez `{q:slug}` à la place : « Estonie frontière » devient `Estonie-fronti%C3%A8re` (soit `Estonie-frontière`). Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. L'adresse doit commencer par `https://`. Les agences ajoutées portent la mention « perso » et se suppriment avec ✕. Elles sont cochées d'office et se réordonnent comme les autres.
 - **Remplir le champ de recherche du site** (proposé par la détection quand l'adresse ne contient pas les mots-clés) : après **Repérer sur le site…** :
   1. Chrome demande l'autorisation d'accéder à ce site (et à lui seul) ;
-  2. le site s'ouvre avec un bandeau Wire Sweep : cliquez sur le champ de recherche, puis sur le bouton qui lance la recherche (ou « Pas de bouton : utiliser Entrée ») ; le bouton **⇅** déplace le bandeau s'il cache le champ ;
-  3. l'agence est enregistrée (mention « perso · champ ») : à chaque recherche, Wire Sweep ouvre la page, tape les mots-clés et clique sur le bouton, comme pour Bloomberg ou Abacapress.
+  2. le site s'ouvre avec un bandeau TabulaPix : cliquez sur le champ de recherche, puis sur le bouton qui lance la recherche (ou « Pas de bouton : utiliser Entrée ») ; le bouton **⇅** déplace le bandeau s'il cache le champ ;
+  3. l'agence est enregistrée (mention « perso · champ ») : à chaque recherche, TabulaPix ouvre la page, tape les mots-clés et clique sur le bouton, comme pour Bloomberg ou Abacapress.
 
-  Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, Wire Sweep utilise le premier visible et le bouton le plus proche du champ.
+  Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, TabulaPix utilise le premier visible et le bouton le plus proche du champ.
 
   Si le site change sa page, il suffit de refaire le repérage (✎ puis **Repérer sur le site…**). Supprimer l'agence retire aussi l'autorisation donnée pour son site.
 - **Encodage avancé** (dans l'ajout ou la modification) : pour les sites qui « emballent » la recherche dans l'adresse, comme AFP news, Sipa ou Rea. Mettez `{payload}` dans l'adresse, le texte modèle contenant `{q}` dans **Modèle**, et les **étapes d'encodage** à appliquer dans l'ordre, parmi `uri`, `hex`, `gzip`, `base64`. Exemple Sipa : adresse `https://www.sipa.com/search/fr/1/0x{payload}`, modèle `{"searchbar":"{q}","folding":"0"}`, étapes `hex`.
@@ -102,7 +105,7 @@ Certains sites (AFP news, Sipa, Rea) « emballent » la recherche dans l'URL (he
 
 Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Pour un nouveau site de ce type, ajoutez aussi son domaine dans `host_permissions` du fichier `extension/manifest.json`.
 
-Après toute modification : `chrome://extensions` → bouton **↻** (recharger) sur Wire Sweep.
+Après toute modification : `chrome://extensions` → bouton **↻** (recharger) sur TabulaPix.
 
 ### Icône
 
@@ -116,7 +119,7 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
   - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
-  - `sidePanel` : afficher Wire Sweep dans la colonne de droite.
+  - `sidePanel` : afficher TabulaPix dans la colonne de droite.
   - `tabs` : voir les adresses des onglets ouverts, pour réutiliser celui d'une agence déjà ouverte au lieu d'en ouvrir un nouveau. Rien n'est enregistré ni transmis. Chrome affiche pour cela l'avertissement « Lire votre historique de navigation ».
   - accès à un site supplémentaire, demandé au cas par cas (fenêtre de Chrome) uniquement quand vous ajoutez une agence de type « Remplir le champ de recherche du site », et retiré quand vous la supprimez ;
   - `scripting` + accès à `mercury.bloomberg.com`, `search.abacapress.com` et `*.pixpalace.com` : uniquement pour taper les mots-clés dans le champ de recherche de ces trois sites et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages. Chrome affichera pour cela un avertissement « lire et modifier vos données sur ces sites ».
