@@ -43,7 +43,7 @@
         </div>
         <div class="field">
           <label for="detQ">Mots-clés cherchés</label>
-          <input id="detQ" autocomplete="off" placeholder="ex. voyage avion">
+          <input id="detQ" autocomplete="off" placeholder="ex. Estonie frontière">
         </div>
         <button type="button" id="detectBtn">Détecter</button>
         <p id="detectMsg" class="status" role="status"></p>
@@ -60,7 +60,7 @@
       <div class="field">
         <label for="newUrl" id="urlLabel">Adresse de recherche</label>
         <input id="newUrl" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…">
-        <p class="help" id="urlHelp">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code> (ou <code>{q:slug}</code> si le site sépare les mots par des tirets, ex. <code>emmanuel-macron</code>). Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
+        <p class="help" id="urlHelp">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code> (ou <code>{q:slug}</code> si le site sépare les mots par des tirets, ex. <code>estonie-frontière</code>). Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
       </div>
       <details id="advanced">
         <summary>Encodage avancé</summary>
@@ -90,6 +90,8 @@
     </form>
     <p id="settingsMsg" class="status" role="status"></p>
   </section>
+  <footer class="credit">Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/" target="_blank" rel="noopener">Jérémie</a>.</footer>
+
   <script src="config.js"></script>
   <script src="shared.js"></script>
   <script src="detect.js"></script>

@@ -401,7 +401,7 @@ async function applySteps(text, steps) {
 }
 
 async function buildUrl(agency, q, options) {
-  // {q:slug} : mots séparés par des tirets (ex. « emmanuel-macron »).
+  // {q:slug} : mots séparés par des tirets (ex. « estonie-frontière »).
   const slug = q.split(/\s+/).filter(Boolean).map(encodeURIComponent).join("-");
   let url = applyOptions(agency.url, options).split("{q:slug}").join(slug).split("{q}").join(encodeURIComponent(q));
   if (url.includes("{payload}")) {

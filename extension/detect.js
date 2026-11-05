@@ -106,7 +106,7 @@ async function detectSearchUrl(pageUrl, keywords) {
     }
   }
 
-  // 1 bis. Mots séparés par des tirets (« emmanuel-macron »), si plusieurs mots.
+  // 1 bis. Mots séparés par des tirets (« estonie-frontière »), si plusieurs mots.
   const words = q.split(/\s+/).filter(Boolean);
   if (words.length > 1) {
     const re = new RegExp(words.map((w) => escapeRe(encodeURIComponent(w))).join("-"), "gi");
