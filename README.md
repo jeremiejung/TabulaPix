@@ -131,6 +131,10 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 - Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
 - Mises à jour : l'extension ne se met jamais à jour toute seule. Ne remplacez le dossier que par une version venant de ce dépôt, et protégez le compte GitHub par la double authentification.
 
+### Chrome Web Store
+
+Les éléments de la fiche (descriptions, justifications des autorisations, instructions pour l'examen) sont dans [`store/fiche-chrome-web-store.md`](store/fiche-chrome-web-store.md), les captures d'écran et la tuile promotionnelle dans [`store/images/`](store/images/), et la politique de confidentialité dans [`PRIVACY.md`](PRIVACY.md).
+
 ### Licence
 
 TabulaPix est distribué sous **licence MIT** (voir le fichier [`LICENSE`](LICENSE)) : vous pouvez l'utiliser, le modifier et le partager librement, à condition de conserver la mention de l'auteur et de la licence. Le logiciel est fourni « tel quel », sans garantie.
