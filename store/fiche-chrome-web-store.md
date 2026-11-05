@@ -81,8 +81,10 @@ Source code: https://github.com/jeremiejung/TabulaPix
 | Catégorie | Productivité (*Productivity*) — ou Outils (*Tools*) |
 | Langue principale | Français (ajoutez l'anglais comme seconde langue de la fiche) |
 | Icône du Store (128 × 128) | `extension/icons/icon-128.png` |
+| Format des images | Toutes en PNG 24 bits sans transparence, comme exigé |
 | Captures d'écran (1280 × 800) | `store/images/capture-1-fr.png`, `capture-2-fr.png`, `capture-3-fr.png` — versions `-en` pour la fiche anglaise |
-| Petite tuile promotionnelle (440 × 280) | `store/images/tuile-440x280-fr.png` (ou `-en`) |
+| Petite image promotionnelle (440 × 280) | `store/images/tuile-440x280.png` (en anglais, une seule version) |
+| Image promotionnelle en haut de la page (1 400 × 560) | `store/images/banniere-1400x560.png` (en anglais) |
 | Site web officiel | https://github.com/jeremiejung/TabulaPix |
 | URL d'assistance | https://github.com/jeremiejung/TabulaPix/issues |
 
