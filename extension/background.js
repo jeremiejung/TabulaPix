@@ -193,7 +193,17 @@ chrome.tabs.onRemoved.addListener(async (tabId) => {
 const DRAFT_KEY = "fillDraft";
 const PICK_KEY = "pickSession";
 
-function cleanDraft(d) {
+function cleanDraft(d, options) {
+  // Agence fournie qui remplit un champ : repérage seulement sur son site.
+  const builtin = d && AGENCY_BY_ID.get(d.id);
+  if (builtin) {
+    if (!builtin.fill) return null;
+    let u;
+    try { u = new URL(String(d.url)); } catch (_) { return null; }
+    const host = hostOf(builtin.url, options);
+    if (u.protocol !== "https:" || u.hostname !== host) return null;
+    return { id: builtin.id, name: builtin.name, url: u.href, host };
+  }
   const agency = cleanCustomAgency({ ...(d || {}), fill: { input: "x" } });
   if (!agency) return null;
   const host = hostOf(agency.url, {});
@@ -201,7 +211,7 @@ function cleanDraft(d) {
 }
 
 async function startPick(rawDraft) {
-  const draft = cleanDraft(rawDraft);
+  const draft = cleanDraft(rawDraft, await loadOptions());
   if (!draft) return { ok: false, error: t("bg.invalidAgency") };
   if (!(await chrome.permissions.contains({ origins: [originPattern(draft.host)] }))) {
     return { ok: false, error: t("bg.permRefused") };
@@ -217,7 +227,7 @@ async function startPick(rawDraft) {
 
 chrome.permissions.onAdded.addListener(async (perms) => {
   const { [DRAFT_KEY]: draft } = await chrome.storage.session.get(DRAFT_KEY);
-  const clean = cleanDraft(draft);
+  const clean = cleanDraft(draft, await loadOptions());
   if (clean && (perms.origins || []).includes(originPattern(clean.host))) startPick(clean);
 });
 
@@ -270,7 +280,10 @@ async function tryAgency(msg) {
     if (builtin.fill) {
       const expected = hostOf(builtin.url, await loadOptions());
       if (u.hostname !== expected) return { ok: false, error: t("bg.sameHost", { host: expected }) };
-      fill = builtin.fill;
+      // Repères en cours de modification, avec le délai propre au site.
+      const picked = msg.fill ? cleanFill(msg.fill) : null;
+      if (picked) delete picked.delay;
+      fill = picked ? { ...picked, ...(builtin.fill.delay !== undefined ? { delay: builtin.fill.delay } : {}) } : builtin.fill;
     }
   } else if (msg.fill) {
     fill = cleanFill(msg.fill);

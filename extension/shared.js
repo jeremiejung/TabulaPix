@@ -112,6 +112,13 @@ function applyOverride(agency, override, options) {
   const out = { ...agency, url: spec.url, modified: true };
   delete out.payload; delete out.encode;
   if (spec.payload !== undefined) { out.payload = spec.payload; out.encode = spec.encode; }
+  // Repères refaits par l'utilisateur (agences qui remplissent un champ) ;
+  // le délai propre au site reste celui de la configuration d'origine.
+  const fill = agency.fill && override.fill ? cleanFill(override.fill) : null;
+  if (fill) {
+    delete fill.delay;
+    out.fill = agency.fill.delay !== undefined ? { ...fill, delay: agency.fill.delay } : fill;
+  }
   return out;
 }
 

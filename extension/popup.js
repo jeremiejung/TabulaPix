@@ -152,6 +152,9 @@ function renderOptionFields(values) {
   }
 }
 
+let cachedOptions = {}; // réglages en mémoire (l'autorisation doit partir directement du clic)
+loadOptions().then((o) => { cachedOptions = o; });
+
 async function showSettings() {
   if (!(await restoreDraft())) resetEditor();
   await renderManageList();
@@ -296,6 +299,7 @@ async function saveDraft() {
 function resetEditor() {
   draft = null;
   editing = null;
+  ed.step1.hidden = false;
   ed.form.reset();
   ed.detUrl.value = ed.detQ.value = "";
   ed.detectMsg.textContent = ed.step2Msg.textContent = addMsg.textContent = "";
@@ -310,7 +314,10 @@ function resetEditor() {
 
 function startEdit(a) {
   resetEditor();
-  draft = { id: a.id, editing: true, builtin: !a.custom, mode: a.custom && a.fill ? "fill" : "url", fill: a.custom ? a.fill || null : null, pageHost: hostOf(a.url, {}) };
+  draft = { id: a.id, editing: true, builtin: !a.custom, mode: a.fill ? "fill" : "url", fill: a.fill || null, pageHost: hostOf(a.url, cachedOptions) };
+  // Agence fournie qui remplit un champ : pas de détection, seulement l'adresse
+  // de la page et le repérage du champ.
+  ed.step1.hidden = Boolean(!a.custom && a.fill);
   editing = a.id;
   ed.title.textContent = t("ed.editTitle", { name: a.name });
   ed.name.value = a.name;
@@ -344,6 +351,7 @@ async function restoreDraft() {
   ed.encode.value = saved.encode || "";
   ed.submit.textContent = saved.editing ? t("ed.saveEdit") : t("ed.add");
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
+  ed.step1.hidden = Boolean(saved.builtin && saved.mode === "fill");
   setMode(saved.mode);
   if (saved.step2) showStep2(saved.step2Msg);
   await applyPickResult(data[PICK_RESULT_KEY]);
@@ -422,11 +430,13 @@ for (const el of [ed.name, ed.url, ed.payload, ed.encode]) {
 /* Repérage sur le site : autorisation Chrome, puis le script d'arrière-plan
    ouvre le site ; le résultat revient dans le brouillon (pickResult). */
 ed.pickBtn.addEventListener("click", () => {
-  const { spec, error } = checkSpec({ url: ed.url.value });
+  const builtin = draft.builtin ? ORIGINAL_BY_ID.get(draft.id) : null;
+  const { spec, error } = checkSpec({ url: ed.url.value }, { allowOptions: Boolean(builtin) });
   if (error) return flash(error, addMsg);
-  const host = hostOf(spec.url, {});
+  const pageUrl = builtin ? applyOptions(spec.url, cachedOptions) : spec.url;
+  const host = hostOf(pageUrl, {});
   draft.pageHost = host;
-  const pick = { id: draft.id, name: ed.name.value.trim() || nameFromUrl(spec.url) || host, url: spec.url };
+  const pick = { id: draft.id, name: builtin ? builtin.name : ed.name.value.trim() || nameFromUrl(pageUrl) || host, url: pageUrl };
   saveDraft();
   chrome.storage.session.set({ fillDraft: pick }); // relu si la popup se ferme pendant la demande
   // La demande d'autorisation doit partir directement du clic.
@@ -478,13 +488,17 @@ addForm.addEventListener("submit", async (e) => {
   let done;
 
   if (draft.builtin) {
-    // Agence intégrée : seulement une modification de son adresse.
+    // Agence intégrée : modification de son adresse et, pour celles qui
+    // remplissent un champ, des repères (refaits sur le site).
     const original = ORIGINAL_BY_ID.get(id);
     const { spec } = checkSpec(raw, { allowOptions: true });
     const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
+    const picked = original.fill && draft.fill ? cleanFill(draft.fill) : null;
+    if (picked) delete picked.delay;
+    const fillChanged = Boolean(picked) && (picked.input !== original.fill.input || (picked.submit || "") !== (original.fill.submit || ""));
     const same = spec.url === original.url && (spec.payload || "") === (original.payload || "")
-      && (spec.encode || []).join() === (original.encode || []).join();
-    if (same) delete overrides[id]; else overrides[id] = spec;
+      && (spec.encode || []).join() === (original.encode || []).join() && !fillChanged;
+    if (same) delete overrides[id]; else overrides[id] = fillChanged ? { ...spec, fill: picked } : spec;
     await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
     done = same ? t("ed.original", { name: original.name }) : t("ed.modified", { name: original.name });
   } else {
@@ -526,6 +540,7 @@ settingsForm.addEventListener("submit", async (e) => {
     values[o.id] = v;
   }
   await chrome.storage.local.set({ [OPTIONS_KEY]: values });
+  cachedOptions = values;
   flash(t("opt.saved"));
 });
 
