@@ -47,13 +47,25 @@ h2:first-of-type { border-top: 0; padding-top: 0; }
 code { font-size: 11px; }
 .status { margin: 6px 0 0; font-size: 12px; min-height: 1em; }
 
-/* Détection automatique */
-.detect { margin: 0 0 12px; padding: 8px 10px; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 6px; }
-.detect legend { font-weight: 600; font-size: 12px; padding: 0 4px; }
-#detectBtn { padding: 4px 12px; font-weight: 600; cursor: pointer; }
-#detectMsg { white-space: pre-line; }
-#detectMsg.ok { color: #2e7d32; }
-#detectMsg.err { color: var(--accent); }
+/* Ajout d'agence : étapes */
+#detectMsg, #step2Msg, #addMsg { white-space: pre-line; }
+#step2Msg { margin: 0 0 8px; }
+#manualLink { margin-top: 6px; }
+#addForm { margin-top: 12px; padding-top: 10px; border-top: 1px dashed color-mix(in srgb, currentColor 25%, transparent); }
+.primary:disabled { opacity: .45; cursor: default; }
+.checks { list-style: none; margin: 4px 0 8px; padding: 0; }
+.checks li { padding: 2px 4px; border-radius: 4px; }
+.checks li.done .mark { color: #2e7d32; font-weight: 700; }
+#pickBtn { padding: 4px 10px; font-weight: 600; cursor: pointer; }
+.help.small { font-size: 10px; margin-top: 4px; }
+#tryBtn { cursor: pointer; }
+
+/* Surbrillance temporaire de ce qui vient d'être détecté ou ajouté */
+@keyframes flash-ok { from { background-color: rgba(46, 125, 50, .35); } to { background-color: transparent; } }
+.flash { animation: flash-ok 1.6s ease-out; }
+@media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
+.status.ok { color: #2e7d32; }
+.status.err { color: var(--accent); }
 
 /* Agence « remplir le champ » */
 .fillbox { margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }

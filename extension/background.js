@@ -23,6 +23,19 @@ async function getPending() {
 async function setPending(p) {
   await chrome.storage.session.set({ [PENDING]: p });
 }
+// Les modifications des recherches en attente passent une par une : plusieurs
+// onglets qui finissent de charger en même temps ne s'écrasent plus.
+let pendingLock = Promise.resolve();
+function updatePending(change) {
+  const run = pendingLock.then(async () => {
+    const pending = await getPending();
+    const result = await change(pending);
+    await setPending(pending);
+    return result;
+  });
+  pendingLock = run.catch(() => {});
+  return run;
+}
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (sender.id !== chrome.runtime.id || !msg) return;
@@ -35,6 +48,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
     } else if (msg.type === "pick") {
       startPick(msg.draft).then(sendResponse);
+      return true;
+    } else if (msg.type === "try") {
+      tryAgency(msg).then(sendResponse);
       return true;
     }
     return;
@@ -88,9 +104,7 @@ async function sweep(jobs, q) {
       : await chrome.tabs.create({ url: job.url, active: false });
     if (job.fill) {
       // Enregistré tout de suite, avant que la page ait fini de charger.
-      const current = await getPending();
-      current[tab.id] = { q, id: job.id, host: job.host, attempts: 0 };
-      await setPending(current);
+      await updatePending((pending) => { pending[tab.id] = { q, id: job.id, host: job.host, fill: job.fill, attempts: 0 }; });
     }
   }
 }
@@ -112,43 +126,47 @@ function findTab(tabs, url, claimed, minScore) {
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   if (info.status !== "complete") return;
   injectPickerIfNeeded(tabId, tab);
-  const pending = await getPending();
-  const job = pending[tabId];
-  if (!job) return;
-  // Retiré avant l'injection : le clic sur « Rechercher » recharge la page.
-  delete pending[tabId];
-  await setPending(pending);
-
-  // On ne tape que si l'onglet est bien sur le site de l'agence (sinon :
-  // page de connexion, page d'erreur… on réessaiera au prochain chargement).
   let host = null;
   try { host = new URL(tab.url).hostname; } catch (_) { /* adresse illisible */ }
-  const fill = AGENCY_BY_ID.get(job.id)?.fill
+
+  // On ne tape que si l'onglet est sur le site de l'agence. Sinon (page de
+  // connexion, page d'erreur…), la recherche reste en attente du prochain
+  // chargement. Sur le bon site, elle est retirée avant de taper : le clic
+  // sur « Rechercher » recharge la page.
+  const job = await updatePending((pending) => {
+    const j = pending[tabId];
+    if (!j) return null;
+    if (host !== j.host) {
+      if (j.attempts + 1 < MAX_ATTEMPTS) pending[tabId] = { ...j, attempts: j.attempts + 1 };
+      else delete pending[tabId];
+      return null;
+    }
+    delete pending[tabId];
+    return j;
+  });
+  if (!job) return;
+
+  const fill = cleanFill(job.fill) || AGENCY_BY_ID.get(job.id)?.fill
     || (await loadAgencies()).custom.find((a) => a.id === job.id)?.fill;
   if (!fill) return;
 
   let ok = false;
-  if (host === job.host) {
-    try {
-      const [res] = await chrome.scripting.executeScript({
-        target: { tabId },
-        func: fillAndSubmit,
-        args: [job.q, fill]
-      });
-      ok = res && res.result === true;
-    } catch (_) { /* page non autorisée ou fermée */ }
-  }
+  try {
+    const [res] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: fillAndSubmit,
+      args: [job.q, fill]
+    });
+    ok = res && res.result === true;
+  } catch (_) { /* page non autorisée ou fermée */ }
 
   if (!ok && job.attempts + 1 < MAX_ATTEMPTS) {
-    const again = await getPending();
-    again[tabId] = { ...job, attempts: job.attempts + 1 };
-    await setPending(again);
+    await updatePending((pending) => { if (!pending[tabId]) pending[tabId] = { ...job, attempts: job.attempts + 1 }; });
   }
 });
 
-chrome.tabs.onRemoved.addListener(async (tabId) => {
-  const pending = await getPending();
-  if (pending[tabId]) { delete pending[tabId]; await setPending(pending); }
+chrome.tabs.onRemoved.addListener((tabId) => {
+  updatePending((pending) => { delete pending[tabId]; });
 });
 
 /* ---------- Repérage du champ et du bouton d'un site ---------- */
@@ -210,22 +228,41 @@ async function handlePicked(sender, msg) {
     await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
     return { ok: true };
   }
-  const agency = cleanCustomAgency({ ...pick.draft, fill: { input: msg.input, submit: msg.submit } });
-  if (!agency) return { ok: false, error: "Repérage invalide : recommencez." };
-  const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], checkedAgencies: null });
-  const custom = Array.isArray(data[CUSTOM_KEY]) ? data[CUSTOM_KEY] : [];
-  const exists = custom.some((c) => c && c.id === agency.id);
-  if (!exists && custom.length >= MAX_CUSTOM) return { ok: false, error: `${MAX_CUSTOM} agences personnalisées au maximum.` };
-  const update = { [CUSTOM_KEY]: exists ? custom.map((c) => (c && c.id === agency.id ? agency : c)) : custom.concat(agency) };
-  if (!exists) {
-    const checked = Array.isArray(data.checkedAgencies)
-      ? data.checkedAgencies
-      : AGENCIES.filter((a) => a.defaultChecked !== false).map((a) => a.id); // cases par défaut
-    update.checkedAgencies = checked.concat(agency.id); // cochée d'office
-  }
-  await chrome.storage.local.set(update);
+  const fill = cleanFill({ input: msg.input, submit: msg.submit });
+  if (!fill) return { ok: false, error: "Repérage invalide : recommencez." };
+  // Le résultat va dans le brouillon : l'agence n'est ajoutée qu'une fois
+  // vérifiée par l'utilisateur dans TabulaPix.
+  await chrome.storage.session.set({ pickResult: { draftId: pick.draft.id, ...fill } });
   await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
-  return { ok: true, name: agency.name };
+  // Rouvre TabulaPix sur l'étape « vérifier » (si Chrome le permet).
+  try { await chrome.action.openPopup({ windowId: sender.tab.windowId }); } catch (_) { /* l'utilisateur la rouvrira */ }
+  return { ok: true, name: pick.draft.name };
+}
+
+/* Essai : une recherche avec les réglages en cours de saisie (agence pas encore
+   enregistrée). Mêmes contrôles que pour une vraie recherche. */
+async function tryAgency(msg) {
+  const q = typeof msg.q === "string" ? msg.q.trim().slice(0, 200) : "";
+  let u;
+  try { u = new URL(msg.url); } catch (_) { return { ok: false, error: "Adresse invalide." }; }
+  if (!q || u.protocol !== "https:") return { ok: false, error: "Adresse invalide : elle doit commencer par https://" };
+  let fill = null;
+  if (msg.builtinId) {
+    const builtin = AGENCY_BY_ID.get(msg.builtinId);
+    if (!builtin) return { ok: false, error: "Agence inconnue." };
+    if (builtin.fill) {
+      if (u.hostname !== hostOf(builtin.url, await loadOptions())) return { ok: false, error: `L'adresse doit rester sur ${hostOf(builtin.url, await loadOptions())}.` };
+      fill = builtin.fill;
+    }
+  } else if (msg.fill) {
+    fill = cleanFill(msg.fill);
+    if (!fill) return { ok: false, error: "Repérage invalide." };
+    if (!(await chrome.permissions.contains({ origins: [originPattern(u.hostname)] }))) {
+      return { ok: false, error: "Autorisation manquante pour ce site : refaites le repérage." };
+    }
+  }
+  await sweep([{ id: "essai", url: u.href, host: u.hostname, fill }], q);
+  return { ok: true };
 }
 
 // Exécutée DANS la page du site : bandeau qui guide le repérage.
@@ -388,7 +425,7 @@ function pickerUI(agencyName) {
     let res;
     try { res = await chrome.runtime.sendMessage({ type: "picked", ...picked }); } catch (_) { res = null; }
     render(res && res.ok
-      ? `✓ « ${res.name} » est prête dans TabulaPix. Vous pouvez fermer cet onglet.`
+      ? `✓ Champ et bouton repérés. Revenez dans TabulaPix pour vérifier puis ajouter « ${res.name} ».`
       : "✗ " + ((res && res.error) || "Enregistrement impossible : recommencez depuis TabulaPix."), !(res && res.ok));
   }
 

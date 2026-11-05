@@ -56,6 +56,7 @@ async function renderManageList() {
   manageList.textContent = "";
   for (const a of orderedAgencies(order)) {
     const li = document.createElement("li");
+    li.dataset.id = a.id;
     const label = document.createElement("label");
     const box = document.createElement("input");
     box.type = "checkbox";
@@ -96,9 +97,9 @@ async function renderManageList() {
         const rest = custom.filter((c) => c && c.id !== a.id);
         await chrome.storage.local.set({ [CUSTOM_KEY]: rest });
         if (a.fill) releasePermission(a, rest);
-        if (editing === a.id) endEdit();
+        if (editing === a.id) resetEditor();
         await renderManageList();
-        flash(`« ${a.name} » supprimée.`, addMsg);
+        flash(`« ${a.name} » supprimée.`, listMsg);
       });
       li.append(del);
     }
@@ -130,10 +131,10 @@ function renderOptionFields(values) {
 }
 
 async function showSettings() {
-  endEdit();
+  if (!(await restoreDraft())) resetEditor();
   await renderManageList();
   renderOptionFields(await loadOptions());
-  settingsMsg.textContent = addMsg.textContent = "";
+  settingsMsg.textContent = listMsg.textContent = "";
   mainForm.hidden = true;
   settingsView.hidden = false;
   document.getElementById("back").focus();
@@ -149,45 +150,27 @@ async function showMain() {
 document.getElementById("settings").addEventListener("click", showSettings);
 document.getElementById("back").addEventListener("click", showMain);
 
-/* Éditeur d'agence : ajout, ou modification d'une agence existante */
+/* ---------- Éditeur d'agence : détecter → vérifier → ajouter ---------- */
 
 const ORIGINAL_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
+const AGENCY_DRAFT_KEY = "agencyDraft"; // brouillon en cours (mémoire de session)
+const PICK_RESULT_KEY = "pickResult";   // champ et bouton repérés sur le site
+const $id = (x) => document.getElementById(x);
 const ed = {
-  title: document.getElementById("editorTitle"),
-  name: document.getElementById("newName"),
-  url: document.getElementById("newUrl"),
-  payload: document.getElementById("newPayload"),
-  encode: document.getElementById("newEncode"),
-  advanced: document.getElementById("advanced"),
-  submit: document.getElementById("agencySubmit"),
-  reset: document.getElementById("resetAgency"),
-  cancel: document.getElementById("cancelEdit")
+  title: $id("editorTitle"), step1: $id("step1"), detUrl: $id("detUrl"), detQ: $id("detQ"),
+  detectMsg: $id("detectMsg"), manualLink: $id("manualLink"), step2Msg: $id("step2Msg"),
+  name: $id("newName"), url: $id("newUrl"), urlLabel: $id("urlLabel"), urlHelp: $id("urlHelp"),
+  fillBox: $id("fillBox"), chkField: $id("chkField"), chkButton: $id("chkButton"),
+  pickBtn: $id("pickBtn"), backToUrl: $id("backToUrl"), advanced: $id("advanced"),
+  techUrl: $id("techUrl"), techFill: $id("techFill"), payload: $id("newPayload"), encode: $id("newEncode"),
+  tryBtn: $id("tryBtn"), submit: $id("agencySubmit"), reset: $id("resetAgency"), cancel: $id("cancelEdit"),
+  form: addForm
 };
-let editing = null; // id de l'agence en cours de modification, sinon null
+const listMsg = $id("listMsg");
 
-/* Type d'agence : adresse de recherche (par défaut), ou remplissage du champ
-   du site — proposé d'office quand la détection ne trouve pas les mots-clés
-   dans l'adresse. */
-const fillBox = document.getElementById("fillBox");
-const fillInfo = document.getElementById("fillInfo");
-let fillMode = false;
-const mode = () => (fillMode ? "fill" : "url");
-
-function setMode(value) {
-  fillMode = value === "fill";
-  fillBox.hidden = !fillMode;
-  ed.advanced.hidden = fillMode;
-  document.getElementById("urlHelp").hidden = fillMode;
-  document.getElementById("urlLabel").textContent = fillMode ? "Page avec le champ de recherche" : "Adresse de recherche";
-  ed.url.placeholder = fillMode ? "https://…" : "https://…{q}…";
-  ed.submit.textContent = fillMode ? "Repérer sur le site…" : (editing ? "Enregistrer" : "Ajouter");
-}
-
-document.getElementById("backToUrl").addEventListener("click", () => {
-  setMode("url");
-  fillInfo.hidden = true;
-  ed.url.focus();
-});
+// Brouillon : { id, editing, builtin, mode: "url" | "fill", fill }
+let draft = null;
+let editing = null; // id de l'agence en cours de modification (surlignée dans la liste)
 
 // Retire l'autorisation d'un site quand plus aucune agence ajoutée ne le remplit
 // (jamais pour les sites des agences intégrées, autorisés d'office).
@@ -198,7 +181,114 @@ async function releasePermission(agency, remaining) {
   try { await chrome.permissions.remove({ origins: [originPattern(host)] }); } catch (_) { /* déjà retirée */ }
 }
 
+const newId = () => "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+// Surbrillance verte qui s'estompe, sur ce qui vient d'être rempli ou ajouté.
+function flashEl(...els) {
+  for (const el of els) {
+    if (!el) continue;
+    el.classList.remove("flash");
+    void el.offsetWidth; // relance l'animation
+    el.classList.add("flash");
+  }
+}
+
+// Nom proposé : le domaine sans sous-domaine ni extension (search.reaphoto.com → Reaphoto).
+function nameFromUrl(url) {
+  let host;
+  try { host = new URL(url).hostname; } catch (_) { return ""; }
+  const labels = host.split(".");
+  let i = labels.length - 2;
+  // extensions en deux parties : co.uk, com.au, org.uk…
+  if (labels.length >= 3 && labels[labels.length - 1].length === 2 && /^(co|com|org|net|ac|gov|edu)$/.test(labels[i])) i -= 1;
+  const base = labels[Math.max(i, 0)] || host;
+  return base.charAt(0).toUpperCase() + base.slice(1);
+}
+
+function renderChecks() {
+  const fill = draft && draft.fill;
+  const set = (li, done, label) => {
+    li.classList.toggle("done", done);
+    li.querySelector(".mark").textContent = done ? "✓" : "○";
+    li.lastChild.textContent = " " + label;
+  };
+  set(ed.chkField, Boolean(fill && fill.input), "Champ de recherche");
+  set(ed.chkButton, Boolean(fill && fill.input), fill && fill.input && !fill.submit ? "Touche Entrée (pas de bouton)" : "Bouton de recherche");
+  ed.pickBtn.textContent = fill && fill.input ? "Refaire le repérage" : "Repérer le champ sur le site";
+  ed.techFill.hidden = !(draft && draft.mode === "fill" && fill && fill.input);
+  if (fill && fill.input) ed.techFill.textContent = `Champ : ${fill.input}${fill.submit ? ` — bouton : ${fill.submit}` : " — touche Entrée"}`;
+}
+
+function setMode(mode) {
+  draft.mode = mode;
+  const fill = mode === "fill";
+  ed.fillBox.hidden = !fill;
+  ed.urlHelp.hidden = fill;
+  ed.techUrl.hidden = fill;
+  ed.urlLabel.textContent = fill ? "Page avec le champ de recherche" : "Adresse de recherche";
+  ed.url.placeholder = fill ? "https://…" : "https://…{q}…";
+  ed.backToUrl.hidden = draft.builtin;
+  renderChecks();
+  validate();
+}
+
+// Vérifie le formulaire ; active « Ajouter » seulement quand tout est bon.
+function validate() {
+  if (!draft) return "Rien à ajouter.";
+  let error = "";
+  const name = ed.name.value.trim();
+  if (!draft.builtin && (!name || name.length > 40)) error = "Indiquez un nom (40 caractères au plus).";
+  const { spec, error: specError } = checkSpec(
+    { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" },
+    { allowOptions: draft.builtin }
+  );
+  if (!error && specError) error = specError;
+  if (!error && draft.mode === "fill" && !(draft.fill && draft.fill.input)) error = "Repérez le champ de recherche sur le site.";
+  const original = draft.builtin && ORIGINAL_BY_ID.get(draft.id);
+  if (!error && original && original.fill && spec && hostOf(spec.url, {}) !== hostOf(original.url, {})) {
+    error = `Pour ${original.name}, l'adresse doit rester sur ${hostOf(original.url, {})}.`;
+  }
+  ed.submit.disabled = Boolean(error);
+  ed.tryBtn.disabled = Boolean(specError) || (draft.mode === "fill" && !(draft.fill && draft.fill.input));
+  ed.submit.title = error;
+  return error;
+}
+
+function showStep2(message) {
+  ed.form.hidden = false;
+  ed.step2Msg.textContent = message || "";
+  ed.step2Msg.hidden = !message;
+  validate();
+}
+
+async function saveDraft() {
+  if (!draft) return chrome.storage.session.remove(AGENCY_DRAFT_KEY);
+  await chrome.storage.session.set({
+    [AGENCY_DRAFT_KEY]: {
+      ...draft, name: ed.name.value, url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value,
+      detUrl: ed.detUrl.value, detQ: ed.detQ.value, step2: !ed.form.hidden, step2Msg: ed.step2Msg.textContent
+    }
+  });
+}
+
+function resetEditor() {
+  draft = null;
+  editing = null;
+  ed.form.reset();
+  ed.detUrl.value = ed.detQ.value = "";
+  ed.detectMsg.textContent = ed.step2Msg.textContent = addMsg.textContent = "";
+  ed.form.hidden = true;
+  ed.title.textContent = "Ajouter une agence";
+  ed.name.disabled = false;
+  ed.reset.hidden = true;
+  ed.advanced.open = false;
+  ed.submit.textContent = "Ajouter l'agence";
+  chrome.storage.session.remove([AGENCY_DRAFT_KEY, PICK_RESULT_KEY, "fillDraft"]);
+}
+
 function startEdit(a) {
+  resetEditor();
+  draft = { id: a.id, editing: true, builtin: !a.custom, mode: a.custom && a.fill ? "fill" : "url", fill: a.custom ? a.fill || null : null, pageHost: hostOf(a.url, {}) };
   editing = a.id;
   ed.title.textContent = `Modifier « ${a.name} »`;
   ed.name.value = a.name;
@@ -206,149 +296,200 @@ function startEdit(a) {
   ed.url.value = a.url;
   ed.payload.value = a.payload || "";
   ed.encode.value = (a.encode || []).join(", ");
-  ed.advanced.open = Boolean(a.payload);
-  ed.cancel.hidden = false;
   ed.reset.hidden = !a.modified;
-  setMode(a.custom && a.fill ? "fill" : "url");
-  fillInfo.hidden = !a.fill || !a.custom;
-  if (a.fill && a.custom) fillInfo.textContent = `Repéré : champ « ${a.fill.input} »${a.fill.submit ? `, bouton « ${a.fill.submit} »` : ", touche Entrée"}. « Repérer sur le site… » pour refaire.`;
-  addMsg.textContent = "";
+  ed.submit.textContent = "Enregistrer";
+  setMode(draft.mode);
+  showStep2("");
+  saveDraft();
   renderManageList();
   ed.title.scrollIntoView({ block: "start" });
-  ed.url.focus();
 }
 
-function endEdit() {
-  editing = null;
-  addForm.reset();
-  detectMsg.textContent = "";
-  ed.title.textContent = "Ajouter une agence";
-  ed.name.disabled = false;
-  ed.advanced.open = false;
-  ed.cancel.hidden = ed.reset.hidden = true;
-  fillInfo.hidden = true;
-  setMode("url");
+// Reprend un brouillon (ex. après le repérage sur le site, qui ferme la popup).
+async function restoreDraft() {
+  const data = await chrome.storage.session.get([AGENCY_DRAFT_KEY, PICK_RESULT_KEY]);
+  const saved = data[AGENCY_DRAFT_KEY];
+  if (!saved) return false;
+  draft = { id: saved.id, editing: saved.editing, builtin: saved.builtin, mode: saved.mode, fill: saved.fill || null, pageHost: saved.pageHost, review: saved.review };
+  editing = saved.editing ? saved.id : null;
+  ed.title.textContent = saved.editing ? `Modifier « ${saved.name} »` : "Ajouter une agence";
+  ed.detUrl.value = saved.detUrl || "";
+  ed.detQ.value = saved.detQ || "";
+  ed.name.value = saved.name || "";
+  ed.name.disabled = saved.builtin;
+  ed.url.value = saved.url || "";
+  ed.payload.value = saved.payload || "";
+  ed.encode.value = saved.encode || "";
+  ed.submit.textContent = saved.editing ? "Enregistrer" : "Ajouter l'agence";
+  ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
+  setMode(saved.mode);
+  if (saved.step2) showStep2(saved.step2Msg);
+  await applyPickResult(data[PICK_RESULT_KEY]);
+  return true;
 }
 
-ed.cancel.addEventListener("click", async () => { endEdit(); await renderManageList(); });
+async function applyPickResult(result) {
+  if (!draft || !result || result.draftId !== draft.id) return;
+  draft.fill = cleanFill(result) || null;
+  draft.review = true; // à vérifier : TabulaPix rouvrira cette étape tant qu'elle n'est pas validée
+  setMode("fill");
+  showStep2(draft.editing ? "Champ et bouton repérés : vérifiez, puis enregistrez." : "Champ et bouton repérés : vérifiez, puis ajoutez l'agence.");
+  flashEl(ed.chkField, ed.chkButton, ed.step2Msg);
+  await chrome.storage.session.remove(PICK_RESULT_KEY);
+  await saveDraft();
+}
 
-// Détection automatique : remplit adresse, modèle et encodage.
-const detectMsg = document.getElementById("detectMsg");
+/* Étape 1 : détection */
 document.getElementById("detectBtn").addEventListener("click", async () => {
-  const pageUrl = document.getElementById("detUrl").value;
-  const r = await detectSearchUrl(pageUrl, document.getElementById("detQ").value);
-  const isBuiltin = editing && ORIGINAL_BY_ID.has(editing);
-  if (r.notFound && !isBuiltin) {
+  const pageUrl = ed.detUrl.value.trim();
+  const r = await detectSearchUrl(pageUrl, ed.detQ.value);
+  if (!draft) draft = { id: newId(), editing: false, builtin: false, mode: "url", fill: null };
+  ed.detectMsg.className = "status err";
+  if (r.error && !(r.notFound && !draft.builtin)) { ed.detectMsg.textContent = r.error; return; }
+  ed.detectMsg.textContent = "";
+  if (!draft.builtin && !ed.name.value.trim()) ed.name.value = nameFromUrl(pageUrl);
+
+  if (r.notFound) {
     // Mots-clés absents de l'adresse : on remplira le champ de recherche du site.
+    ed.url.value = pageUrl;
+    draft.fill = null;
     setMode("fill");
-    fillInfo.hidden = true;
-    ed.url.value = pageUrl.trim();
-    if (!ed.name.value.trim()) ed.name.value = new URL(pageUrl.trim()).hostname.replace(/^(www|search|stock)\./, "");
-    detectMsg.className = "status ok";
-    detectMsg.textContent = `Les mots-clés ne figurent pas dans l'adresse : TabulaPix remplira plutôt le champ de recherche du site.\nVérifiez le nom, puis cliquez sur « ${ed.submit.textContent} ».`;
-    return;
+    showStep2("Les mots-clés ne figurent pas dans l'adresse : TabulaPix remplira le champ de recherche du site.");
+    flashEl(ed.name, ed.url, ed.step2Msg, ed.fillBox);
+  } else {
+    ed.url.value = r.url;
+    ed.payload.value = r.payload || "";
+    ed.encode.value = (r.encode || []).join(", ");
+    if (!draft.builtin) draft.fill = null;
+    setMode("url");
+    showStep2([r.summary, ...r.warnings.map((w) => "⚠ " + w), draft.editing ? "Vérifiez, puis enregistrez." : "Vérifiez, puis ajoutez l'agence."].join("\n"));
+    flashEl(ed.name, ed.url, ed.step2Msg);
   }
-  detectMsg.className = "status " + (r.error ? "err" : "ok");
-  if (r.error) { detectMsg.textContent = r.error; return; }
+  await saveDraft();
+});
+
+ed.manualLink.addEventListener("click", async () => {
+  if (!draft) draft = { id: newId(), editing: false, builtin: false, mode: "url", fill: null };
   setMode("url");
-  fillInfo.hidden = true;
-  ed.url.value = r.url;
-  ed.payload.value = r.payload || "";
-  ed.encode.value = (r.encode || []).join(", ");
-  ed.advanced.open = Boolean(r.payload);
-  if (!ed.name.disabled && !ed.name.value.trim()) {
-    ed.name.value = new URL(pageUrl.trim()).hostname.replace(/^(www|search|stock)\./, "");
-  }
-  detectMsg.textContent = [r.summary, ...r.warnings.map((w) => "⚠ " + w), `Vérifiez, puis cliquez sur « ${ed.submit.textContent} ».`].join("\n");
+  showStep2("Saisissez l'adresse de recherche, avec {q} à la place des mots-clés.");
+  ed.url.focus();
+  await saveDraft();
 });
 
-ed.reset.addEventListener("click", async () => {
-  const id = editing;
-  const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
-  delete overrides[id];
-  await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
-  endEdit();
-  await renderManageList();
-  flash(`« ${ORIGINAL_BY_ID.get(id).name} » : adresse d'origine rétablie.`, addMsg);
+ed.backToUrl.addEventListener("click", async () => {
+  draft.fill = null;
+  setMode("url");
+  ed.url.focus();
+  await saveDraft();
 });
 
-// Mode « remplir le champ » : brouillon, autorisation Chrome, puis repérage
-// sur le site (fait par le script d'arrière-plan, même si la popup se ferme).
-function startFillPick() {
-  const name = ed.name.value.trim();
-  if (!name || name.length > 40) return flash("Nom manquant (40 caractères au plus).", addMsg);
-  const id = editing || "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+// Saisie : on revérifie ; une autre page = repérage à refaire.
+for (const el of [ed.name, ed.url, ed.payload, ed.encode]) {
+  el.addEventListener("input", () => {
+    if (!draft) return;
+    if (el === ed.url && draft.mode === "fill" && draft.fill && !draft.builtin) {
+      const before = draft.pageHost;
+      const now = hostOf(ed.url.value.replace(/\{[^}]*\}/g, "x"), {});
+      if (before && now !== before) { draft.fill = null; renderChecks(); }
+    }
+    validate();
+    saveDraft();
+  });
+}
+
+/* Repérage sur le site : autorisation Chrome, puis le script d'arrière-plan
+   ouvre le site ; le résultat revient dans le brouillon (pickResult). */
+ed.pickBtn.addEventListener("click", () => {
   const { spec, error } = checkSpec({ url: ed.url.value });
   if (error) return flash(error, addMsg);
   const host = hostOf(spec.url, {});
-  const draft = { id, name, url: spec.url };
-  chrome.storage.session.set({ fillDraft: draft }); // relu si la popup se ferme pendant la demande
+  draft.pageHost = host;
+  const pick = { id: draft.id, name: ed.name.value.trim() || nameFromUrl(spec.url) || host, url: spec.url };
+  saveDraft();
+  chrome.storage.session.set({ fillDraft: pick }); // relu si la popup se ferme pendant la demande
   // La demande d'autorisation doit partir directement du clic.
   chrome.permissions.request({ origins: [originPattern(host)] }).then(async (granted) => {
     if (!granted) return flash(`Autorisation refusée pour ${host} : impossible de remplir son champ de recherche.`, addMsg);
-    const res = await chrome.runtime.sendMessage({ type: "pick", draft });
+    const res = await chrome.runtime.sendMessage({ type: "pick", draft: pick });
     if (!res || !res.ok) return flash((res && res.error) || "Repérage impossible.", addMsg);
-    flash(`Le site s'ouvre : cliquez sur son champ de recherche, puis sur son bouton.`, addMsg);
+    addMsg.textContent = "Le site s'ouvre : cliquez sur son champ de recherche, puis sur son bouton.";
     if (isPopup) window.close();
   });
-}
+});
 
+/* Essayer : recherche d'essai, dans un nouvel onglet, avec les réglages en cours */
+ed.tryBtn.addEventListener("click", async () => {
+  const builtin = draft.builtin ? ORIGINAL_BY_ID.get(draft.id) : null;
+  const { spec, error } = checkSpec(
+    { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" },
+    { allowOptions: Boolean(builtin) }
+  );
+  if (error) return flash(error, addMsg);
+  const q = ed.detQ.value.trim() || input.value.trim() || "Estonie frontière";
+  const url = await buildUrl(spec, q, await loadOptions());
+  const fill = draft.mode === "fill" ? draft.fill : (builtin ? builtin.fill || null : null);
+  const res = await chrome.runtime.sendMessage({ type: "try", url, q, fill, builtinId: builtin ? builtin.id : null });
+  flash(res && res.ok ? `Essai lancé avec « ${q} » dans un nouvel onglet.` : (res && res.error) || "Essai impossible.", addMsg);
+});
+
+ed.cancel.addEventListener("click", async () => { resetEditor(); await renderManageList(); });
+
+ed.reset.addEventListener("click", async () => {
+  const id = draft.id;
+  const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
+  delete overrides[id];
+  await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
+  resetEditor();
+  await renderManageList();
+  flashEl(manageList.querySelector(`li[data-id="${id}"]`));
+  flash(`« ${ORIGINAL_BY_ID.get(id).name} » : adresse d'origine rétablie.`, listMsg);
+});
+
+/* Étape 3 : ajouter (ou enregistrer la modification) */
 addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (mode() === "fill") return startFillPick();
+  const error = validate();
+  if (error) return flash(error, addMsg);
+  const id = draft.id;
   const name = ed.name.value.trim();
-  const raw = { url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value };
-  const original = editing && ORIGINAL_BY_ID.get(editing);
+  const raw = { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" };
+  let done;
 
-  // Agence intégrée : on enregistre seulement une modification de son adresse.
-  if (original) {
-    const { spec, error } = checkSpec(raw, { allowOptions: true });
-    if (error) return flash(error, addMsg);
-    const options = await loadOptions();
-    const host = hostOf(original.url, options);
-    if (original.fill && hostOf(spec.url, options) !== host) {
-      return flash(`Pour ${original.name}, l'adresse doit rester sur ${host} (remplissage automatique du champ de recherche).`, addMsg);
-    }
+  if (draft.builtin) {
+    // Agence intégrée : seulement une modification de son adresse.
+    const original = ORIGINAL_BY_ID.get(id);
+    const { spec } = checkSpec(raw, { allowOptions: true });
     const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
     const same = spec.url === original.url && (spec.payload || "") === (original.payload || "")
       && (spec.encode || []).join() === (original.encode || []).join();
-    if (same) delete overrides[editing]; else overrides[editing] = spec;
+    if (same) delete overrides[id]; else overrides[id] = spec;
     await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
-    endEdit();
-    await renderManageList();
-    return flash(same ? `« ${original.name} » : adresse d'origine.` : `« ${original.name} » modifiée.`, addMsg);
+    done = same ? `« ${original.name} » : adresse d'origine.` : `« ${original.name} » modifiée.`;
+  } else {
+    const agency = cleanCustomAgency({ id, name, ...raw, fill: draft.mode === "fill" ? draft.fill : undefined });
+    if (!agency) return flash("Agence invalide : vérifiez le nom et l'adresse.", addMsg);
+    const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: DEFAULT_CHECKED });
+    const before = data[CUSTOM_KEY].find((c) => c && c.id === id);
+    if (before) {
+      const after = data[CUSTOM_KEY].map((c) => (c && c.id === id ? agency : c));
+      await chrome.storage.local.set({ [CUSTOM_KEY]: after });
+      if (before.fill && !agency.fill) releasePermission(before, after);
+      done = `« ${agency.name} » modifiée.`;
+    } else {
+      if (data[CUSTOM_KEY].length >= MAX_CUSTOM) return flash(`${MAX_CUSTOM} agences personnalisées au maximum.`, addMsg);
+      await chrome.storage.local.set({
+        [CUSTOM_KEY]: data[CUSTOM_KEY].concat(agency),
+        [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
+      });
+      done = `« ${agency.name} » ajoutée.`;
+    }
   }
-
-  if (!name || name.length > 40) return flash("Nom manquant (40 caractères au plus).", addMsg);
-  const { error } = checkSpec(raw);
-  if (error) return flash(error, addMsg);
-  const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: DEFAULT_CHECKED });
-
-  // Agence personnalisée existante : remplacée sur place.
-  if (editing) {
-    const agency = cleanCustomAgency({ id: editing, name, ...raw });
-    const before = data[CUSTOM_KEY].find((c) => c && c.id === editing);
-    const after = data[CUSTOM_KEY].map((c) => (c && c.id === editing ? agency : c));
-    await chrome.storage.local.set({ [CUSTOM_KEY]: after });
-    if (before && before.fill) releasePermission(before, after);
-    endEdit();
-    await renderManageList();
-    return flash(`« ${agency.name} » modifiée.`, addMsg);
-  }
-
-  // Nouvelle agence.
-  if (data[CUSTOM_KEY].length >= MAX_CUSTOM) return flash(`${MAX_CUSTOM} agences personnalisées au maximum.`, addMsg);
-  const id = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const agency = cleanCustomAgency({ id, name, ...raw });
-  await chrome.storage.local.set({
-    [CUSTOM_KEY]: data[CUSTOM_KEY].concat(agency),
-    [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
-  });
-  addForm.reset();
-  detectMsg.textContent = "";
-  ed.advanced.open = false;
+  resetEditor();
   await renderManageList();
-  flash(`« ${agency.name} » ajoutée.`, addMsg);
+  const li = manageList.querySelector(`li[data-id="${id}"]`);
+  li?.scrollIntoView({ block: "nearest" });
+  flashEl(li);
+  flash(done, listMsg);
 });
 
 settingsForm.addEventListener("submit", async (e) => {
@@ -586,8 +727,19 @@ refreshList().then((data) => {
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
 });
 
-// Une agence enregistrée par le repérage (arrière-plan) : on met la liste à jour.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area !== "local" || !changes[CUSTOM_KEY]) return;
-  if (!settingsView.hidden) renderManageList(); else refreshList();
+  // Agences modifiées ailleurs (autre fenêtre) : on met la liste à jour.
+  if (area === "local" && changes[CUSTOM_KEY]) {
+    if (!settingsView.hidden) renderManageList(); else refreshList();
+  }
+  // Repérage terminé sur le site (colonne latérale restée ouverte) : on l'affiche.
+  if (area === "session" && changes[PICK_RESULT_KEY] && changes[PICK_RESULT_KEY].newValue) {
+    if (settingsView.hidden) showSettings(); else applyPickResult(changes[PICK_RESULT_KEY].newValue);
+  }
+});
+
+// Réouverture après un repérage : on revient directement à l'étape « vérifier ».
+chrome.storage.session.get([AGENCY_DRAFT_KEY, PICK_RESULT_KEY]).then((data) => {
+  const d = data[AGENCY_DRAFT_KEY], r = data[PICK_RESULT_KEY];
+  if (d && ((r && r.draftId === d.id) || d.review)) showSettings();
 });

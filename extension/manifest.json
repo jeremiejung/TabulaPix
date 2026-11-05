@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "TabulaPix",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Une recherche, toutes vos agences photo : TabulaPix ouvre un onglet par agence avec vos résultats.",
   "icons": {
     "16": "icons/icon-16.png",
