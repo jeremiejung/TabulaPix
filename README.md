@@ -2,7 +2,7 @@
 
 **Une recherche, toutes vos agences photo.** — *One search, all your picture agencies.*
 
-Chrome extension for photo editors: type your keywords once and search all your news picture agencies at the same time (AFP, Reuters, Getty, Sipa, Abaca, MaxPPP, PixPalace…). TabulaPix opens one tab per agency with results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored.
+Available in English and French (follows the browser language, can be changed in the settings). Chrome extension for photo editors: type your keywords once and search all your news picture agencies at the same time (AFP, Reuters, Getty, Sipa, Abaca, MaxPPP, PixPalace…). TabulaPix opens one tab per agency with results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored.
 
 ---
 
@@ -75,6 +75,7 @@ Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages d
 
   Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, TabulaPix utilise le premier visible et le bouton le plus proche du champ. Si le site change sa page, refaites le repérage (✎ puis **Refaire le repérage**).
 - **Modifier une agence** (bouton **✎**) : même formulaire, directement à l'étape « vérifier », avec **Enregistrer**. Pour les agences fournies, le nom reste le même, la mention « modifiée » apparaît et **Rétablir l'original** revient à la configuration livrée ; pour Bloomberg, Abacapress et Pixpalace, l'adresse doit rester sur le même site (le remplissage automatique n'est autorisé que là).
+- **Langue** : français ou anglais. Par défaut, TabulaPix suit la langue du navigateur (« Automatique ») ; le changement s'applique immédiatement. Le nom et la description affichés dans `chrome://extensions` et sur le Chrome Web Store suivent toujours la langue du navigateur.
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
 
 Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.

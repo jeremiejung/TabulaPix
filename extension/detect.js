@@ -83,12 +83,12 @@ async function unwrap(value, q, steps = [], depth = 0) {
 async function detectSearchUrl(pageUrl, keywords) {
   const url = String(pageUrl || "").trim();
   const q = String(keywords || "").trim();
-  if (!q) return { error: "Indiquez les mots-clés que vous aviez cherchés." };
+  if (!q) return { error: t("det.noKeywords") };
   let parsed;
-  try { parsed = new URL(url); } catch (_) { return { error: "Adresse invalide : collez l'adresse complète de la page de résultats." }; }
-  if (parsed.protocol !== "https:") return { error: "L'adresse doit commencer par https://" };
+  try { parsed = new URL(url); } catch (_) { return { error: t("det.badUrl") }; }
+  if (parsed.protocol !== "https:") return { error: t("det.https") };
   const warnings = [];
-  if (/\{[^}]*\}/.test(url)) return { error: "L'adresse contient déjà des accolades { } : collez l'adresse réelle de la page de résultats." };
+  if (/\{[^}]*\}/.test(url)) return { error: t("det.braces") };
 
   // 1. Mots-clés en clair dans l'adresse.
   for (const form of plainForms(q)) {
@@ -96,13 +96,12 @@ async function detectSearchUrl(pageUrl, keywords) {
     const n = (url.match(re) || []).length;
     if (n) {
       const out = url.replace(re, "{q}");
-      const where = n > 1 ? `${n} endroits de l'adresse` : "l'adresse";
       if (/q=[^&#]*_\d/.test(out) || /search=\d{6,}/.test(out)) {
-        warnings.push("L'adresse contient aussi un numéro de recherche enregistrée : il est possible qu'il faille le retirer.");
+        warnings.push(t("det.warn.savedSearch"));
       } else if (/[?&=/]\d{10,}(?=[&#/]|$)/.test(out)) {
-        warnings.push("L'adresse contient un long numéro (peut-être un numéro de session) : si la recherche cesse de fonctionner, essayez de le retirer de l'adresse.");
+        warnings.push(t("det.warn.session"));
       }
-      return { url: out, summary: `Mots-clés trouvés en clair dans ${where}.`, warnings };
+      return { url: out, summary: n > 1 ? t("det.plain.many", { n }) : t("det.plain.one"), warnings };
     }
   }
 
@@ -114,7 +113,7 @@ async function detectSearchUrl(pageUrl, keywords) {
     if (n) {
       return {
         url: url.replace(re, "{q:slug}"),
-        summary: "Mots-clés trouvés avec des tirets à la place des espaces (marqueur {q:slug}).",
+        summary: t("det.slug"),
         warnings
       };
     }
@@ -133,17 +132,17 @@ async function detectSearchUrl(pageUrl, keywords) {
     const payload = found.text.replace(new RegExp(escapeRe(q), "gi"), "{q}");
     const encode = found.steps.slice().reverse();
     if (found.steps.includes("hex") && /[a-f]/.test(piece) && !/[A-F]/.test(piece)) {
-      warnings.push("Le site écrit l'hexadécimal en minuscules ; l'extension l'écrit en majuscules (en général sans conséquence).");
+      warnings.push(t("det.warn.hexCase"));
     }
     return {
       url: url.replace(piece, "{payload}"),
       payload,
       encode,
-      summary: `Mots-clés trouvés emballés dans l'adresse. Encodage : ${encode.join(" → ")}.`,
+      summary: t("det.wrapped", { steps: encode.join(" → ") }),
       warnings
     };
   }
 
   // 3. Rien trouvé.
-  return { notFound: true, error: "Mots-clés introuvables dans l'adresse : ce site ne les y met pas (recherche enregistrée côté serveur, ou page qui ne change pas d'adresse)." };
+  return { notFound: true, error: t("det.notFound") };
 }

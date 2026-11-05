@@ -49,19 +49,19 @@ function checkSpec(raw, { allowOptions = false } = {}) {
   const url = String(raw.url || "").trim();
   const payload = String(raw.payload || "");
   const encode = parseEncode(raw.encode);
-  if (!url || url.length > 2000) return { error: "Adresse manquante ou trop longue." };
-  if (payload.length > 2000) return { error: "Modèle trop long (2000 caractères au plus)." };
-  if (!encode) return { error: `Étapes d'encodage inconnues : utilisez ${ENCODE_STEPS.join(", ")}.` };
+  if (!url || url.length > 2000) return { error: t("spec.url") };
+  if (payload.length > 2000) return { error: t("spec.payloadLong") };
+  if (!encode) return { error: t("spec.encode", { steps: ENCODE_STEPS.join(", ") }) };
   for (const [, inner] of url.matchAll(/\{([^}]*)\}/g)) {
     if (inner === "q" || inner === "q:slug" || inner === "payload") continue;
     const opt = inner.match(/^opt:([A-Za-z0-9_]+)$/);
     if (opt && allowOptions && OPTION_BY_ID.has(opt[1])) continue;
-    return { error: `Marqueur inconnu dans l'adresse : {${inner}}. Utilisez {q}, {q:slug} (ou {payload}).` };
+    return { error: t("spec.marker", { marker: inner }) };
   }
-  if (url.includes("{payload}") && !payload) return { error: "L'adresse contient {payload} : renseignez le modèle." };
+  if (url.includes("{payload}") && !payload) return { error: t("spec.payloadMissing") };
   let u;
-  try { u = new URL(url.replace(/\{[^}]*\}/g, "x")); } catch (_) { return { error: "Adresse invalide." }; }
-  if (u.protocol !== "https:" || !u.hostname) return { error: "L'adresse doit commencer par https://" };
+  try { u = new URL(url.replace(/\{[^}]*\}/g, "x")); } catch (_) { return { error: t("spec.invalid") }; }
+  if (u.protocol !== "https:" || !u.hostname) return { error: t("spec.https") };
   const spec = { url };
   if (url.includes("{payload}")) { spec.payload = payload; spec.encode = encode; }
   return { spec };
