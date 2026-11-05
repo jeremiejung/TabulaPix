@@ -73,4 +73,6 @@ code { font-size: 11px; }
 
 /* Signature */
 .credit { margin: 12px 0 0; font-size: 10px; text-align: center; opacity: .55; }
+.credit p { margin: 2px 0; }
+.field.lang { margin-top: 14px; }
 .credit a { color: inherit; }

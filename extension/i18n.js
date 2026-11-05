@@ -45,6 +45,7 @@ const I18N = {
     "opt.invalid": "Valeur invalide pour « {label} ».",
     "opt.lang": "Langue",
     "opt.lang.auto": "Automatique (langue du navigateur)",
+    "footer.source": "Code source sur GitHub",
     "opt.pixpalaceSubdomain.label": "Sous-domaine Pixpalace",
     "opt.pixpalaceSubdomain.help": "La partie avant « .pixpalace.com » dans l'adresse de votre espace Pixpalace (ex. « www » ou le nom de votre rédaction).",
 
@@ -186,6 +187,7 @@ const I18N = {
     "opt.invalid": "Invalid value for “{label}”.",
     "opt.lang": "Language",
     "opt.lang.auto": "Automatic (browser language)",
+    "footer.source": "Source code on GitHub",
     "opt.pixpalaceSubdomain.label": "Pixpalace subdomain",
     "opt.pixpalaceSubdomain.help": "The part before “.pixpalace.com” in your Pixpalace address (e.g. “www” or your newsroom's name).",
 
