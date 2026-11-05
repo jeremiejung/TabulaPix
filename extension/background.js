@@ -86,7 +86,9 @@ function validJobs(jobs, options, agencies) {
 }
 
 async function sweep(jobs, q) {
-  const existing = await chrome.tabs.query({ windowType: "normal" });
+  // L'onglet d'un repérage en cours n'est jamais réutilisé.
+  const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
+  const existing = (await chrome.tabs.query({ windowType: "normal" })).filter((tab) => !pick || tab.id !== pick.tabId);
 
   // Onglet à réutiliser pour chaque agence : d'abord ceux qui sont sur la
   // même page (même site + même chemin), puis ceux qui sont juste sur le
@@ -261,8 +263,16 @@ async function handlePicked(sender, msg) {
   // vérifiée par l'utilisateur dans TabulaPix.
   await chrome.storage.session.set({ pickResult: { draftId: pick.draft.id, ...fill } });
   await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
-  // Rouvre TabulaPix sur l'étape « vérifier » (si Chrome le permet).
-  try { await chrome.action.openPopup({ windowId: sender.tab.windowId }); } catch (_) { /* l'utilisateur la rouvrira */ }
+  // Rouvre TabulaPix sur l'étape « vérifier », sauf s'il est déjà ouvert dans
+  // cette fenêtre (colonne latérale ou popup) : il s'y met à jour tout seul.
+  let alreadyOpen = false;
+  try {
+    const open = await chrome.runtime.getContexts({ contextTypes: ["SIDE_PANEL", "POPUP"] });
+    alreadyOpen = open.some((c) => c.windowId === sender.tab.windowId || c.windowId === -1);
+  } catch (_) { /* Chrome trop ancien : on tente l'ouverture */ }
+  if (!alreadyOpen) {
+    try { await chrome.action.openPopup({ windowId: sender.tab.windowId }); } catch (_) { /* l'utilisateur la rouvrira */ }
+  }
   return { ok: true, name: pick.draft.name };
 }
 
