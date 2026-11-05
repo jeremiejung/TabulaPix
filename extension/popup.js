@@ -10,6 +10,28 @@ const msg = document.getElementById("msg");
 // mots-clés : on ouvre la page et on copie les mots-clés dans le presse-papiers.
 const isManual = (a) => !a.fill && !/\{(q|q:slug|payload)\}/.test(a.url);
 
+/* ---------- Langue ---------- */
+
+const langSelect = document.getElementById("langSelect");
+applyI18n(); // langue du navigateur tout de suite…
+const langReady = loadLang().then((choice) => { // …puis celle choisie dans les réglages
+  langSelect.value = choice;
+  applyI18n();
+});
+
+langSelect.addEventListener("change", async () => {
+  await chrome.storage.local.set({ [LANG_KEY]: langSelect.value });
+  await loadLang();
+  applyI18n();
+  // Textes construits par le code : on les refait dans la nouvelle langue.
+  await renderManageList();
+  renderOptionFields(await loadOptions());
+  if (draft) { setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
+  else { ed.title.textContent = t("ed.addTitle"); }
+  list.textContent = "";
+  await refreshList();
+});
+
 /* ---------- Popup ou panneau latéral ---------- */
 
 // Le même fichier sert de popup et de panneau latéral.
@@ -23,11 +45,11 @@ chrome.windows.getCurrent().then((w) => { windowId = w.id; });
 
 document.getElementById("pin").addEventListener("click", () => {
   if (windowId === null || !chrome.sidePanel) {
-    msg.textContent = "Panneau latéral indisponible (Chrome 116 ou plus récent requis).";
+    msg.textContent = t("main.panelUnavailable");
     return;
   }
   chrome.sidePanel.open({ windowId }).then(() => window.close(), () => {
-    msg.textContent = "Impossible d'ouvrir le panneau latéral.";
+    msg.textContent = t("main.panelError");
   });
 });
 
@@ -71,7 +93,7 @@ async function renderManageList() {
     if (a.custom || a.modified) {
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = a.custom ? (a.fill ? "perso · champ" : "perso") : "modifiée";
+      tag.textContent = a.custom ? (a.fill ? t("opt.tag.customFill") : t("opt.tag.custom")) : t("opt.tag.modified");
       label.append(" ", tag);
     }
     li.append(label);
@@ -80,7 +102,7 @@ async function renderManageList() {
     edit.type = "button";
     edit.className = "edit";
     edit.textContent = "✎";
-    edit.title = `Modifier « ${a.name} »`;
+    edit.title = t("opt.edit", { name: a.name });
     edit.setAttribute("aria-label", edit.title);
     edit.addEventListener("click", () => startEdit(a));
     li.append(edit);
@@ -89,17 +111,17 @@ async function renderManageList() {
       del.type = "button";
       del.className = "del";
       del.textContent = "✕";
-      del.title = `Supprimer « ${a.name} »`;
+      del.title = t("opt.delete", { name: a.name });
       del.setAttribute("aria-label", del.title);
       del.addEventListener("click", async () => {
-        if (!confirm(`Supprimer l'agence « ${a.name} » ?`)) return;
+        if (!confirm(t("opt.delete.confirm", { name: a.name }))) return;
         const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
         const rest = custom.filter((c) => c && c.id !== a.id);
         await chrome.storage.local.set({ [CUSTOM_KEY]: rest });
         if (a.fill) releasePermission(a, rest);
         if (editing === a.id) resetEditor();
         await renderManageList();
-        flash(`« ${a.name} » supprimée.`, listMsg);
+        flash(t("opt.deleted", { name: a.name }), listMsg);
       });
       li.append(del);
     }
@@ -114,7 +136,7 @@ function renderOptionFields(values) {
     div.className = "field";
     const label = document.createElement("label");
     label.htmlFor = "opt-" + o.id;
-    label.textContent = o.label;
+    label.textContent = t(`opt.${o.id}.label`);
     const field = document.createElement("input");
     field.id = "opt-" + o.id;
     field.autocomplete = "off";
@@ -124,7 +146,7 @@ function renderOptionFields(values) {
     field.pattern = o.pattern.replace(/^\^|\$$/g, ""); // l'attribut HTML ajoute ^…$ lui-même
     const help = document.createElement("p");
     help.className = "help";
-    help.textContent = o.help;
+    help.textContent = t(`opt.${o.id}.help`);
     div.append(label, field, help);
     fields.append(div);
   }
@@ -212,11 +234,11 @@ function renderChecks() {
     li.querySelector(".mark").textContent = done ? "✓" : "○";
     li.lastChild.textContent = " " + label;
   };
-  set(ed.chkField, Boolean(fill && fill.input), "Champ de recherche");
-  set(ed.chkButton, Boolean(fill && fill.input), fill && fill.input && !fill.submit ? "Touche Entrée (pas de bouton)" : "Bouton de recherche");
-  ed.pickBtn.textContent = fill && fill.input ? "Refaire le repérage" : "Repérer le champ sur le site";
+  set(ed.chkField, Boolean(fill && fill.input), t("ed.chk.field"));
+  set(ed.chkButton, Boolean(fill && fill.input), fill && fill.input && !fill.submit ? t("ed.chk.enter") : t("ed.chk.button"));
+  ed.pickBtn.textContent = fill && fill.input ? t("ed.repick") : t("ed.pick");
   ed.techFill.hidden = !(draft && draft.mode === "fill" && fill && fill.input);
-  if (fill && fill.input) ed.techFill.textContent = `Champ : ${fill.input}${fill.submit ? ` — bouton : ${fill.submit}` : " — touche Entrée"}`;
+  if (fill && fill.input) ed.techFill.textContent = t("ed.tech.fill", { input: fill.input, button: fill.submit ? t("ed.tech.fill.button", { submit: fill.submit }) : t("ed.tech.fill.enter") });
 }
 
 function setMode(mode) {
@@ -225,7 +247,7 @@ function setMode(mode) {
   ed.fillBox.hidden = !fill;
   ed.urlHelp.hidden = fill;
   ed.techUrl.hidden = fill;
-  ed.urlLabel.textContent = fill ? "Page avec le champ de recherche" : "Adresse de recherche";
+  ed.urlLabel.textContent = fill ? t("ed.url.fill") : t("ed.url");
   ed.url.placeholder = fill ? "https://…" : "https://…{q}…";
   ed.backToUrl.hidden = draft.builtin;
   renderChecks();
@@ -234,19 +256,19 @@ function setMode(mode) {
 
 // Vérifie le formulaire ; active « Ajouter » seulement quand tout est bon.
 function validate() {
-  if (!draft) return "Rien à ajouter.";
+  if (!draft) return t("ed.err.nothing");
   let error = "";
   const name = ed.name.value.trim();
-  if (!draft.builtin && (!name || name.length > 40)) error = "Indiquez un nom (40 caractères au plus).";
+  if (!draft.builtin && (!name || name.length > 40)) error = t("ed.err.name");
   const { spec, error: specError } = checkSpec(
     { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" },
     { allowOptions: draft.builtin }
   );
   if (!error && specError) error = specError;
-  if (!error && draft.mode === "fill" && !(draft.fill && draft.fill.input)) error = "Repérez le champ de recherche sur le site.";
+  if (!error && draft.mode === "fill" && !(draft.fill && draft.fill.input)) error = t("ed.err.pickNeeded");
   const original = draft.builtin && ORIGINAL_BY_ID.get(draft.id);
   if (!error && original && original.fill && spec && hostOf(spec.url, {}) !== hostOf(original.url, {})) {
-    error = `Pour ${original.name}, l'adresse doit rester sur ${hostOf(original.url, {})}.`;
+    error = t("ed.err.sameHost", { name: original.name, host: hostOf(original.url, {}) });
   }
   ed.submit.disabled = Boolean(error);
   ed.tryBtn.disabled = Boolean(specError) || (draft.mode === "fill" && !(draft.fill && draft.fill.input));
@@ -278,11 +300,11 @@ function resetEditor() {
   ed.detUrl.value = ed.detQ.value = "";
   ed.detectMsg.textContent = ed.step2Msg.textContent = addMsg.textContent = "";
   ed.form.hidden = true;
-  ed.title.textContent = "Ajouter une agence";
+  ed.title.textContent = t("ed.addTitle");
   ed.name.disabled = false;
   ed.reset.hidden = true;
   ed.advanced.open = false;
-  ed.submit.textContent = "Ajouter l'agence";
+  ed.submit.textContent = t("ed.add");
   chrome.storage.session.remove([AGENCY_DRAFT_KEY, PICK_RESULT_KEY, "fillDraft"]);
 }
 
@@ -290,14 +312,14 @@ function startEdit(a) {
   resetEditor();
   draft = { id: a.id, editing: true, builtin: !a.custom, mode: a.custom && a.fill ? "fill" : "url", fill: a.custom ? a.fill || null : null, pageHost: hostOf(a.url, {}) };
   editing = a.id;
-  ed.title.textContent = `Modifier « ${a.name} »`;
+  ed.title.textContent = t("ed.editTitle", { name: a.name });
   ed.name.value = a.name;
   ed.name.disabled = !a.custom; // le nom des agences intégrées ne change pas
   ed.url.value = a.url;
   ed.payload.value = a.payload || "";
   ed.encode.value = (a.encode || []).join(", ");
   ed.reset.hidden = !a.modified;
-  ed.submit.textContent = "Enregistrer";
+  ed.submit.textContent = t("ed.saveEdit");
   setMode(draft.mode);
   showStep2("");
   saveDraft();
@@ -312,7 +334,7 @@ async function restoreDraft() {
   if (!saved) return false;
   draft = { id: saved.id, editing: saved.editing, builtin: saved.builtin, mode: saved.mode, fill: saved.fill || null, pageHost: saved.pageHost, review: saved.review };
   editing = saved.editing ? saved.id : null;
-  ed.title.textContent = saved.editing ? `Modifier « ${saved.name} »` : "Ajouter une agence";
+  ed.title.textContent = saved.editing ? t("ed.editTitle", { name: saved.name }) : t("ed.addTitle");
   ed.detUrl.value = saved.detUrl || "";
   ed.detQ.value = saved.detQ || "";
   ed.name.value = saved.name || "";
@@ -320,7 +342,7 @@ async function restoreDraft() {
   ed.url.value = saved.url || "";
   ed.payload.value = saved.payload || "";
   ed.encode.value = saved.encode || "";
-  ed.submit.textContent = saved.editing ? "Enregistrer" : "Ajouter l'agence";
+  ed.submit.textContent = saved.editing ? t("ed.saveEdit") : t("ed.add");
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
   setMode(saved.mode);
   if (saved.step2) showStep2(saved.step2Msg);
@@ -333,7 +355,7 @@ async function applyPickResult(result) {
   draft.fill = cleanFill(result) || null;
   draft.review = true; // à vérifier : TabulaPix rouvrira cette étape tant qu'elle n'est pas validée
   setMode("fill");
-  showStep2(draft.editing ? "Champ et bouton repérés : vérifiez, puis enregistrez." : "Champ et bouton repérés : vérifiez, puis ajoutez l'agence.");
+  showStep2(draft.editing ? t("ed.picked.edit") : t("ed.picked.add"));
   flashEl(ed.chkField, ed.chkButton, ed.step2Msg);
   await chrome.storage.session.remove(PICK_RESULT_KEY);
   await saveDraft();
@@ -354,7 +376,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     ed.url.value = pageUrl;
     draft.fill = null;
     setMode("fill");
-    showStep2("Les mots-clés ne figurent pas dans l'adresse : TabulaPix remplira le champ de recherche du site.");
+    showStep2(t("ed.notInUrl"));
     flashEl(ed.name, ed.url, ed.step2Msg, ed.fillBox);
   } else {
     ed.url.value = r.url;
@@ -362,7 +384,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     ed.encode.value = (r.encode || []).join(", ");
     if (!draft.builtin) draft.fill = null;
     setMode("url");
-    showStep2([r.summary, ...r.warnings.map((w) => "⚠ " + w), draft.editing ? "Vérifiez, puis enregistrez." : "Vérifiez, puis ajoutez l'agence."].join("\n"));
+    showStep2([r.summary, ...r.warnings.map((w) => "⚠ " + w), draft.editing ? t("ed.check.edit") : t("ed.check.add")].join("\n"));
     flashEl(ed.name, ed.url, ed.step2Msg);
   }
   await saveDraft();
@@ -371,7 +393,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
 ed.manualLink.addEventListener("click", async () => {
   if (!draft) draft = { id: newId(), editing: false, builtin: false, mode: "url", fill: null };
   setMode("url");
-  showStep2("Saisissez l'adresse de recherche, avec {q} à la place des mots-clés.");
+  showStep2(t("ed.manual.msg"));
   ed.url.focus();
   await saveDraft();
 });
@@ -409,10 +431,10 @@ ed.pickBtn.addEventListener("click", () => {
   chrome.storage.session.set({ fillDraft: pick }); // relu si la popup se ferme pendant la demande
   // La demande d'autorisation doit partir directement du clic.
   chrome.permissions.request({ origins: [originPattern(host)] }).then(async (granted) => {
-    if (!granted) return flash(`Autorisation refusée pour ${host} : impossible de remplir son champ de recherche.`, addMsg);
+    if (!granted) return flash(t("ed.permRefused", { host }), addMsg);
     const res = await chrome.runtime.sendMessage({ type: "pick", draft: pick });
-    if (!res || !res.ok) return flash((res && res.error) || "Repérage impossible.", addMsg);
-    addMsg.textContent = "Le site s'ouvre : cliquez sur son champ de recherche, puis sur son bouton.";
+    if (!res || !res.ok) return flash((res && res.error) || t("ed.pickFailed"), addMsg);
+    addMsg.textContent = t("ed.siteOpening");
     if (isPopup) window.close();
   });
 });
@@ -425,11 +447,11 @@ ed.tryBtn.addEventListener("click", async () => {
     { allowOptions: Boolean(builtin) }
   );
   if (error) return flash(error, addMsg);
-  const q = ed.detQ.value.trim() || input.value.trim() || "Estonie frontière";
+  const q = ed.detQ.value.trim() || input.value.trim() || t("ed.sampleQuery");
   const url = await buildUrl(spec, q, await loadOptions());
   const fill = draft.mode === "fill" ? draft.fill : (builtin ? builtin.fill || null : null);
   const res = await chrome.runtime.sendMessage({ type: "try", url, q, fill, builtinId: builtin ? builtin.id : null });
-  flash(res && res.ok ? `Essai lancé avec « ${q} » dans un nouvel onglet.` : (res && res.error) || "Essai impossible.", addMsg);
+  flash(res && res.ok ? t("ed.tryStarted", { q }) : (res && res.error) || t("ed.tryFailed"), addMsg);
 });
 
 ed.cancel.addEventListener("click", async () => { resetEditor(); await renderManageList(); });
@@ -442,7 +464,7 @@ ed.reset.addEventListener("click", async () => {
   resetEditor();
   await renderManageList();
   flashEl(manageList.querySelector(`li[data-id="${id}"]`));
-  flash(`« ${ORIGINAL_BY_ID.get(id).name} » : adresse d'origine rétablie.`, listMsg);
+  flash(t("ed.restored", { name: ORIGINAL_BY_ID.get(id).name }), listMsg);
 });
 
 /* Étape 3 : ajouter (ou enregistrer la modification) */
@@ -464,24 +486,24 @@ addForm.addEventListener("submit", async (e) => {
       && (spec.encode || []).join() === (original.encode || []).join();
     if (same) delete overrides[id]; else overrides[id] = spec;
     await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
-    done = same ? `« ${original.name} » : adresse d'origine.` : `« ${original.name} » modifiée.`;
+    done = same ? t("ed.original", { name: original.name }) : t("ed.modified", { name: original.name });
   } else {
     const agency = cleanCustomAgency({ id, name, ...raw, fill: draft.mode === "fill" ? draft.fill : undefined });
-    if (!agency) return flash("Agence invalide : vérifiez le nom et l'adresse.", addMsg);
+    if (!agency) return flash(t("ed.err.invalid"), addMsg);
     const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: DEFAULT_CHECKED });
     const before = data[CUSTOM_KEY].find((c) => c && c.id === id);
     if (before) {
       const after = data[CUSTOM_KEY].map((c) => (c && c.id === id ? agency : c));
       await chrome.storage.local.set({ [CUSTOM_KEY]: after });
       if (before.fill && !agency.fill) releasePermission(before, after);
-      done = `« ${agency.name} » modifiée.`;
+      done = t("ed.modified", { name: agency.name });
     } else {
-      if (data[CUSTOM_KEY].length >= MAX_CUSTOM) return flash(`${MAX_CUSTOM} agences personnalisées au maximum.`, addMsg);
+      if (data[CUSTOM_KEY].length >= MAX_CUSTOM) return flash(t("ed.err.max", { max: MAX_CUSTOM }), addMsg);
       await chrome.storage.local.set({
         [CUSTOM_KEY]: data[CUSTOM_KEY].concat(agency),
         [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
       });
-      done = `« ${agency.name} » ajoutée.`;
+      done = t("ed.added", { name: agency.name });
     }
   }
   resetEditor();
@@ -498,13 +520,13 @@ settingsForm.addEventListener("submit", async (e) => {
   for (const o of OPTIONS) {
     const v = document.getElementById("opt-" + o.id).value.trim();
     if (v !== "" && !new RegExp(o.pattern).test(v)) {
-      flash(`Valeur invalide pour « ${o.label} ».`);
+      flash(t("opt.invalid", { label: t(`opt.${o.id}.label`) }));
       return;
     }
     values[o.id] = v;
   }
   await chrome.storage.local.set({ [OPTIONS_KEY]: values });
-  flash("Réglages enregistrés.");
+  flash(t("opt.saved"));
 });
 
 /* ---------- Construction des URL ---------- */
@@ -535,7 +557,7 @@ async function applySteps(text, steps) {
       case "hex": value = toHex(asBytes); break;
       case "gzip": value = await gzip(asBytes); break;
       case "base64": value = toBase64(asBytes); break;
-      default: throw new Error(`Étape d'encodage inconnue : ${step}`);
+      default: throw new Error(t("spec.step", { step }));
     }
   }
   return typeof value === "string" ? value : toBase64(value);
@@ -587,7 +609,7 @@ function render(agencies, checked) {
     const handle = document.createElement("span");
     handle.className = "handle";
     handle.textContent = "⋮⋮";
-    handle.title = "Glisser pour réordonner (ou Alt + ↑ / ↓ sur la case)";
+    handle.title = t("main.handle");
     handle.setAttribute("aria-hidden", "true");
     const label = document.createElement("label");
     const box = document.createElement("input");
@@ -608,8 +630,8 @@ function render(agencies, checked) {
     if (isManual(a)) {
       const hint = document.createElement("span");
       hint.className = "hint";
-      hint.textContent = "coller";
-      hint.title = "Mots-clés copiés dans le presse-papiers : collez-les (Ctrl/Cmd+V) dans le champ de recherche du site.";
+      hint.textContent = t("main.paste");
+      hint.title = t("main.paste.title");
       label.append(hint);
     }
     li.append(handle, label);
@@ -673,12 +695,14 @@ function setAll(state) {
 document.getElementById("all").addEventListener("click", () => setAll(true));
 document.getElementById("none").addEventListener("click", () => setAll(false));
 
+let sweeping = false; // évite un double lancement (double Entrée)
 document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (sweeping) return;
   const q = input.value.trim();
   const ids = checkedIds();
   if (!q) return input.focus();
-  if (!ids.length) { msg.textContent = "Cochez au moins une agence."; return; }
+  if (!ids.length) { msg.textContent = t("main.noAgency"); return; }
 
   const selected = ids.map((id) => AGENCY_BY_ID.get(id)); // dans l'ordre affiché
   let urls;
@@ -686,7 +710,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     const options = await loadOptions();
     urls = await Promise.all(selected.map((a) => buildUrl(a, q, options)));
   } catch (err) {
-    msg.textContent = "Erreur de configuration : " + err.message;
+    msg.textContent = t("main.configError", { error: err.message });
     return;
   }
 
@@ -698,7 +722,9 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   // se ferme dès qu'un onglet passe au premier plan.
   chrome.storage.local.set({ [QUERY_KEY]: q });
   const jobs = selected.map((a, i) => ({ id: a.id, url: urls[i] }));
-  await chrome.runtime.sendMessage({ type: "sweep", jobs, q });
+  sweeping = true;
+  try { await chrome.runtime.sendMessage({ type: "sweep", jobs, q }); }
+  finally { setTimeout(() => { sweeping = false; }, 800); }
   if (isPopup) {
     window.close(); // on reste sur l'onglet en cours
   } else {
@@ -722,14 +748,14 @@ async function refreshList() {
   return data;
 }
 
-refreshList().then((data) => {
+langReady.then(refreshList).then((data) => {
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
   // Agences modifiées ailleurs (autre fenêtre) : on met la liste à jour.
-  if (area === "local" && changes[CUSTOM_KEY]) {
+  if (area === "local" && (changes[CUSTOM_KEY] || changes[HIDDEN_KEY] || changes[OVERRIDES_KEY])) {
     if (!settingsView.hidden) renderManageList(); else refreshList();
   }
   // Repérage terminé sur le site (colonne latérale restée ouverte) : on l'affiche.

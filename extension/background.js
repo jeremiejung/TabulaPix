@@ -8,7 +8,11 @@
  * à la fermeture de Chrome), au cas où Chrome mettrait ce script en veille.
  */
 
-importScripts("config.js", "shared.js"); // AGENCIES/OPTIONS : seule source des sites et des champs
+importScripts("config.js", "i18n.js", "shared.js"); // AGENCIES/OPTIONS : seule source des sites et des champs
+
+// Langue des messages : celle choisie dans les réglages (ou du navigateur).
+loadLang();
+chrome.storage.onChanged.addListener((changes, area) => { if (area === "local" && changes[LANG_KEY]) loadLang(); });
 
 const PENDING = "pendingFills";
 const AGENCY_BY_ID = new Map(AGENCIES.map((a) => [a.id, a]));
@@ -39,6 +43,7 @@ function updatePending(change) {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (sender.id !== chrome.runtime.id || !msg) return;
+  // (LANG est tenu à jour par loadLang() au démarrage et à chaque changement.)
 
   // Messages de la popup / du panneau de l'extension.
   if (sender.url === chrome.runtime.getURL("popup.html")) {
@@ -99,9 +104,15 @@ async function sweep(jobs, q) {
 
   // Les onglets s'ouvrent en arrière-plan : l'utilisateur reste sur son onglet.
   for (const [i, job] of jobs.entries()) {
-    const tab = reuse[i]
-      ? await chrome.tabs.update(reuse[i].id, { url: job.url })
-      : await chrome.tabs.create({ url: job.url, active: false });
+    let tab;
+    try {
+      tab = reuse[i]
+        ? await chrome.tabs.update(reuse[i].id, { url: job.url })
+        : await chrome.tabs.create({ url: job.url, active: false });
+    } catch (_) {
+      // Onglet fermé entre-temps : on en ouvre un nouveau, sans bloquer les autres agences.
+      try { tab = await chrome.tabs.create({ url: job.url, active: false }); } catch (_) { continue; }
+    }
     if (job.fill) {
       // Enregistré tout de suite, avant que la page ait fini de charger.
       await updatePending((pending) => { pending[tab.id] = { q, id: job.id, host: job.host, fill: job.fill, attempts: 0 }; });
@@ -165,8 +176,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   }
 });
 
-chrome.tabs.onRemoved.addListener((tabId) => {
+chrome.tabs.onRemoved.addListener(async (tabId) => {
   updatePending((pending) => { delete pending[tabId]; });
+  // Repérage abandonné (onglet fermé) : on l'oublie.
+  const { pickSession } = await chrome.storage.session.get("pickSession");
+  if (pickSession && pickSession.tabId === tabId) chrome.storage.session.remove(["pickSession", "fillDraft"]);
 });
 
 /* ---------- Repérage du champ et du bouton d'un site ---------- */
@@ -188,9 +202,9 @@ function cleanDraft(d) {
 
 async function startPick(rawDraft) {
   const draft = cleanDraft(rawDraft);
-  if (!draft) return { ok: false, error: "Agence invalide." };
+  if (!draft) return { ok: false, error: t("bg.invalidAgency") };
   if (!(await chrome.permissions.contains({ origins: [originPattern(draft.host)] }))) {
-    return { ok: false, error: "Autorisation refusée pour ce site." };
+    return { ok: false, error: t("bg.permRefused") };
   }
   const { [PICK_KEY]: current } = await chrome.storage.session.get(PICK_KEY);
   if (current && current.draft.id === draft.id) {
@@ -214,22 +228,25 @@ async function injectPickerIfNeeded(tabId, tab) {
   try { host = new URL(tab.url).hostname; } catch (_) { return; }
   if (host !== pick.draft.host) return; // page de connexion… : on attend le retour sur le site
   try {
-    await chrome.scripting.executeScript({ target: { tabId }, func: pickerUI, args: [pick.draft.name] });
+    await loadLang();
+    const texts = Object.fromEntries(["pick.step1", "pick.step2", "pick.notField", "pick.noButton", "pick.cancel", "pick.close", "pick.move", "pick.failed"].map((k) => [k, t(k)]));
+    texts["pick.done"] = t("pick.done", { name: pick.draft.name });
+    await chrome.scripting.executeScript({ target: { tabId }, func: pickerUI, args: [pick.draft.name, texts] });
   } catch (_) { /* autorisation retirée ou onglet fermé */ }
 }
 
 async function handlePicked(sender, msg) {
   const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
-  if (!pick || pick.tabId !== sender.tab.id) return { ok: false, error: "Repérage expiré : recommencez depuis TabulaPix." };
+  if (!pick || pick.tabId !== sender.tab.id) return { ok: false, error: t("bg.pickExpired") };
   let host = null;
   try { host = new URL(sender.url).hostname; } catch (_) { /* rien */ }
-  if (host !== pick.draft.host) return { ok: false, error: "Ce n'est pas le site prévu." };
+  if (host !== pick.draft.host) return { ok: false, error: t("bg.wrongSite") };
   if (msg.type === "pickCancel") {
     await chrome.storage.session.remove([PICK_KEY, DRAFT_KEY]);
     return { ok: true };
   }
   const fill = cleanFill({ input: msg.input, submit: msg.submit });
-  if (!fill) return { ok: false, error: "Repérage invalide : recommencez." };
+  if (!fill) return { ok: false, error: t("bg.pickInvalid") };
   // Le résultat va dans le brouillon : l'agence n'est ajoutée qu'une fois
   // vérifiée par l'utilisateur dans TabulaPix.
   await chrome.storage.session.set({ pickResult: { draftId: pick.draft.id, ...fill } });
@@ -244,21 +261,22 @@ async function handlePicked(sender, msg) {
 async function tryAgency(msg) {
   const q = typeof msg.q === "string" ? msg.q.trim().slice(0, 200) : "";
   let u;
-  try { u = new URL(msg.url); } catch (_) { return { ok: false, error: "Adresse invalide." }; }
-  if (!q || u.protocol !== "https:") return { ok: false, error: "Adresse invalide : elle doit commencer par https://" };
+  try { u = new URL(msg.url); } catch (_) { return { ok: false, error: t("bg.badUrl") }; }
+  if (!q || u.protocol !== "https:") return { ok: false, error: t("bg.https") };
   let fill = null;
   if (msg.builtinId) {
     const builtin = AGENCY_BY_ID.get(msg.builtinId);
-    if (!builtin) return { ok: false, error: "Agence inconnue." };
+    if (!builtin) return { ok: false, error: t("bg.unknownAgency") };
     if (builtin.fill) {
-      if (u.hostname !== hostOf(builtin.url, await loadOptions())) return { ok: false, error: `L'adresse doit rester sur ${hostOf(builtin.url, await loadOptions())}.` };
+      const expected = hostOf(builtin.url, await loadOptions());
+      if (u.hostname !== expected) return { ok: false, error: t("bg.sameHost", { host: expected }) };
       fill = builtin.fill;
     }
   } else if (msg.fill) {
     fill = cleanFill(msg.fill);
-    if (!fill) return { ok: false, error: "Repérage invalide." };
+    if (!fill) return { ok: false, error: t("bg.pickInvalidShort") };
     if (!(await chrome.permissions.contains({ origins: [originPattern(u.hostname)] }))) {
-      return { ok: false, error: "Autorisation manquante pour ce site : refaites le repérage." };
+      return { ok: false, error: t("bg.permMissing") };
     }
   }
   await sweep([{ id: "essai", url: u.href, host: u.hostname, fill }], q);
@@ -266,7 +284,7 @@ async function tryAgency(msg) {
 }
 
 // Exécutée DANS la page du site : bandeau qui guide le repérage.
-function pickerUI(agencyName) {
+function pickerUI(agencyName, T) {
   if (window.__tabulaPixPicker) return;
   window.__tabulaPixPicker = true;
 
@@ -358,25 +376,25 @@ function pickerUI(agencyName) {
   }
 
   function render(message, isError) {
-    $(".t").textContent = `TabulaPix — « ${agencyName} »`;
+    $(".t").textContent = `TabulaPix — ${agencyName}`;
     const m = $(".msg");
     m.className = "msg" + (isError ? " err" : "");
     const actions = $(".actions");
     actions.textContent = "";
     const btn = (label, cls, fn, title) => { const b = document.createElement("button"); b.className = cls; b.textContent = label; if (title) b.title = title; b.addEventListener("click", fn); actions.append(b); };
-    const moveBtn = () => btn("⇅", "alt", () => $(".panel").classList.toggle("bottom"), "Déplacer ce bandeau en haut / en bas de l'écran");
+    const moveBtn = () => btn("⇅", "alt", () => $(".panel").classList.toggle("bottom"), T["pick.move"]);
     if (step === "input") {
-      m.textContent = message || "1/2 — Cliquez sur le champ de recherche du site.";
-      btn("Annuler", "alt", cancel);
+      m.textContent = message || T["pick.step1"];
+      btn(T["pick.cancel"], "alt", cancel);
       moveBtn();
     } else if (step === "submit") {
-      m.textContent = message || "2/2 — Cliquez sur le bouton qui lance la recherche (loupe, « Rechercher »…).";
-      btn("Pas de bouton : utiliser Entrée", "alt", () => finish(""));
-      btn("Annuler", "alt", cancel);
+      m.textContent = message || T["pick.step2"];
+      btn(T["pick.noButton"], "alt", () => finish(""));
+      btn(T["pick.cancel"], "alt", cancel);
       moveBtn();
     } else {
       m.textContent = message;
-      btn("Fermer", "ok", stop);
+      btn(T["pick.close"], "ok", stop);
     }
   }
 
@@ -398,7 +416,7 @@ function pickerUI(agencyName) {
     if (step === "done" || inPanel(e)) return;
     e.preventDefault(); e.stopImmediatePropagation();
     if (step === "input") {
-      if (!isField(e.target)) return render("Ce n'est pas un champ de saisie : cliquez dans la zone où l'on tape la recherche.", true);
+      if (!isField(e.target)) return render(T["pick.notField"], true);
       picked.input = selectorFor(e.target);
       step = "submit";
       highlight(null);
@@ -425,8 +443,8 @@ function pickerUI(agencyName) {
     let res;
     try { res = await chrome.runtime.sendMessage({ type: "picked", ...picked }); } catch (_) { res = null; }
     render(res && res.ok
-      ? `✓ Champ et bouton repérés. Revenez dans TabulaPix pour vérifier puis ajouter « ${res.name} ».`
-      : "✗ " + ((res && res.error) || "Enregistrement impossible : recommencez depuis TabulaPix."), !(res && res.ok));
+      ? T["pick.done"]
+      : "✗ " + ((res && res.error) || T["pick.failed"]), !(res && res.ok));
   }
 
   async function cancel() {
@@ -462,6 +480,7 @@ async function fillAndSubmit(q, fill) {
   const delay = Number.isFinite(fill.delay) ? fill.delay : 300;
   await sleep(delay);
   input = find(fill.input) || input; // le champ a pu être recréé
+  if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) return false;
   input.focus();
   // Passe par le « setter » natif pour que React & co voient la saisie.
   const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
