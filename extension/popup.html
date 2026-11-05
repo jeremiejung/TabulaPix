@@ -33,26 +33,26 @@
     <ul id="manageList"></ul>
 
     <h2 id="editorTitle">Ajouter une agence</h2>
-    <form id="addForm" novalidate>
-      <fieldset class="detect">
-        <legend>Détection automatique</legend>
-        <p class="help">Faites une recherche sur le site, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés : l'adresse et l'encodage sont remplis pour vous.</p>
-        <div class="field">
-          <label for="detUrl">Adresse de la page de résultats</label>
-          <input id="detUrl" autocomplete="off" spellcheck="false" placeholder="https://…">
-        </div>
-        <div class="field">
-          <label for="detQ">Mots-clés cherchés</label>
-          <input id="detQ" autocomplete="off" placeholder="ex. Estonie frontière">
-        </div>
-        <button type="button" id="detectBtn">Détecter</button>
-        <p id="detectMsg" class="status" role="status"></p>
-      </fieldset>
-      <div class="fillbox" id="fillBox" hidden>
-        <p class="help">TabulaPix ouvrira la page ci-dessous, tapera les mots-clés dans le champ de recherche du site et cliquera sur son bouton. « Repérer sur le site… » ouvre le site pour que vous lui montriez le champ et le bouton (Chrome vous demandera l'autorisation pour ce site).</p>
-        <p class="help" id="fillInfo" hidden></p>
-        <button type="button" id="backToUrl" class="link">Utiliser plutôt une adresse de recherche avec {q}</button>
+
+    <!-- Étape 1 : détection -->
+    <div id="step1">
+      <p class="help">Faites une recherche sur le site de l'agence, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés.</p>
+      <div class="field">
+        <label for="detUrl">Page de résultats</label>
+        <input id="detUrl" autocomplete="off" spellcheck="false" placeholder="https://…">
       </div>
+      <div class="field">
+        <label for="detQ">Mots-clés cherchés</label>
+        <input id="detQ" autocomplete="off" placeholder="ex. Estonie frontière">
+      </div>
+      <button type="button" id="detectBtn" class="primary">Détecter</button>
+      <p id="detectMsg" class="status" role="status"></p>
+      <button type="button" id="manualLink" class="link">Saisir l'adresse à la main</button>
+    </div>
+
+    <!-- Étape 2 : vérification, puis ajout -->
+    <form id="addForm" novalidate hidden>
+      <p id="step2Msg" class="status ok" role="status"></p>
       <div class="field">
         <label for="newName">Nom</label>
         <input id="newName" maxlength="40" autocomplete="off">
@@ -60,28 +60,48 @@
       <div class="field">
         <label for="newUrl" id="urlLabel">Adresse de recherche</label>
         <input id="newUrl" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…">
-        <p class="help" id="urlHelp">Faites une recherche sur le site, copiez l'adresse de la page de résultats, puis remplacez vos mots-clés par <code>{q}</code> (ou <code>{q:slug}</code> si le site sépare les mots par des tirets, ex. <code>estonie-frontière</code>). Sans <code>{q}</code>, la page s'ouvre et les mots-clés sont copiés pour être collés.</p>
+        <p class="help" id="urlHelp">Vos mots-clés y sont remplacés par <code>{q}</code>.</p>
       </div>
+
+      <!-- Si les mots-clés ne passent pas par l'adresse : remplir le champ du site -->
+      <div class="fillbox" id="fillBox" hidden>
+        <p class="help">TabulaPix ouvrira cette page, tapera les mots-clés dans le champ de recherche du site et cliquera sur son bouton. Montrez-lui où ils se trouvent :</p>
+        <ul class="checks">
+          <li id="chkField"><span class="mark">○</span> Champ de recherche</li>
+          <li id="chkButton"><span class="mark">○</span> Bouton de recherche</li>
+        </ul>
+        <button type="button" id="pickBtn">Repérer le champ sur le site</button>
+        <p class="help small">Chrome vous demandera l'autorisation pour ce site.</p>
+        <button type="button" id="backToUrl" class="link">Utiliser plutôt une adresse de recherche</button>
+      </div>
+
       <details id="advanced">
-        <summary>Encodage avancé</summary>
-        <p class="help">Pour les sites qui « emballent » la recherche dans l'adresse (comme AFP news, Sipa, Rea) : mettez <code>{payload}</code> dans l'adresse, et ici le texte modèle contenant <code>{q}</code>.</p>
-        <div class="field">
-          <label for="newPayload">Modèle (payload)</label>
-          <textarea id="newPayload" rows="3" maxlength="2000" spellcheck="false" placeholder='{"searchbar":"{q}"}'></textarea>
+        <summary>Détails techniques</summary>
+        <div id="techUrl">
+          <p class="help">Pour les sites qui « emballent » la recherche dans l'adresse : <code>{payload}</code> dans l'adresse, le texte modèle contenant <code>{q}</code> ci-dessous, et les étapes d'encodage (<code>uri</code>, <code>hex</code>, <code>gzip</code>, <code>base64</code>) dans l'ordre. <code>{q:slug}</code> écrit les mots avec des tirets (<code>estonie-frontière</code>).</p>
+          <div class="field">
+            <label for="newPayload">Modèle (payload)</label>
+            <textarea id="newPayload" rows="3" maxlength="2000" spellcheck="false" placeholder='{"searchbar":"{q}"}'></textarea>
+          </div>
+          <div class="field">
+            <label for="newEncode">Étapes d'encodage</label>
+            <input id="newEncode" autocomplete="off" spellcheck="false" placeholder="ex. hex   ou   uri, gzip, base64, uri">
+          </div>
         </div>
-        <div class="field">
-          <label for="newEncode">Étapes d'encodage</label>
-          <input id="newEncode" autocomplete="off" spellcheck="false" placeholder="ex. hex   ou   uri, gzip, base64, uri">
-          <p class="help">Appliquées au modèle, dans l'ordre : <code>uri</code> (encodage URL), <code>hex</code> (hexadécimal), <code>gzip</code> (compression), <code>base64</code>.</p>
-        </div>
+        <p class="help" id="techFill" hidden></p>
       </details>
+
       <div class="bar">
-        <button type="submit" id="agencySubmit" class="primary">Ajouter</button>
+        <button type="button" id="tryBtn" title="Lancer une recherche d'essai dans un nouvel onglet">Essayer</button>
+        <button type="submit" id="agencySubmit" class="primary" disabled>Ajouter l'agence</button>
+      </div>
+      <div class="bar">
         <button type="button" id="resetAgency" hidden>Rétablir l'original</button>
-        <button type="button" id="cancelEdit" hidden>Annuler</button>
+        <button type="button" id="cancelEdit">Annuler</button>
       </div>
       <p id="addMsg" class="status" role="status"></p>
     </form>
+    <p id="listMsg" class="status" role="status"></p>
 
     <h2>Réglages</h2>
     <form id="settingsForm">
