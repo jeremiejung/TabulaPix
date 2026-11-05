@@ -58,3 +58,7 @@ code { font-size: 11px; }
 /* Agence « remplir le champ » */
 .fillbox { margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
 .link { display: block; text-align: left; padding: 0; border: 0; background: none; color: inherit; font-size: 11px; text-decoration: underline; cursor: pointer; opacity: .8; }
+
+/* Signature */
+.credit { margin: 12px 0 0; font-size: 10px; text-align: center; opacity: .55; }
+.credit a { color: inherit; }
