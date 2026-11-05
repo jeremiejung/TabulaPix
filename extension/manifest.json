@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Wire Sweep",
-  "version": "2.6.1",
-  "description": "Lance la même recherche sur toutes vos agences photo, un onglet par agence.",
+  "name": "TabulaPix",
+  "version": "2.7.0",
+  "description": "Une recherche, toutes vos agences photo : TabulaPix ouvre un onglet par agence avec vos résultats.",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -10,7 +10,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "Wire Sweep",
+    "default_title": "TabulaPix",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

@@ -245,7 +245,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     ed.url.value = pageUrl.trim();
     if (!ed.name.value.trim()) ed.name.value = new URL(pageUrl.trim()).hostname.replace(/^(www|search|stock)\./, "");
     detectMsg.className = "status ok";
-    detectMsg.textContent = `Les mots-clés ne figurent pas dans l'adresse : Wire Sweep remplira plutôt le champ de recherche du site.\nVérifiez le nom, puis cliquez sur « ${ed.submit.textContent} ».`;
+    detectMsg.textContent = `Les mots-clés ne figurent pas dans l'adresse : TabulaPix remplira plutôt le champ de recherche du site.\nVérifiez le nom, puis cliquez sur « ${ed.submit.textContent} ».`;
     return;
   }
   detectMsg.className = "status " + (r.error ? "err" : "ok");

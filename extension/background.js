@@ -202,7 +202,7 @@ async function injectPickerIfNeeded(tabId, tab) {
 
 async function handlePicked(sender, msg) {
   const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
-  if (!pick || pick.tabId !== sender.tab.id) return { ok: false, error: "Repérage expiré : recommencez depuis Wire Sweep." };
+  if (!pick || pick.tabId !== sender.tab.id) return { ok: false, error: "Repérage expiré : recommencez depuis TabulaPix." };
   let host = null;
   try { host = new URL(sender.url).hostname; } catch (_) { /* rien */ }
   if (host !== pick.draft.host) return { ok: false, error: "Ce n'est pas le site prévu." };
@@ -230,8 +230,8 @@ async function handlePicked(sender, msg) {
 
 // Exécutée DANS la page du site : bandeau qui guide le repérage.
 function pickerUI(agencyName) {
-  if (window.__wireSweepPicker) return;
-  window.__wireSweepPicker = true;
+  if (window.__tabulaPixPicker) return;
+  window.__tabulaPixPicker = true;
 
   const host = document.createElement("div");
   host.style.cssText = "all:initial;position:fixed;inset:0;z-index:2147483647;pointer-events:none;";
@@ -321,7 +321,7 @@ function pickerUI(agencyName) {
   }
 
   function render(message, isError) {
-    $(".t").textContent = `Wire Sweep — « ${agencyName} »`;
+    $(".t").textContent = `TabulaPix — « ${agencyName} »`;
     const m = $(".msg");
     m.className = "msg" + (isError ? " err" : "");
     const actions = $(".actions");
@@ -377,7 +377,7 @@ function pickerUI(agencyName) {
   function stop() {
     events.forEach(([t, fn]) => document.removeEventListener(t, fn, true));
     host.remove();
-    window.__wireSweepPicker = false;
+    window.__tabulaPixPicker = false;
   }
 
   async function finish(submitSelector) {
@@ -388,8 +388,8 @@ function pickerUI(agencyName) {
     let res;
     try { res = await chrome.runtime.sendMessage({ type: "picked", ...picked }); } catch (_) { res = null; }
     render(res && res.ok
-      ? `✓ « ${res.name} » est prête dans Wire Sweep. Vous pouvez fermer cet onglet.`
-      : "✗ " + ((res && res.error) || "Enregistrement impossible : recommencez depuis Wire Sweep."), !(res && res.ok));
+      ? `✓ « ${res.name} » est prête dans TabulaPix. Vous pouvez fermer cet onglet.`
+      : "✗ " + ((res && res.error) || "Enregistrement impossible : recommencez depuis TabulaPix."), !(res && res.ok));
   }
 
   async function cancel() {
