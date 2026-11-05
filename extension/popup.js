@@ -695,8 +695,10 @@ function setAll(state) {
 document.getElementById("all").addEventListener("click", () => setAll(true));
 document.getElementById("none").addEventListener("click", () => setAll(false));
 
+let sweeping = false; // évite un double lancement (double Entrée)
 document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (sweeping) return;
   const q = input.value.trim();
   const ids = checkedIds();
   if (!q) return input.focus();
@@ -720,7 +722,9 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   // se ferme dès qu'un onglet passe au premier plan.
   chrome.storage.local.set({ [QUERY_KEY]: q });
   const jobs = selected.map((a, i) => ({ id: a.id, url: urls[i] }));
-  await chrome.runtime.sendMessage({ type: "sweep", jobs, q });
+  sweeping = true;
+  try { await chrome.runtime.sendMessage({ type: "sweep", jobs, q }); }
+  finally { setTimeout(() => { sweeping = false; }, 800); }
   if (isPopup) {
     window.close(); // on reste sur l'onglet en cours
   } else {
@@ -751,7 +755,7 @@ langReady.then(refreshList).then((data) => {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   // Agences modifiées ailleurs (autre fenêtre) : on met la liste à jour.
-  if (area === "local" && changes[CUSTOM_KEY]) {
+  if (area === "local" && (changes[CUSTOM_KEY] || changes[HIDDEN_KEY] || changes[OVERRIDES_KEY])) {
     if (!settingsView.hidden) renderManageList(); else refreshList();
   }
   // Repérage terminé sur le site (colonne latérale restée ouverte) : on l'affiche.

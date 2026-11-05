@@ -26,7 +26,6 @@ const I18N = {
     "main.handle": "Glisser pour réordonner (ou Alt + ↑ / ↓ sur la case)",
     "main.paste": "coller",
     "main.paste.title": "Mots-clés copiés dans le presse-papiers : collez-les (Ctrl/Cmd+V) dans le champ de recherche du site.",
-    "main.optionsSaved": "Options enregistrées.",
 
     // Options
     "opt.title": "Options",
@@ -169,7 +168,6 @@ const I18N = {
     "main.handle": "Drag to reorder (or Alt + ↑ / ↓ on the checkbox)",
     "main.paste": "paste",
     "main.paste.title": "Keywords copied to the clipboard: paste them (Ctrl/Cmd+V) into the site's search field.",
-    "main.optionsSaved": "Settings saved.",
 
     "opt.title": "Settings",
     "opt.back": "← Back",

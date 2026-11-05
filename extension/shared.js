@@ -73,7 +73,10 @@ function cleanFill(f) {
   const input = String(f.input || "").trim();
   const submit = String(f.submit || "").trim();
   if (!input || input.length > 500 || submit.length > 500) return null;
-  return submit ? { input, submit } : { input };
+  const out = submit ? { input, submit } : { input };
+  // Délai propre à certains sites lents (ex. Bloomberg), borné à 10 s.
+  if (Number.isFinite(f.delay) && f.delay >= 0 && f.delay <= 10000) out.delay = f.delay;
+  return out;
 }
 
 // Agence ajoutée par l'utilisateur : copie propre, ou null.

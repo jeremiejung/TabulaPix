@@ -104,9 +104,15 @@ async function sweep(jobs, q) {
 
   // Les onglets s'ouvrent en arrière-plan : l'utilisateur reste sur son onglet.
   for (const [i, job] of jobs.entries()) {
-    const tab = reuse[i]
-      ? await chrome.tabs.update(reuse[i].id, { url: job.url })
-      : await chrome.tabs.create({ url: job.url, active: false });
+    let tab;
+    try {
+      tab = reuse[i]
+        ? await chrome.tabs.update(reuse[i].id, { url: job.url })
+        : await chrome.tabs.create({ url: job.url, active: false });
+    } catch (_) {
+      // Onglet fermé entre-temps : on en ouvre un nouveau, sans bloquer les autres agences.
+      try { tab = await chrome.tabs.create({ url: job.url, active: false }); } catch (_) { continue; }
+    }
     if (job.fill) {
       // Enregistré tout de suite, avant que la page ait fini de charger.
       await updatePending((pending) => { pending[tab.id] = { q, id: job.id, host: job.host, fill: job.fill, attempts: 0 }; });
@@ -170,8 +176,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   }
 });
 
-chrome.tabs.onRemoved.addListener((tabId) => {
+chrome.tabs.onRemoved.addListener(async (tabId) => {
   updatePending((pending) => { delete pending[tabId]; });
+  // Repérage abandonné (onglet fermé) : on l'oublie.
+  const { pickSession } = await chrome.storage.session.get("pickSession");
+  if (pickSession && pickSession.tabId === tabId) chrome.storage.session.remove(["pickSession", "fillDraft"]);
 });
 
 /* ---------- Repérage du champ et du bouton d'un site ---------- */
@@ -471,6 +480,7 @@ async function fillAndSubmit(q, fill) {
   const delay = Number.isFinite(fill.delay) ? fill.delay : 300;
   await sleep(delay);
   input = find(fill.input) || input; // le champ a pu être recréé
+  if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) return false;
   input.focus();
   // Passe par le « setter » natif pour que React & co voient la saisie.
   const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;

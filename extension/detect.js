@@ -29,9 +29,24 @@ function base64ToBytes(s) {
   return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
 
+// Décompression plafonnée à 1 Mo (une adresse ne contient pas plus ; évite de
+// bloquer la popup sur des données qui gonfleraient démesurément).
+const MAX_INFLATE = 1024 * 1024;
 async function gunzip(bytes) {
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+  const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip")).getReader();
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > MAX_INFLATE) { reader.cancel(); throw new Error("trop gros"); }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(size);
+  let offset = 0;
+  for (const c of chunks) { out.set(c, offset); offset += c.length; }
+  return out;
 }
 
 const printable = (s) => !/[\u0000-\u0008\u000E-\u001F]/.test(s);
