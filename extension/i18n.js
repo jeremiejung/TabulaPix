@@ -102,8 +102,8 @@ const I18N = {
     "ed.siteOpening": "Le site s'ouvre : cliquez sur son champ de recherche, puis sur son bouton.",
     "ed.tryStarted": "Essai lancé avec « {q} » dans un nouvel onglet.",
     "ed.tryFailed": "Essai impossible.",
-    "ed.restored": "« {name} » : adresse d'origine rétablie.",
-    "ed.original": "« {name} » : adresse d'origine.",
+    "ed.restored": "« {name} » : configuration d'origine rétablie.",
+    "ed.original": "« {name} » : configuration d'origine.",
     "ed.modified": "« {name} » modifiée.",
     "ed.added": "« {name} » ajoutée.",
 
@@ -243,8 +243,8 @@ const I18N = {
     "ed.siteOpening": "The site is opening: click its search field, then its button.",
     "ed.tryStarted": "Test search for “{q}” opened in a new tab.",
     "ed.tryFailed": "Test search failed.",
-    "ed.restored": "“{name}”: original address restored.",
-    "ed.original": "“{name}”: original address.",
+    "ed.restored": "“{name}”: original settings restored.",
+    "ed.original": "“{name}”: original settings.",
     "ed.modified": "“{name}” updated.",
     "ed.added": "“{name}” added.",
 
