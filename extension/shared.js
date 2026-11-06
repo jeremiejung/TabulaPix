@@ -138,3 +138,17 @@ async function loadAgencies(options) {
     hidden: new Set(Array.isArray(data[HIDDEN_KEY]) ? data[HIDDEN_KEY] : [])
   };
 }
+
+// Agences fournies « masquées par défaut » (defaultHidden) : masquées la
+// première fois qu'elles apparaissent (installation ou mise à jour), puis le
+// choix de l'utilisateur est respecté. SEEN_KEY retient les agences déjà vues.
+const SEEN_KEY = "seenAgencies";
+async function applyNewAgencyDefaults() {
+  const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [] });
+  const seen = new Set(Array.isArray(data[SEEN_KEY]) ? data[SEEN_KEY] : []);
+  const fresh = AGENCIES.filter((a) => !seen.has(a.id));
+  if (!fresh.length) return;
+  const hidden = new Set(Array.isArray(data[HIDDEN_KEY]) ? data[HIDDEN_KEY] : []);
+  for (const a of fresh) if (a.defaultHidden) hidden.add(a.id);
+  await chrome.storage.local.set({ [SEEN_KEY]: AGENCIES.map((a) => a.id), [HIDDEN_KEY]: [...hidden] });
+}

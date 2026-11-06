@@ -9,6 +9,8 @@
  *   id       identifiant unique, sans espace (sert à mémoriser la case cochée)
  *   name     nom affiché dans la popup
  *   defaultChecked  (facultatif) false = décochée au premier lancement
+ *   defaultHidden   (facultatif) true = masquée la première fois qu'elle
+ *                   apparaît (à afficher dans ⚙ → Agences affichées)
  *   url      adresse de recherche. Marqueurs possibles :
  *              {q}        → les mots-clés, encodés pour une URL (cas le plus courant)
  *              {payload}  → le résultat du champ « payload » ci-dessous
@@ -40,8 +42,17 @@
 const AGENCIES = [
   {
     id: "reuters",
-    name: "Reuters",
+    name: "Reuters (points)",
+    // Interface des comptes au crédit de points (affiche le solde de points).
     url: "https://www.reutersconnect.com/all?media-types=pic&search=all%3A{q}"
+  },
+  {
+    id: "reuters-standard",
+    name: "Reuters (standard)",
+    defaultChecked: false,
+    defaultHidden: true,
+    // Interface « app » des comptes sans points (téléchargement libre).
+    url: "https://www.reutersconnect.com/app/feed/pictures?query={q}"
   },
   {
     id: "afp",
@@ -54,6 +65,7 @@ const AGENCIES = [
     id: "afp-forum",
     name: "AFP (forum)",
     defaultChecked: false,
+    defaultHidden: true,
     // Les paramètres sont répétés après le « # » : la page les relit de là.
     url: "https://www.afpforum.com/AFPForum/Search/Results.aspx?pn=1&smd=8&mui=3&fst={q}&fto=3&t=2#pn=1&smd=8&mui=3&fst={q}&fto=3&t=2"
   },

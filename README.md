@@ -63,6 +63,7 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
 
 - **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez).
+  - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte. **AFP (forum)** est aussi masquée par défaut.
 - **Ajouter une agence**, en trois étapes :
   1. **Détecter** : faites une recherche sur le site de l'agence, puis collez l'adresse de la page de résultats et les mots-clés que vous avez tapés (ex. « Estonie frontière ») et cliquez sur **Détecter**.
   2. **Vérifier** : TabulaPix propose un nom (le domaine du site, ex. `search.reaphoto.com` → « Reaphoto ») et remplit l'adresse de recherche, avec une surbrillance verte sur ce qu'il vient de remplir.
@@ -93,7 +94,7 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 }
 ```
 
-Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` (c'est le cas d'AFP (forum)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
+Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` ; pour qu'elle soit masquée (à afficher dans ⚙ → Agences affichées), `defaultHidden: true` — appliqué la première fois que l'agence apparaît, y compris lors d'une mise à jour (c'est le cas d'AFP (forum) et de Reuters (standard)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
 
 Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
 
