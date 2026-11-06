@@ -151,6 +151,8 @@ Le numéro de version (`version` dans `extension/manifest.json`) ne change **qu'
 
 Le store refuse un numéro inférieur ou égal à la version publiée : on ne peut jamais revenir en arrière.
 
+L'historique des versions est tenu dans [`CHANGELOG.md`](CHANGELOG.md).
+
 ### Chrome Web Store
 
 Les éléments de la fiche (descriptions, justifications des autorisations, instructions pour l'examen) sont dans [`store/fiche-chrome-web-store.md`](store/fiche-chrome-web-store.md), les captures d'écran et la tuile promotionnelle dans [`store/images/`](store/images/), et la politique de confidentialité dans [`PRIVACY.md`](PRIVACY.md).
