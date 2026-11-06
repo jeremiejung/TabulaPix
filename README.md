@@ -1,99 +1,96 @@
 # TabulaPix
 
-**Une recherche, toutes vos agences photo.** — *One search, all your picture agencies.*
+***English** · [Français](README.fr.md)*
 
-**➜ [Installer depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** — *[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)*
+**One search, all your picture agencies.**
 
-Available in English and French (follows the browser language, can be changed in the settings). Chrome extension for photo editors: type your keywords once and search all your news picture agencies at the same time (AFP, Reuters, Getty, Sipa, Abaca, MaxPPP, PixPalace…). TabulaPix opens one tab per agency with results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored.
+**➜ [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**
 
----
+Chrome extension for photo desks, picture researchers and photo editors: type your keywords once and search all your news picture agencies at the same time. TabulaPix opens one tab per agency with the results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored. Interface in English and French.
 
-## TabulaPix (en français)
+Everything is set up from the extension itself (⚙ button), without editing any file: agencies shown, order, agencies added with automatic detection, editable addresses and field locations, language, Pixpalace subdomain. Ticked agencies and their order are remembered between uses.
 
-> Tout se règle depuis l'extension (bouton ⚙), sans modifier de fichier : agences affichées, adresses des agences (y compris l'encodage), agences personnalisées avec détection automatique, sous-domaine Pixpalace.
+Chrome extension (Manifest V3) in plain HTML/JavaScript: no dependencies, no build step.
 
-Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les agences, et TabulaPix ouvre un onglet par agence avec la recherche déjà lancée. Les agences cochées sont mémorisées d'une utilisation à l'autre.
+## Installation
 
-HTML/JavaScript simple : aucune dépendance, aucune compilation.
+**The easiest way: [install TabulaPix from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**, then pin the extension (puzzle icon 🧩 → pin next to **TabulaPix**). Updates then arrive automatically.
 
-### Installation
+> If you have been using the version loaded from a folder, Chrome treats the store version as a different extension: your settings (ticked agencies, order, added agencies, Pixpalace subdomain) are not carried over. Write them down, install the store version, set them again, then remove the old version in `chrome://extensions` so that you don't have TabulaPix twice.
 
-**Le plus simple : [installer TabulaPix depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**, puis épingler l'extension (icône puzzle 🧩 → épingle à côté de **TabulaPix**). Les mises à jour arrivent ensuite automatiquement.
+**Manual installation** (development version, from this repository):
 
-> Si vous utilisiez jusqu'ici la version chargée depuis un dossier, Chrome considère la version du store comme une autre extension : vos réglages (agences cochées, ordre, agences ajoutées, sous-domaine Pixpalace) ne sont pas repris. Notez-les, installez la version du store, refaites-les, puis supprimez l'ancienne version dans `chrome://extensions` pour ne pas avoir TabulaPix en double.
+1. Download this repository (**Code → Download ZIP** on GitHub) and unzip it, or clone it with `git clone`.
+2. In Chrome, open `chrome://extensions`.
+3. Turn on **Developer mode** (switch at the top right).
+4. Click **Load unpacked** and choose the repository's `extension` folder.
+5. Pin the extension: puzzle icon 🧩 in the toolbar → pin next to **TabulaPix**.
+6. Adjust your **settings** (⚙ button in the popup), in particular the subdomain of your Pixpalace space (see “Settings” below).
 
-**Installation manuelle** (version de développement, depuis ce dépôt) :
+Also works in Chromium-based browsers (Edge, Brave, Arc…) through their equivalent extensions page.
 
+> **Do not move, rename or delete the folder after installing.** Chrome reads the extension directly from that folder: if it moves, the extension no longer loads (it is disabled, with an error in `chrome://extensions`).
+> So choose a lasting location before installing (for example `Documents/TabulaPix`), not the Downloads folder or the Desktop.
+> If the folder was moved: remove TabulaPix in `chrome://extensions`, then repeat step 4 choosing the `extension` folder in its new location. Chrome then treats it as a new extension: ticked agencies and their order have to be set again.
 
-1. Téléchargez ce dépôt (bouton **Code → Download ZIP** sur GitHub) et décompressez-le, ou clonez-le avec `git clone`.
-2. Dans Chrome, ouvrez `chrome://extensions`.
-3. Activez le **Mode développeur** (interrupteur en haut à droite).
-4. Cliquez sur **Charger l'extension non empaquetée** et choisissez le dossier `extension` du dépôt.
-5. Épinglez l'extension : icône puzzle 🧩 dans la barre d'outils → épingle à côté de **TabulaPix**.
-6. Réglez vos **options** (bouton ⚙ de la popup) : notamment le sous-domaine de votre espace Pixpalace (voir « Options » ci-dessous).
+## Updating a manual installation
 
-Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) via leur page d'extensions équivalente.
+(The Chrome Web Store version updates itself.)
 
-> **Ne déplacez pas, ne renommez pas et ne supprimez pas le dossier après l'installation.** Chrome lit l'extension directement dans ce dossier : s'il change de place, l'extension ne se charge plus (elle est désactivée, avec une erreur dans `chrome://extensions`).
-> Choisissez donc un emplacement durable avant d'installer (par exemple `Documents/TabulaPix`), pas le dossier Téléchargements ni le Bureau.
-> Si le dossier a été déplacé : supprimez TabulaPix dans `chrome://extensions`, puis refaites l'étape 4 en choisissant le dossier `extension` à son nouvel emplacement. Chrome la considère alors comme une nouvelle extension : les agences cochées et leur ordre sont à refaire.
+1. Download the new version (**Code → Download ZIP**) and unzip it.
+2. Copy the **contents** of its `extension` folder into the `extension` folder already installed, replacing the existing files. Keep the same folder, in the same place: this is what keeps your ticked agencies and their order.
+3. In `chrome://extensions`, click the **↻** (reload) button on the TabulaPix card.
+4. If Chrome shows a warning about new permissions, accept it: the “Privacy” section below explains each of them.
 
-### Mettre à jour une version déjà installée
+If you installed with `git clone`: `git pull` in the repository folder, then **↻** in `chrome://extensions`.
 
-1. Téléchargez la nouvelle version (bouton **Code → Download ZIP**) et décompressez-la.
-2. Copiez le **contenu** de son dossier `extension` dans le dossier `extension` déjà installé, en remplaçant les fichiers existants. Gardez le même dossier, au même endroit : c'est ce qui conserve vos agences cochées et leur ordre.
-3. Dans `chrome://extensions`, cliquez sur le bouton **↻** (recharger) de la carte TabulaPix.
-4. Si Chrome affiche un avertissement sur de nouvelles autorisations, acceptez-le : la section « Confidentialité » ci-dessous explique chacune.
+If you had edited `config.js`, note your changes before replacing the files, then copy them into the new `config.js`.
 
-Si vous avez installé avec `git clone` : `git pull` dans le dossier du dépôt, puis **↻** dans `chrome://extensions`.
+## Usage
 
-Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les fichiers, puis reportez-les dans le nouveau `config.js`.
+1. Click the TabulaPix icon.
+2. Type your keywords and tick the agencies you want (**All** / **None** buttons to go faster).
+   To change the order of the agencies, drag them by the **⋮⋮** handle on the left (or, with the keyboard, **Alt + ↑ / ↓** on a checkbox). The order is remembered and tabs open in that order.
+3. Press **Enter** or **Search**: one tab opens per agency.
+   Tabs open in the background: you stay on the tab you are on.
+   Your last keywords are shown again (already selected) the next time you open TabulaPix: just type to replace them.
+   If a tab is already open on an agency's site (for example after a previous search), it is reused: the new search shows there instead of opening one more tab.
 
-### Utilisation
+**Keep open:** the **Keep open ⇥** button at the top of the popup shows TabulaPix in a column on the right of the window (Chrome's side panel, version 116 or later). The column stays open when you switch tabs, so you can chain searches without reopening the extension. To close it: the cross at the top of the column. It can also be reopened from Chrome's side panel icon.
 
-1. Cliquez sur l'icône TabulaPix.
-2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
-   Pour changer l'ordre des agences, faites-les glisser par la poignée **⋮⋮** à gauche (ou, au clavier, **Alt + ↑ / ↓** sur une case). L'ordre est mémorisé et les onglets s'ouvrent dans cet ordre.
-3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
-   Les onglets s'ouvrent en arrière-plan : vous restez sur l'onglet où vous êtes.
-   Les derniers mots-clés lancés sont réaffichés (déjà sélectionnés) à la prochaine ouverture : tapez directement pour les remplacer.
-   Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus.
+For **Bloomberg, Abacapress and Pixpalace**, the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more).
 
-**Garder ouvert :** le bouton **Garder ouvert ⇥** en haut de la popup affiche TabulaPix dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
+If an agency added later has neither an address with `{q}` nor automatic field filling, it is marked **“paste”**: the page opens and your keywords are copied to the clipboard; just press **Ctrl+V** (or **Cmd+V**) in the search field.
 
-Pour **Bloomberg, Abacapress et Pixpalace**, l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus).
+You need to be logged in to your agency accounts in Chrome, as usual: the extension only opens tabs.
 
-Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automatique, elle est marquée **« coller »** : la page s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche.
+## Settings
 
-Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude : l'extension ne fait qu'ouvrir des onglets.
+The **⚙** button at the top of the popup (or of the column) shows the settings right in the popup; **← Back** returns to the search.
 
-### Options
+- **Agencies shown**: untick the agencies you don't use, they disappear from the list (their place in the order is kept if you show them again).
+  - **Reuters** comes in two versions, depending on your contract: **Reuters (points)** for credit-based accounts (shows your points balance), shown by default, and **Reuters (standard)** for accounts without points (free download), hidden by default: show the one that matches your account. **AFP (forum)** is also hidden by default.
+- **Add an agency**, in three steps:
+  1. **Detect**: run a search on the agency's website, then paste the address of the results page and the keywords you typed (e.g. “Estonia border”) and click **Detect**.
+  2. **Check**: TabulaPix suggests a name (the site's domain, e.g. `search.reaphoto.com` → “Reaphoto”) and fills in the search address, with a green highlight on what it just filled in.
+     - If the keywords are in the address (plain, with dashes, or wrapped: URL encoding, hexadecimal, base64, gzip and combinations of them), it is ready.
+     - Otherwise (search stored on the server, like Pixpalace, or a page whose address doesn't change), TabulaPix will fill in the site's search field: click **Locate the field on the site**. Chrome asks for permission for that site (and that site only), the site opens with a TabulaPix banner: click its search field, then its button (or “No button: use Enter”; **⇅** moves the banner). TabulaPix then reopens on this step, with “✓ Search field” and “✓ Search button”.
+     - **Try** runs a test search in a new tab, with the current settings.
+  3. **Add the agency**: the button only becomes active when everything is correct; the agency appears in the list, ticked and highlighted.
 
-Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
+  The “Type the address by hand” link lets you type an address directly, with `{q}` in place of the keywords (or `{q:slug}` if the site separates words with dashes: “Estonia border” → `Estonia-border`). Without `{q}`, the page opens and the keywords are copied to be pasted. **Technical details** (folded) show the template and encoding steps, or where the located field and button are. Added agencies are tagged “custom” (“custom · field” for those that fill in a field) and are deleted with ✕; deleting an agency that fills in a field also removes the permission granted for its site.
 
-- **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez).
-  - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte. **AFP (forum)** est aussi masquée par défaut.
-- **Ajouter une agence**, en trois étapes :
-  1. **Détecter** : faites une recherche sur le site de l'agence, puis collez l'adresse de la page de résultats et les mots-clés que vous avez tapés (ex. « Estonie frontière ») et cliquez sur **Détecter**.
-  2. **Vérifier** : TabulaPix propose un nom (le domaine du site, ex. `search.reaphoto.com` → « Reaphoto ») et remplit l'adresse de recherche, avec une surbrillance verte sur ce qu'il vient de remplir.
-     - Si les mots-clés sont dans l'adresse (en clair, avec des tirets, ou emballés : encodage URL, hexadécimal, base64, gzip et leurs combinaisons), c'est prêt.
-     - Sinon (recherche enregistrée côté serveur, comme Pixpalace, ou page qui ne change pas d'adresse), TabulaPix remplira le champ de recherche du site : cliquez sur **Repérer le champ sur le site**. Chrome demande l'autorisation pour ce site (et lui seul), le site s'ouvre avec un bandeau TabulaPix : cliquez sur son champ de recherche, puis sur son bouton (ou « Pas de bouton : utiliser Entrée » ; **⇅** déplace le bandeau). TabulaPix se rouvre ensuite sur cette étape, avec « ✓ Champ de recherche » et « ✓ Bouton de recherche ».
-     - **Essayer** lance une recherche d'essai dans un nouvel onglet, avec les réglages en cours.
-  3. **Ajouter l'agence** : le bouton ne s'active que lorsque tout est correct ; l'agence apparaît dans la liste, cochée, en surbrillance.
+  Locating ignores ids generated on every page load (e.g. `…__bfac60392382`) and relies on stable landmarks (field name, class, button label…); if the site has several identical search forms, TabulaPix uses the first visible one and the button closest to the field. If the site changes its page, locate the field again (✎ then **Locate again**).
+- **Edit an agency** (**✎** button): the same form, straight at the “check” step, with **Save**. For built-in agencies, the name stays the same, a “modified” tag appears and **Restore the original** goes back to the shipped settings.
+  - **Bloomberg, Abacapress and Pixpalace** fill in their site's search field: if one of them changes its page and the search no longer starts, open ✎ then **Locate again** to show it the field and button again (no extra permission is requested; Bloomberg's specific delay is kept). Their address can be edited, but must stay on the same site.
+- **Language**: English or French. By default, TabulaPix follows the browser language (“Automatic”); the change applies immediately. The name and description shown in `chrome://extensions` and on the Chrome Web Store always follow the browser language.
+- **Pixpalace subdomain**: the part before `.pixpalace.com` in the address of your Pixpalace space (`www` by default). For example, for `https://mynewsroom.pixpalace.com/home`, type `mynewsroom`.
 
-  Le lien « Saisir l'adresse à la main » permet de taper directement une adresse avec `{q}` à la place des mots-clés (ou `{q:slug}` si le site sépare les mots par des tirets : « Estonie frontière » → `Estonie-frontière`). Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. Les **Détails techniques** (repliés) montrent le modèle et les étapes d'encodage, ou l'emplacement du champ et du bouton repérés. Les agences ajoutées portent la mention « perso » (« perso · champ » pour celles qui remplissent un champ) et se suppriment avec ✕ ; supprimer une agence qui remplit un champ retire aussi l'autorisation donnée pour son site.
+These settings stay in Chrome on your computer and are kept across updates.
 
-  Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, TabulaPix utilise le premier visible et le bouton le plus proche du champ. Si le site change sa page, refaites le repérage (✎ puis **Refaire le repérage**).
-- **Modifier une agence** (bouton **✎**) : même formulaire, directement à l'étape « vérifier », avec **Enregistrer**. Pour les agences fournies, le nom reste le même, la mention « modifiée » apparaît et **Rétablir l'original** revient à la configuration livrée.
-  - **Bloomberg, Abacapress et Pixpalace** remplissent le champ de recherche de leur site : si l'un d'eux change sa page et que la recherche ne part plus, ouvrez ✎ puis **Refaire le repérage** pour lui montrer à nouveau le champ et le bouton (aucune autorisation supplémentaire n'est demandée ; le délai propre à Bloomberg est conservé). Leur adresse peut être modifiée, mais doit rester sur le même site.
-- **Langue** : français ou anglais. Par défaut, TabulaPix suit la langue du navigateur (« Automatique ») ; le changement s'applique immédiatement. Le nom et la description affichés dans `chrome://extensions` et sur le Chrome Web Store suivent toujours la langue du navigateur.
-- **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
+## Editing the built-in agencies (development)
 
-Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
-
-### Modifier les agences
-
-Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adresse où le mot-clé est remplacé par `{q}` :
+Everything is in **`extension/config.js`**. Each agency has a name and an address where the keyword is replaced by `{q}`:
 
 ```js
 {
@@ -103,64 +100,64 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 }
 ```
 
-Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` ; pour qu'elle soit masquée (à afficher dans ⚙ → Agences affichées), `defaultHidden: true` — appliqué la première fois que l'agence apparaît, y compris lors d'une mise à jour (c'est le cas d'AFP (forum) et de Reuters (standard)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
+To have an agency unticked on a first install, add `defaultChecked: false`; to have it hidden (to be shown in ⚙ → Agencies shown), `defaultHidden: true` — applied the first time the agency appears, including on an update (this is the case for AFP (forum) and Reuters (standard)). A new agency is placed in the list right after the one that precedes it in `config.js`.
 
-Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
+Tip for finding the address: run a search on the site with easy-to-spot words (e.g. `midterms texas democrats`), copy the URL of the results page and replace the words with `{q}`. Depending on the site, spaces appear as `%20` or `+`: replace the whole thing, separators included.
 
-Les valeurs propres à une rédaction ne s'écrivent pas en dur : elles passent par une option, insérée dans l'adresse avec `{opt:nom}` (voir `OPTIONS` en bas de `config.js`).
+Newsroom-specific values are not hard-coded: they go through an option, inserted in the address with `{opt:name}` (see `OPTIONS` at the bottom of `config.js`).
 
-Certains sites (AFP news, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
+Some sites (AFP news, Sipa, Rea) “wrap” the search in the URL (hexadecimal, or gzip + base64). For them, the content is described in `payload` and the encoding steps in `encode` — see the comments at the top of `config.js`.
 
-Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Pour un nouveau site de ce type, ajoutez aussi son domaine dans `host_permissions` du fichier `extension/manifest.json`.
+For sites whose address cannot contain the search, the field to fill in and the button to click are given instead (`fill`), as CSS selectors. For a new site of this kind, also add its domain to `host_permissions` in `extension/manifest.json`.
 
-Après toute modification : `chrome://extensions` → bouton **↻** (recharger) sur TabulaPix.
+After any change: `chrome://extensions` → **↻** (reload) button on TabulaPix.
 
-### Icône
+## Icon
 
-Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombre), avec une loupe rouge en bas à droite. Sources dans `extension/icons/` : `icon.svg` (32 à 128 px) et `icon-16.svg`, une version simplifiée dessinée pour 16 px. Les PNG `icon-16/32/48/128.png` en sont l'export à taille réelle. Pour modifier l'icône, éditez les SVG puis réexportez-les aux mêmes tailles, sur fond transparent.
+A text cursor in a rounded frame with a white background (readable in dark mode), with a red magnifying glass at the bottom right. Sources in `extension/icons/`: `icon.svg` (32 to 128 px) and `icon-16.svg`, a simplified version drawn for 16 px. The PNGs `icon-16/32/48/128.png` are their actual-size exports. To change the icon, edit the SVGs and export them again at the same sizes, on a transparent background.
 
-### Confidentialité
+## Privacy
 
-- Aucune collecte de données, aucun mot de passe, aucun compte.
-- Aucun appel réseau : l'extension se contente d'ouvrir des onglets (la politique de sécurité de l'extension interdit d'ailleurs toute requête : `connect-src 'none'`).
-- Seules données enregistrées : la liste des agences cochées, leur ordre, les agences masquées, modifiées ou ajoutées, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
-- Permissions demandées :
-  - `storage` : mémoriser les cases cochées ;
-  - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
-  - `sidePanel` : afficher TabulaPix dans la colonne de droite.
-  - `tabs` : voir les adresses des onglets ouverts, pour réutiliser celui d'une agence déjà ouverte au lieu d'en ouvrir un nouveau. Rien n'est enregistré ni transmis. Chrome affiche pour cela l'avertissement « Lire votre historique de navigation ».
-  - accès à un site supplémentaire, demandé au cas par cas (fenêtre de Chrome) uniquement quand vous ajoutez une agence de type « Remplir le champ de recherche du site », et retiré quand vous la supprimez ;
-  - `scripting` + accès à `mercury.bloomberg.com`, `search.abacapress.com` et `*.pixpalace.com` : uniquement pour taper les mots-clés dans le champ de recherche de ces trois sites et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages. Chrome affichera pour cela un avertissement « lire et modifier vos données sur ces sites ».
+- No data collection, no passwords, no account.
+- No network calls: the extension only opens tabs (its security policy actually forbids any request: `connect-src 'none'`).
+- The only data stored: ticked agencies, their order, hidden, edited or added agencies, the last search and your settings, stored locally in Chrome (`chrome.storage.local`), never transmitted. Only the last search is kept (no history); it disappears when the extension is uninstalled.
+- Permissions requested:
+  - `storage`: remember your ticks and settings;
+  - `clipboardWrite`: copy the keywords for “paste” sites;
+  - `sidePanel`: show TabulaPix in the right-hand column;
+  - `tabs`: see the addresses of open tabs, to reuse an agency's tab that is already open instead of opening a new one. Nothing is stored or transmitted. For this, Chrome shows the “Read your browsing history” warning;
+  - access to an additional site, requested case by case (Chrome prompt) only when you add an agency whose search field must be filled in, and removed when you delete it;
+  - `scripting` + access to `mercury.bloomberg.com`, `search.abacapress.com` and `*.pixpalace.com`: only to type the keywords into these three sites' search field and click the button. The extension reads nothing else on these pages. For this, Chrome shows a “Read and change your data on these sites” warning.
 
-### Sécurité
+See also the [privacy policy](PRIVACY.md).
 
-- Les sites et les champs à remplir viennent uniquement de `config.js`, livré avec l'extension : rien n'est téléchargé.
-- Le script d'arrière-plan n'accepte que les demandes de sa propre popup, et n'ouvre que des adresses `https` correspondant au site déclaré pour chaque agence (y compris les agences ajoutées, dont l'adresse est vérifiée à l'ajout puis à chaque lecture).
-- Avant de remplir un champ, il vérifie que l'onglet est toujours sur le site de l'agence.
-- Repérage d'un champ sur un site ajouté : le bandeau n'est affiché que dans l'onglet ouvert pour ce repérage ; le résultat n'est accepté que de cet onglet, sur ce site, et ne contient que l'emplacement du champ et du bouton (aucun contenu de la page n'est lu ni conservé).
-- Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
-- Mises à jour : l'extension ne se met jamais à jour toute seule. Ne remplacez le dossier que par une version venant de ce dépôt, et protégez le compte GitHub par la double authentification.
+## Security
 
-### Numéros de version
+- Built-in agencies come from `config.js`, shipped with the extension, and added agencies from your settings: nothing is downloaded.
+- The background script only accepts requests from its own popup, and only opens `https` addresses matching the site declared for each agency (including added agencies, whose address is checked when added and on every read).
+- Before filling in a field, it checks that the tab is still on the agency's site.
+- Locating a field on an added site: the banner is only shown in the tab opened for that purpose; the result is only accepted from that tab, on that site, and only contains where the field and button are (no page content is read or kept).
+- Keywords are inserted as text (never as code) and encoded in addresses.
+- Updates: the Chrome Web Store version updates automatically, after Google reviews each version. A manual installation never updates itself: only replace its folder with a version coming from this repository. Protect the GitHub account with two-factor authentication.
 
-Le numéro de version (`version` dans `extension/manifest.json`) ne change **qu'au moment d'un envoi au Chrome Web Store**, une seule fois par envoi, quel que soit le nombre de modifications intégrées entre-temps :
+## Version numbers
 
-- **correction** : dernier chiffre (3.2.0 → 3.2.1) ;
-- **nouveauté** : chiffre du milieu (3.2.x → 3.3.0) ;
-- **changement majeur** : premier chiffre.
+The version number (`version` in `extension/manifest.json`) **only changes when submitting to the Chrome Web Store**, once per submission, however many changes were merged in between:
 
-Le store refuse un numéro inférieur ou égal à la version publiée : on ne peut jamais revenir en arrière.
+- **fix**: last digit (3.2.0 → 3.2.1);
+- **new feature**: middle digit (3.2.x → 3.3.0);
+- **major change**: first digit.
 
-L'historique des versions est tenu dans [`CHANGELOG.md`](CHANGELOG.md).
+The store refuses a number lower than or equal to the published version: there is no going back.
 
-### Chrome Web Store
+The version history is kept in [`CHANGELOG.md`](CHANGELOG.md) (in French).
 
-Les éléments de la fiche (descriptions, justifications des autorisations, instructions pour l'examen) sont dans [`store/fiche-chrome-web-store.md`](store/fiche-chrome-web-store.md), les captures d'écran et la tuile promotionnelle dans [`store/images/`](store/images/), et la politique de confidentialité dans [`PRIVACY.md`](PRIVACY.md).
+## Chrome Web Store
 
-### Licence
+The listing materials (descriptions, permission justifications, review instructions) are in [`store/fiche-chrome-web-store.md`](store/fiche-chrome-web-store.md) (in French, with the English texts to paste), the screenshots and promotional images in [`store/images/`](store/images/), and the privacy policy in [`PRIVACY.md`](PRIVACY.md).
 
-TabulaPix est distribué sous **licence MIT** (voir le fichier [`LICENSE`](LICENSE)) : vous pouvez l'utiliser, le modifier et le partager librement, à condition de conserver la mention de l'auteur et de la licence. Le logiciel est fourni « tel quel », sans garantie.
+## License
 
-TabulaPix est un outil indépendant, sans lien avec les agences citées. Les noms AFP, Reuters, Getty Images, Sipa, Shutterstock, Adobe Stock, Abacapress, Rea, Pixpalace, MaxPPP, Bloomberg et les autres sont des marques de leurs propriétaires respectifs.
+TabulaPix is released under the **MIT license** (see [`LICENSE`](LICENSE)): you may use, modify and share it freely, provided you keep the author and license notice. The software is provided “as is”, without warranty.
 
-*License: MIT — see [`LICENSE`](LICENSE). TabulaPix is an independent tool, not affiliated with the agencies mentioned; their names are trademarks of their respective owners.*
+TabulaPix is an independent tool, not affiliated with the agencies mentioned. The names AFP, Reuters, Getty Images, Sipa, Shutterstock, Adobe Stock, Abacapress, Rea, Pixpalace, MaxPPP, Bloomberg and others are trademarks of their respective owners.

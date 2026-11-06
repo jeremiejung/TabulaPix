@@ -4,7 +4,7 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
-- Documentation : règle de numérotation des versions dans le README, ce journal.
+- Documentation : README en anglais (`README.md`, page d'accueil du dépôt) et en français (`README.fr.md`) ; règle de numérotation des versions ; ce journal.
 
 ## 3.2.0 — 6 novembre 2026 (Chrome Web Store)
 
