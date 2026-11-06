@@ -2,6 +2,8 @@
 
 **Une recherche, toutes vos agences photo.** — *One search, all your picture agencies.*
 
+**➜ [Installer depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** — *[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)*
+
 Available in English and French (follows the browser language, can be changed in the settings). Chrome extension for photo editors: type your keywords once and search all your news picture agencies at the same time (AFP, Reuters, Getty, Sipa, Abaca, MaxPPP, PixPalace…). TabulaPix opens one tab per agency with results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored.
 
 ---
@@ -15,6 +17,13 @@ Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les 
 HTML/JavaScript simple : aucune dépendance, aucune compilation.
 
 ### Installation
+
+**Le plus simple : [installer TabulaPix depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**, puis épingler l'extension (icône puzzle 🧩 → épingle à côté de **TabulaPix**). Les mises à jour arrivent ensuite automatiquement.
+
+> Si vous utilisiez jusqu'ici la version chargée depuis un dossier, Chrome considère la version du store comme une autre extension : vos réglages (agences cochées, ordre, agences ajoutées, sous-domaine Pixpalace) ne sont pas repris. Notez-les, installez la version du store, refaites-les, puis supprimez l'ancienne version dans `chrome://extensions` pour ne pas avoir TabulaPix en double.
+
+**Installation manuelle** (version de développement, depuis ce dépôt) :
+
 
 1. Téléchargez ce dépôt (bouton **Code → Download ZIP** sur GitHub) et décompressez-le, ou clonez-le avec `git clone`.
 2. Dans Chrome, ouvrez `chrome://extensions`.
