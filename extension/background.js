@@ -204,7 +204,8 @@ function cleanDraft(d, options) {
     try { u = new URL(String(d.url)); } catch (_) { return null; }
     const host = hostOf(builtin.url, options);
     if (u.protocol !== "https:" || u.hostname !== host) return null;
-    return { id: builtin.id, name: builtin.name, url: u.href, host };
+    const name = String(d.name || "").trim();
+    return { id: builtin.id, name: name && name.length <= 40 ? name : builtin.name, url: u.href, host };
   }
   const agency = cleanCustomAgency({ ...(d || {}), fill: { input: "x" } });
   if (!agency) return null;

@@ -68,7 +68,7 @@ You need to be logged in to your agency accounts in Chrome, as usual: the extens
 
 The **⚙** button at the top of the popup (or of the column) shows the settings right in the popup; **← Back** returns to the search.
 
-- **Agencies shown**: untick the agencies you don't use, they disappear from the list (their place in the order is kept if you show them again).
+- **Agencies shown**: untick the agencies you don't use, they disappear from the list (their place in the order is kept if you show them again). **✕** deletes any agency, built-in ones included; deleted built-in agencies can be brought back with **Restore**, below the list.
   - **Reuters** comes in two versions, depending on your contract: **Reuters (points)** for credit-based accounts (shows your points balance), shown by default, and **Reuters (standard)** for accounts without points (free download), hidden by default: show the one that matches your account. **AFP (forum)** is also hidden by default.
 - **Add an agency**, in three steps:
   1. **Detect**: run a search on the agency's website, then paste the address of the results page and the keywords you typed (e.g. “Estonia border”) and click **Detect**.
@@ -81,12 +81,39 @@ The **⚙** button at the top of the popup (or of the column) shows the settings
   The “Type the address by hand” link lets you type an address directly, with `{q}` in place of the keywords (or `{q:slug}` if the site separates words with dashes: “Estonia border” → `Estonia-border`). Without `{q}`, the page opens and the keywords are copied to be pasted. **Technical details** (folded) show the template and encoding steps, or where the located field and button are. Added agencies are tagged “custom” (“custom · field” for those that fill in a field) and are deleted with ✕; deleting an agency that fills in a field also removes the permission granted for its site.
 
   Locating ignores ids generated on every page load (e.g. `…__bfac60392382`) and relies on stable landmarks (field name, class, button label…); if the site has several identical search forms, TabulaPix uses the first visible one and the button closest to the field. If the site changes its page, locate the field again (✎ then **Locate again**).
-- **Edit an agency** (**✎** button): the same form, straight at the “check” step, with **Save**. For built-in agencies, the name stays the same, a “modified” tag appears and **Restore the original** goes back to the shipped settings.
+- **Edit an agency** (**✎** button): the same form, straight at the “check” step, with **Save**. Every agency can be renamed, built-in ones included; for built-in agencies, a “modified” tag appears and **Restore the original** goes back to the shipped name and settings.
   - **Bloomberg, Abacapress and Pixpalace** fill in their site's search field: if one of them changes its page and the search no longer starts, open ✎ then **Locate again** to show it the field and button again (no extra permission is requested; Bloomberg's specific delay is kept). Their address can be edited, but must stay on the same site.
 - **Language**: English or French. By default, TabulaPix follows the browser language (“Automatic”); the change applies immediately. The name and description shown in `chrome://extensions` and on the Chrome Web Store always follow the browser language.
 - **Pixpalace subdomain**: the part before `.pixpalace.com` in the address of your Pixpalace space (`www` by default). For example, for `https://mynewsroom.pixpalace.com/home`, type `mynewsroom`.
 
+- **Backup and sharing**: **Export** saves your whole configuration to a `.json` file (agencies and their order, names, addresses, field locations, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches). **Import…** loads such a file, after showing a summary and asking for confirmation: use it after reinstalling, or to share a configuration with colleagues. Every agency in the file is checked like an agency added by hand; invalid ones are ignored. If the file contains agencies that fill in their site's search field, an **Allow the sites** button asks Chrome for those sites in one go. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
+- **Factory settings**: **Restore factory settings** erases your settings, your added, edited or deleted agencies and the site permissions you granted, and goes back to the shipped configuration (after confirmation; export first if you want to keep yours).
+
 These settings stay in Chrome on your computer and are kept across updates.
+
+## Configuration file
+
+The file created by **Export** is plain JSON, readable and editable:
+
+```json
+{
+  "format": "tabulapix-config",
+  "formatVersion": 1,
+  "exportedAt": "2026-11-06T10:00:00.000Z",
+  "app": { "name": "TabulaPix", "version": "3.2.0" },
+  "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
+  "folders": [],
+  "agencies": [
+    { "id": "reuters", "builtin": true, "name": "Reuters (points)", "checked": true, "hidden": false },
+    { "id": "custom-abc123", "builtin": false, "name": "Alamy", "url": "https://www.alamy.com/search.html?qt={q}", "checked": true, "hidden": false }
+  ],
+  "removedBuiltins": ["afp-forum"]
+}
+```
+
+- `agencies` is in list order. Built-in agencies only carry `name`, `url`, `payload`, `encode` or `fill` when they were edited; added agencies always carry their address (and `fill` when they fill in a search field).
+- `formatVersion` lets future versions read older files; a file from a newer version is refused with a message.
+- `folders` (and an optional `folder` field on each agency) is reserved for the planned agency folders (wire agencies, photographers' agencies, press-service agencies…): empty for now, ignored on import.
 
 ## Editing the built-in agencies (development)
 

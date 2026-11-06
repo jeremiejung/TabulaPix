@@ -106,27 +106,37 @@ async function renderManageList() {
     edit.setAttribute("aria-label", edit.title);
     edit.addEventListener("click", () => startEdit(a));
     li.append(edit);
-    if (a.custom) {
-      const del = document.createElement("button");
-      del.type = "button";
-      del.className = "del";
-      del.textContent = "✕";
-      del.title = t("opt.delete", { name: a.name });
-      del.setAttribute("aria-label", del.title);
-      del.addEventListener("click", async () => {
-        if (!confirm(t("opt.delete.confirm", { name: a.name }))) return;
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "del";
+    del.textContent = "✕";
+    del.title = t("opt.delete", { name: a.name });
+    del.setAttribute("aria-label", del.title);
+    del.addEventListener("click", async () => {
+      if (!confirm(t(a.custom ? "opt.delete.confirm" : "opt.delete.builtinConfirm", { name: a.name }))) return;
+      if (a.custom) {
         const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
         const rest = custom.filter((c) => c && c.id !== a.id);
         await chrome.storage.local.set({ [CUSTOM_KEY]: rest });
         if (a.fill) releasePermission(a, rest);
-        if (editing === a.id) resetEditor();
-        await renderManageList();
-        flash(t("opt.deleted", { name: a.name }), listMsg);
-      });
-      li.append(del);
-    }
+      } else {
+        // Agence fournie : retirée de la liste (récupérable avec « Restaurer »),
+        // ses modifications sont oubliées.
+        const data = await chrome.storage.local.get({ [REMOVED_KEY]: [], [OVERRIDES_KEY]: {} });
+        delete data[OVERRIDES_KEY][a.id];
+        await chrome.storage.local.set({ [REMOVED_KEY]: [...new Set(data[REMOVED_KEY].concat(a.id))], [OVERRIDES_KEY]: data[OVERRIDES_KEY] });
+      }
+      if (editing === a.id) resetEditor();
+      await renderManageList();
+      flash(t("opt.deleted", { name: a.name }), listMsg);
+    });
+    li.append(del);
     manageList.append(li);
   }
+  // Agences fournies supprimées : récupérables d'un clic.
+  const removedLine = document.getElementById("removedLine");
+  removedLine.hidden = !ag.removed.size;
+  document.getElementById("removedText").textContent = t("opt.removed.line", { n: ag.removed.size });
 }
 
 function renderOptionFields(values) {
@@ -262,7 +272,7 @@ function validate() {
   if (!draft) return t("ed.err.nothing");
   let error = "";
   const name = ed.name.value.trim();
-  if (!draft.builtin && (!name || name.length > 40)) error = t("ed.err.name");
+  if (!name || name.length > 40) error = t("ed.err.name");
   const { spec, error: specError } = checkSpec(
     { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" },
     { allowOptions: draft.builtin }
@@ -321,7 +331,7 @@ function startEdit(a) {
   editing = a.id;
   ed.title.textContent = t("ed.editTitle", { name: a.name });
   ed.name.value = a.name;
-  ed.name.disabled = !a.custom; // le nom des agences intégrées ne change pas
+  ed.name.disabled = false;
   ed.url.value = a.url;
   ed.payload.value = a.payload || "";
   ed.encode.value = (a.encode || []).join(", ");
@@ -345,7 +355,7 @@ async function restoreDraft() {
   ed.detUrl.value = saved.detUrl || "";
   ed.detQ.value = saved.detQ || "";
   ed.name.value = saved.name || "";
-  ed.name.disabled = saved.builtin;
+  ed.name.disabled = false;
   ed.url.value = saved.url || "";
   ed.payload.value = saved.payload || "";
   ed.encode.value = saved.encode || "";
@@ -436,7 +446,7 @@ ed.pickBtn.addEventListener("click", () => {
   const pageUrl = builtin ? applyOptions(spec.url, cachedOptions) : spec.url;
   const host = hostOf(pageUrl, {});
   draft.pageHost = host;
-  const pick = { id: draft.id, name: builtin ? builtin.name : ed.name.value.trim() || nameFromUrl(pageUrl) || host, url: pageUrl };
+  const pick = { id: draft.id, name: ed.name.value.trim() || (builtin ? builtin.name : nameFromUrl(pageUrl)) || host, url: pageUrl };
   saveDraft();
   chrome.storage.session.set({ fillDraft: pick }); // relu si la popup se ferme pendant la demande
   // La demande d'autorisation doit partir directement du clic.
@@ -496,11 +506,13 @@ addForm.addEventListener("submit", async (e) => {
     const picked = original.fill && draft.fill ? cleanFill(draft.fill) : null;
     if (picked) delete picked.delay;
     const fillChanged = Boolean(picked) && (picked.input !== original.fill.input || (picked.submit || "") !== (original.fill.submit || ""));
+    const renamed = name !== original.name;
     const same = spec.url === original.url && (spec.payload || "") === (original.payload || "")
-      && (spec.encode || []).join() === (original.encode || []).join() && !fillChanged;
-    if (same) delete overrides[id]; else overrides[id] = fillChanged ? { ...spec, fill: picked } : spec;
+      && (spec.encode || []).join() === (original.encode || []).join() && !fillChanged && !renamed;
+    if (same) delete overrides[id];
+    else overrides[id] = { ...spec, ...(fillChanged ? { fill: picked } : {}), ...(renamed ? { name } : {}) };
     await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
-    done = same ? t("ed.original", { name: original.name }) : t("ed.modified", { name: original.name });
+    done = same ? t("ed.original", { name: original.name }) : t("ed.modified", { name });
   } else {
     const agency = cleanCustomAgency({ id, name, ...raw, fill: draft.mode === "fill" ? draft.fill : undefined });
     if (!agency) return flash(t("ed.err.invalid"), addMsg);
@@ -543,6 +555,112 @@ settingsForm.addEventListener("submit", async (e) => {
   cachedOptions = values;
   flash(t("opt.saved"));
 });
+
+/* ---------- Sauvegarde, partage et configuration d'usine ---------- */
+
+const backupMsg = document.getElementById("backupMsg");
+const importFile = document.getElementById("importFile");
+const authorizeBtn = document.getElementById("authorizeBtn");
+let missingOrigins = [];
+
+document.getElementById("restoreRemoved").addEventListener("click", async () => {
+  await chrome.storage.local.set({ [REMOVED_KEY]: [] });
+  await renderManageList();
+  flash(t("opt.removed.restored"), listMsg);
+});
+
+// Export : un fichier JSON téléchargé (aucun envoi nulle part).
+document.getElementById("exportBtn").addEventListener("click", async () => {
+  const config = await buildConfigExport();
+  const name = `tabulapix-config-${new Date().toISOString().slice(0, 10)}.json`;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(config, null, 2) + "\n"], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  flash(t("backup.exported", { file: name }), backupMsg);
+});
+
+// Import : dans la popup, Chrome la ferme à l'ouverture du sélecteur de
+// fichier ; on ouvre donc TabulaPix dans un onglet pour choisir le fichier.
+document.getElementById("importBtn").addEventListener("click", () => {
+  if (isPopup) {
+    chrome.tabs.create({ url: chrome.runtime.getURL("popup.html#import") });
+    window.close();
+    return;
+  }
+  importFile.value = "";
+  importFile.click();
+});
+
+importFile.addEventListener("change", async () => {
+  const file = importFile.files && importFile.files[0];
+  if (!file) return;
+  backupMsg.className = "status err";
+  if (file.size > CONFIG_MAX_BYTES) { backupMsg.textContent = t("backup.err.size"); return; }
+  let parsed;
+  try { parsed = JSON.parse(await file.text()); } catch (_) { backupMsg.textContent = t("backup.err.json"); return; }
+  const result = parseConfigImport(parsed);
+  if (result.error) { backupMsg.textContent = t(result.error); return; }
+  const s = result.summary;
+  const summary = t("backup.summary", s) + (s.skipped ? " " + t("backup.skipped", { n: s.skipped }) : "");
+  if (!confirm(t("backup.confirm", { summary }))) { backupMsg.textContent = ""; return; }
+
+  // Remplace la configuration (la dernière recherche est gardée).
+  const { [QUERY_KEY]: lastQuery } = await chrome.storage.local.get(QUERY_KEY);
+  await chrome.storage.local.clear();
+  await chrome.storage.local.set({ ...result.storage, ...(lastQuery ? { [QUERY_KEY]: lastQuery } : {}) });
+  await chrome.storage.session.remove([AGENCY_DRAFT_KEY, PICK_RESULT_KEY, "fillDraft", "pickSession"]);
+  await applyNewAgencyDefaults();
+
+  // Autorisations : on retire celles qui ne servent plus, on liste celles à accorder.
+  const needed = result.hosts.map(originPattern);
+  for (const origin of await optionalOriginsGranted()) {
+    if (!needed.includes(origin)) { try { await chrome.permissions.remove({ origins: [origin] }); } catch (_) { /* déjà retirée */ } }
+  }
+  missingOrigins = [];
+  for (const origin of needed) if (!(await chrome.permissions.contains({ origins: [origin] }))) missingOrigins.push(origin);
+
+  await reloadSettingsView();
+  backupMsg.className = "status ok";
+  backupMsg.textContent = t("backup.imported") + " " + summary + (missingOrigins.length ? "\n" + t("backup.needPerm") : "");
+  authorizeBtn.hidden = !missingOrigins.length;
+  authorizeBtn.textContent = t("backup.authorize", { n: missingOrigins.length });
+});
+
+// Les autorisations doivent être demandées directement depuis un clic.
+authorizeBtn.addEventListener("click", () => {
+  chrome.permissions.request({ origins: missingOrigins }).then((granted) => {
+    backupMsg.className = "status " + (granted ? "ok" : "err");
+    backupMsg.textContent = granted ? t("backup.authorized") : t("backup.authRefused");
+    if (granted) authorizeBtn.hidden = true;
+  });
+});
+
+// Configuration d'usine : tout est effacé, y compris les autorisations de sites.
+document.getElementById("factoryBtn").addEventListener("click", async () => {
+  if (!confirm(t("factory.confirm"))) return;
+  for (const origin of await optionalOriginsGranted()) {
+    try { await chrome.permissions.remove({ origins: [origin] }); } catch (_) { /* déjà retirée */ }
+  }
+  await chrome.storage.local.clear();
+  await chrome.storage.session.clear();
+  location.hash = "";
+  location.reload();
+});
+
+// Après un import : langue, réglages et listes refaits.
+async function reloadSettingsView() {
+  langSelect.value = await loadLang();
+  applyI18n();
+  cachedOptions = await loadOptions();
+  renderOptionFields(cachedOptions);
+  resetEditor();
+  await renderManageList();
+}
 
 /* ---------- Construction des URL ---------- */
 
@@ -778,6 +896,15 @@ chrome.storage.onChanged.addListener((changes, area) => {
     if (settingsView.hidden) showSettings(); else applyPickResult(changes[PICK_RESULT_KEY].newValue);
   }
 });
+
+// Ouvert pour un import (depuis la popup) : directement à la section Sauvegarde.
+if (location.hash === "#import") {
+  langReady.then(showSettings).then(() => {
+    document.getElementById("backupTitle").scrollIntoView({ block: "start" });
+    backupMsg.className = "status ok";
+    backupMsg.textContent = t("backup.chooseFile");
+  });
+}
 
 // Réouverture après un repérage : on revient directement à l'étape « vérifier ».
 chrome.storage.session.get([AGENCY_DRAFT_KEY, PICK_RESULT_KEY]).then((data) => {

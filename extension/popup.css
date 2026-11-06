@@ -76,3 +76,10 @@ code { font-size: 11px; }
 .credit p { margin: 2px 0; }
 .field.lang { margin-top: 14px; }
 .credit a { color: inherit; }
+
+/* Sauvegarde, configuration d'usine */
+.link.inline { display: inline; font-size: 11px; }
+#exportBtn, #importBtn { cursor: pointer; }
+#authorizeBtn { margin-top: 4px; }
+.danger { padding: 5px 12px; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--accent); border-radius: 4px; cursor: pointer; }
+.danger:hover { color: #fff; background: var(--accent); }

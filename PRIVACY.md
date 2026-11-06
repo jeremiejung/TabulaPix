@@ -25,6 +25,8 @@ Pendant une recherche, les mots-clés à taper dans le champ d'un site sont gard
 
 Désinstaller TabulaPix efface toutes ces données.
 
+**Fichier de configuration** : le bouton « Exporter » enregistre ces réglages (sans vos recherches) dans un fichier, à l'endroit que vous choisissez sur votre ordinateur. TabulaPix ne l'envoie nulle part ; c'est vous qui décidez de le conserver ou de le partager. « Importer » lit un tel fichier localement.
+
 ## Sites des agences
 
 Les recherches s'ouvrent sur les sites des agences, avec vos propres comptes : ces sites reçoivent vos mots-clés comme pour toute recherche faite à la main, et appliquent leur propre politique de confidentialité.
@@ -66,6 +68,8 @@ The following is stored **only in Chrome, on your computer** (`chrome.storage.lo
 During a search, the keywords to type into a site's field are kept in session memory (cleared when Chrome closes).
 
 Uninstalling TabulaPix deletes all of this data.
+
+**Configuration file**: the “Export” button saves these settings (without your searches) to a file, wherever you choose on your computer. TabulaPix never sends it anywhere; you decide whether to keep or share it. “Import” reads such a file locally.
 
 ## Agency websites
 

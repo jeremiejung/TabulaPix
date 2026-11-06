@@ -6,6 +6,10 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Supprimer n'importe quelle agence**, y compris celles fournies ; les agences fournies supprimées peuvent être restaurées.
+- **Renommer n'importe quelle agence**, y compris celles fournies (« Rétablir l'original » remet le nom d'origine).
+- **Exporter / importer la configuration** dans un fichier JSON, pour la garder hors de l'extension ou la partager entre collègues ; chaque agence importée est vérifiée, avec un récapitulatif avant de remplacer ; un bouton autorise les sites nécessaires aux agences importées qui remplissent un champ. Le format est versionné et réserve `folders` aux futurs dossiers d'agences.
+- Bouton **Rétablir la configuration d'usine**.
 - Documentation : README et journal des versions en anglais (`README.md`, `CHANGELOG.md`) et en français (`README.fr.md`, `CHANGELOG.fr.md`) ; règle de numérotation des versions.
 
 ## 3.2.0 — 6 novembre 2026 (Chrome Web Store)

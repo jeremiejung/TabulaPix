@@ -31,6 +31,7 @@
     <h2 data-i18n="opt.shown">Agences affichées</h2>
     <p class="intro" data-i18n="opt.shown.intro">Décochez celles que vous n'utilisez pas : elles disparaissent de la liste.</p>
     <ul id="manageList"></ul>
+    <p id="removedLine" class="help" hidden><span id="removedText"></span> <button type="button" id="restoreRemoved" class="link inline" data-i18n="opt.removed.restore">Restaurer</button></p>
 
     <h2 id="editorTitle" data-i18n="ed.addTitle">Ajouter une agence</h2>
 
@@ -117,6 +118,20 @@
       </select>
     </div>
     <p id="settingsMsg" class="status" role="status"></p>
+
+    <h2 id="backupTitle" data-i18n="backup.title">Sauvegarde et partage</h2>
+    <p class="help" data-i18n="backup.help">Enregistrez votre configuration dans un fichier, pour la retrouver après une réinstallation ou la partager avec des collègues.</p>
+    <div class="bar">
+      <button type="button" id="exportBtn" data-i18n="backup.export">Exporter</button>
+      <button type="button" id="importBtn" data-i18n="backup.import">Importer…</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <p id="backupMsg" class="status" role="status"></p>
+    <button type="button" id="authorizeBtn" class="primary" hidden></button>
+
+    <h2 data-i18n="factory.title">Configuration d'usine</h2>
+    <p class="help" data-i18n="factory.help">Efface vos réglages, vos agences ajoutées ou modifiées et les autorisations de sites, et revient à la configuration livrée.</p>
+    <button type="button" id="factoryBtn" class="danger" data-i18n="factory.button">Rétablir la configuration d'usine</button>
   </section>
   <footer class="credit">
     <p>Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/" target="_blank" rel="noopener">Jérémie</a>.</p>

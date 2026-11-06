@@ -68,7 +68,7 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
 
-- **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez).
+- **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez). **✕** supprime n'importe quelle agence, y compris celles fournies ; les agences fournies supprimées se récupèrent avec **Restaurer**, sous la liste.
   - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte. **AFP (forum)** est aussi masquée par défaut.
 - **Ajouter une agence**, en trois étapes :
   1. **Détecter** : faites une recherche sur le site de l'agence, puis collez l'adresse de la page de résultats et les mots-clés que vous avez tapés (ex. « Estonie frontière ») et cliquez sur **Détecter**.
@@ -81,12 +81,39 @@ Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages d
   Le lien « Saisir l'adresse à la main » permet de taper directement une adresse avec `{q}` à la place des mots-clés (ou `{q:slug}` si le site sépare les mots par des tirets : « Estonie frontière » → `Estonie-frontière`). Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. Les **Détails techniques** (repliés) montrent le modèle et les étapes d'encodage, ou l'emplacement du champ et du bouton repérés. Les agences ajoutées portent la mention « perso » (« perso · champ » pour celles qui remplissent un champ) et se suppriment avec ✕ ; supprimer une agence qui remplit un champ retire aussi l'autorisation donnée pour son site.
 
   Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, TabulaPix utilise le premier visible et le bouton le plus proche du champ. Si le site change sa page, refaites le repérage (✎ puis **Refaire le repérage**).
-- **Modifier une agence** (bouton **✎**) : même formulaire, directement à l'étape « vérifier », avec **Enregistrer**. Pour les agences fournies, le nom reste le même, la mention « modifiée » apparaît et **Rétablir l'original** revient à la configuration livrée.
+- **Modifier une agence** (bouton **✎**) : même formulaire, directement à l'étape « vérifier », avec **Enregistrer**. Toutes les agences peuvent être renommées, y compris celles fournies ; pour celles-ci, la mention « modifiée » apparaît et **Rétablir l'original** revient au nom et aux réglages livrés.
   - **Bloomberg, Abacapress et Pixpalace** remplissent le champ de recherche de leur site : si l'un d'eux change sa page et que la recherche ne part plus, ouvrez ✎ puis **Refaire le repérage** pour lui montrer à nouveau le champ et le bouton (aucune autorisation supplémentaire n'est demandée ; le délai propre à Bloomberg est conservé). Leur adresse peut être modifiée, mais doit rester sur le même site.
 - **Langue** : français ou anglais. Par défaut, TabulaPix suit la langue du navigateur (« Automatique ») ; le changement s'applique immédiatement. Le nom et la description affichés dans `chrome://extensions` et sur le Chrome Web Store suivent toujours la langue du navigateur.
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
 
+- **Sauvegarde et partage** : **Exporter** enregistre toute votre configuration dans un fichier `.json` (agences et leur ordre, noms, adresses, repérages, agences cochées, masquées et supprimées, langue, sous-domaine Pixpalace — jamais vos recherches). **Importer…** recharge un tel fichier, après un récapitulatif et une confirmation : après une réinstallation, ou pour partager une configuration entre collègues. Chaque agence du fichier est vérifiée comme une agence ajoutée à la main ; les invalides sont ignorées. Si le fichier contient des agences qui remplissent le champ de recherche de leur site, un bouton **Autoriser les sites** les demande à Chrome en une fois. Depuis la popup, Importer ouvre TabulaPix dans un onglet (Chrome ferme la popup à l'ouverture du sélecteur de fichier).
+- **Configuration d'usine** : **Rétablir la configuration d'usine** efface vos réglages, vos agences ajoutées, modifiées ou supprimées et les autorisations de sites accordées, et revient à la configuration livrée (après confirmation ; exportez d'abord si vous voulez garder la vôtre).
+
 Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
+
+## Fichier de configuration
+
+Le fichier créé par **Exporter** est du JSON lisible et modifiable :
+
+```json
+{
+  "format": "tabulapix-config",
+  "formatVersion": 1,
+  "exportedAt": "2026-11-06T10:00:00.000Z",
+  "app": { "name": "TabulaPix", "version": "3.2.0" },
+  "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
+  "folders": [],
+  "agencies": [
+    { "id": "reuters", "builtin": true, "name": "Reuters (points)", "checked": true, "hidden": false },
+    { "id": "custom-abc123", "builtin": false, "name": "Alamy", "url": "https://www.alamy.com/search.html?qt={q}", "checked": true, "hidden": false }
+  ],
+  "removedBuiltins": ["afp-forum"]
+}
+```
+
+- `agencies` suit l'ordre de la liste. Les agences fournies ne portent `name`, `url`, `payload`, `encode` ou `fill` que si elles ont été modifiées ; les agences ajoutées portent toujours leur adresse (et `fill` quand elles remplissent un champ de recherche).
+- `formatVersion` permet aux versions futures de lire les anciens fichiers ; un fichier venant d'une version plus récente est refusé avec un message.
+- `folders` (et un champ `folder` facultatif sur chaque agence) est réservé aux futurs dossiers d'agences (agences filaires, agences d'auteurs, agences de service de presse…) : vide pour l'instant, ignoré à l'import.
 
 ## Modifier les agences fournies (développement)
 
