@@ -2,6 +2,8 @@
 
 **Une recherche, toutes vos agences photo.** — *One search, all your picture agencies.*
 
+**➜ [Installer depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** — *[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)*
+
 Available in English and French (follows the browser language, can be changed in the settings). Chrome extension for photo editors: type your keywords once and search all your news picture agencies at the same time (AFP, Reuters, Getty, Sipa, Abaca, MaxPPP, PixPalace…). TabulaPix opens one tab per agency with results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored.
 
 ---
@@ -15,6 +17,13 @@ Extension Chrome (Manifest V3) : vous tapez vos mots-clés une fois, cochez les 
 HTML/JavaScript simple : aucune dépendance, aucune compilation.
 
 ### Installation
+
+**Le plus simple : [installer TabulaPix depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**, puis épingler l'extension (icône puzzle 🧩 → épingle à côté de **TabulaPix**). Les mises à jour arrivent ensuite automatiquement.
+
+> Si vous utilisiez jusqu'ici la version chargée depuis un dossier, Chrome considère la version du store comme une autre extension : vos réglages (agences cochées, ordre, agences ajoutées, sous-domaine Pixpalace) ne sont pas repris. Notez-les, installez la version du store, refaites-les, puis supprimez l'ancienne version dans `chrome://extensions` pour ne pas avoir TabulaPix en double.
+
+**Installation manuelle** (version de développement, depuis ce dépôt) :
+
 
 1. Téléchargez ce dépôt (bouton **Code → Download ZIP** sur GitHub) et décompressez-le, ou clonez-le avec `git clone`.
 2. Dans Chrome, ouvrez `chrome://extensions`.
@@ -63,6 +72,7 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
 
 - **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez).
+  - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte. **AFP (forum)** est aussi masquée par défaut.
 - **Ajouter une agence**, en trois étapes :
   1. **Détecter** : faites une recherche sur le site de l'agence, puis collez l'adresse de la page de résultats et les mots-clés que vous avez tapés (ex. « Estonie frontière ») et cliquez sur **Détecter**.
   2. **Vérifier** : TabulaPix propose un nom (le domaine du site, ex. `search.reaphoto.com` → « Reaphoto ») et remplit l'adresse de recherche, avec une surbrillance verte sur ce qu'il vient de remplir.
@@ -93,7 +103,7 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 }
 ```
 
-Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` (c'est le cas d'AFP (forum)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
+Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` ; pour qu'elle soit masquée (à afficher dans ⚙ → Agences affichées), `defaultHidden: true` — appliqué la première fois que l'agence apparaît, y compris lors d'une mise à jour (c'est le cas d'AFP (forum) et de Reuters (standard)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
 
 Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
 

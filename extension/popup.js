@@ -763,7 +763,7 @@ async function refreshList() {
   return data;
 }
 
-langReady.then(refreshList).then((data) => {
+langReady.then(applyNewAgencyDefaults).then(refreshList).then((data) => {
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
 });
