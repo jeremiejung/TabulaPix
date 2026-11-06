@@ -150,7 +150,7 @@ Le numéro de version (`version` dans `extension/manifest.json`) ne change **qu'
 
 Le store refuse un numéro inférieur ou égal à la version publiée : on ne peut jamais revenir en arrière.
 
-L'historique des versions est tenu dans [`CHANGELOG.md`](CHANGELOG.md).
+L'historique des versions est tenu dans [`CHANGELOG.fr.md`](CHANGELOG.fr.md).
 
 ## Chrome Web Store
 

@@ -1,35 +1,37 @@
-# Journal des versions
+# Changelog
 
-Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) sont signalées. Le numéro de version ne change qu'à un envoi au store (voir « Numéros de version » dans le README).
+***English** · [Français](CHANGELOG.fr.md)*
 
-## [Non publié]
+Versions published on the [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) are marked. The version number only changes when submitting to the store (see “Version numbers” in the [README](README.md)).
 
-- Documentation : README en anglais (`README.md`, page d'accueil du dépôt) et en français (`README.fr.md`) ; règle de numérotation des versions ; ce journal.
+## [Unreleased]
 
-## 3.2.0 — 6 novembre 2026 (Chrome Web Store)
+- Documentation: README and changelog in English (`README.md`, `CHANGELOG.md`) and French (`README.fr.md`, `CHANGELOG.fr.md`); version numbering rule.
 
-- **Reuters en deux versions**, selon le contrat Reuters Connect :
-  - **Reuters (points)** : l'ancienne agence « Reuters », renommée (cases et ordre conservés). Interface classique, qui affiche le solde des comptes au crédit de points.
-  - **Reuters (standard)** : nouvelle agence pour les comptes sans points (téléchargement libre, paiement à la publication), interface « app ».
-- **Agences masquées par défaut** : Reuters (standard) et AFP (forum) sont masquées à l'installation comme lors de la mise à jour ; elles s'affichent dans ⚙ → Agences affichées. Le choix de l'utilisateur est ensuite respecté.
-- Lien vers la fiche du Chrome Web Store dans le README.
+## 3.2.0 — 6 November 2026 (Chrome Web Store)
 
-## 3.1.1 — 5 novembre 2026 (Chrome Web Store, première publication)
+- **Reuters in two versions**, depending on the Reuters Connect contract:
+  - **Reuters (points)**: the former “Reuters” agency, renamed (ticks and order kept). Classic interface, which shows the balance of credit-based accounts.
+  - **Reuters (standard)**: new agency for accounts without points (free download, pay on publication), “app” interface.
+- **Agencies hidden by default**: Reuters (standard) and AFP (forum) are hidden on install as well as on update; show them in ⚙ → Agencies shown. The user's choice is respected afterwards.
+- Link to the Chrome Web Store listing in the README.
 
-Première version publiée sur le Chrome Web Store.
+## 3.1.1 — 5 November 2026 (Chrome Web Store, first release)
 
-- Une recherche, toutes vos agences photo : un onglet par agence, ouvert en arrière-plan, avec vos propres comptes ; réutilisation de l'onglet d'une agence déjà ouverte ; dernière recherche mémorisée.
-- Agences fournies : Reuters, AFP (news et forum), Bloomberg, Sipa, Getty Images (Creative et Actu), Shutterstock, Adobe Stock, Abacapress, Rea, Pixpalace, MaxPPP. Ordre personnalisable par glisser-déposer, agences masquables.
-- Remplissage automatique du champ de recherche pour les sites dont l'adresse ne contient pas la recherche (Bloomberg, Abacapress, Pixpalace), avec possibilité de **refaire le repérage** si un site change sa page.
-- **Ajout d'agences** guidé : détection automatique des mots-clés dans l'adresse (en clair, avec des tirets, ou encodés : URL, hexadécimal, base64, gzip), ou repérage du champ de recherche directement sur le site ; bouton « Essayer ». Agences fournies modifiables, avec retour à l'original.
-- Colonne latérale (« Garder ouvert ») pour enchaîner les recherches.
-- Interface en **français et en anglais**, selon la langue du navigateur ou au choix.
-- Aucune collecte de données, aucune requête réseau ; autorisation d'accès à un site supplémentaire demandée au cas par cas.
+First version published on the Chrome Web Store.
 
-## Versions de développement (non publiées)
+- One search, all your picture agencies: one tab per agency, opened in the background, with your own accounts; reuses an agency's tab that is already open; remembers the last search.
+- Built-in agencies: Reuters, AFP (news and forum), Bloomberg, Sipa, Getty Images (Creative and Actu), Shutterstock, Adobe Stock, Abacapress, Rea, Pixpalace, MaxPPP. Order customisable by drag and drop, agencies can be hidden.
+- Automatic filling of the search field for sites whose address doesn't contain the search (Bloomberg, Abacapress, Pixpalace), with the option to **locate the field again** if a site changes its page.
+- Guided **adding of agencies**: automatic detection of the keywords in the address (plain, with dashes, or encoded: URL, hexadecimal, base64, gzip), or locating the search field directly on the site; “Try” button. Built-in agencies can be edited, with a way back to the original.
+- Side panel (“Keep open”) to chain searches.
+- Interface in **English and French**, following the browser language or chosen in the settings.
+- No data collection, no network requests; access to an additional site requested case by case.
 
-Avant la première publication, les versions se sont succédé rapidement (une par modification) :
+## Development versions (unreleased)
 
-- **3.0.x – 3.1.0** (5 novembre 2026) : traduction anglaise et choix de la langue, audit du code et corrections (dont le délai de Bloomberg), lien vers le code source, nouveau repérage des agences fournies.
-- **2.x** (4–5 novembre 2026) : réglages complets dans l'extension (agences masquées, modifiées, ajoutées), détection automatique, repérage du champ sur site, parcours d'ajout guidé, nouveau nom **TabulaPix** (anciennement Wire Sweep).
-- **1.x** (4 novembre 2026) : premières versions (Wire Sweep) — recherche sur une douzaine d'agences, remplissage de champ pour Bloomberg, Abacapress et Pixpalace, réutilisation des onglets, colonne latérale, icône, réglage du sous-domaine Pixpalace.
+Before the first release, versions followed each other quickly (one per change):
+
+- **3.0.x – 3.1.0** (5 November 2026): English translation and language setting, code audit and fixes (including Bloomberg's delay), link to the source code, locating built-in agencies' fields again.
+- **2.x** (4–5 November 2026): full settings inside the extension (hidden, edited and added agencies), automatic detection, on-site field locating, guided add-agency flow, new name **TabulaPix** (formerly Wire Sweep).
+- **1.x** (4 November 2026): first versions (Wire Sweep) — search on a dozen agencies, field filling for Bloomberg, Abacapress and Pixpalace, tab reuse, side panel, icon, Pixpalace subdomain setting.
