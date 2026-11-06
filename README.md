@@ -141,6 +141,16 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 - Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
 - Mises à jour : l'extension ne se met jamais à jour toute seule. Ne remplacez le dossier que par une version venant de ce dépôt, et protégez le compte GitHub par la double authentification.
 
+### Numéros de version
+
+Le numéro de version (`version` dans `extension/manifest.json`) ne change **qu'au moment d'un envoi au Chrome Web Store**, une seule fois par envoi, quel que soit le nombre de modifications intégrées entre-temps :
+
+- **correction** : dernier chiffre (3.2.0 → 3.2.1) ;
+- **nouveauté** : chiffre du milieu (3.2.x → 3.3.0) ;
+- **changement majeur** : premier chiffre.
+
+Le store refuse un numéro inférieur ou égal à la version publiée : on ne peut jamais revenir en arrière.
+
 ### Chrome Web Store
 
 Les éléments de la fiche (descriptions, justifications des autorisations, instructions pour l'examen) sont dans [`store/fiche-chrome-web-store.md`](store/fiche-chrome-web-store.md), les captures d'écran et la tuile promotionnelle dans [`store/images/`](store/images/), et la politique de confidentialité dans [`PRIVACY.md`](PRIVACY.md).
