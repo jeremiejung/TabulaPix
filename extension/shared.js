@@ -162,27 +162,61 @@ async function applyNewAgencyDefaults() {
 /*
  * Format JSON versionné, pour sauvegarder la configuration hors de
  * l'extension ou la partager entre collègues :
- *   { format: "tabulapix-config", formatVersion: 1, exportedAt, app,
- *     settings: { language, options },
- *     folders: [],            // réservé aux futurs dossiers d'agences
+ *   { format: "tabulapix-config", formatVersion, minReaderVersion,
+ *     exportedAt, app, settings: { language, options },
+ *     folders: [ { id, name } ],   // dossiers d'agences (à venir)
  *     agencies: [ … dans l'ordre de la liste … ],
  *     removedBuiltins: [ … agences fournies supprimées … ] }
  * Chaque agence : { id, builtin, name, checked, hidden, folder? } et, si
  * elle est ajoutée ou modifiée, url / payload / encode / fill.
  * La dernière recherche n'est jamais exportée.
+ *
+ * Compatibilité entre versions :
+ * - une version ne fait qu'AJOUTER des champs facultatifs, jamais changer le
+ *   sens d'un champ existant (formatVersion augmente) ; une version plus
+ *   ancienne lit donc un fichier plus récent en ignorant ce qu'elle ne
+ *   connaît pas, et une version plus récente lit les anciens fichiers en
+ *   donnant leur valeur par défaut aux champs absents ;
+ * - seul un changement incompatible (à éviter) augmenterait
+ *   minReaderVersion : un lecteur plus ancien refuse alors le fichier ;
+ * - les dossiers sont conservés tels quels même par une version qui ne les
+ *   affiche pas encore, pour ne rien perdre lors des échanges.
+ * L'état coché d'un dossier n'est pas enregistré : il se déduit de ses
+ * agences (toutes cochées, aucune, ou certaines = à moitié coché).
  */
 const CONFIG_FORMAT = "tabulapix-config";
-const CONFIG_FORMAT_VERSION = 1;
+const CONFIG_FORMAT_VERSION = 1; // version du format écrit par cette extension
+const CONFIG_READER_VERSION = 1; // plus haut minReaderVersion que cette extension sait lire
 const CONFIG_MAX_BYTES = 1024 * 1024;
+const FOLDERS_KEY = "agencyFolders";     // [ { id, name } ]
+const FOLDER_OF_KEY = "agencyFolderOf";  // { idAgence: idDossier }
 const STORAGE_KEYS = {
   checked: "checkedAgencies", order: "agencyOrder", query: "lastQuery", seen: "seenAgencies"
 };
 
+// Dossiers : liste propre (id court, nom de 60 caractères au plus).
+function cleanFolders(list) {
+  const out = [], ids = new Set();
+  for (const f of Array.isArray(list) ? list.slice(0, 100) : []) {
+    if (!f || typeof f !== "object") continue;
+    const id = String(f.id || "");
+    const name = String(f.name || "").trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/.test(id) || ids.has(id) || !name || name.length > 60) continue;
+    ids.add(id);
+    out.push({ id, name });
+  }
+  return out;
+}
+
 async function buildConfigExport() {
   const data = await chrome.storage.local.get({
     [STORAGE_KEYS.checked]: null, [STORAGE_KEYS.order]: [], [CUSTOM_KEY]: [], [OVERRIDES_KEY]: {},
-    [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [OPTIONS_KEY]: {}, [LANG_KEY]: "auto"
+    [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [OPTIONS_KEY]: {}, [LANG_KEY]: "auto",
+    [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}
   });
+  const folders = cleanFolders(data[FOLDERS_KEY]);
+  const folderIds = new Set(folders.map((f) => f.id));
+  const folderOf = data[FOLDER_OF_KEY] && typeof data[FOLDER_OF_KEY] === "object" ? data[FOLDER_OF_KEY] : {};
   const removed = new Set(Array.isArray(data[REMOVED_KEY]) ? data[REMOVED_KEY] : []);
   const custom = (Array.isArray(data[CUSTOM_KEY]) ? data[CUSTOM_KEY] : []).map(cleanCustomAgency).filter(Boolean);
   const checked = new Set(Array.isArray(data[STORAGE_KEYS.checked])
@@ -201,6 +235,7 @@ async function buildConfigExport() {
   const agencies = order.map((id) => {
     const { a, builtin } = byId.get(id);
     const entry = { id, builtin, name: a.name, checked: checked.has(id), hidden: hidden.has(id) };
+    if (folderIds.has(folderOf[id])) entry.folder = folderOf[id];
     const src = builtin ? overrides[id] : a;
     if (builtin && src && typeof src === "object") {
       for (const k of ["name", "url", "payload", "encode", "fill"]) if (src[k] !== undefined) entry[k] = src[k];
@@ -212,10 +247,11 @@ async function buildConfigExport() {
   return {
     format: CONFIG_FORMAT,
     formatVersion: CONFIG_FORMAT_VERSION,
+    minReaderVersion: 1,
     exportedAt: new Date().toISOString(),
     app: { name: "TabulaPix", version: chrome.runtime.getManifest().version },
     settings: { language: data[LANG_KEY], options: data[OPTIONS_KEY] || {} },
-    folders: [],
+    folders,
     agencies,
     removedBuiltins: AGENCIES.filter((a) => removed.has(a.id)).map((a) => a.id)
   };
@@ -228,8 +264,14 @@ function parseConfigImport(file) {
   if (!file || typeof file !== "object" || file.format !== CONFIG_FORMAT || !Array.isArray(file.agencies)) {
     return { error: "backup.err.format" };
   }
-  if (!Number.isInteger(file.formatVersion) || file.formatVersion < 1) return { error: "backup.err.format" };
-  if (file.formatVersion > CONFIG_FORMAT_VERSION) return { error: "backup.err.newer" };
+  // Versions : un fichier plus récent est lu en ignorant ce qui est inconnu,
+  // sauf s'il exige un lecteur plus récent (minReaderVersion).
+  const formatVersion = file.formatVersion === undefined ? 1 : file.formatVersion;
+  if (!Number.isInteger(formatVersion) || formatVersion < 1) return { error: "backup.err.format" };
+  const minReader = file.minReaderVersion === undefined ? 1 : file.minReaderVersion;
+  if (!Number.isInteger(minReader) || minReader < 1) return { error: "backup.err.format" };
+  if (minReader > CONFIG_READER_VERSION) return { error: "backup.err.newer" };
+  const newer = formatVersion > CONFIG_FORMAT_VERSION;
 
   // Réglages
   const settings = file.settings && typeof file.settings === "object" ? file.settings : {};
@@ -245,12 +287,16 @@ function parseConfigImport(file) {
   const builtinById = new Map(AGENCIES.map((a) => [a.id, a]));
   const removed = new Set((Array.isArray(file.removedBuiltins) ? file.removedBuiltins : []).filter((id) => builtinById.has(id)));
   const order = [], checked = [], hidden = [], custom = [], overrides = {}, seen = new Set(removed);
-  let skipped = 0;
+  const folders = cleanFolders(file.folders);
+  const folderIds = new Set(folders.map((f) => f.id));
+  const folderOf = {};
+  let skipped = 0, unknown = 0;
   for (const e of file.agencies.slice(0, 200)) {
     if (!e || typeof e !== "object") { skipped++; continue; }
     if (e.builtin === true) {
       const original = builtinById.get(e.id);
-      if (!original || removed.has(e.id) || order.includes(e.id)) { skipped++; continue; }
+      if (!original) { unknown++; continue; } // agence fournie par une autre version
+      if (removed.has(e.id) || order.includes(e.id)) { skipped++; continue; }
       seen.add(e.id);
       const hasOverride = ["name", "url", "payload", "encode", "fill"].some((k) => e[k] !== undefined)
         && (e.name !== original.name || e.url !== undefined || e.fill !== undefined);
@@ -282,6 +328,7 @@ function parseConfigImport(file) {
     order.push(e.id);
     if (e.checked === true) checked.push(e.id);
     if (e.hidden === true) hidden.push(e.id);
+    if (folderIds.has(e.folder)) folderOf[e.id] = e.folder;
   }
 
   // Sites dont il faudra accorder l'autorisation (agences ajoutées qui remplissent un champ).
@@ -290,9 +337,10 @@ function parseConfigImport(file) {
     storage: {
       [STORAGE_KEYS.checked]: checked, [STORAGE_KEYS.order]: order, [HIDDEN_KEY]: hidden,
       [REMOVED_KEY]: [...removed], [CUSTOM_KEY]: custom, [OVERRIDES_KEY]: overrides,
-      [OPTIONS_KEY]: options, [LANG_KEY]: lang, [STORAGE_KEYS.seen]: [...seen]
+      [OPTIONS_KEY]: options, [LANG_KEY]: lang, [STORAGE_KEYS.seen]: [...seen],
+      [FOLDERS_KEY]: folders, [FOLDER_OF_KEY]: folderOf
     },
-    summary: { agencies: order.length, custom: custom.length, removed: removed.size, modified: Object.keys(overrides).length, checked: checked.length, skipped },
+    summary: { agencies: order.length, custom: custom.length, removed: removed.size, modified: Object.keys(overrides).length, checked: checked.length, skipped, unknown, newer },
     hosts
   };
 }

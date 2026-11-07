@@ -606,7 +606,8 @@ importFile.addEventListener("change", async () => {
   const result = parseConfigImport(parsed);
   if (result.error) { backupMsg.textContent = t(result.error); return; }
   const s = result.summary;
-  const summary = t("backup.summary", s) + (s.skipped ? " " + t("backup.skipped", { n: s.skipped }) : "");
+  const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
+    s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
   if (!confirm(t("backup.confirm", { summary }))) { backupMsg.textContent = ""; return; }
 
   // Remplace la configuration (la dernière recherche est gardée).

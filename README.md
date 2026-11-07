@@ -99,6 +99,7 @@ The file created by **Export** is plain JSON, readable and editable:
 {
   "format": "tabulapix-config",
   "formatVersion": 1,
+  "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
   "app": { "name": "TabulaPix", "version": "3.2.0" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
@@ -112,8 +113,8 @@ The file created by **Export** is plain JSON, readable and editable:
 ```
 
 - `agencies` is in list order. Built-in agencies only carry `name`, `url`, `payload`, `encode` or `fill` when they were edited; added agencies always carry their address (and `fill` when they fill in a search field).
-- `formatVersion` lets future versions read older files; a file from a newer version is refused with a message.
-- `folders` (and an optional `folder` field on each agency) is reserved for the planned agency folders (wire agencies, photographers' agencies, press-service agencies…): empty for now, ignored on import.
+- **Compatibility between versions**: new versions only *add* optional fields, never change the meaning of an existing one (`formatVersion` goes up). So a newer TabulaPix reads older files (missing fields get their default value), and an older TabulaPix reads newer files, ignoring what it doesn't know yet (the import summary says so; built-in agencies it doesn't know are counted separately). Only an incompatible change, to be avoided, would raise `minReaderVersion`: an older TabulaPix then refuses the file and asks for an update.
+- **Folders** (`folders: [{ "id", "name" }]`, and a `folder` field on each agency) are planned for grouping agencies (wire agencies, photographers' agencies, press-service agencies…). Even before they are shown, they are kept on import and written back on export, so nothing is lost when colleagues with different versions exchange files (other fields that a future version might add are ignored). A folder's checkbox will not be stored: it is derived from its agencies — ticked, unticked, or half-ticked when only some are ticked — and ticking it ticks or unticks all of them.
 
 ## Editing the built-in agencies (development)
 

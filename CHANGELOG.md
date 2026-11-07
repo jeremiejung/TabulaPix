@@ -8,7 +8,7 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 - **Delete any agency**, built-in ones included; deleted built-in agencies can be restored.
 - **Rename any agency**, built-in ones included (“Restore the original” brings the name back).
-- **Export / import the configuration** to a JSON file, to keep it outside the extension or share it with colleagues; every imported agency is checked, with a summary before replacing; a button allows the sites needed by imported field-filling agencies. The file format is versioned and reserves `folders` for future agency folders.
+- **Export / import the configuration** to a JSON file, to keep it outside the extension or share it with colleagues; every imported agency is checked, with a summary before replacing; a button allows the sites needed by imported field-filling agencies. The file format is versioned and compatible both ways (older and newer versions read each other's files, ignoring what they don't know); agency folders (`folders`, `folder`) are already kept on import and export, ahead of the planned folders feature.
 - **Restore factory settings** button.
 - Documentation: README and changelog in English (`README.md`, `CHANGELOG.md`) and French (`README.fr.md`, `CHANGELOG.fr.md`); version numbering rule.
 
