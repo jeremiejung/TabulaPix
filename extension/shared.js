@@ -331,6 +331,9 @@ function parseConfigImport(file) {
     if (folderIds.has(e.folder)) folderOf[e.id] = e.folder;
   }
 
+  // Aucune agence utilisable : on ne remplace pas la configuration par du vide.
+  if (!order.length) return { error: "backup.err.empty" };
+
   // Sites dont il faudra accorder l'autorisation (agences ajoutées qui remplissent un champ).
   const hosts = [...new Set(custom.filter((a) => a.fill).map((a) => hostOf(a.url, {})).filter(Boolean))];
   return {
