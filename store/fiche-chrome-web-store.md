@@ -36,7 +36,8 @@ PRATIQUE
 • Colonne latérale pour enchaîner les recherches
 • Réutilise l'onglet d'une agence déjà ouverte
 • Dernière recherche mémorisée
-• Agences fournies modifiables, avec retour à l'original
+• Toutes les agences renommables, modifiables ou supprimables, avec retour à la configuration d'usine
+• Sauvegarde de la configuration dans un fichier, à garder ou à partager entre collègues
 • En français et en anglais
 
 CONFIDENTIALITÉ
@@ -65,7 +66,8 @@ HANDY
 • Side panel to chain searches
 • Reuses an agency's tab that is already open
 • Remembers your last search
-• Built-in agencies can be edited, with a way back to the original
+• Every agency can be renamed, edited or deleted, with a way back to factory settings
+• Configuration backup to a file, to keep or to share with colleagues
 • In English and French
 
 PRIVACY
