@@ -33,6 +33,15 @@
     <ul id="manageList"></ul>
     <p id="removedLine" class="help" hidden><span id="removedText"></span> <button type="button" id="restoreRemoved" class="link inline" data-i18n="opt.removed.restore">Restaurer</button></p>
 
+    <h2 data-i18n="folders.title">Dossiers</h2>
+    <p class="help" data-i18n="folders.help">Classez vos agences en dossiers. Dans la liste de recherche, glissez une agence sur le titre d'un dossier pour l'y ranger ; la case d'un dossier coche ou décoche toutes ses agences.</p>
+    <ul id="folderAdmin"></ul>
+    <form id="folderForm" class="inline-form" novalidate>
+      <input id="newFolderName" maxlength="60" autocomplete="off" placeholder="Nouveau dossier…" data-i18n-placeholder="folders.new">
+      <button type="submit" data-i18n="folders.create">Créer</button>
+    </form>
+    <p id="folderMsg" class="status" role="status"></p>
+
     <h2 id="editorTitle" data-i18n="ed.addTitle">Ajouter une agence</h2>
 
     <!-- Étape 1 : détection -->
@@ -57,6 +66,10 @@
       <div class="field">
         <label for="newName" data-i18n="ed.name">Nom</label>
         <input id="newName" maxlength="40" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="newFolder" data-i18n="ed.folder">Dossier</label>
+        <select id="newFolder"><option value="" data-i18n="ed.folder.none">Aucun</option></select>
       </div>
       <div class="field">
         <label for="newUrl" id="urlLabel">Adresse de recherche</label>

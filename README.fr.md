@@ -51,6 +51,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 1. Cliquez sur l'icône TabulaPix.
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
    Pour changer l'ordre des agences, faites-les glisser par la poignée **⋮⋮** à gauche (ou, au clavier, **Alt + ↑ / ↓** sur une case). L'ordre est mémorisé et les onglets s'ouvrent dans cet ordre.
+   Les **dossiers** regroupent les agences (agences filaires, agences d'auteurs, agences de service de presse…) : créez-les dans ⚙ → Dossiers, puis faites glisser une agence sur le titre d'un dossier, ou choisissez son dossier en la modifiant. La case d'un dossier coche ou décoche toutes ses agences d'un coup ; elle est à moitié cochée quand seules certaines le sont (le compteur indique combien). **▾** replie ou déplie un dossier, et les dossiers se réordonnent en les faisant glisser par leur poignée **⋮⋮**. Les agences hors dossier sont listées après les dossiers.
 3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
    Les onglets s'ouvrent en arrière-plan : vous restez sur l'onglet où vous êtes.
    Les derniers mots-clés lancés sont réaffichés (déjà sélectionnés) à la prochaine ouverture : tapez directement pour les remplacer.
@@ -98,14 +99,14 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
 ```json
 {
   "format": "tabulapix-config",
-  "formatVersion": 1,
+  "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.2.0" },
+  "app": { "name": "TabulaPix", "version": "3.4.0" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
-  "folders": [],
+  "folders": [{ "id": "f-wire", "name": "Agences filaires" }],
   "agencies": [
-    { "id": "reuters", "builtin": true, "name": "Reuters (points)", "checked": true, "hidden": false },
+    { "id": "reuters", "builtin": true, "name": "Reuters (points)", "folder": "f-wire", "checked": true, "hidden": false },
     { "id": "custom-abc123", "builtin": false, "name": "Alamy", "url": "https://www.alamy.com/search.html?qt={q}", "checked": true, "hidden": false }
   ],
   "removedBuiltins": ["afp-forum"]
@@ -114,7 +115,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
 
 - `agencies` suit l'ordre de la liste. Les agences fournies ne portent `name`, `url`, `payload`, `encode` ou `fill` que si elles ont été modifiées ; les agences ajoutées portent toujours leur adresse (et `fill` quand elles remplissent un champ de recherche).
 - **Compatibilité entre versions** : une nouvelle version ne fait qu'*ajouter* des champs facultatifs, jamais changer le sens d'un champ existant (`formatVersion` augmente). Une version plus récente de TabulaPix lit donc les anciens fichiers (les champs absents prennent leur valeur par défaut), et une version plus ancienne lit les fichiers plus récents en ignorant ce qu'elle ne connaît pas encore (le récapitulatif d'import le signale ; les agences fournies qu'elle ne connaît pas sont comptées à part). Seul un changement incompatible, à éviter, augmenterait `minReaderVersion` : une version plus ancienne refuse alors le fichier et demande une mise à jour.
-- **Dossiers** (`folders: [{ "id", "name" }]`, et un champ `folder` sur chaque agence) : prévus pour classer les agences (agences filaires, agences d'auteurs, agences de service de presse…). Même avant d'être affichés, ils sont conservés à l'import et réécrits à l'export : rien n'est perdu quand des collègues aux versions différentes s'échangent des fichiers (les autres champs qu'une version future ajouterait sont ignorés). La case d'un dossier ne sera pas enregistrée : elle se déduit de ses agences — cochée, décochée, ou à moitié cochée quand seules certaines le sont — et la cocher coche ou décoche toutes ses agences.
+- **Dossiers** (`folders: [{ "id", "name", "collapsed" }]`, et un champ `folder` sur chaque agence) : exportés et importés avec le reste, y compris l'état replié de chaque dossier. La case d'un dossier n'est pas enregistrée : elle se déduit de ses agences. Une version plus ancienne qui n'affiche pas les dossiers les conserve et les réécrit : rien n'est perdu quand des collègues aux versions différentes s'échangent des fichiers (les autres champs qu'une version future ajouterait sont ignorés).
 
 ## Modifier les agences fournies (développement)
 

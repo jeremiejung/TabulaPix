@@ -6,6 +6,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Dossiers d'agences** (agences filaires, agences d'auteurs, agences de service de presse…) : créés, renommés et supprimés dans ⚙ → Dossiers ; on range une agence en la faisant glisser sur le titre d'un dossier ou depuis l'éditeur d'agence. La case d'un dossier coche ou décoche toutes ses agences, et est à moitié cochée quand seules certaines le sont. Les dossiers se replient et se réordonnent ; tout est conservé dans le fichier de configuration exporté (format version 2, toujours lisible par la 3.3.0).
+- Barre latérale : le pied de page (liens vers jeremie.eu et le code source) reste désormais collé au bas de la fenêtre.
+
 ## 3.3.0 — 7 novembre 2026 (Chrome Web Store)
 
 - **Supprimer n'importe quelle agence**, y compris celles fournies ; les agences fournies supprimées peuvent être restaurées.

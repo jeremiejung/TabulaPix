@@ -25,6 +25,7 @@ langSelect.addEventListener("change", async () => {
   applyI18n();
   // Textes construits par le code : on les refait dans la nouvelle langue.
   await renderManageList();
+  await renderFolderAdmin();
   renderOptionFields(await loadOptions());
   if (draft) { setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
   else { ed.title.textContent = t("ed.addTitle"); }
@@ -166,6 +167,7 @@ let cachedOptions = {}; // réglages en mémoire (l'autorisation doit partir dir
 loadOptions().then((o) => { cachedOptions = o; });
 
 async function showSettings() {
+  await renderFolderAdmin();
   if (!(await restoreDraft())) resetEditor();
   await renderManageList();
   renderOptionFields(await loadOptions());
@@ -199,6 +201,7 @@ const ed = {
   pickBtn: $id("pickBtn"), backToUrl: $id("backToUrl"), advanced: $id("advanced"),
   techUrl: $id("techUrl"), techFill: $id("techFill"), payload: $id("newPayload"), encode: $id("newEncode"),
   tryBtn: $id("tryBtn"), submit: $id("agencySubmit"), reset: $id("resetAgency"), cancel: $id("cancelEdit"),
+  folder: $id("newFolder"),
   form: addForm
 };
 const listMsg = $id("listMsg");
@@ -300,7 +303,7 @@ async function saveDraft() {
   if (!draft) return chrome.storage.session.remove(AGENCY_DRAFT_KEY);
   await chrome.storage.session.set({
     [AGENCY_DRAFT_KEY]: {
-      ...draft, name: ed.name.value, url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value,
+      ...draft, name: ed.name.value, url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value, folder: ed.folder.value,
       detUrl: ed.detUrl.value, detQ: ed.detQ.value, step2: !ed.form.hidden, step2Msg: ed.step2Msg.textContent
     }
   });
@@ -329,6 +332,7 @@ function startEdit(a) {
   // de la page et le repérage du champ.
   ed.step1.hidden = Boolean(!a.custom && a.fill);
   editing = a.id;
+  loadFolders().then(({ folderOf }) => { ed.folder.value = folderOf[a.id] || ""; saveDraft(); });
   ed.title.textContent = t("ed.editTitle", { name: a.name });
   ed.name.value = a.name;
   ed.name.disabled = false;
@@ -361,6 +365,8 @@ async function restoreDraft() {
   ed.encode.value = saved.encode || "";
   ed.submit.textContent = saved.editing ? t("ed.saveEdit") : t("ed.add");
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
+  await renderFolderAdmin();
+  ed.folder.value = saved.folder || "";
   ed.step1.hidden = Boolean(saved.builtin && saved.mode === "fill");
   setMode(saved.mode);
   if (saved.step2) showStep2(saved.step2Msg);
@@ -532,6 +538,10 @@ addForm.addEventListener("submit", async (e) => {
       done = t("ed.added", { name: agency.name });
     }
   }
+  // Dossier choisi dans le formulaire.
+  const { folderOf } = await loadFolders();
+  if (ed.folder.value) folderOf[id] = ed.folder.value; else delete folderOf[id];
+  await chrome.storage.local.set({ [FOLDER_OF_KEY]: folderOf });
   resetEditor();
   await renderManageList();
   const li = manageList.querySelector(`li[data-id="${id}"]`);
@@ -555,6 +565,95 @@ settingsForm.addEventListener("submit", async (e) => {
   cachedOptions = values;
   flash(t("opt.saved"));
 });
+
+/* ---------- Dossiers (options) ---------- */
+
+const folderAdmin = document.getElementById("folderAdmin");
+const folderMsg = document.getElementById("folderMsg");
+
+// Liste des dossiers (renommer, supprimer) et menu « Dossier » du formulaire.
+async function renderFolderAdmin() {
+  const { folders, folderOf } = await loadFolders();
+  const counts = {};
+  for (const f of Object.values(folderOf)) counts[f] = (counts[f] || 0) + 1;
+  folderAdmin.textContent = "";
+  if (!folders.length) {
+    const li = document.createElement("li");
+    li.className = "help";
+    li.textContent = t("folders.none");
+    folderAdmin.append(li);
+  }
+  for (const f of folders) {
+    const li = document.createElement("li");
+    const name = document.createElement("span");
+    name.className = "fname";
+    name.textContent = f.name;
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.textContent = t("folders.count", { n: counts[f.id] || 0 });
+    const rename = document.createElement("button");
+    rename.type = "button";
+    rename.textContent = "✎";
+    rename.title = t("folders.rename", { name: f.name });
+    rename.setAttribute("aria-label", rename.title);
+    rename.addEventListener("click", async () => {
+      const value = prompt(t("folders.renamePrompt"), f.name);
+      if (value === null) return;
+      const n = value.trim();
+      if (!n || n.length > 60) return flash(t("folders.err.name"), folderMsg);
+      const cur = (await loadFolders()).folders;
+      await chrome.storage.local.set({ [FOLDERS_KEY]: cur.map((x) => (x.id === f.id ? { ...x, name: n } : x)) });
+      await renderFolderAdmin();
+      flash(t("folders.renamed", { name: n }), folderMsg);
+    });
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "fdel";
+    del.textContent = "✕";
+    del.title = t("folders.delete", { name: f.name });
+    del.setAttribute("aria-label", del.title);
+    del.addEventListener("click", async () => {
+      if (!confirm(t("folders.deleteConfirm", { name: f.name }))) return;
+      const cur = await loadFolders();
+      for (const [agencyId, folderId] of Object.entries(cur.folderOf)) if (folderId === f.id) delete cur.folderOf[agencyId];
+      await chrome.storage.local.set({ [FOLDERS_KEY]: cur.folders.filter((x) => x.id !== f.id), [FOLDER_OF_KEY]: cur.folderOf });
+      await renderFolderAdmin();
+      flash(t("folders.deleted", { name: f.name }), folderMsg);
+    });
+    li.append(name, tag, rename, del);
+    folderAdmin.append(li);
+  }
+  // Menu « Dossier » du formulaire d'agence.
+  const keep = ed.folder.value;
+  ed.folder.textContent = "";
+  const none = document.createElement("option");
+  none.value = "";
+  none.textContent = t("ed.folder.none");
+  ed.folder.append(none);
+  for (const f of folders) {
+    const o = document.createElement("option");
+    o.value = f.id;
+    o.textContent = f.name;
+    ed.folder.append(o);
+  }
+  ed.folder.value = folders.some((f) => f.id === keep) ? keep : "";
+}
+
+document.getElementById("folderForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const field = document.getElementById("newFolderName");
+  const name = field.value.trim();
+  if (!name || name.length > 60) return flash(t("folders.err.name"), folderMsg);
+  const { folders } = await loadFolders();
+  if (folders.length >= MAX_FOLDERS) return flash(t("folders.err.max", { max: MAX_FOLDERS }), folderMsg);
+  await chrome.storage.local.set({ [FOLDERS_KEY]: folders.concat({ id: newFolderId(), name }) });
+  field.value = "";
+  await renderFolderAdmin();
+  flashEl(folderAdmin.lastElementChild);
+  flash(t("folders.created", { name }), folderMsg);
+});
+
+ed.folder.addEventListener("change", () => saveDraft());
 
 /* ---------- Sauvegarde, partage et configuration d'usine ---------- */
 
@@ -660,6 +759,7 @@ async function reloadSettingsView() {
   cachedOptions = await loadOptions();
   renderOptionFields(cachedOptions);
   resetEditor();
+  await renderFolderAdmin();
   await renderManageList();
 }
 
@@ -735,74 +835,177 @@ function orderedAgencies(order) {
   return out;
 }
 
-function render(agencies, checked) {
-  for (const a of agencies) {
-    const li = document.createElement("li");
-    li.dataset.id = a.id;
-    li.draggable = true;
-    const handle = document.createElement("span");
-    handle.className = "handle";
-    handle.textContent = "⋮⋮";
-    handle.title = t("main.handle");
-    handle.setAttribute("aria-hidden", "true");
-    const label = document.createElement("label");
-    const box = document.createElement("input");
-    box.type = "checkbox";
-    box.value = a.id;
-    box.checked = checked.includes(a.id);
-    box.addEventListener("change", save);
-    box.addEventListener("keydown", (e) => {
-      if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
-      e.preventDefault();
-      const other = e.key === "ArrowUp" ? li.previousElementSibling : li.nextElementSibling;
-      if (!other) return;
-      e.key === "ArrowUp" ? other.before(li) : other.after(li);
-      box.focus();
-      saveOrder();
-    });
-    label.append(box, a.name);
-    if (isManual(a)) {
-      const hint = document.createElement("span");
-      hint.className = "hint";
-      hint.textContent = t("main.paste");
-      hint.title = t("main.paste.title");
-      label.append(hint);
+// Une ligne d'agence (case, nom, poignée de glisser-déposer).
+function agencyItem(a, checked) {
+  const li = document.createElement("li");
+  li.className = "agency";
+  li.dataset.id = a.id;
+  li.draggable = true;
+  const handle = document.createElement("span");
+  handle.className = "handle";
+  handle.textContent = "⋮⋮";
+  handle.title = t("main.handle");
+  handle.setAttribute("aria-hidden", "true");
+  const label = document.createElement("label");
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.className = "agency-box";
+  box.value = a.id;
+  box.checked = checked.includes(a.id);
+  box.addEventListener("change", save);
+  box.addEventListener("keydown", (e) => {
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    e.preventDefault();
+    const other = e.key === "ArrowUp" ? li.previousElementSibling : li.nextElementSibling;
+    if (!other) return;
+    e.key === "ArrowUp" ? other.before(li) : other.after(li);
+    box.focus();
+    saveOrder();
+  });
+  label.append(box, a.name);
+  if (isManual(a)) {
+    const hint = document.createElement("span");
+    hint.className = "hint";
+    hint.textContent = t("main.paste");
+    hint.title = t("main.paste.title");
+    label.append(hint);
+  }
+  li.append(handle, label);
+  return li;
+}
+
+// Liste : un groupe par dossier (titre avec case à trois états), puis les
+// agences sans dossier. Sans dossier, la liste reste une liste simple.
+function render(agencies, checked, folders, folderOf) {
+  const groups = folders.map((f) => ({ folder: f, items: [] }));
+  const byFolder = new Map(groups.map((g) => [g.folder.id, g]));
+  const root = { folder: null, items: [] };
+  for (const a of agencies) (byFolder.get(folderOf[a.id]) || root).items.push(a);
+
+  for (const g of [...groups, root]) {
+    const group = document.createElement("li");
+    group.className = "group" + (g.folder ? "" : " root") + (g.folder && g.folder.collapsed ? " collapsed" : "");
+    group.dataset.folder = g.folder ? g.folder.id : "";
+    if (g.folder) {
+      const head = document.createElement("div");
+      head.className = "group-head";
+      head.draggable = true;
+      const handle = document.createElement("span");
+      handle.className = "handle";
+      handle.textContent = "⋮⋮";
+      handle.title = t("folder.handle");
+      handle.setAttribute("aria-hidden", "true");
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "toggle";
+      toggle.title = t("folder.toggle");
+      toggle.setAttribute("aria-label", toggle.title);
+      toggle.setAttribute("aria-expanded", String(!g.folder.collapsed));
+      toggle.textContent = g.folder.collapsed ? "▸" : "▾";
+      toggle.addEventListener("click", () => toggleFolder(group, toggle));
+      const label = document.createElement("label");
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.className = "folder-box";
+      // Cocher le dossier coche (ou décoche) toutes ses agences.
+      box.addEventListener("change", () => {
+        group.querySelectorAll("input.agency-box").forEach((b) => (b.checked = box.checked));
+        save();
+      });
+      const name = document.createElement("span");
+      name.className = "folder-name";
+      name.textContent = g.folder.name;
+      const count = document.createElement("span");
+      count.className = "count";
+      label.append(box, name, count);
+      head.append(handle, toggle, label);
+      group.append(head);
     }
-    li.append(handle, label);
-    list.append(li);
+    const ul = document.createElement("ul");
+    ul.className = "items";
+    for (const a of g.items) ul.append(agencyItem(a, checked));
+    group.append(ul);
+    list.append(group);
+  }
+  updateFolderStates();
+}
+
+// Case de chaque dossier : cochée, décochée ou à moitié cochée (déduite de
+// ses agences, jamais enregistrée), et compteur « cochées / total ».
+function updateFolderStates() {
+  for (const group of list.querySelectorAll("li.group:not(.root)")) {
+    const all = [...group.querySelectorAll("input.agency-box")];
+    const on = all.filter((b) => b.checked).length;
+    const box = group.querySelector("input.folder-box");
+    box.checked = all.length > 0 && on === all.length;
+    box.indeterminate = on > 0 && on < all.length;
+    box.disabled = !all.length;
+    group.querySelector(".count").textContent = `${on}/${all.length}`;
   }
 }
 
-/* Glisser-déposer */
+async function toggleFolder(group, toggle) {
+  const collapsed = group.classList.toggle("collapsed");
+  toggle.textContent = collapsed ? "▸" : "▾";
+  toggle.setAttribute("aria-expanded", String(!collapsed));
+  const { [FOLDERS_KEY]: folders = [] } = await chrome.storage.local.get(FOLDERS_KEY);
+  await chrome.storage.local.set({ [FOLDERS_KEY]: cleanFolders(folders).map((f) => (f.id === group.dataset.folder ? (collapsed ? { ...f, collapsed: true } : { id: f.id, name: f.name }) : f)) });
+}
+
+/* Glisser-déposer : une agence (entre agences, ou sur le titre d'un dossier
+   pour l'y ranger), ou un dossier entier par son titre. */
 let dragged = null;
 list.addEventListener("dragstart", (e) => {
-  dragged = e.target.closest("li");
+  const head = e.target.closest(".group-head");
+  dragged = head ? head.parentElement : e.target.closest("li.agency");
   if (!dragged) return;
   dragged.classList.add("dragging");
   e.dataTransfer.effectAllowed = "move";
-  e.dataTransfer.setData("text/plain", dragged.dataset.id);
+  e.dataTransfer.setData("text/plain", dragged.dataset.id || dragged.dataset.folder);
 });
 list.addEventListener("dragover", (e) => {
   if (!dragged) return;
   e.preventDefault();
-  const over = e.target.closest("li");
-  if (!over || over === dragged) return;
-  const box = over.getBoundingClientRect();
-  e.clientY < box.top + box.height / 2 ? over.before(dragged) : over.after(dragged);
+  const half = (el) => { const r = el.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; };
+  if (dragged.classList.contains("group")) {
+    // Dossier : se place avant ou après un autre dossier (jamais après le groupe « sans dossier »).
+    const over = e.target.closest("li.group");
+    if (!over || over === dragged) return;
+    if (over.classList.contains("root")) { over.before(dragged); return; }
+    half(over.querySelector(".group-head")) ? over.before(dragged) : over.after(dragged);
+    return;
+  }
+  const head = e.target.closest(".group-head");
+  if (head) { // sur le titre d'un dossier : rangée dedans, à la fin
+    const items = head.parentElement.querySelector(".items");
+    if (dragged.parentElement !== items || items.lastElementChild !== dragged) items.append(dragged);
+    return;
+  }
+  const over = e.target.closest("li.agency");
+  if (over && over !== dragged) { half(over) ? over.before(dragged) : over.after(dragged); return; }
+  const group = e.target.closest("li.group");
+  if (group && !over) { // zone vide d'un groupe (ex. dossier vide ou « sans dossier »)
+    const items = group.querySelector(".items");
+    if (dragged.parentElement !== items) items.append(dragged);
+  }
 });
 list.addEventListener("drop", (e) => e.preventDefault());
 list.addEventListener("dragend", () => {
   if (!dragged) return;
+  const wasFolder = dragged.classList.contains("group");
   dragged.classList.remove("dragging");
   dragged = null;
-  saveOrder();
+  if (wasFolder) saveFolderOrder();
+  else { saveOrder(); saveFolderMembership(); }
+  updateFolderStates();
 });
 
 // Cases et ordre sont lus dans la liste affichée.
-const boxes = () => Array.from(list.querySelectorAll("input[type=checkbox]"));
+const boxes = () => Array.from(list.querySelectorAll("input.agency-box"));
 const checkedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);
 
 function save() {
+  updateFolderStates();
   chrome.storage.local.set({ [STORAGE_KEY]: checkedIds() });
 }
 
@@ -819,6 +1022,25 @@ function saveOrder() {
   });
   fullOrder = out;
   chrome.storage.local.set({ [ORDER_KEY]: fullOrder });
+}
+
+// Dossier de chaque agence affichée, d'après la liste (les agences masquées
+// gardent le leur).
+async function saveFolderMembership() {
+  const { folderOf } = await loadFolders();
+  for (const li of list.querySelectorAll("li.agency")) {
+    const folder = li.closest("li.group").dataset.folder;
+    if (folder) folderOf[li.dataset.id] = folder; else delete folderOf[li.dataset.id];
+  }
+  await chrome.storage.local.set({ [FOLDER_OF_KEY]: folderOf });
+}
+
+async function saveFolderOrder() {
+  const { folders } = await loadFolders();
+  const byId = new Map(folders.map((f) => [f.id, f]));
+  const order = [...list.querySelectorAll("li.group:not(.root)")].map((g) => byId.get(g.dataset.folder)).filter(Boolean);
+  for (const f of folders) if (!order.includes(f)) order.push(f);
+  await chrome.storage.local.set({ [FOLDERS_KEY]: order });
 }
 
 function setAll(state) {
@@ -877,8 +1099,9 @@ async function refreshList() {
   const data = await chrome.storage.local.get({ [STORAGE_KEY]: DEFAULT_CHECKED, [ORDER_KEY]: [], [QUERY_KEY]: "" });
   const ordered = orderedAgencies(data[ORDER_KEY]);
   fullOrder = ordered.map((a) => a.id);
+  const { folders, folderOf } = await loadFolders();
   list.textContent = "";
-  render(ordered.filter((a) => !ag.hidden.has(a.id)), data[STORAGE_KEY]);
+  render(ordered.filter((a) => !ag.hidden.has(a.id)), data[STORAGE_KEY], folders, folderOf);
   return data;
 }
 
@@ -889,8 +1112,8 @@ langReady.then(applyNewAgencyDefaults).then(refreshList).then((data) => {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   // Agences modifiées ailleurs (autre fenêtre) : on met la liste à jour.
-  if (area === "local" && (changes[CUSTOM_KEY] || changes[HIDDEN_KEY] || changes[OVERRIDES_KEY])) {
-    if (!settingsView.hidden) renderManageList(); else refreshList();
+  if (area === "local" && (changes[CUSTOM_KEY] || changes[HIDDEN_KEY] || changes[OVERRIDES_KEY] || changes[FOLDERS_KEY] || changes[FOLDER_OF_KEY])) {
+    if (!settingsView.hidden) { renderManageList(); renderFolderAdmin(); } else refreshList();
   }
   // Repérage terminé sur le site (colonne latérale restée ouverte) : on l'affiche.
   if (area === "session" && changes[PICK_RESULT_KEY] && changes[PICK_RESULT_KEY].newValue) {

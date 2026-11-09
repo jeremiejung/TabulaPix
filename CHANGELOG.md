@@ -6,6 +6,9 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Agency folders** (wire agencies, photographers' agencies, press-service agencies…): created, renamed and deleted in ⚙ → Folders; agencies are moved into a folder by dragging them onto its title or from the agency editor. A folder's checkbox ticks or unticks all its agencies, and is half-ticked when only some are ticked. Folders can be folded and reordered; everything is kept in the exported configuration file (format version 2, still readable by 3.3.0).
+- Side panel: the footer (links to jeremie.eu and the source code) now stays at the bottom of the window.
+
 ## 3.3.0 — 7 November 2026 (Chrome Web Store)
 
 - **Delete any agency**, built-in ones included; deleted built-in agencies can be restored.

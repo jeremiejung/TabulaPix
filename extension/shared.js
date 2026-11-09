@@ -164,7 +164,7 @@ async function applyNewAgencyDefaults() {
  * l'extension ou la partager entre collègues :
  *   { format: "tabulapix-config", formatVersion, minReaderVersion,
  *     exportedAt, app, settings: { language, options },
- *     folders: [ { id, name } ],   // dossiers d'agences (à venir)
+ *     folders: [ { id, name, collapsed? } ],   // dossiers d'agences
  *     agencies: [ … dans l'ordre de la liste … ],
  *     removedBuiltins: [ … agences fournies supprimées … ] }
  * Chaque agence : { id, builtin, name, checked, hidden, folder? } et, si
@@ -185,16 +185,16 @@ async function applyNewAgencyDefaults() {
  * agences (toutes cochées, aucune, ou certaines = à moitié coché).
  */
 const CONFIG_FORMAT = "tabulapix-config";
-const CONFIG_FORMAT_VERSION = 1; // version du format écrit par cette extension
+const CONFIG_FORMAT_VERSION = 2; // version du format écrit par cette extension (2 : dossiers repliés)
 const CONFIG_READER_VERSION = 1; // plus haut minReaderVersion que cette extension sait lire
 const CONFIG_MAX_BYTES = 1024 * 1024;
-const FOLDERS_KEY = "agencyFolders";     // [ { id, name } ]
+const FOLDERS_KEY = "agencyFolders";     // [ { id, name, collapsed? } ]
 const FOLDER_OF_KEY = "agencyFolderOf";  // { idAgence: idDossier }
 const STORAGE_KEYS = {
   checked: "checkedAgencies", order: "agencyOrder", query: "lastQuery", seen: "seenAgencies"
 };
 
-// Dossiers : liste propre (id court, nom de 60 caractères au plus).
+// Dossiers : liste propre (id court, nom de 60 caractères au plus, replié ou non).
 function cleanFolders(list) {
   const out = [], ids = new Set();
   for (const f of Array.isArray(list) ? list.slice(0, 100) : []) {
@@ -203,7 +203,7 @@ function cleanFolders(list) {
     const name = String(f.name || "").trim();
     if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/.test(id) || ids.has(id) || !name || name.length > 60) continue;
     ids.add(id);
-    out.push({ id, name });
+    out.push(f.collapsed === true ? { id, name, collapsed: true } : { id, name });
   }
   return out;
 }
@@ -355,3 +355,16 @@ async function optionalOriginsGranted() {
   const { origins = [] } = await chrome.permissions.getAll();
   return origins.filter((o) => !required.has(o));
 }
+
+// Dossiers et rattachement des agences (id d'agence → id de dossier existant).
+async function loadFolders() {
+  const data = await chrome.storage.local.get({ [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {} });
+  const folders = cleanFolders(data[FOLDERS_KEY]);
+  const ids = new Set(folders.map((f) => f.id));
+  const raw = data[FOLDER_OF_KEY] && typeof data[FOLDER_OF_KEY] === "object" ? data[FOLDER_OF_KEY] : {};
+  const folderOf = {};
+  for (const [agencyId, folderId] of Object.entries(raw)) if (ids.has(folderId)) folderOf[agencyId] = folderId;
+  return { folders, folderOf };
+}
+const MAX_FOLDERS = 100;
+const newFolderId = () => "f-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
