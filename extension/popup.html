@@ -134,14 +134,21 @@
 
 
 
-    <h2 data-i18n="opt.settings">Réglages</h2>
-    <form id="settingsForm">
+    <!-- À régler : seulement quand quelque chose attend l'utilisateur -->
+    <div id="attention" class="attention" hidden>
+      <h2 data-i18n="attention.title">À régler</h2>
+      <p id="attentionText" class="help"></p>
+      <button type="button" id="authorizeBtn" class="secondary" data-i18n="attention.authorize">Autoriser ces sites</button>
+    </div>
+
+    <h2 data-i18n="opt.pixpalace">Pixpalace</h2>
+    <form id="settingsForm" novalidate>
       <div id="fields"></div>
-      <button type="submit" id="save" class="primary" data-i18n="opt.save">Enregistrer</button>
-      <p id="settingsMsg" class="status" role="status"></p>
     </form>
+
+    <h2 data-i18n="opt.lang">Langue</h2>
     <div class="field lang">
-      <label for="langSelect" data-i18n="opt.lang">Langue</label>
+      <label for="langSelect" data-i18n="opt.lang.label">Langue de l'interface</label>
       <select id="langSelect">
         <option value="auto" data-i18n="opt.lang.auto">Automatique (langue du navigateur)</option>
         <option value="fr">Français</option>
@@ -149,18 +156,21 @@
       </select>
     </div>
 
+    <h2 data-i18n="access.title">Accès rapide</h2>
+    <p class="help access-line"><span id="shortcutText"></span> <button type="button" id="shortcutBtn" class="link inline" data-i18n="access.change">Changer le raccourci</button></p>
+    <p class="help" data-i18n="access.panel">Le bouton colonne, en haut de la popup, garde TabulaPix ouvert à droite de la fenêtre pour enchaîner les recherches.</p>
+
     <h2 id="backupTitle" data-i18n="backup.title">Sauvegarde et partage</h2>
-    <p class="help" data-i18n="backup.help">Enregistrez votre configuration dans un fichier, pour la retrouver après une réinstallation ou la partager avec des collègues.</p>
+    <p class="help" data-i18n="backup.help">Pour retrouver votre configuration après une réinstallation, ou la partager avec des collègues.</p>
     <div class="bar">
       <button type="button" id="exportBtn" data-i18n="backup.export">Exporter</button>
       <button type="button" id="importBtn" data-i18n="backup.import">Importer…</button>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" hidden>
     <p id="backupMsg" class="status" role="status"></p>
-    <button type="button" id="authorizeBtn" class="primary" hidden></button>
 
     <div id="removedLine" hidden>
-      <h2 data-i18n="opt.removed.title">Agences fournies supprimées</h2>
+      <h2 data-i18n="opt.removed.title">Agences retirées de la liste</h2>
       <p class="help"><span id="removedText"></span> <button type="button" id="restoreRemoved" class="link inline" data-i18n="opt.removed.restore">Restaurer</button></p>
     </div>
     <p id="restoreMsg" class="status ok" role="status"></p>

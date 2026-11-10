@@ -26,7 +26,7 @@ langSelect.addEventListener("change", async () => {
   // Textes construits par le code : on les refait dans la nouvelle langue.
   await renderRemoved();
   fillFolderSelect();
-  renderOptionFields(await loadOptions());
+  renderOptionFields(await currentOptionValues()); // la saisie en cours n'est pas perdue
   if (draft) { layoutEditor(Boolean(draft.editing)); setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
   else { ed.title.textContent = t("ed.addTitle"); }
   list.textContent = "";
@@ -83,10 +83,9 @@ const settingsForm = document.getElementById("settingsForm");
 const addForm = document.getElementById("addForm");
 const editorView = document.getElementById("editorView");
 const fields = document.getElementById("fields");
-const settingsMsg = document.getElementById("settingsMsg");
 const addMsg = document.getElementById("addMsg");
 
-function flash(text, el = settingsMsg) {
+function flash(text, el) {
   el.textContent = text;
   // Sous le bouton de recherche, un message (erreur) reste jusqu'à l'action
   // suivante : s'il s'effaçait tout seul, la liste remonterait d'un coup.
@@ -184,9 +183,13 @@ async function setHidden(id, hide) {
 async function renderRemoved() {
   const ag = await loadAgencies();
   document.getElementById("removedLine").hidden = !ag.removed.size;
-  document.getElementById("removedText").textContent = t("opt.removed.line", { n: ag.removed.size });
+  const names = AGENCIES.filter((a) => ag.removed.has(a.id)).map((a) => a.name);
+  document.getElementById("removedText").textContent = t("opt.removed.line", { names: names.join(", ") });
 }
 
+// Réglages des options (sous-domaine Pixpalace) : enregistrés dès qu'on quitte
+// le champ (ou Entrée), avec « ✓ Enregistré » à côté du libellé et l'erreur
+// sous le champ. Plus de bouton : une seule façon d'enregistrer, comme la langue.
 function renderOptionFields(values) {
   fields.textContent = "";
   for (const o of OPTIONS) {
@@ -194,21 +197,76 @@ function renderOptionFields(values) {
     div.className = "field";
     const label = document.createElement("label");
     label.htmlFor = "opt-" + o.id;
+    label.className = "with-status";
     label.textContent = t(`opt.${o.id}.label`);
+    const saved = document.createElement("span");
+    saved.className = "saved";
+    saved.setAttribute("role", "status");
+    label.append(saved);
     const field = document.createElement("input");
     field.id = "opt-" + o.id;
     field.autocomplete = "off";
     field.spellcheck = false;
     field.value = values[o.id] ?? o.default;
     field.placeholder = o.default;
-    field.pattern = o.pattern.replace(/^\^|\$$/g, ""); // l'attribut HTML ajoute ^…$ lui-même
     const help = document.createElement("p");
     help.className = "help";
+    help.id = `opt-${o.id}-help`;
     help.textContent = t(`opt.${o.id}.help`);
-    div.append(label, field, help);
+    const err = document.createElement("p");
+    err.className = "status err field-err";
+    err.id = `opt-${o.id}-err`;
+    field.setAttribute("aria-describedby", `${help.id} ${err.id}`);
+    field.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); field.blur(); } });
+    field.addEventListener("input", () => { err.textContent = ""; field.removeAttribute("aria-invalid"); saved.textContent = ""; });
+    field.addEventListener("change", () => saveOption(o, field, saved, err));
+    div.append(label, field, err, help);
     fields.append(div);
   }
 }
+
+async function saveOption(o, field, saved, err) {
+  const v = field.value.trim();
+  if (v !== "" && !new RegExp(o.pattern).test(v)) {
+    err.textContent = t(`opt.${o.id}.invalid`);
+    field.setAttribute("aria-invalid", "true");
+    return;
+  }
+  const values = { ...(await loadOptions()), [o.id]: v };
+  await chrome.storage.local.set({ [OPTIONS_KEY]: values });
+  cachedOptions = values;
+  saved.textContent = t("opt.saved");
+  setTimeout(() => { if (saved.textContent === t("opt.saved")) saved.textContent = ""; }, 2500);
+}
+
+// Valeurs affichées (non perdues si l'on change de langue en cours de saisie).
+async function currentOptionValues() {
+  const values = { ...(await loadOptions()) };
+  for (const o of OPTIONS) { const f = document.getElementById("opt-" + o.id); if (f) values[o.id] = f.value; }
+  return values;
+}
+
+// À régler : sites qu'il faut encore autoriser, avec le nom des agences.
+async function renderAttention() {
+  const missing = await missingFillOrigins((await loadAgencies()).all);
+  missingOrigins = [...missing.keys()];
+  const names = [...missing.values()].flat().map((a) => a.name);
+  document.getElementById("attention").hidden = !names.length;
+  document.getElementById("attentionText").textContent = names.length === 1
+    ? t("perm.banner.one", { names: names[0] })
+    : t("perm.banner.many", { n: names.length, names: names.join(", ") });
+}
+
+// Accès rapide : le raccourci réellement défini dans Chrome.
+async function renderShortcut() {
+  let key = "";
+  try { key = ((await chrome.commands.getAll()).find((c) => c.name === "_execute_action") || {}).shortcut || ""; } catch (_) { /* rien */ }
+  document.getElementById("shortcutText").textContent = t("access.shortcut", { key: key || t("access.none") });
+}
+document.getElementById("shortcutBtn").addEventListener("click", () => {
+  chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
+  if (isPopup) window.close();
+});
 
 let cachedOptions = {}; // réglages en mémoire (l'autorisation doit partir directement du clic)
 loadOptions().then((o) => { cachedOptions = o; });
@@ -223,13 +281,10 @@ function showView(view) {
 
 async function showSettings() {
   await renderRemoved();
-  // Sites encore à autoriser (import, refus…) : le bouton reste disponible.
-  const missing = await missingFillOrigins((await loadAgencies()).all);
-  missingOrigins = [...missing.keys()];
-  authorizeBtn.hidden = !missingOrigins.length;
-  authorizeBtn.textContent = t("backup.authorize", { n: missingOrigins.length });
+  await renderAttention(); // sites encore à autoriser (import, refus…)
+  await renderShortcut();
   renderOptionFields(await loadOptions());
-  settingsMsg.textContent = document.getElementById("restoreMsg").textContent = "";
+  document.getElementById("restoreMsg").textContent = "";
   showView(settingsView);
   document.getElementById("back").focus();
 }
@@ -772,21 +827,7 @@ addForm.addEventListener("submit", async (e) => {
   await releaseUnusedOrigins(); // ex. passée d'un champ à remplir à une adresse de recherche
 });
 
-settingsForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const values = {};
-  for (const o of OPTIONS) {
-    const v = document.getElementById("opt-" + o.id).value.trim();
-    if (v !== "" && !new RegExp(o.pattern).test(v)) {
-      flash(t("opt.invalid", { label: t(`opt.${o.id}.label`) }));
-      return;
-    }
-    values[o.id] = v;
-  }
-  await chrome.storage.local.set({ [OPTIONS_KEY]: values });
-  cachedOptions = values;
-  flash(t("opt.saved"));
-});
+settingsForm.addEventListener("submit", (e) => e.preventDefault()); // Entrée : enregistré au « change »
 
 // Après reconstruction d'une liste : remet le focus sur le même élément.
 const focusKey = () => document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : undefined;
@@ -979,6 +1020,7 @@ document.getElementById("exportBtn").addEventListener("click", async () => {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10000);
+  backupMsg.className = "status ok";
   flash(t("backup.exported", { file: name }), backupMsg);
 });
 
@@ -1030,8 +1072,7 @@ importFile.addEventListener("change", async () => {
     for (const origin of needed) if (!(await chrome.permissions.contains({ origins: [origin] }))) missingOrigins.push(origin);
     backupMsg.className = "status ok";
     backupMsg.textContent = t("backup.imported") + " " + summary + (missingOrigins.length ? "\n" + t("backup.needPerm") : "");
-    authorizeBtn.hidden = !missingOrigins.length;
-    authorizeBtn.textContent = t("backup.authorize", { n: missingOrigins.length });
+    await renderAttention();
   };
   await report();
   asked.then(report); // une fois la demande de Chrome acceptée ou refusée
@@ -1039,11 +1080,10 @@ importFile.addEventListener("change", async () => {
 
 // Les autorisations doivent être demandées directement depuis un clic.
 authorizeBtn.addEventListener("click", () => {
-  chrome.permissions.request({ origins: missingOrigins }).then((granted) => {
-    backupMsg.className = "status " + (granted ? "ok" : "err");
-    backupMsg.textContent = granted ? t("backup.authorized") : t("backup.authRefused");
-    if (granted) authorizeBtn.hidden = true;
-  });
+  chrome.permissions.request({ origins: missingOrigins }).then(async (granted) => {
+    await renderAttention(); // accordé : le bloc disparaît
+    if (!granted) document.getElementById("attentionText").textContent += " " + t("backup.authRefused");
+  }).catch(() => {});
 });
 
 // Configuration d'usine : tout est effacé, y compris les autorisations de sites.
