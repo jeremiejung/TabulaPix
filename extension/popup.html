@@ -6,7 +6,8 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <form id="form">
+  <main>
+  <form id="form" role="search" aria-label="TabulaPix">
     <header>
       <h1>TabulaPix</h1>
       <button type="button" id="pin" class="icon-btn" title="Garder TabulaPix ouvert dans une colonne" aria-label="Garder TabulaPix ouvert dans une colonne" data-i18n-title="main.pin.title"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2" y="3" width="12" height="10" rx="1.6"/><path d="M10 3v10"/><path d="M11.6 6h.9M11.6 8h.9"/></svg></button>
@@ -156,6 +157,7 @@
     <p class="help" data-i18n="factory.help">Efface vos réglages, vos agences ajoutées ou modifiées et les autorisations de sites, et revient à la configuration livrée.</p>
     <button type="button" id="factoryBtn" class="danger" data-i18n="factory.button">Rétablir la configuration d'usine</button>
   </section>
+  </main>
   <footer class="credit">
     <p>Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/" target="_blank" rel="noopener">Jérémie</a>.</p>
     <p><a href="https://github.com/jeremiejung/TabulaPix" target="_blank" rel="noopener" data-i18n="footer.source">Code source sur GitHub</a></p>

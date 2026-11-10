@@ -518,7 +518,7 @@ ed.pickBtn.addEventListener("click", () => {
       chrome.storage.session.remove("fillDraft");
       return flash(t("ed.permRefused", { host }), addMsg);
     }
-    const res = await chrome.runtime.sendMessage({ type: "pick", draft: pick });
+    const res = await chrome.runtime.sendMessage({ type: "pick", draft: pick }).catch(() => null);
     if (!res || !res.ok) return flash((res && res.error) || t("ed.pickFailed"), addMsg);
     addMsg.textContent = t("ed.siteOpening");
     if (isPopup) window.close();
@@ -536,7 +536,7 @@ ed.tryBtn.addEventListener("click", async () => {
   const q = ed.detQ.value.trim() || input.value.trim() || t("ed.sampleQuery");
   const url = await buildUrl(spec, q, await loadOptions());
   const fill = draft.mode === "fill" ? draft.fill : null;
-  const res = await chrome.runtime.sendMessage({ type: "try", url, q, fill, builtinId: builtin ? builtin.id : null });
+  const res = await chrome.runtime.sendMessage({ type: "try", url, q, fill, builtinId: builtin ? builtin.id : null }).catch(() => null);
   flash(res && res.ok ? t("ed.tryStarted", { q }) : (res && res.error) || t("ed.tryFailed"), addMsg);
 });
 
@@ -688,6 +688,7 @@ async function deleteFolder(f) {
 function folderControls(f, color, msgEl) {
   const nameInput = document.createElement("input");
   nameInput.className = "fname-input";
+  nameInput.dir = "auto";
   nameInput.dataset.key = "n:" + f.id;
   nameInput.value = f.name;
   nameInput.maxLength = 60;
@@ -1012,6 +1013,7 @@ function agencyItem(a, checked, isHidden = false) {
   });
   const name = document.createElement("span");
   name.className = "name";
+  name.dir = "auto"; // noms en arabe, hébreu… dans le bon sens
   name.textContent = a.name;
   label.append(box, name);
   if (isManual(a)) {
@@ -1080,6 +1082,7 @@ function renderPermBanner(missing) {
   pendingOrigins = [...missing.keys()];
   const names = [...missing.values()].flat().map((a) => a.name);
   permBanner.hidden = !names.length;
+  document.getElementById("permText").dir = "auto";
   document.getElementById("permText").textContent = names.length === 1
     ? t("perm.banner.one", { names: names[0] })
     : t("perm.banner.many", { n: names.length, names: names.join(", ") });
@@ -1185,6 +1188,7 @@ function folderHead(f, color, group) {
   } else {
     const name = document.createElement("span");
     name.className = "folder-name";
+    name.dir = "auto";
     name.textContent = f.name;
     label.append(name, count);
     head.append(toggle, label);
@@ -1229,6 +1233,13 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     group.append(ul, empty);
     list.append(group);
   });
+  if (!agencies.length && !folders.length) {
+    // Rien à afficher : toutes les agences sont masquées ou supprimées.
+    const li = document.createElement("li");
+    li.className = "empty-list";
+    li.textContent = t(organizing ? "main.empty.organize" : "main.empty");
+    list.append(li);
+  }
   if (organizing) list.append(newFolderRow(), addAgencyRow());
   updateFolderStates();
 }
@@ -1249,8 +1260,12 @@ function newFolderRow() {
   add.title = t("folders.create");
   add.setAttribute("aria-label", add.title);
   add.append(icon("plus"));
+  let busy = false; // double Entrée : un seul dossier
   const create = async () => {
-    await createFolder(field.value, msg); // la liste se reconstruit, le dossier y est surligné
+    if (busy) return;
+    busy = true;
+    try { await createFolder(field.value, msg); } // la liste se reconstruit, le dossier y est surligné
+    finally { busy = false; }
   };
   field.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); create(); } });
   add.addEventListener("click", create);
@@ -1429,6 +1444,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   const jobs = selected.map((a, i) => ({ id: a.id, url: urls[i] }));
   sweeping = true;
   try { await chrome.runtime.sendMessage({ type: "sweep", jobs, q }); }
+  catch (_) { msg.textContent = t("main.bgError"); return; } // ex. extension en cours de rechargement
   finally { setTimeout(() => { sweeping = false; }, 800); }
   if (isPopup) {
     window.close(); // on reste sur l'onglet en cours
