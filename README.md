@@ -92,7 +92,7 @@ In three steps:
   Locating ignores ids generated on every page load (e.g. `…__bfac60392382`) and relies on stable landmarks (field name, class, button label…); if the site has several identical search forms, TabulaPix uses the first visible one and the button closest to the field. If the site changes its page, locate the field again (pencil then **Locate again**).
 ### Editing an agency
 
-- **Edit an agency** (its pencil): the same screen, straight at the “check” step, with **Save**, and a **Folder** menu. Every agency can be renamed, built-in ones included; for built-in agencies, **Restore the original** goes back to the shipped name and settings.
+- **Edit an agency** (its pencil): the same screen, straight at the form (name, folder, address), with **Save**. If the site has changed, **Detect the address again from the site** (folded, at the bottom) runs the detection again from a results page; for an added agency that fills in a field, its located field is kept if the keywords still aren't in the address. Every agency can be renamed, built-in ones included; for built-in agencies, **Restore the original** goes back to the shipped name and settings.
   - **Bloomberg, Abacapress and Pixpalace** fill in their site's search field: if one of them changes its page and the search no longer starts, open its pencil then **Locate again** to show it the field and button again (no extra permission is requested; Bloomberg's specific delay is kept). Their address can be edited, but must stay on the same site.
 ## Settings
 

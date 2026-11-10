@@ -27,7 +27,7 @@ langSelect.addEventListener("change", async () => {
   await renderRemoved();
   fillFolderSelect();
   renderOptionFields(await loadOptions());
-  if (draft) { setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
+  if (draft) { layoutEditor(Boolean(draft.editing), Boolean(draft.builtin && draft.mode === "fill")); setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
   else { ed.title.textContent = t("ed.addTitle"); }
   list.textContent = "";
   await refreshList();
@@ -163,7 +163,7 @@ async function showEditor(a) {
   if (a) startEdit(a);
   else if (!(await restoreDraft())) resetEditor();
   showView(editorView);
-  (ed.step1.hidden ? ed.name : ed.detUrl).focus();
+  (draft && draft.editing ? ed.name : ed.detUrl).focus();
 }
 
 // Retour à la liste après l'éditeur : l'agence ajoutée ou modifiée y est
@@ -301,9 +301,39 @@ async function saveDraft() {
   });
 }
 
+// Ajout : la détection d'abord. Modification : le formulaire d'abord, la
+// détection repliée en bas (« Re-détecter »), sans « Saisir à la main ».
+const redetect = $id("redetect");
+const detectBtn = $id("detectBtn");
+function layoutEditor(editing, builtinFill = false) {
+  const help = ed.step1.querySelector(".help");
+  if (editing) {
+    $id("redetectSlot").append(ed.step1);
+    redetect.hidden = builtinFill; // agences fournies qui remplissent un champ : seul le repérage compte
+    ed.step1.hidden = false;
+    help.textContent = t("ed.redetect.help");
+    detectBtn.textContent = t("ed.redetect");
+    detectBtn.className = "secondary";
+  } else {
+    editorView.insertBefore(ed.step1, ed.form);
+    redetect.hidden = true;
+    redetect.open = false;
+    ed.step1.hidden = false;
+    help.textContent = t("ed.step1.help");
+    detectBtn.textContent = t("ed.detect");
+    detectBtn.className = "primary";
+  }
+  ed.manualLink.hidden = editing;
+}
+
+// Entrée dans les champs de détection : détecter (et non enregistrer le formulaire).
+for (const el of [ed.detUrl, ed.detQ]) {
+  el.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); detectBtn.click(); } });
+}
+
 function resetEditor() {
   draft = null;
-  ed.step1.hidden = false;
+  layoutEditor(false);
   ed.form.reset();
   ed.detUrl.value = ed.detQ.value = "";
   ed.detectMsg.textContent = ed.step2Msg.textContent = addMsg.textContent = "";
@@ -322,7 +352,8 @@ function startEdit(a) {
   draft = { id: a.id, editing: true, builtin: !a.custom, mode: a.fill ? "fill" : "url", fill: a.fill || null, pageHost: hostOf(a.url, cachedOptions) };
   // Agence fournie qui remplit un champ : pas de détection, seulement l'adresse
   // de la page et le repérage du champ.
-  ed.step1.hidden = Boolean(!a.custom && a.fill);
+  layoutEditor(true, Boolean(!a.custom && a.fill));
+  redetect.open = false;
   loadFolders().then(({ folderOf }) => { ed.folder.value = folderOf[a.id] || ""; saveDraft(); });
   ed.title.textContent = t("ed.editTitle", { name: a.name });
   ed.name.value = a.name;
@@ -355,7 +386,8 @@ async function restoreDraft() {
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
   fillFolderSelect();
   ed.folder.value = saved.folder || "";
-  ed.step1.hidden = Boolean(saved.builtin && saved.mode === "fill");
+  layoutEditor(Boolean(saved.editing), Boolean(saved.builtin && saved.mode === "fill"));
+  if (saved.editing) redetect.open = Boolean(saved.detUrl);
   setMode(saved.mode);
   if (saved.step2) showStep2(saved.step2Msg);
   await applyPickResult(data[PICK_RESULT_KEY]);
@@ -386,7 +418,8 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
   if (r.notFound) {
     // Mots-clés absents de l'adresse : on remplira le champ de recherche du site.
     ed.url.value = pageUrl;
-    draft.fill = null;
+    // Re-détection d'une agence qui remplit déjà ce site : son repérage reste valable.
+    if (!(draft.editing && draft.fill && hostOf(pageUrl, {}) === draft.pageHost)) draft.fill = null;
     setMode("fill");
     showStep2(t("ed.notInUrl"));
     flashEl(ed.name, ed.url, ed.step2Msg);
