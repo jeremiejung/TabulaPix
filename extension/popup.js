@@ -279,8 +279,9 @@ function renderChecks() {
   const fill = draft && draft.fill;
   const set = (li, done, label) => {
     li.classList.toggle("done", done);
-    li.querySelector(".mark").textContent = done ? "✓" : "○";
+    li.querySelector(".mark").replaceChildren(icon(done ? "check" : "dot")); // icônes dessinées, pas de ✓ / ○
     li.lastChild.textContent = " " + label;
+    li.setAttribute("aria-label", `${label} : ${t(done ? "ed.chk.done" : "ed.chk.todo")}`); // l'état sans la seule icône
   };
   set(ed.chkField, Boolean(fill && fill.input), t("ed.chk.field"));
   set(ed.chkButton, Boolean(fill && fill.input), fill && fill.input && !fill.submit ? t("ed.chk.enter") : t("ed.chk.button"));
@@ -963,6 +964,8 @@ const ICONS = {
   grip: '<g fill="currentColor" stroke="none"><circle cx="6" cy="3.5" r="1.1"/><circle cx="10" cy="3.5" r="1.1"/><circle cx="6" cy="8" r="1.1"/><circle cx="10" cy="8" r="1.1"/><circle cx="6" cy="12.5" r="1.1"/><circle cx="10" cy="12.5" r="1.1"/></g>',
   trash: '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/>',
   plus: '<path d="M8 3.5v9M3.5 8h9"/>',
+  check: '<path d="M3.5 8.5l3 3 6-7"/>',
+  dot: '<circle cx="8" cy="8" r="4.5"/>',
   pencil: '<path d="M10.5 2.8l2.7 2.7L6 12.7l-3.3.6.6-3.3z"/><path d="M9 4.3l2.7 2.7"/>',
   eye: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>',
   eyeOff: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><path d="M2.5 13.5l11-11"/>',

@@ -46,7 +46,6 @@ html.panel #pin { display: none; }
 .icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 28px; height: 28px; padding: 0 6px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 7px; background: Canvas; color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 .icon-btn:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 .icon-btn.bare { border-color: transparent; background: none; min-width: 24px; height: 24px; padding: 0; }
-.icon-btn .knob { fill: Canvas; }
 #organize .done { display: none; }
 #organize[aria-pressed="true"] { background: CanvasText; color: Canvas; border-color: CanvasText; padding: 0 9px 0 7px; }
 #organize[aria-pressed="true"] .done { display: inline; }
@@ -63,7 +62,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 #list li.agency { display: flex; align-items: center; gap: 4px; border-radius: 6px; }
 #list li.agency label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 26px; cursor: pointer; }
 #list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-li .hint { margin-left: auto; padding: 1px 6px; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 9px; }
+li .hint { margin-left: auto; padding: 1px 7px; font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 9px; }
 #list.has-folders .root > .items { padding-left: 8px; }
 
 /* Dossiers : un bloc teinté de la couleur du dossier */
@@ -73,7 +72,7 @@ li .hint { margin-left: auto; padding: 1px 6px; font-size: 11px; color: var(--mu
 #list .group:not(.root) input[type=checkbox] { accent-color: var(--fc); }
 .group-head { display: flex; align-items: center; gap: 2px; min-height: 32px; padding: 0 8px 0 2px; border-radius: 9px; background: color-mix(in srgb, var(--fc) 20%, Canvas); }
 .group:not(.collapsed) > .group-head { border-radius: 9px 9px 4px 4px; }
-html.organizing .group-head label { flex: none; padding: 0 4px; }
+html.organizing .group-head label { flex: none; min-width: 26px; justify-content: center; padding: 0 4px; }
 .group-head label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
 .folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--fc) 50%, CanvasText); }
 .count { margin-left: auto; padding: 2px 7px; border-radius: 9px; font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--muted); background: color-mix(in srgb, Canvas 75%, transparent); }
@@ -95,7 +94,7 @@ html:not(.organizing) .root > .empty { display: none; }
 .perm-banner[hidden] { display: none; }
 .perm-banner p { flex: 1; margin: 0; font-size: 12px; }
 .perm-banner button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: CanvasText; color: Canvas; font: 600 12px system-ui, sans-serif; cursor: pointer; }
-.perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--warn) 16%, Canvas); color: inherit; font: 600 11px system-ui, sans-serif; cursor: pointer; }
+.perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--warn) 16%, Canvas); color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 .perm-pill:hover { background: color-mix(in srgb, var(--warn) 30%, Canvas); }
 
 /* Mode Organiser */
@@ -147,17 +146,21 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 
 /* Vue Options */
 [hidden] { display: none !important; }
-.intro { margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .field { margin: 0 0 10px; }
 .field label { display: block; font-weight: 600; margin-bottom: 3px; }
-.field input, .field textarea, .field select { width: 100%; box-sizing: border-box; padding: 5px 7px; font-size: 13px; }
-.field textarea { font: 12px ui-monospace, monospace; resize: vertical; }
+/* Champs (éditeur, options) : même famille que le champ de recherche */
+.field input, .field textarea, .field select { width: 100%; box-sizing: border-box; min-height: 32px; padding: 6px 9px; font: 13px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 7px; }
+.field select { padding-right: 6px; cursor: pointer; }
+.field textarea { min-height: 64px; font: 12px/1.4 ui-monospace, monospace; resize: vertical; }
+.field input:hover, .field textarea:hover, .field select:hover { border-color: color-mix(in srgb, CanvasText 45%, transparent); }
+.field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible { outline-offset: 0; border-color: var(--focus); }
 .field input:disabled { opacity: .6; }
+.field input:user-invalid { border-color: var(--err); outline-color: var(--err); }
 details { margin: 0 0 10px; }
-summary { cursor: pointer; font-size: 12px; margin-bottom: 6px; }
-.field input:user-invalid { border-color: var(--accent); outline-color: var(--accent); }
+summary { min-height: 24px; line-height: 24px; cursor: pointer; font-size: 12px; font-weight: 600; margin-bottom: 4px; border-radius: 5px; }
+summary:hover { color: color-mix(in srgb, CanvasText 80%, var(--focus)); }
 .help { margin: 3px 0 6px; font-size: 12px; color: var(--muted); }
-.primary { padding: 5px 12px; font-weight: 600; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; }
+.primary { min-height: 30px; padding: 0 14px; font: 600 13px system-ui, sans-serif; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
 #back, #edBack { flex: none; margin-left: auto; height: 28px; padding: 0 10px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
 #back:hover, #edBack:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 #editorTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -165,12 +168,10 @@ summary { cursor: pointer; font-size: 12px; margin-bottom: 6px; }
 .bar button.primary:disabled { opacity: .45; }
 h2 { font-size: 13px; margin: 16px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); }
 #settingsView > h2:first-of-type { border-top: 0; padding-top: 0; }
-code { font-size: 11px; }
+code { font-size: 12px; }
 .status { margin: 6px 0 0; font-size: 12px; min-height: 1em; }
+.status:empty { min-height: 0; margin: 0; } /* pas de trou quand il n'y a rien à dire */
 
-.inline-form { display: flex; gap: 6px; margin: 4px 0; }
-.inline-form input { flex: 1; min-width: 0; padding: 4px 6px; font-size: 13px; }
-.inline-form button { padding: 3px 10px; cursor: pointer; }
 
 /* Ajout d'agence : étapes */
 #detectMsg, #step2Msg, #addMsg { white-space: pre-line; }
@@ -180,14 +181,16 @@ code { font-size: 11px; }
 .primary:disabled { opacity: .45; cursor: default; }
 .checks { list-style: none; margin: 4px 0 8px; padding: 0; }
 .checks li { padding: 2px 4px; border-radius: 4px; }
-.checks li.done .mark { color: var(--ok); font-weight: 700; }
-#pickBtn { padding: 4px 10px; font-weight: 600; cursor: pointer; }
-.secondary { height: 28px; padding: 0 12px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 7px; cursor: pointer; }
+.checks li { display: flex; align-items: center; gap: 6px; }
+.checks .mark { display: inline-grid; place-items: center; color: var(--muted); }
+.checks .mark svg { width: 14px; height: 14px; }
+.checks li.done .mark { color: var(--ok); }
+.secondary { min-height: 30px; padding: 0 12px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 7px; cursor: pointer; }
 .secondary:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 #redetect { margin: 4px 0 10px; }
 #redetect[open] { padding: 0 0 4px; }
 #redetect #step1 { padding: 2px 0 0 12px; border-left: 1px solid var(--line); }
-.help.small { font-size: 11px; margin-top: 4px; }
+.help.small { margin-top: 4px; }
 #tryBtn { cursor: pointer; }
 
 /* Surbrillance temporaire de ce qui vient d'être détecté, ajouté ou rangé */
@@ -201,19 +204,19 @@ code { font-size: 11px; }
 
 /* Agence « remplir le champ » */
 .fillbox { margin: 0 0 10px; padding: 7px 10px; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 7px; background: color-mix(in srgb, var(--accent) 6%, Canvas); }
-.link { display: block; text-align: left; padding: 0; border: 0; background: none; color: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; opacity: .85; }
+.link { display: block; min-height: 24px; text-align: left; padding: 0; border: 0; background: none; color: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; opacity: .85; }
 
 /* Signature */
-.credit { margin: 14px 0 0; font-size: 11px; text-align: center; color: var(--muted); }
+.credit { margin: 14px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
 .credit p { margin: 2px 0; }
 .field.lang { margin-top: 14px; }
 .credit a { color: inherit; text-underline-offset: 2px; }
 
 /* Sauvegarde, configuration d'usine */
-.link.inline { display: inline; font-size: 12px; }
+.link.inline { display: inline-flex; align-items: center; min-height: 24px; vertical-align: middle; font-size: 12px; }
 #exportBtn, #importBtn { cursor: pointer; }
 #authorizeBtn { margin-top: 4px; }
-.danger { padding: 5px 12px; font-weight: 600; color: var(--err); background: none; border: 1px solid var(--err); border-radius: 6px; cursor: pointer; }
+.danger { min-height: 30px; padding: 0 14px; font: 600 13px system-ui, sans-serif; color: var(--err); background: none; border: 1px solid var(--err); border-radius: 7px; cursor: pointer; }
 .danger:hover { color: var(--on-accent); background: var(--accent); }
 
 /* Colonne latérale : le pied de page reste collé en bas de la fenêtre. */
