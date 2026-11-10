@@ -42,7 +42,21 @@ if (!isPopup) document.documentElement.classList.add("panel");
 // L'identifiant de la fenêtre est lu dès l'ouverture : Chrome n'autorise
 // l'ouverture du panneau que directement dans le clic.
 let windowId = null;
-chrome.windows.getCurrent().then((w) => { windowId = w.id; });
+chrome.windows.getCurrent().then(async (w) => {
+  windowId = w.id;
+  // Sécurité : popup ouverte alors que la colonne TabulaPix est déjà ouverte
+  // dans cette fenêtre (normalement évité par le script d'arrière-plan) →
+  // le clic sur l'icône sert d'interrupteur : on ferme la colonne et la popup.
+  if (!isPopup || !chrome.runtime.getContexts) return;
+  try {
+    const panels = await chrome.runtime.getContexts({ contextTypes: ["SIDE_PANEL"] });
+    // Fenêtre non précisée par Chrome (-1) : on n'agit que s'il n'y a qu'une fenêtre.
+    const single = (await chrome.windows.getAll({ windowTypes: ["normal"] })).length === 1;
+    if (!panels.some((c) => c.windowId === w.id || (c.windowId === -1 && single))) return;
+    if (chrome.sidePanel && chrome.sidePanel.close) await chrome.sidePanel.close({ windowId: w.id }).catch(() => {});
+    window.close();
+  } catch (_) { /* Chrome trop ancien : on garde la popup */ }
+});
 
 document.getElementById("pin").addEventListener("click", () => {
   if (windowId === null || !chrome.sidePanel) {
