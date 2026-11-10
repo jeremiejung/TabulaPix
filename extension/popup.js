@@ -995,8 +995,10 @@ function setOrganizing(on) {
   organizeBtn.setAttribute("aria-pressed", String(on));
   // Pas de recherche pendant l'organisation : on ne reste pas dans ce mode par mégarde.
   const go = document.getElementById("go");
-  input.disabled = go.disabled = on;
-  go.title = input.title = on ? t("main.organize.blocked") : "";
+  // …ni de sélection globale : « Tout » / « Aucune » attendent aussi la fin.
+  const all = document.getElementById("all"), none = document.getElementById("none");
+  input.disabled = go.disabled = all.disabled = none.disabled = on;
+  go.title = input.title = all.title = none.title = on ? t("main.organize.blocked") : "";
   return refreshList().then(() => { if (!on) input.focus(); });
 }
 organizeBtn.addEventListener("click", () => setOrganizing(!organizing));

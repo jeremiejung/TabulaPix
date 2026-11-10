@@ -142,7 +142,8 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 
 #go { width: 100%; margin-top: var(--space-2); padding: 8px; font-size: 13.5px; font-weight: 650; color: var(--on-accent); background: var(--accent); border: 0; border-radius: var(--r-control); cursor: pointer; }
 #go:hover { background: var(--accent-hover); }
-#go:disabled, input[type=search]:disabled { opacity: .4; cursor: not-allowed; }
+#go:disabled, input[type=search]:disabled, .bar.quick button:disabled { opacity: .4; cursor: not-allowed; }
+.bar.quick button:disabled:hover { background: Canvas; }
 #go:disabled:hover { background: var(--accent); }
 .go-count { font-weight: 400; }
 .go-count:not(:empty)::before { content: "· "; }
