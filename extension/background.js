@@ -335,8 +335,8 @@ function pickerUI(agencyName, T) {
   root.innerHTML = `<style>
     .panel{pointer-events:auto;position:fixed;top:12px;left:50%;transform:translateX(-50%);max-width:520px;
       background:#111;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:12px 16px;border-radius:8px;
-      box-shadow:0 4px 18px rgba(0,0,0,.35);border-left:5px solid #D7141A}
-    .t{font-weight:700;margin-bottom:4px}.msg{margin:2px 0 8px}.err{color:#ff8a80}
+      box-shadow:0 4px 18px rgba(0,0,0,.35);border-top:3px solid #D7141A}
+    .t{font-weight:700;margin-bottom:4px}.t::before{content:"";display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#D7141A;vertical-align:1px}.msg{margin:2px 0 8px}.err{color:#ff8a80}
     button{font:600 13px system-ui,sans-serif;margin-right:6px;padding:4px 10px;border-radius:4px;border:0;cursor:pointer}
     .alt{background:#444;color:#fff}.ok{background:#D7141A;color:#fff}
     .panel.bottom{top:auto;bottom:12px}

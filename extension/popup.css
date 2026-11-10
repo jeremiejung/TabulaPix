@@ -1,8 +1,17 @@
 :root {
   color-scheme: light dark;
-  --accent: #c62828;
+  /* Identité : celle de l'icône, encre et rouge signal. Le rouge ne sert qu'à
+     l'action principale, au focus et à la marque ; les dossiers ont leurs
+     propres couleurs de repérage ; tout le reste est neutre. */
+  --brand: #d7141a;            /* rouge de l'icône (5:1 avec du blanc) */
+  --accent: var(--brand);
+  --accent-hover: #b51016;
+  --on-accent: #fff;
+  --focus: var(--brand);
+  --ink: CanvasText;           /* cases hors dossier : encre, pas le bleu du navigateur */
   --line: color-mix(in srgb, CanvasText 16%, transparent);
   --muted: color-mix(in srgb, CanvasText 64%, Canvas);
+  --warn: #b98900;
   /* Couleurs des dossiers : teintes moyennes, lisibles en clair comme en sombre */
   --c-blue: #2f6fd0; --c-teal: #17908b; --c-green: #2f8a4c; --c-amber: #b98900; --c-orange: #d0661c;
   --c-red: #cc3f3c; --c-pink: #c43f86; --c-violet: #7b52c7; --c-gray: #7b8089;
@@ -10,17 +19,23 @@
   --ok: #2e7d32; --err: #c62828;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --ok: #81c784; --err: #ff8a80; }
+  /* Thème sombre composé, pas inversé : le rouge du bouton reste celui de la
+     marque, mais le focus et les textes d'état s'éclaircissent pour rester
+     lisibles sur fond sombre. */
+  :root { --ok: #81c784; --err: #ff8a80; --focus: #ff6b70; --accent-hover: #e8353b; --warn: #e0b437; }
 }
 ::placeholder { color: var(--muted); opacity: 1; }
 body { width: 260px; margin: 0; padding: 12px; font: 13px/1.35 system-ui, sans-serif; background: Canvas; color: CanvasText; }
 ::selection { background: color-mix(in srgb, var(--accent) 28%, Canvas); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+input[type=checkbox] { accent-color: var(--ink); }
 svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 input[type=checkbox] { width: 15px; height: 15px; margin: 0; flex: none; }
 
 header { display: flex; align-items: center; gap: 6px; margin: 0 0 10px; }
 h1 { font-size: 16px; font-weight: 750; letter-spacing: -.01em; margin: 0; }
+.brand { display: flex; align-items: center; gap: 7px; }
+.brand img { width: 18px; height: 18px; flex: none; }
 #pin { margin-left: auto; }
 html.panel #organize { margin-left: auto; }
 /* Panneau latéral : prend la largeur de la colonne, sans bouton « Garder ouvert » */
@@ -76,12 +91,12 @@ html:not(.organizing) .root > .empty { display: none; }
 .root > .empty { margin-left: 8px; }
 
 /* Sites à autoriser */
-.perm-banner { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 7px 8px 7px 10px; border: 1px solid color-mix(in srgb, var(--c-amber) 55%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--c-amber) 14%, Canvas); }
+.perm-banner { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 7px 8px 7px 10px; border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--warn) 14%, Canvas); }
 .perm-banner[hidden] { display: none; }
 .perm-banner p { flex: 1; margin: 0; font-size: 12px; }
 .perm-banner button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: CanvasText; color: Canvas; font: 600 12px system-ui, sans-serif; cursor: pointer; }
-.perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--c-amber) 60%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--c-amber) 16%, Canvas); color: inherit; font: 600 11px system-ui, sans-serif; cursor: pointer; }
-.perm-pill:hover { background: color-mix(in srgb, var(--c-amber) 30%, Canvas); }
+.perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--warn) 16%, Canvas); color: inherit; font: 600 11px system-ui, sans-serif; cursor: pointer; }
+.perm-pill:hover { background: color-mix(in srgb, var(--warn) 30%, Canvas); }
 
 /* Mode Organiser */
 .organize-help { display: none; margin: 0 0 8px; font-size: 12px; color: var(--muted); }
@@ -121,11 +136,11 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 .new-folder input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 8px; font-size: 13px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: none; color: inherit; }
 .new-folder input:focus { border-style: solid; }
 
-#go { width: 100%; margin-top: 8px; padding: 8px; font-size: 13.5px; font-weight: 650; color: #fff; background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
-#go:hover { background: color-mix(in srgb, var(--accent) 88%, black); }
+#go { width: 100%; margin-top: 8px; padding: 8px; font-size: 13.5px; font-weight: 650; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
+#go:hover { background: var(--accent-hover); }
 #go:disabled, input[type=search]:disabled { opacity: .4; cursor: not-allowed; }
 #go:disabled:hover { background: var(--accent); }
-.go-count { font-weight: 400; opacity: .9; }
+.go-count { font-weight: 400; }
 .go-count:not(:empty)::before { content: "· "; }
 #msg { margin: 6px 0 0; font-size: 12px; }
 #msg:empty { display: none; }
@@ -142,11 +157,11 @@ details { margin: 0 0 10px; }
 summary { cursor: pointer; font-size: 12px; margin-bottom: 6px; }
 .field input:user-invalid { border-color: var(--accent); outline-color: var(--accent); }
 .help { margin: 3px 0 6px; font-size: 12px; color: var(--muted); }
-.primary { padding: 5px 12px; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; }
+.primary { padding: 5px 12px; font-weight: 600; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; }
 #back, #edBack { flex: none; margin-left: auto; height: 28px; padding: 0 10px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
 #back:hover, #edBack:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 #editorTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar button.primary { color: #fff; background: var(--accent); border-color: var(--accent); }
+.bar button.primary { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
 .bar button.primary:disabled { opacity: .45; }
 h2 { font-size: 13px; margin: 16px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); }
 #settingsView > h2:first-of-type { border-top: 0; padding-top: 0; }
@@ -176,7 +191,7 @@ code { font-size: 11px; }
 #tryBtn { cursor: pointer; }
 
 /* Surbrillance temporaire de ce qui vient d'être détecté, ajouté ou rangé */
-@keyframes flash-ok { from { background-color: rgba(46, 125, 50, .35); } to { background-color: transparent; } }
+@keyframes flash-ok { from { background-color: color-mix(in srgb, var(--ok) 32%, transparent); } to { background-color: transparent; } }
 .flash { animation: flash-ok 1.6s ease-out; }
 @keyframes flash-head { from { box-shadow: inset 0 0 0 2px var(--fc); } to { box-shadow: inset 0 0 0 2px transparent; } }
 .group-head.flash { animation: flash-head 1.2s ease-out; }
@@ -199,7 +214,7 @@ code { font-size: 11px; }
 #exportBtn, #importBtn { cursor: pointer; }
 #authorizeBtn { margin-top: 4px; }
 .danger { padding: 5px 12px; font-weight: 600; color: var(--err); background: none; border: 1px solid var(--err); border-radius: 6px; cursor: pointer; }
-.danger:hover { color: #fff; background: var(--accent); }
+.danger:hover { color: var(--on-accent); background: var(--accent); }
 
 /* Colonne latérale : le pied de page reste collé en bas de la fenêtre. */
 html.panel body { min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; }
