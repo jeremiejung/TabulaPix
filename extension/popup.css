@@ -69,6 +69,14 @@ html.organizing .group-head label { flex: none; padding: 0 4px; }
 html:not(.organizing) .root > .empty { display: none; }
 .root > .empty { margin-left: 8px; }
 
+/* Sites à autoriser */
+.perm-banner { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 7px 8px 7px 10px; border: 1px solid color-mix(in srgb, var(--c-amber) 55%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--c-amber) 14%, Canvas); }
+.perm-banner[hidden] { display: none; }
+.perm-banner p { flex: 1; margin: 0; font-size: 12px; }
+.perm-banner button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: CanvasText; color: Canvas; font: 600 12px system-ui, sans-serif; cursor: pointer; }
+.perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--c-amber) 60%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--c-amber) 16%, Canvas); color: inherit; font: 600 11px system-ui, sans-serif; cursor: pointer; }
+.perm-pill:hover { background: color-mix(in srgb, var(--c-amber) 30%, Canvas); }
+
 /* Mode Organiser */
 .organize-help { display: none; margin: 0 0 8px; font-size: 12px; color: var(--muted); }
 html.organizing .organize-help { display: block; }

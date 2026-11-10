@@ -138,6 +138,11 @@ function showView(view) {
 
 async function showSettings() {
   await renderRemoved();
+  // Sites encore à autoriser (import, refus…) : le bouton reste disponible.
+  const missing = await missingFillOrigins((await loadAgencies()).all);
+  missingOrigins = [...missing.keys()];
+  authorizeBtn.hidden = !missingOrigins.length;
+  authorizeBtn.textContent = t("backup.authorize", { n: missingOrigins.length });
   renderOptionFields(await loadOptions());
   settingsMsg.textContent = "";
   showView(settingsView);
@@ -733,6 +738,12 @@ importFile.addEventListener("change", async () => {
   const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
     s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
   if (!confirm(t("backup.confirm", { summary }))) { backupMsg.textContent = ""; return; }
+  // On tente de demander tout de suite les sites nécessaires : Chrome ne
+  // l'accepte que peu après un clic (choix du fichier rapide). Sinon, la
+  // liste et les options proposent « Autoriser » tant qu'il en manque.
+  const asked = result.hosts.length
+    ? chrome.permissions.request({ origins: result.hosts.map(originPattern) }).catch(() => false)
+    : Promise.resolve(true);
 
   // Remplace la configuration (la dernière recherche est gardée).
   const { [QUERY_KEY]: lastQuery } = await chrome.storage.local.get(QUERY_KEY);
@@ -746,14 +757,17 @@ importFile.addEventListener("change", async () => {
   for (const origin of await optionalOriginsGranted()) {
     if (!needed.includes(origin)) { try { await chrome.permissions.remove({ origins: [origin] }); } catch (_) { /* déjà retirée */ } }
   }
-  missingOrigins = [];
-  for (const origin of needed) if (!(await chrome.permissions.contains({ origins: [origin] }))) missingOrigins.push(origin);
-
   await reloadSettingsView();
-  backupMsg.className = "status ok";
-  backupMsg.textContent = t("backup.imported") + " " + summary + (missingOrigins.length ? "\n" + t("backup.needPerm") : "");
-  authorizeBtn.hidden = !missingOrigins.length;
-  authorizeBtn.textContent = t("backup.authorize", { n: missingOrigins.length });
+  const report = async () => {
+    missingOrigins = [];
+    for (const origin of needed) if (!(await chrome.permissions.contains({ origins: [origin] }))) missingOrigins.push(origin);
+    backupMsg.className = "status ok";
+    backupMsg.textContent = t("backup.imported") + " " + summary + (missingOrigins.length ? "\n" + t("backup.needPerm") : "");
+    authorizeBtn.hidden = !missingOrigins.length;
+    authorizeBtn.textContent = t("backup.authorize", { n: missingOrigins.length });
+  };
+  await report();
+  asked.then(report); // une fois la demande de Chrome acceptée ou refusée
 });
 
 // Les autorisations doivent être demandées directement depuis un clic.
@@ -944,6 +958,60 @@ function toolButton(name, title, onClick) {
   return b;
 }
 
+/* ---------- Autorisations des sites dont on remplit le champ ---------- */
+
+// Sites (motif d'origine → agences) que Chrome n'autorise pas encore :
+// import d'une configuration, autorisation refusée ou retirée dans Chrome…
+async function missingFillOrigins(agencies) {
+  const options = await loadOptions();
+  const out = new Map();
+  for (const a of agencies) {
+    if (!a.fill) continue;
+    const host = hostOf(a.url, options);
+    if (!host) continue;
+    const origin = originPattern(host);
+    if (!out.has(origin)) out.set(origin, []);
+    out.get(origin).push(a);
+  }
+  for (const origin of [...out.keys()]) {
+    if (await chrome.permissions.contains({ origins: [origin] })) out.delete(origin);
+  }
+  return out;
+}
+
+// La demande doit partir directement du clic (aucune attente avant).
+function askPermission(origins) {
+  chrome.permissions.request({ origins }).then((granted) => {
+    flash(t(granted ? "perm.granted" : "perm.refused"), msg);
+    refreshList();
+  }).catch(() => flash(t("perm.refused"), msg));
+}
+
+let pendingOrigins = [];
+const permBanner = document.getElementById("permBanner");
+function renderPermBanner(missing) {
+  pendingOrigins = [...missing.keys()];
+  const names = [...missing.values()].flat().map((a) => a.name);
+  permBanner.hidden = !names.length;
+  document.getElementById("permText").textContent = names.length === 1
+    ? t("perm.banner.one", { names: names[0] })
+    : t("perm.banner.many", { n: names.length, names: names.join(", ") });
+}
+document.getElementById("permBtn").addEventListener("click", () => askPermission(pendingOrigins));
+
+function permPill(origin) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "perm-pill";
+  b.textContent = t("perm.row");
+  b.title = t("perm.row.title", { host: origin.replace(/^https:\/\/|\/\*$/g, "") });
+  b.addEventListener("click", () => askPermission([origin]));
+  return b;
+}
+// Autorisation accordée ou retirée ailleurs (réglages de Chrome) : on met à jour.
+chrome.permissions.onAdded.addListener(() => { if (!mainForm.hidden) refreshList(); });
+chrome.permissions.onRemoved.addListener(() => { if (!mainForm.hidden) refreshList(); });
+
 // Mode Organiser : ajout d'une agence (ouvre l'éditeur).
 function addAgencyRow() {
   const li = document.createElement("li");
@@ -1039,7 +1107,7 @@ function folderHead(f, color, group) {
 }
 
 // Liste : un bloc coloré par dossier, puis les agences sans dossier.
-function render(agencies, checked, folders, folderOf, hidden = new Set()) {
+function render(agencies, checked, folders, folderOf, hidden = new Set(), missing = new Map()) {
   list.classList.toggle("has-folders", folders.length > 0);
   const groups = folders.map((f) => ({ folder: f, items: [] }));
   const byFolder = new Map(groups.map((g) => [g.folder.id, g]));
@@ -1062,7 +1130,12 @@ function render(agencies, checked, folders, folderOf, hidden = new Set()) {
     }
     const ul = document.createElement("ul");
     ul.className = "items";
-    for (const a of g.items) ul.append(agencyItem(a, checked, hidden.has(a.id)));
+    for (const a of g.items) {
+      const li = agencyItem(a, checked, hidden.has(a.id));
+      const origin = [...missing].find(([, names]) => names.includes(a))?.[0];
+      if (origin && !organizing) li.append(permPill(origin));
+      ul.append(li);
+    }
     const empty = document.createElement("p");
     empty.className = "empty";
     empty.textContent = t(!g.folder ? "folder.root.empty" : organizing ? "folder.empty.organize" : "folder.empty");
@@ -1290,10 +1363,15 @@ async function refreshList() {
   fullOrder = ordered.map((a) => a.id);
   const { folders, folderOf } = await loadFolders();
   currentFolders = folders;
+  // Mode Organiser : les agences masquées apparaissent aussi (grisées), pour les réafficher.
+  const shown = organizing ? ordered : ordered.filter((a) => !ag.hidden.has(a.id));
+  const missing = await missingFillOrigins(shown.filter((a) => !ag.hidden.has(a.id)));
+  // Plus aucune attente ici : vider puis reconstruire d'un seul tenant (sinon
+  // deux mises à jour simultanées dupliqueraient les lignes).
   const key = focusKey();
   list.textContent = "";
-  // Mode Organiser : les agences masquées apparaissent aussi (grisées), pour les réafficher.
-  render(organizing ? ordered : ordered.filter((a) => !ag.hidden.has(a.id)), data[STORAGE_KEY], folders, folderOf, ag.hidden);
+  render(shown, data[STORAGE_KEY], folders, folderOf, ag.hidden, missing);
+  renderPermBanner(missing);
   restoreFocus(list, key);
   return data;
 }
