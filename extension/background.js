@@ -59,6 +59,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     } else if (msg.type === "try") {
       tryAgency(msg).then(sendResponse);
       return true;
+    } else if (msg.type === "panelOpened") {
+      syncActionWithPanel().then(() => sendResponse({ ok: true }), () => sendResponse({ ok: false }));
+      return true;
     }
     return;
   }
@@ -80,11 +83,13 @@ async function syncActionWithPanel() {
   await chrome.action.setPopup({ popup: open ? "" : "popup.html" });
   try { await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: open }); } catch (_) { /* sans colonne */ }
 }
-chrome.runtime.onConnect.addListener((port) => {
-  if (port.name !== "panel") return;
-  syncActionWithPanel();
-  port.onDisconnect.addListener(() => setTimeout(syncActionWithPanel, 200));
-});
+// Quand revérifier : ouverture signalée par la colonne, ouverture et
+// fermeture de la colonne (Chrome récent), changement d'onglet ou de fenêtre
+// (Chrome plus ancien : la fermeture se remarque au plus tard là), démarrage.
+if (chrome.sidePanel && chrome.sidePanel.onOpened) chrome.sidePanel.onOpened.addListener(() => syncActionWithPanel());
+if (chrome.sidePanel && chrome.sidePanel.onClosed) chrome.sidePanel.onClosed.addListener(() => setTimeout(syncActionWithPanel, 100));
+chrome.tabs.onActivated.addListener(() => syncActionWithPanel());
+chrome.windows.onFocusChanged.addListener(() => syncActionWithPanel());
 syncActionWithPanel();
 
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré

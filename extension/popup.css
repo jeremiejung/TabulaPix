@@ -122,7 +122,9 @@ html.organizing #list li.agency:hover { background: color-mix(in srgb, CanvasTex
 .palette[hidden] { display: none; }
 .chip { width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: var(--fc); cursor: pointer; }
 .chip[aria-pressed="true"] { box-shadow: 0 0 0 2px Canvas, 0 0 0 4px CanvasText; }
-#list .new-folder { display: flex; gap: 6px; margin: 8px 0 2px; }
+#list .new-folder { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 2px; }
+#list .new-folder .field-err { flex-basis: 100%; margin: -2px 0 0 2px; }
+.new-folder input[aria-invalid="true"] { border-style: solid; border-color: var(--err); }
 #list .add-agency { margin: 6px 0 2px; }
 .add-btn { display: flex; align-items: center; gap: 6px; width: 100%; height: 30px; padding: 0 8px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: var(--r-control); background: none; color: inherit; font: 600 13px system-ui, sans-serif; cursor: pointer; }
 .add-btn:hover { border-style: solid; background: color-mix(in srgb, CanvasText 5%, Canvas); }
@@ -204,26 +206,27 @@ code { font-size: 12px; }
 .flash { animation: flash-ok 1.6s ease-out; }
 @keyframes flash-head { from { box-shadow: inset 0 0 0 2px var(--fc); } to { box-shadow: inset 0 0 0 2px transparent; } }
 .group-head.flash { animation: flash-head 1.2s ease-out; }
-/* Ajouté ou modifié : « tac tac tac tac… psssht ». Quatre éclats nets (230 ms
-   allumé / 230 ms éteint, sous la limite de 3 éclats par seconde), le
-   dernier tient puis s'estompe. Un calque par-dessus la ligne : le fond
-   propre d'un dossier ne clignote pas avec. 3,2 s en tout (FRESH_MS). */
+/* Ajouté ou modifié : « tac tac tac tac… psssht ». Quatre éclats secs
+   (80 ms allumé / 80 ms éteint), le dernier tient puis s'estompe. Petite zone
+   (une ligne de la liste), loin du seuil des flashs dangereux. Un calque
+   par-dessus la ligne : le fond propre d'un dossier ne clignote pas avec.
+   2,4 s en tout (FRESH_MS). */
 .fresh { position: relative; }
 .fresh::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: color-mix(in srgb, var(--ok) 30%, transparent);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ok) 80%, transparent);
-  opacity: 0; animation: fresh-blink 3.2s linear; animation-delay: inherit;
+  background: color-mix(in srgb, var(--ok) 34%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ok) 85%, transparent);
+  opacity: 0; animation: fresh-blink 2.4s linear; animation-delay: inherit;
 }
 @keyframes fresh-blink {
-  0%, 7.1%     { opacity: 1; }
-  7.2%, 14.3%  { opacity: 0; }
-  14.4%, 21.5% { opacity: 1; }
-  21.6%, 28.7% { opacity: 0; }
-  28.8%, 35.9% { opacity: 1; }
-  36%, 43.1%   { opacity: 0; }
-  43.2%, 50%   { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
-  100%         { opacity: 0; }
+  0%, 3.3%      { opacity: 1; }
+  3.34%, 6.6%   { opacity: 0; }
+  6.67%, 9.9%   { opacity: 1; }
+  10%, 13.3%    { opacity: 0; }
+  13.34%, 16.6% { opacity: 1; }
+  16.67%, 19.9% { opacity: 0; }
+  20%, 29%      { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  100%          { opacity: 0; }
 }
 /* Moins d'animations demandé : pas d'éclats, la teinte tient puis s'estompe. */
 @keyframes fresh-calm { 0%, 40% { opacity: 1; } 100% { opacity: 0; } }

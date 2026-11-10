@@ -69,18 +69,10 @@ document.getElementById("pin").addEventListener("click", () => {
 });
 
 // Colonne latérale : on le signale au script d'arrière-plan, qui fait alors
-// agir l'icône de l'extension sur la colonne (pas de popup en plus).
-if (!isPopup) {
-  const connectPanel = () => {
-    let port;
-    try { port = chrome.runtime.connect({ name: "panel" }); } catch (_) { return; } // extension rechargée : page périmée
-    port.onDisconnect.addListener(() => {
-      void chrome.runtime.lastError; // coupure attendue (script d'arrière-plan redémarré) : rien à signaler
-      setTimeout(connectPanel, 1000);
-    });
-  };
-  connectPanel();
-}
+// agir l'icône de l'extension sur la colonne (pas de popup en plus). Un
+// simple message (et non une connexion permanente, qui pouvait laisser une
+// erreur « Receiving end does not exist » dans chrome://extensions).
+if (!isPopup) chrome.runtime.sendMessage({ type: "panelOpened" }).catch(() => {});
 
 /* ---------- Vue Options (dans la popup / le panneau) ---------- */
 
@@ -97,7 +89,7 @@ function flash(text, el = settingsMsg) {
   el.textContent = text;
   // Sous le bouton de recherche, un message (erreur) reste jusqu'à l'action
   // suivante : s'il s'effaçait tout seul, la liste remonterait d'un coup.
-  if (el === msg) return;
+  if (el === msg || el.classList.contains("field-err")) return;
   setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
 }
 
@@ -671,7 +663,7 @@ async function updateFolder(id, patch) {
    reconstruite plusieurs fois de suite (un changement par réglage) : la
    surbrillance reprend alors là où elle en était (délai négatif), au lieu
    de repartir à zéro à chaque fois, ce qui faisait un effet stroboscope. */
-const FRESH_MS = 3200; // durée de l'animation .fresh (popup.css)
+const FRESH_MS = 2400; // durée de l'animation .fresh (popup.css)
 let fresh = null; // { selector, start, scrolled }
 function highlightFresh(selector) { fresh = { selector, start: performance.now(), scrolled: false }; }
 function applyFresh() {
@@ -725,7 +717,14 @@ function folderControls(f, color, msgEl) {
   nameInput.addEventListener("change", async () => {
     const n = nameInput.value.trim();
     if (n === f.name) return;
-    if (!n || n.length > 60) { nameInput.value = f.name; return flash(t("folders.err.name"), msgEl); }
+    if (!n || n.length > 60) {
+      // Erreur affichée sur le champ lui-même (bulle sous le nom du dossier).
+      nameInput.value = f.name;
+      nameInput.setCustomValidity(t("folders.err.name"));
+      nameInput.reportValidity();
+      nameInput.addEventListener("input", () => nameInput.setCustomValidity(""), { once: true });
+      return;
+    }
     await updateFolder(f.id, { name: n });
   });
 
@@ -1289,16 +1288,25 @@ function newFolderRow() {
   add.title = t("folders.create");
   add.setAttribute("aria-label", add.title);
   add.append(icon("plus"));
+  // Erreur juste sous le champ (là où l'on regarde), pas en haut de la liste.
+  const err = document.createElement("p");
+  err.className = "status err field-err";
+  err.id = "newFolderErr";
+  err.setAttribute("role", "alert");
+  field.setAttribute("aria-describedby", err.id);
+  field.addEventListener("input", () => { err.textContent = ""; field.removeAttribute("aria-invalid"); });
   let busy = false; // double Entrée : un seul dossier
   const create = async () => {
     if (busy) return;
     busy = true;
-    try { await createFolder(field.value, msg); } // la liste se reconstruit, le dossier y est surligné
-    finally { busy = false; }
+    try {
+      // la liste se reconstruit, le dossier y est surligné
+      if (!(await createFolder(field.value, err))) { field.setAttribute("aria-invalid", "true"); field.focus(); }
+    } finally { busy = false; }
   };
   field.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); create(); } });
   add.addEventListener("click", create);
-  li.append(field, add);
+  li.append(field, add, err);
   return li;
 }
 
