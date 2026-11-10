@@ -93,7 +93,7 @@ En trois étapes :
 ### Modifier une agence
 
 - **Modifier une agence** (son crayon) : même écran, directement sur le formulaire (nom, dossier, adresse), avec **Enregistrer**. Si le site a changé, **Re-détecter l'adresse depuis le site** (replié, en bas) relance la détection à partir d'une page de résultats ; pour une agence ajoutée qui remplit un champ, le repérage est gardé si les mots-clés ne sont toujours pas dans l'adresse. Toutes les agences peuvent être renommées, y compris celles fournies ; pour celles-ci, **Rétablir l'original** revient au nom et aux réglages livrés.
-  - **Bloomberg, Abacapress et Pixpalace** remplissent le champ de recherche de leur site : si l'un d'eux change sa page et que la recherche ne part plus, ouvrez son crayon puis **Refaire le repérage** pour lui montrer à nouveau le champ et le bouton (aucune autorisation supplémentaire n'est demandée ; le délai propre à Bloomberg est conservé). Leur adresse peut être modifiée, mais doit rester sur le même site.
+  - **Bloomberg, Abacapress et Pixpalace** remplissent le champ de recherche de leur site : si l'un d'eux change sa page et que la recherche ne part plus, ouvrez son crayon puis **Refaire le repérage** pour lui montrer à nouveau le champ et le bouton (aucune autorisation supplémentaire n'est demandée ; le délai propre à Bloomberg est conservé). Comme toute agence, elles peuvent aussi être re-détectées, passer à une adresse de recherche (**Utiliser plutôt une adresse de recherche**) ou changer de site (le champ est alors repéré sur ce site, avec l'autorisation de Chrome pour celui-ci) ; **Rétablir l'original** revient au fonctionnement livré.
 ## Options
 
 Le bouton **⚙** en haut affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.

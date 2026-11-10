@@ -102,25 +102,28 @@ function hostOf(url, options) {
   catch (_) { return null; }
 }
 
-// Agence intégrée + modification de l'utilisateur. Pour les agences à
-// remplissage automatique, le site ne peut pas changer (autorisation Chrome
-// limitée à ce site) : sinon la modification est ignorée.
+// Agence intégrée + modification de l'utilisateur, traitée comme une agence
+// ajoutée : autre adresse, autre site, passage en « remplir le champ »
+// (override.fill = repères) ou en « adresse de recherche » (override.fill = false).
+// Le délai propre au site (Bloomberg) n'est gardé que sur le même site.
 function applyOverride(agency, override, options) {
   if (!override || typeof override !== "object") return agency;
   const { spec } = checkSpec(override, { allowOptions: true });
   if (!spec) return agency;
-  if (agency.fill && hostOf(spec.url, options) !== hostOf(agency.url, options)) return agency;
+  const sameHost = hostOf(spec.url, options) === hostOf(agency.url, options);
+  const picked = override.fill && typeof override.fill === "object" ? cleanFill(override.fill) : null;
+  // Agence qui remplit un champ, déplacée sur un autre site sans nouveau repérage : ignorée.
+  if (agency.fill && override.fill !== false && !picked && !sameHost) return agency;
   const out = { ...agency, url: spec.url, modified: true };
   const name = String(override.name || "").trim();
   if (name && name.length <= 40) out.name = name; // agence fournie renommée
   delete out.payload; delete out.encode;
   if (spec.payload !== undefined) { out.payload = spec.payload; out.encode = spec.encode; }
-  // Repères refaits par l'utilisateur (agences qui remplissent un champ) ;
-  // le délai propre au site reste celui de la configuration d'origine.
-  const fill = agency.fill && override.fill ? cleanFill(override.fill) : null;
-  if (fill) {
-    delete fill.delay;
-    out.fill = agency.fill.delay !== undefined ? { ...fill, delay: agency.fill.delay } : fill;
+  if (override.fill === false) delete out.fill;
+  else if (picked) {
+    delete picked.delay;
+    const delay = agency.fill && sameHost ? agency.fill.delay : undefined;
+    out.fill = delay !== undefined ? { ...picked, delay } : picked;
   }
   return out;
 }
@@ -310,13 +313,14 @@ function parseConfigImport(file) {
         const ov = { url: e.url !== undefined ? e.url : original.url };
         if (e.payload !== undefined) { ov.payload = e.payload; ov.encode = e.encode; }
         else if (e.url === undefined && original.payload !== undefined) { ov.payload = original.payload; ov.encode = original.encode; }
-        if (e.fill !== undefined && original.fill) { const f = cleanFill(e.fill); if (f) { delete f.delay; ov.fill = f; } }
+        if (e.fill === false && original.fill) ov.fill = false; // passée en « adresse de recherche »
+        else if (e.fill && typeof e.fill === "object") { const f = cleanFill(e.fill); if (f) { delete f.delay; ov.fill = f; } }
         const name = String(e.name || "").trim();
         if (name && name !== original.name && name.length <= 40) ov.name = name;
         const applied = applyOverride(original, ov, options);
         if (applied.modified) {
           const { spec } = checkSpec(ov, { allowOptions: true });
-          overrides[e.id] = { ...spec, ...(ov.fill ? { fill: ov.fill } : {}), ...(ov.name ? { name: ov.name } : {}) };
+          overrides[e.id] = { ...spec, ...(ov.fill !== undefined ? { fill: ov.fill } : {}), ...(ov.name ? { name: ov.name } : {}) };
         }
       }
     } else {

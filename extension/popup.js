@@ -27,7 +27,7 @@ langSelect.addEventListener("change", async () => {
   await renderRemoved();
   fillFolderSelect();
   renderOptionFields(await loadOptions());
-  if (draft) { layoutEditor(Boolean(draft.editing), Boolean(draft.builtin && draft.mode === "fill")); setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
+  if (draft) { layoutEditor(Boolean(draft.editing)); setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
   else { ed.title.textContent = t("ed.addTitle"); }
   list.textContent = "";
   await refreshList();
@@ -257,7 +257,7 @@ function setMode(mode) {
   ed.techUrl.hidden = fill;
   ed.urlLabel.textContent = fill ? t("ed.url.fill") : t("ed.url");
   ed.url.placeholder = fill ? "https://…" : "https://…{q}…";
-  ed.backToUrl.hidden = draft.builtin;
+  ed.backToUrl.hidden = false;
   renderChecks();
   validate();
 }
@@ -274,10 +274,6 @@ function validate() {
   );
   if (!error && specError) error = specError;
   if (!error && draft.mode === "fill" && !(draft.fill && draft.fill.input)) error = t("ed.err.pickNeeded");
-  const original = draft.builtin && ORIGINAL_BY_ID.get(draft.id);
-  if (!error && original && original.fill && spec && hostOf(spec.url, {}) !== hostOf(original.url, {})) {
-    error = t("ed.err.sameHost", { name: original.name, host: hostOf(original.url, {}) });
-  }
   ed.submit.disabled = Boolean(error);
   ed.tryBtn.disabled = Boolean(specError) || (draft.mode === "fill" && !(draft.fill && draft.fill.input));
   ed.submit.title = error;
@@ -305,11 +301,11 @@ async function saveDraft() {
 // détection repliée en bas (« Re-détecter »), sans « Saisir à la main ».
 const redetect = $id("redetect");
 const detectBtn = $id("detectBtn");
-function layoutEditor(editing, builtinFill = false) {
+function layoutEditor(editing) {
   const help = ed.step1.querySelector(".help");
   if (editing) {
     $id("redetectSlot").append(ed.step1);
-    redetect.hidden = builtinFill; // agences fournies qui remplissent un champ : seul le repérage compte
+    redetect.hidden = false;
     ed.step1.hidden = false;
     help.textContent = t("ed.redetect.help");
     detectBtn.textContent = t("ed.redetect");
@@ -352,7 +348,7 @@ function startEdit(a) {
   draft = { id: a.id, editing: true, builtin: !a.custom, mode: a.fill ? "fill" : "url", fill: a.fill || null, pageHost: hostOf(a.url, cachedOptions) };
   // Agence fournie qui remplit un champ : pas de détection, seulement l'adresse
   // de la page et le repérage du champ.
-  layoutEditor(true, Boolean(!a.custom && a.fill));
+  layoutEditor(true);
   redetect.open = false;
   loadFolders().then(({ folderOf }) => { ed.folder.value = folderOf[a.id] || ""; saveDraft(); });
   ed.title.textContent = t("ed.editTitle", { name: a.name });
@@ -386,7 +382,7 @@ async function restoreDraft() {
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
   fillFolderSelect();
   ed.folder.value = saved.folder || "";
-  layoutEditor(Boolean(saved.editing), Boolean(saved.builtin && saved.mode === "fill"));
+  layoutEditor(Boolean(saved.editing));
   if (saved.editing) redetect.open = Boolean(saved.detUrl);
   setMode(saved.mode);
   if (saved.step2) showStep2(saved.step2Msg);
@@ -411,7 +407,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
   const r = await detectSearchUrl(pageUrl, ed.detQ.value);
   if (!draft) draft = { id: newId(), editing: false, builtin: false, mode: "url", fill: null };
   ed.detectMsg.className = "status err";
-  if (r.error && !(r.notFound && !draft.builtin)) { ed.detectMsg.textContent = r.error; return; }
+  if (r.error && !r.notFound) { ed.detectMsg.textContent = r.error; return; }
   ed.detectMsg.textContent = "";
   if (!draft.builtin && !ed.name.value.trim()) ed.name.value = nameFromUrl(pageUrl);
 
@@ -427,7 +423,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     ed.url.value = r.url;
     ed.payload.value = r.payload || "";
     ed.encode.value = (r.encode || []).join(", ");
-    if (!draft.builtin) draft.fill = null;
+    draft.fill = null;
     setMode("url");
     showStep2([r.summary, ...r.warnings.map((w) => "⚠ " + w), draft.editing ? t("ed.check.edit") : t("ed.check.add")].join("\n"));
     flashEl(ed.name, ed.url, ed.step2Msg);
@@ -454,9 +450,9 @@ ed.backToUrl.addEventListener("click", async () => {
 for (const el of [ed.name, ed.url, ed.payload, ed.encode]) {
   el.addEventListener("input", () => {
     if (!draft) return;
-    if (el === ed.url && draft.mode === "fill" && draft.fill && !draft.builtin) {
+    if (el === ed.url && draft.mode === "fill" && draft.fill) {
       const before = draft.pageHost;
-      const now = hostOf(ed.url.value.replace(/\{[^}]*\}/g, "x"), {});
+      const now = hostOf(ed.url.value, cachedOptions);
       if (before && now !== before) { draft.fill = null; renderChecks(); }
     }
     validate();
@@ -496,7 +492,7 @@ ed.tryBtn.addEventListener("click", async () => {
   if (error) return flash(error, addMsg);
   const q = ed.detQ.value.trim() || input.value.trim() || t("ed.sampleQuery");
   const url = await buildUrl(spec, q, await loadOptions());
-  const fill = draft.mode === "fill" ? draft.fill : (builtin ? builtin.fill || null : null);
+  const fill = draft.mode === "fill" ? draft.fill : null;
   const res = await chrome.runtime.sendMessage({ type: "try", url, q, fill, builtinId: builtin ? builtin.id : null });
   flash(res && res.ok ? t("ed.tryStarted", { q }) : (res && res.error) || t("ed.tryFailed"), addMsg);
 });
@@ -525,19 +521,27 @@ addForm.addEventListener("submit", async (e) => {
   const raw = { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" };
 
   if (draft.builtin) {
-    // Agence intégrée : modification de son adresse et, pour celles qui
-    // remplissent un champ, des repères (refaits sur le site).
+    // Agence fournie, modifiée comme une agence ajoutée : on n'enregistre que
+    // l'écart avec l'original (fill : repères, ou false = « adresse de recherche »).
     const original = ORIGINAL_BY_ID.get(id);
     const { spec } = checkSpec(raw, { allowOptions: true });
     const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
-    const picked = original.fill && draft.fill ? cleanFill(draft.fill) : null;
-    if (picked) delete picked.delay;
-    const fillChanged = Boolean(picked) && (picked.input !== original.fill.input || (picked.submit || "") !== (original.fill.submit || ""));
+    let fillOverride; // undefined : comme l'original
+    if (draft.mode === "url") {
+      if (original.fill) fillOverride = false;
+    } else {
+      const picked = draft.fill ? cleanFill(draft.fill) : null;
+      if (picked) delete picked.delay;
+      const unchanged = original.fill && picked && picked.input === original.fill.input
+        && (picked.submit || "") === (original.fill.submit || "")
+        && hostOf(spec.url, cachedOptions) === hostOf(original.url, cachedOptions);
+      if (!unchanged) fillOverride = picked;
+    }
     const renamed = name !== original.name;
     const same = spec.url === original.url && (spec.payload || "") === (original.payload || "")
-      && (spec.encode || []).join() === (original.encode || []).join() && !fillChanged && !renamed;
+      && (spec.encode || []).join() === (original.encode || []).join() && fillOverride === undefined && !renamed;
     if (same) delete overrides[id];
-    else overrides[id] = { ...spec, ...(fillChanged ? { fill: picked } : {}), ...(renamed ? { name } : {}) };
+    else overrides[id] = { ...spec, ...(fillOverride !== undefined ? { fill: fillOverride } : {}), ...(renamed ? { name } : {}) };
     await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
 
   } else {

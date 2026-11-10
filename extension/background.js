@@ -196,14 +196,14 @@ const DRAFT_KEY = "fillDraft";
 const PICK_KEY = "pickSession";
 
 function cleanDraft(d, options) {
-  // Agence fournie qui remplit un champ : repérage seulement sur son site.
+  // Agence fournie : repérage sur la page donnée, comme pour une agence
+  // ajoutée (son site peut avoir changé d'adresse ou de fonctionnement).
   const builtin = d && AGENCY_BY_ID.get(d.id);
   if (builtin) {
-    if (!builtin.fill) return null;
     let u;
     try { u = new URL(String(d.url)); } catch (_) { return null; }
-    const host = hostOf(builtin.url, options);
-    if (u.protocol !== "https:" || u.hostname !== host) return null;
+    const host = u.hostname;
+    if (u.protocol !== "https:" || !host) return null;
     const name = String(d.name || "").trim();
     return { id: builtin.id, name: name && name.length <= 40 ? name : builtin.name, url: u.href, host };
   }
@@ -284,21 +284,18 @@ async function tryAgency(msg) {
   let u;
   try { u = new URL(msg.url); } catch (_) { return { ok: false, error: t("bg.badUrl") }; }
   if (!q || u.protocol !== "https:") return { ok: false, error: t("bg.https") };
+  // Repères en cours de modification (agence fournie ou ajoutée, même règle) ;
+  // le délai propre au site d'une agence fournie est gardé sur ce même site.
   let fill = null;
-  if (msg.builtinId) {
-    const builtin = AGENCY_BY_ID.get(msg.builtinId);
-    if (!builtin) return { ok: false, error: t("bg.unknownAgency") };
-    if (builtin.fill) {
-      const expected = hostOf(builtin.url, await loadOptions());
-      if (u.hostname !== expected) return { ok: false, error: t("bg.sameHost", { host: expected }) };
-      // Repères en cours de modification, avec le délai propre au site.
-      const picked = msg.fill ? cleanFill(msg.fill) : null;
-      if (picked) delete picked.delay;
-      fill = picked ? { ...picked, ...(builtin.fill.delay !== undefined ? { delay: builtin.fill.delay } : {}) } : builtin.fill;
-    }
-  } else if (msg.fill) {
+  if (msg.fill) {
     fill = cleanFill(msg.fill);
     if (!fill) return { ok: false, error: t("bg.pickInvalidShort") };
+    delete fill.delay;
+    const builtin = msg.builtinId ? AGENCY_BY_ID.get(msg.builtinId) : null;
+    if (msg.builtinId && !builtin) return { ok: false, error: t("bg.unknownAgency") };
+    if (builtin && builtin.fill && builtin.fill.delay !== undefined && u.hostname === hostOf(builtin.url, await loadOptions())) {
+      fill.delay = builtin.fill.delay;
+    }
     if (!(await chrome.permissions.contains({ origins: [originPattern(u.hostname)] }))) {
       return { ok: false, error: t("bg.permMissing") };
     }
