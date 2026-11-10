@@ -237,6 +237,8 @@ function renderChecks() {
   set(ed.chkButton, Boolean(fill && fill.input), fill && fill.input && !fill.submit ? t("ed.chk.enter") : t("ed.chk.button"));
   ed.pickBtn.textContent = fill && fill.input ? t("ed.repick") : t("ed.pick");
   ed.techFill.hidden = !(draft && draft.mode === "fill" && fill && fill.input);
+  // En mode « remplir le champ », rien à montrer tant que le champ n'est pas repéré.
+  ed.advanced.hidden = Boolean(draft && draft.mode === "fill" && !(fill && fill.input));
   if (fill && fill.input) ed.techFill.textContent = t("ed.tech.fill", { input: fill.input, button: fill.submit ? t("ed.tech.fill.button", { submit: fill.submit }) : t("ed.tech.fill.enter") });
 }
 
@@ -303,6 +305,7 @@ function resetEditor() {
   ed.name.disabled = false;
   ed.reset.hidden = true;
   ed.advanced.open = false;
+  ed.advanced.hidden = false;
   ed.submit.textContent = t("ed.add");
   chrome.storage.session.remove([AGENCY_DRAFT_KEY, PICK_RESULT_KEY, "fillDraft"]);
 }
@@ -379,7 +382,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     draft.fill = null;
     setMode("fill");
     showStep2(t("ed.notInUrl"));
-    flashEl(ed.name, ed.url, ed.step2Msg, ed.fillBox);
+    flashEl(ed.name, ed.url, ed.step2Msg);
   } else {
     ed.url.value = r.url;
     ed.payload.value = r.payload || "";
@@ -458,7 +461,11 @@ ed.tryBtn.addEventListener("click", async () => {
   flash(res && res.ok ? t("ed.tryStarted", { q }) : (res && res.error) || t("ed.tryFailed"), addMsg);
 });
 
-ed.cancel.addEventListener("click", () => leaveEditor());
+// Annuler : pendant un ajout, revient à l'étape « détecter » ; sinon, à la liste.
+ed.cancel.addEventListener("click", () => {
+  if (draft && !draft.editing) { resetEditor(); ed.detUrl.focus(); }
+  else leaveEditor();
+});
 
 ed.reset.addEventListener("click", async () => {
   const id = draft.id;
@@ -676,9 +683,14 @@ const authorizeBtn = document.getElementById("authorizeBtn");
 let missingOrigins = [];
 
 document.getElementById("restoreRemoved").addEventListener("click", async () => {
+  const n = (await loadAgencies()).removed.size;
   await chrome.storage.local.set({ [REMOVED_KEY]: [] });
   await renderRemoved();
-  flash(t("opt.removed.restored"), settingsMsg);
+  const done = document.getElementById("restoreMsg");
+  done.textContent = t(n === 1 ? "opt.removed.restored.one" : "opt.removed.restored.many", { n });
+  flashEl(done);
+  setTimeout(() => { done.textContent = ""; }, 4000);
+
 });
 
 // Export : un fichier JSON téléchargé (aucun envoi nulle part).
@@ -1293,7 +1305,7 @@ langReady.then(applyNewAgencyDefaults).then(refreshList).then((data) => {
 
 chrome.storage.onChanged.addListener((changes, area) => {
   // Agences modifiées ailleurs (autre fenêtre) : on met la liste à jour.
-  if (area === "local" && (changes[CUSTOM_KEY] || changes[HIDDEN_KEY] || changes[OVERRIDES_KEY] || changes[FOLDERS_KEY] || changes[FOLDER_OF_KEY])) {
+  if (area === "local" && (changes[CUSTOM_KEY] || changes[HIDDEN_KEY] || changes[REMOVED_KEY] || changes[OVERRIDES_KEY] || changes[FOLDERS_KEY] || changes[FOLDER_OF_KEY])) {
     if (!settingsView.hidden) renderRemoved(); else refreshList();
   }
   // Repérage terminé sur le site (colonne latérale restée ouverte) : on l'affiche.
