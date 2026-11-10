@@ -212,8 +212,10 @@ code { font-size: 12px; }
 .link { display: block; min-height: 24px; text-align: left; padding: 0; border: 0; background: none; color: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; opacity: .85; }
 
 /* Signature */
-.credit { margin: 14px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
-.credit p { margin: 2px 0; }
+.credit { container-type: inline-size; margin: 14px 0 0; font-size: 11px; text-align: center; color: var(--muted); }
+/* Signature : chaque ligne tient sur une ligne ; la taille (11 px au plus)
+   se réduit d'elle-même si la largeur manque, et les deux lignes la partagent. */
+.credit p { margin: 0; white-space: nowrap; font-size: min(11px, 4.1cqi); }
 .field.lang { margin-top: 14px; }
 .credit a { display: inline-block; min-height: 24px; line-height: 24px; color: inherit; text-underline-offset: 2px; }
 
