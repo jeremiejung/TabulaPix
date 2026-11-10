@@ -46,10 +46,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // (LANG est tenu à jour par loadLang() au démarrage et à chaque changement.)
 
   // Messages de la popup / du panneau de l'extension.
-  if (sender.url === chrome.runtime.getURL("popup.html")) {
+  // (L'adresse peut porter un #, ex. popup.html#import ouverte dans un onglet.)
+  if (String(sender.url || "").split(/[?#]/)[0] === chrome.runtime.getURL("popup.html")) {
     if (msg.type === "sweep" && Array.isArray(msg.jobs) && typeof msg.q === "string") {
       loadOptions()
-        .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)));
+        .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)))
+        .catch(() => { /* onglet fermé, Chrome occupé… : rien à faire de plus */ });
       sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
     } else if (msg.type === "pick") {
       startPick(msg.draft).then(sendResponse);
@@ -176,8 +178,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   });
   if (!job) return;
 
-  const fill = cleanFill(job.fill) || AGENCY_BY_ID.get(job.id)?.fill
-    || (await loadAgencies()).custom.find((a) => a.id === job.id)?.fill;
+  const fill = cleanFill(job.fill); // repères effectifs de l'agence, relevés au lancement
   if (!fill) return;
 
   let ok = false;
@@ -286,7 +287,9 @@ async function handlePicked(sender, msg) {
   let alreadyOpen = false;
   try {
     const open = await chrome.runtime.getContexts({ contextTypes: ["SIDE_PANEL", "POPUP"] });
-    alreadyOpen = open.some((c) => c.windowId === sender.tab.windowId || c.windowId === -1);
+    // Fenêtre non précisée par Chrome (-1) : elle ne compte que s'il n'y a qu'une fenêtre.
+    const single = (await chrome.windows.getAll({ windowTypes: ["normal"] })).length === 1;
+    alreadyOpen = open.some((c) => c.windowId === sender.tab.windowId || (c.windowId === -1 && single));
   } catch (_) { /* Chrome trop ancien : on tente l'ouverture */ }
   if (!alreadyOpen) {
     try { await chrome.action.openPopup({ windowId: sender.tab.windowId }); } catch (_) { /* l'utilisateur la rouvrira */ }

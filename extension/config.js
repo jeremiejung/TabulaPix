@@ -10,7 +10,7 @@
  *   name     nom affiché dans la popup
  *   defaultChecked  (facultatif) false = décochée au premier lancement
  *   defaultHidden   (facultatif) true = masquée la première fois qu'elle
- *                   apparaît (à afficher dans ⚙ → Agences affichées)
+ *                   apparaît (à réafficher avec son œil, mode Organiser)
  *   url      adresse de recherche. Marqueurs possibles :
  *              {q}        → les mots-clés, encodés pour une URL (cas le plus courant)
  *              {payload}  → le résultat du champ « payload » ci-dessous

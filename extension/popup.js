@@ -106,15 +106,22 @@ function flash(text, el = settingsMsg) {
 async function deleteAgency(a) {
   if (!confirm(t(a.custom ? "opt.delete.confirm" : "opt.delete.builtinConfirm", { name: a.name }))) return;
   if (a.custom) {
-    const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
-    const rest = custom.filter((c) => c && c.id !== a.id);
-    await chrome.storage.local.set({ [CUSTOM_KEY]: rest });
-    if (a.fill) releasePermission(a, rest);
+    // Agence ajoutée : effacée partout (case, ordre, masquage, dossier).
+    const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: [], [ORDER_KEY]: [], [HIDDEN_KEY]: [], [FOLDER_OF_KEY]: {} });
+    const without = (list) => (Array.isArray(list) ? list.filter((x) => x !== a.id) : []);
+    const folderOf = data[FOLDER_OF_KEY] && typeof data[FOLDER_OF_KEY] === "object" ? data[FOLDER_OF_KEY] : {};
+    delete folderOf[a.id];
+    await chrome.storage.local.set({
+      [CUSTOM_KEY]: data[CUSTOM_KEY].filter((c) => c && c.id !== a.id),
+      [STORAGE_KEY]: without(data[STORAGE_KEY]), [ORDER_KEY]: without(data[ORDER_KEY]),
+      [HIDDEN_KEY]: without(data[HIDDEN_KEY]), [FOLDER_OF_KEY]: folderOf
+    });
   } else {
     const data = await chrome.storage.local.get({ [REMOVED_KEY]: [], [OVERRIDES_KEY]: {} });
     delete data[OVERRIDES_KEY][a.id];
     await chrome.storage.local.set({ [REMOVED_KEY]: [...new Set(data[REMOVED_KEY].concat(a.id))], [OVERRIDES_KEY]: data[OVERRIDES_KEY] });
   }
+  await releaseUnusedOrigins();
 }
 
 // Masque ou réaffiche une agence (mode Organiser).
@@ -228,13 +235,20 @@ const ed = {
 // Brouillon : { id, editing, builtin, mode: "url" | "fill", fill }
 let draft = null;
 
-// Retire l'autorisation d'un site quand plus aucune agence ajoutée ne le remplit
-// (jamais pour les sites des agences intégrées, autorisés d'office).
-async function releasePermission(agency, remaining) {
-  const host = hostOf(agency.url, {});
-  if (!host || AGENCIES.some((b) => b.fill && hostOf(b.url, {}) === host)) return;
-  if (remaining.some((c) => c && c.fill && hostOf(c.url, {}) === host)) return;
-  try { await chrome.permissions.remove({ origins: [originPattern(host)] }); } catch (_) { /* déjà retirée */ }
+// Retire les autorisations de sites dont plus aucune agence ne remplit le champ
+// (agence supprimée, passée à une adresse de recherche, rétablie, import…).
+// Les sites du manifeste ne sont jamais concernés ; celui d'un repérage en
+// cours est gardé.
+async function releaseUnusedOrigins() {
+  const options = await loadOptions();
+  const keep = new Set((await loadAgencies(options)).all.filter((a) => a.fill)
+    .map((a) => hostOf(a.url, options)).filter(Boolean).map(originPattern));
+  const { fillDraft } = await chrome.storage.session.get("fillDraft");
+  const pickHost = fillDraft && hostOf(String(fillDraft.url || ""), {});
+  if (pickHost) keep.add(originPattern(pickHost));
+  for (const origin of await optionalOriginsGranted()) {
+    if (!keep.has(origin)) { try { await chrome.permissions.remove({ origins: [origin] }); } catch (_) { /* déjà retirée */ } }
+  }
 }
 
 const newId = () => "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -374,8 +388,6 @@ function resetEditor() {
 function startEdit(a) {
   resetEditor();
   draft = { id: a.id, editing: true, builtin: !a.custom, mode: a.fill ? "fill" : "url", fill: a.fill || null, pageHost: hostOf(a.url, cachedOptions) };
-  // Agence fournie qui remplit un champ : pas de détection, seulement l'adresse
-  // de la page et le repérage du champ.
   layoutEditor(true);
   redetect.open = false;
   loadFolders().then(({ folderOf }) => { ed.folder.value = folderOf[a.id] || ""; saveDraft(); });
@@ -502,7 +514,10 @@ ed.pickBtn.addEventListener("click", () => {
   chrome.storage.session.set({ fillDraft: pick }); // relu si la popup se ferme pendant la demande
   // La demande d'autorisation doit partir directement du clic.
   chrome.permissions.request({ origins: [originPattern(host)] }).then(async (granted) => {
-    if (!granted) return flash(t("ed.permRefused", { host }), addMsg);
+    if (!granted) {
+      chrome.storage.session.remove("fillDraft");
+      return flash(t("ed.permRefused", { host }), addMsg);
+    }
     const res = await chrome.runtime.sendMessage({ type: "pick", draft: pick });
     if (!res || !res.ok) return flash((res && res.error) || t("ed.pickFailed"), addMsg);
     addMsg.textContent = t("ed.siteOpening");
@@ -537,6 +552,7 @@ ed.reset.addEventListener("click", async () => {
   delete overrides[id];
   await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
   await leaveEditor(id);
+  await releaseUnusedOrigins(); // ex. agence fournie qui avait changé de site
 });
 
 /* Étape 3 : ajouter (ou enregistrer la modification) */
@@ -580,7 +596,6 @@ addForm.addEventListener("submit", async (e) => {
     if (before) {
       const after = data[CUSTOM_KEY].map((c) => (c && c.id === id ? agency : c));
       await chrome.storage.local.set({ [CUSTOM_KEY]: after });
-      if (before.fill && !agency.fill) releasePermission(before, after);
 
     } else {
       if (data[CUSTOM_KEY].length >= MAX_CUSTOM) return flash(t("ed.err.max", { max: MAX_CUSTOM }), addMsg);
@@ -595,7 +610,8 @@ addForm.addEventListener("submit", async (e) => {
   const { folderOf } = await loadFolders();
   if (ed.folder.value) folderOf[id] = ed.folder.value; else delete folderOf[id];
   await chrome.storage.local.set({ [FOLDER_OF_KEY]: folderOf });
-  await leaveEditor(id);
+  await leaveEditor(id); // efface aussi le brouillon de repérage
+  await releaseUnusedOrigins(); // ex. passée d'un champ à remplir à une adresse de recherche
 });
 
 settingsForm.addEventListener("submit", async (e) => {
@@ -823,9 +839,7 @@ importFile.addEventListener("change", async () => {
 
   // Autorisations : on retire celles qui ne servent plus, on liste celles à accorder.
   const needed = result.hosts.map(originPattern);
-  for (const origin of await optionalOriginsGranted()) {
-    if (!needed.includes(origin)) { try { await chrome.permissions.remove({ origins: [origin] }); } catch (_) { /* déjà retirée */ } }
-  }
+  await releaseUnusedOrigins();
   await reloadSettingsView();
   const report = async () => {
     missingOrigins = [];

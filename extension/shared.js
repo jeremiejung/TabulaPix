@@ -344,8 +344,12 @@ function parseConfigImport(file) {
   // Aucune agence utilisable : on ne remplace pas la configuration par du vide.
   if (!order.length) return { error: "backup.err.empty" };
 
-  // Sites dont il faudra accorder l'autorisation (agences ajoutées qui remplissent un champ).
-  const hosts = [...new Set(custom.filter((a) => a.fill).map((a) => hostOf(a.url, {})).filter(Boolean))];
+  // Sites dont il faudra accorder l'autorisation : agences qui remplissent un
+  // champ (ajoutées, ou fournies déplacées sur un autre site ; Chrome ne
+  // redemande rien pour les sites déjà autorisés par le manifeste).
+  const fillHosts = custom.filter((a) => a.fill).map((a) => hostOf(a.url, {}))
+    .concat(Object.values(overrides).filter((ov) => ov.fill && typeof ov.fill === "object").map((ov) => hostOf(ov.url, options)));
+  const hosts = [...new Set(fillHosts.filter(Boolean))];
   return {
     storage: {
       [STORAGE_KEYS.checked]: checked, [STORAGE_KEYS.order]: order, [HIDDEN_KEY]: hidden,
