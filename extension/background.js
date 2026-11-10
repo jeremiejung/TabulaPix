@@ -46,16 +46,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // (LANG est tenu à jour par loadLang() au démarrage et à chaque changement.)
 
   // Messages de la popup / du panneau de l'extension.
-  if (sender.url === chrome.runtime.getURL("popup.html")) {
+  // (L'adresse peut porter un #, ex. popup.html#import ouverte dans un onglet.)
+  if (String(sender.url || "").split(/[?#]/)[0] === chrome.runtime.getURL("popup.html")) {
     if (msg.type === "sweep" && Array.isArray(msg.jobs) && typeof msg.q === "string") {
       loadOptions()
-        .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)));
+        .then((options) => loadAgencies(options).then((agencies) => sweep(validJobs(msg.jobs, options, agencies.all), msg.q)))
+        .catch(() => { /* onglet fermé, Chrome occupé… : rien à faire de plus */ });
       sendResponse({ ok: true }); // la popup peut se fermer : l'ouverture continue ici
     } else if (msg.type === "pick") {
       startPick(msg.draft).then(sendResponse);
       return true;
     } else if (msg.type === "try") {
       tryAgency(msg).then(sendResponse);
+      return true;
+    } else if (msg.type === "panelOpened") {
+      syncActionWithPanel().then(() => sendResponse({ ok: true }), () => sendResponse({ ok: false }));
       return true;
     }
     return;
@@ -67,6 +72,25 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 });
+
+/* Colonne latérale ouverte : un clic sur l'icône de l'extension agit sur la
+   colonne (Chrome l'ouvre ou la ferme) au lieu d'ouvrir une popup par-dessus.
+   Colonne fermée partout : la popup revient. */
+async function syncActionWithPanel() {
+  let open;
+  try { open = (await chrome.runtime.getContexts({ contextTypes: ["SIDE_PANEL"] })).length > 0; }
+  catch (_) { return; } // Chrome trop ancien : comportement par défaut
+  await chrome.action.setPopup({ popup: open ? "" : "popup.html" });
+  try { await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: open }); } catch (_) { /* sans colonne */ }
+}
+// Quand revérifier : ouverture signalée par la colonne, ouverture et
+// fermeture de la colonne (Chrome récent), changement d'onglet ou de fenêtre
+// (Chrome plus ancien : la fermeture se remarque au plus tard là), démarrage.
+if (chrome.sidePanel && chrome.sidePanel.onOpened) chrome.sidePanel.onOpened.addListener(() => syncActionWithPanel());
+if (chrome.sidePanel && chrome.sidePanel.onClosed) chrome.sidePanel.onClosed.addListener(() => setTimeout(syncActionWithPanel, 100));
+chrome.tabs.onActivated.addListener(() => syncActionWithPanel());
+chrome.windows.onFocusChanged.addListener(() => syncActionWithPanel());
+syncActionWithPanel();
 
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré
 // pour cette agence (config.js ou agence ajoutée par l'utilisateur).
@@ -159,8 +183,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   });
   if (!job) return;
 
-  const fill = cleanFill(job.fill) || AGENCY_BY_ID.get(job.id)?.fill
-    || (await loadAgencies()).custom.find((a) => a.id === job.id)?.fill;
+  const fill = cleanFill(job.fill); // repères effectifs de l'agence, relevés au lancement
   if (!fill) return;
 
   let ok = false;
@@ -196,14 +219,14 @@ const DRAFT_KEY = "fillDraft";
 const PICK_KEY = "pickSession";
 
 function cleanDraft(d, options) {
-  // Agence fournie qui remplit un champ : repérage seulement sur son site.
+  // Agence fournie : repérage sur la page donnée, comme pour une agence
+  // ajoutée (son site peut avoir changé d'adresse ou de fonctionnement).
   const builtin = d && AGENCY_BY_ID.get(d.id);
   if (builtin) {
-    if (!builtin.fill) return null;
     let u;
     try { u = new URL(String(d.url)); } catch (_) { return null; }
-    const host = hostOf(builtin.url, options);
-    if (u.protocol !== "https:" || u.hostname !== host) return null;
+    const host = u.hostname;
+    if (u.protocol !== "https:" || !host) return null;
     const name = String(d.name || "").trim();
     return { id: builtin.id, name: name && name.length <= 40 ? name : builtin.name, url: u.href, host };
   }
@@ -269,7 +292,9 @@ async function handlePicked(sender, msg) {
   let alreadyOpen = false;
   try {
     const open = await chrome.runtime.getContexts({ contextTypes: ["SIDE_PANEL", "POPUP"] });
-    alreadyOpen = open.some((c) => c.windowId === sender.tab.windowId || c.windowId === -1);
+    // Fenêtre non précisée par Chrome (-1) : elle ne compte que s'il n'y a qu'une fenêtre.
+    const single = (await chrome.windows.getAll({ windowTypes: ["normal"] })).length === 1;
+    alreadyOpen = open.some((c) => c.windowId === sender.tab.windowId || (c.windowId === -1 && single));
   } catch (_) { /* Chrome trop ancien : on tente l'ouverture */ }
   if (!alreadyOpen) {
     try { await chrome.action.openPopup({ windowId: sender.tab.windowId }); } catch (_) { /* l'utilisateur la rouvrira */ }
@@ -284,21 +309,18 @@ async function tryAgency(msg) {
   let u;
   try { u = new URL(msg.url); } catch (_) { return { ok: false, error: t("bg.badUrl") }; }
   if (!q || u.protocol !== "https:") return { ok: false, error: t("bg.https") };
+  // Repères en cours de modification (agence fournie ou ajoutée, même règle) ;
+  // le délai propre au site d'une agence fournie est gardé sur ce même site.
   let fill = null;
-  if (msg.builtinId) {
-    const builtin = AGENCY_BY_ID.get(msg.builtinId);
-    if (!builtin) return { ok: false, error: t("bg.unknownAgency") };
-    if (builtin.fill) {
-      const expected = hostOf(builtin.url, await loadOptions());
-      if (u.hostname !== expected) return { ok: false, error: t("bg.sameHost", { host: expected }) };
-      // Repères en cours de modification, avec le délai propre au site.
-      const picked = msg.fill ? cleanFill(msg.fill) : null;
-      if (picked) delete picked.delay;
-      fill = picked ? { ...picked, ...(builtin.fill.delay !== undefined ? { delay: builtin.fill.delay } : {}) } : builtin.fill;
-    }
-  } else if (msg.fill) {
+  if (msg.fill) {
     fill = cleanFill(msg.fill);
     if (!fill) return { ok: false, error: t("bg.pickInvalidShort") };
+    delete fill.delay;
+    const builtin = msg.builtinId ? AGENCY_BY_ID.get(msg.builtinId) : null;
+    if (msg.builtinId && !builtin) return { ok: false, error: t("bg.unknownAgency") };
+    if (builtin && builtin.fill && builtin.fill.delay !== undefined && u.hostname === hostOf(builtin.url, await loadOptions())) {
+      fill.delay = builtin.fill.delay;
+    }
     if (!(await chrome.permissions.contains({ origins: [originPattern(u.hostname)] }))) {
       return { ok: false, error: t("bg.permMissing") };
     }
@@ -317,9 +339,11 @@ function pickerUI(agencyName, T) {
   const root = host.attachShadow({ mode: "closed" });
   root.innerHTML = `<style>
     .panel{pointer-events:auto;position:fixed;top:12px;left:50%;transform:translateX(-50%);max-width:520px;
-      background:#111;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:12px 16px;border-radius:8px;
-      box-shadow:0 4px 18px rgba(0,0,0,.35);border-left:5px solid #D7141A}
-    .t{font-weight:700;margin-bottom:4px}.msg{margin:2px 0 8px}.err{color:#ff8a80}
+      background:#111;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:12px 16px;border-radius:9px;
+      border:2px solid #fff;cursor:grab;touch-action:none;user-select:none;
+      box-shadow:inset 0 3px 0 #D7141A,0 0 0 1px rgba(0,0,0,.55),0 6px 20px rgba(0,0,0,.4)}
+    .panel.dragging{cursor:grabbing}
+    .t{font-weight:700;margin-bottom:4px}.t::before{content:"";display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#D7141A;vertical-align:1px}.msg{margin:2px 0 8px}.err{color:#ff8a80}
     button{font:600 13px system-ui,sans-serif;margin-right:6px;padding:4px 10px;border-radius:4px;border:0;cursor:pointer}
     .alt{background:#444;color:#fff}.ok{background:#D7141A;color:#fff}
     .panel.bottom{top:auto;bottom:12px}
@@ -330,6 +354,32 @@ function pickerUI(agencyName, T) {
   document.documentElement.append(host);
   const $ = (s) => root.querySelector(s);
   const box = $(".box");
+
+  // Le bandeau se déplace aussi en le faisant glisser (ailleurs que sur ses boutons).
+  const panel = $(".panel");
+  const resetPosition = () => { panel.style.left = panel.style.top = panel.style.bottom = panel.style.transform = ""; };
+  panel.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || e.target.closest("button")) return;
+    const r = panel.getBoundingClientRect();
+    const dx = e.clientX - r.left, dy = e.clientY - r.top;
+    panel.setPointerCapture(e.pointerId);
+    panel.classList.add("dragging");
+    const move = (ev) => {
+      const x = Math.min(Math.max(0, ev.clientX - dx), innerWidth - r.width);
+      const y = Math.min(Math.max(0, ev.clientY - dy), innerHeight - r.height);
+      Object.assign(panel.style, { left: x + "px", top: y + "px", bottom: "auto", transform: "none" });
+    };
+    const up = () => {
+      panel.classList.remove("dragging");
+      panel.removeEventListener("pointermove", move);
+      panel.removeEventListener("pointerup", up);
+      panel.removeEventListener("pointercancel", up);
+    };
+    panel.addEventListener("pointermove", move);
+    panel.addEventListener("pointerup", up);
+    panel.addEventListener("pointercancel", up);
+    e.preventDefault();
+  });
 
   let step = "input";
   let picked = { input: "", submit: "" };
@@ -406,7 +456,7 @@ function pickerUI(agencyName, T) {
     const actions = $(".actions");
     actions.textContent = "";
     const btn = (label, cls, fn, title) => { const b = document.createElement("button"); b.className = cls; b.textContent = label; if (title) b.title = title; b.addEventListener("click", fn); actions.append(b); };
-    const moveBtn = () => btn("⇅", "alt", () => $(".panel").classList.toggle("bottom"), T["pick.move"]);
+    const moveBtn = () => btn("⇅", "alt", () => { resetPosition(); $(".panel").classList.toggle("bottom"); }, T["pick.move"]);
     if (step === "input") {
       m.textContent = message || T["pick.step1"];
       btn(T["pick.cancel"], "alt", cancel);

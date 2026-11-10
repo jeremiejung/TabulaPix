@@ -105,12 +105,18 @@ async function detectSearchUrl(pageUrl, keywords) {
   const warnings = [];
   if (/\{[^}]*\}/.test(url)) return { error: t("det.braces") };
 
+  // Les mots-clés ne sont cherchés qu'après le nom du site (jamais dans le
+  // domaine : « photos » sur photos.example.net).
+  const origin = parsed.origin;
+  const rest = url.startsWith(origin) ? url.slice(origin.length) : url.slice(url.indexOf(parsed.host) + parsed.host.length);
+  const base = url.slice(0, url.length - rest.length);
+
   // 1. Mots-clés en clair dans l'adresse.
   for (const form of plainForms(q)) {
     const re = new RegExp(escapeRe(form), "gi");
-    const n = (url.match(re) || []).length;
+    const n = (rest.match(re) || []).length;
     if (n) {
-      const out = url.replace(re, "{q}");
+      const out = base + rest.replace(re, "{q}");
       if (/q=[^&#]*_\d/.test(out) || /search=\d{6,}/.test(out)) {
         warnings.push(t("det.warn.savedSearch"));
       } else if (/[?&=/]\d{10,}(?=[&#/]|$)/.test(out)) {
@@ -124,10 +130,10 @@ async function detectSearchUrl(pageUrl, keywords) {
   const words = q.split(/\s+/).filter(Boolean);
   if (words.length > 1) {
     const re = new RegExp(words.map((w) => escapeRe(encodeURIComponent(w))).join("-"), "gi");
-    const n = (url.match(re) || []).length;
+    const n = (rest.match(re) || []).length;
     if (n) {
       return {
-        url: url.replace(re, "{q:slug}"),
+        url: base + rest.replace(re, "{q:slug}"),
         summary: t("det.slug"),
         warnings
       };
@@ -136,7 +142,7 @@ async function detectSearchUrl(pageUrl, keywords) {
 
   // 2. Mots-clés emballés dans un morceau de l'adresse.
   const pieces = new Set();
-  for (const part of url.split(/[\/?&=#]/)) {
+  for (const part of rest.split(/[\/?&=#]/)) {
     if (part.length < 8) continue;
     pieces.add(part);
     if (/^0x/i.test(part)) pieces.add(part.slice(2));
@@ -150,7 +156,7 @@ async function detectSearchUrl(pageUrl, keywords) {
       warnings.push(t("det.warn.hexCase"));
     }
     return {
-      url: url.replace(piece, "{payload}"),
+      url: base + rest.replace(piece, "{payload}"),
       payload,
       encode,
       summary: t("det.wrapped", { steps: encode.join(" → ") }),

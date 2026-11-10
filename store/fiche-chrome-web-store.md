@@ -2,7 +2,7 @@
 
 Tout ce qu'il faut pour remplir le tableau de bord du Chrome Web Store (https://chrome.google.com/webstore/devconsole), dans l'ordre des onglets. Chaque texte est dans un bloc à copier-coller.
 
-Paquet à envoyer : `TabulaPix-3.1.1.zip` (ou plus récent).
+Paquet à envoyer : `TabulaPix-3.4.0.zip` (ou plus récent).
 
 ---
 
@@ -33,7 +33,8 @@ Faites une recherche sur le site d'une agence, collez l'adresse de la page de r�
 Quand le site ne met pas la recherche dans l'adresse, montrez une fois à TabulaPix son champ de recherche et son bouton : il les remplira pour vous à chaque recherche.
 
 PRATIQUE
-• Colonne latérale pour enchaîner les recherches
+• Agences rangées dans des dossiers en couleur, cochés d'un clic
+• Colonne latérale pour enchaîner les recherches, raccourci clavier Alt+Maj+Y
 • Réutilise l'onglet d'une agence déjà ouverte
 • Dernière recherche mémorisée
 • Toutes les agences renommables, modifiables ou supprimables, avec retour à la configuration d'usine
@@ -63,7 +64,8 @@ Run a search on an agency's website, paste the address of the results page and y
 When the site doesn't put the search in the address, show TabulaPix its search field and button once: it will fill them in for you on every search.
 
 HANDY
-• Side panel to chain searches
+• Agencies sorted into colour folders, ticked in one click
+• Side panel to chain searches, Alt+Shift+Y keyboard shortcut
 • Reuses an agency's tab that is already open
 • Remembers your last search
 • Every agency can be renamed, edited or deleted, with a way back to factory settings

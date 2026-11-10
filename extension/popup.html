@@ -6,36 +6,43 @@
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <form id="form">
+  <main>
+  <form id="form" role="search" aria-label="TabulaPix">
     <header>
-      <h1>TabulaPix</h1>
-      <button type="button" id="pin" data-i18n="main.pin" data-i18n-title="main.pin.title">Garder ouvert ⇥</button>
-      <button type="button" id="settings" title="Options" aria-label="Options" data-i18n-title="main.settings">⚙</button>
+      <h1 class="brand"><img src="icons/icon-32.png" alt="">TabulaPix</h1>
+      <button type="button" id="pin" class="icon-btn" title="Garder TabulaPix ouvert dans une colonne" aria-label="Garder TabulaPix ouvert dans une colonne" data-i18n-title="main.pin.title"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="2" y="3" width="12" height="10" rx="1.6"/><path d="M10 3v10"/><path d="M11.6 6h.9M11.6 8h.9"/></svg></button>
+      <button type="button" id="organize" class="icon-btn" aria-pressed="false" title="Organiser" aria-label="Organiser" data-i18n-title="main.organize"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M7 4h6.5M7 8h6.5M7 12h6.5"/><g fill="currentColor" stroke="none"><circle cx="3" cy="3" r=".9"/><circle cx="5" cy="3" r=".9"/><circle cx="3" cy="5" r=".9"/><circle cx="5" cy="5" r=".9"/><circle cx="3" cy="11" r=".9"/><circle cx="5" cy="11" r=".9"/><circle cx="3" cy="13" r=".9"/><circle cx="5" cy="13" r=".9"/></g></svg><span class="done" data-i18n="main.organize.done">Terminé</span></button>
+      <button type="button" id="settings" class="icon-btn" title="Options" aria-label="Options" data-i18n-title="main.settings"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M12.51 7.09 L14.25 7.18 L14.25 8.82 L12.51 8.91 L11.83 10.54 L12.99 11.84 L11.84 12.99 L10.54 11.83 L8.91 12.51 L8.82 14.25 L7.18 14.25 L7.09 12.51 L5.46 11.83 L4.16 12.99 L3.01 11.84 L4.17 10.54 L3.49 8.91 L1.75 8.82 L1.75 7.18 L3.49 7.09 L4.17 5.46 L3.01 4.16 L4.16 3.01 L5.46 4.17 L7.09 3.49 L7.18 1.75 L8.82 1.75 L8.91 3.49 L10.54 4.17 L11.84 3.01 L12.99 4.16 L11.83 5.46Z"/><circle cx="8" cy="8" r="2"/></svg></button>
     </header>
+    <p id="headMsg" class="status err" role="alert"></p>
     <input id="q" type="search" placeholder="Mots-clés…" data-i18n-placeholder="main.keywords" autocomplete="off" autofocus required>
-    <div class="bar">
+    <button type="submit" id="go"><span data-i18n="main.go">Lancer la recherche</span> <span id="goCount" class="go-count"></span><span class="go-paused" data-i18n="main.paused">Recherche en pause</span></button>
+    <p id="msg" role="status"></p>
+    <div class="bar quick">
       <button type="button" id="all" data-i18n="main.all">Tout</button>
       <button type="button" id="none" data-i18n="main.none">Aucune</button>
     </div>
+    <div id="permBanner" class="perm-banner" role="status" hidden>
+      <p id="permText"></p>
+      <button type="button" id="permBtn" data-i18n="perm.authorize">Autoriser</button>
+    </div>
+    <details class="organize-help">
+      <summary data-i18n="main.organize.short">Glissez pour ranger · Alt + ↑/↓ · Échap</summary>
+      <p data-i18n="main.organize.help">Glissez une agence par sa poignée, entre deux agences ou sur un dossier.</p>
+    </details>
+    <p id="live" class="sr-only" aria-live="polite"></p>
     <ul id="list"></ul>
-    <button type="submit" id="go" data-i18n="main.go">Lancer la recherche</button>
-    <p id="msg" role="status"></p>
   </form>
 
-  <section id="settingsView" hidden>
+  <section id="editorView" hidden>
     <header>
-      <h1 data-i18n="opt.title">Options</h1>
-      <button type="button" id="back" data-i18n="opt.back">← Retour</button>
+      <h1 id="editorTitle" data-i18n="ed.addTitle">Ajouter une agence</h1>
+      <button type="button" id="edBack"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13 8H3.5M7.5 4L3.5 8l4 4"/></svg><span data-i18n="opt.back">Retour</span></button>
     </header>
 
-    <h2 data-i18n="opt.shown">Agences affichées</h2>
-    <p class="intro" data-i18n="opt.shown.intro">Décochez celles que vous n'utilisez pas : elles disparaissent de la liste.</p>
-    <ul id="manageList"></ul>
-    <p id="removedLine" class="help" hidden><span id="removedText"></span> <button type="button" id="restoreRemoved" class="link inline" data-i18n="opt.removed.restore">Restaurer</button></p>
-
-    <h2 id="editorTitle" data-i18n="ed.addTitle">Ajouter une agence</h2>
-
     <!-- Étape 1 : détection -->
+    <!-- Après détection (ajout) : l'étape 1 se résume en une ligne -->
+    <p id="step1Summary" class="step-summary" hidden><span id="step1Text"></span> <button type="button" id="step1Edit" class="link inline" data-i18n="ed.step1.edit">Modifier</button></p>
     <div id="step1">
       <p class="help" data-i18n="ed.step1.help">Faites une recherche sur le site de l'agence, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés.</p>
       <div class="field">
@@ -56,11 +63,17 @@
       <p id="step2Msg" class="status ok" role="status"></p>
       <div class="field">
         <label for="newName" data-i18n="ed.name">Nom</label>
-        <input id="newName" maxlength="40" autocomplete="off">
+        <input id="newName" maxlength="40" autocomplete="off" aria-describedby="nameErr">
+        <p class="status err field-err" id="nameErr"></p>
+      </div>
+      <div class="field">
+        <label for="newFolder" data-i18n="ed.folder">Dossier</label>
+        <select id="newFolder"><option value="" data-i18n="ed.folder.none">Aucun</option></select>
       </div>
       <div class="field">
         <label for="newUrl" id="urlLabel">Adresse de recherche</label>
-        <input id="newUrl" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…">
+        <input id="newUrl" maxlength="2000" autocomplete="off" spellcheck="false" placeholder="https://…{q}…" aria-describedby="urlErr">
+        <p class="status err field-err" id="urlErr"></p>
         <p class="help" id="urlHelp" data-i18n-html="ed.url.help">Vos mots-clés y sont remplacés par <code>{q}</code>.</p>
       </div>
 
@@ -68,10 +81,11 @@
       <div class="fillbox" id="fillBox" hidden>
         <p class="help" data-i18n="ed.fill.help">TabulaPix ouvrira cette page, tapera les mots-clés dans le champ de recherche du site et cliquera sur son bouton. Montrez-lui où ils se trouvent :</p>
         <ul class="checks">
-          <li id="chkField"><span class="mark">○</span> Champ de recherche</li>
-          <li id="chkButton"><span class="mark">○</span> Bouton de recherche</li>
+          <li id="chkField"><span class="mark" aria-hidden="true"></span> Champ de recherche</li>
+          <li id="chkButton"><span class="mark" aria-hidden="true"></span> Bouton de recherche</li>
         </ul>
-        <button type="button" id="pickBtn" data-i18n="ed.pick">Repérer le champ sur le site</button>
+        <button type="button" id="pickBtn" class="secondary" data-i18n="ed.pick">Repérer le champ sur le site</button>
+        <p id="pickMsg" class="status" role="status"></p>
         <p class="help small" data-i18n="ed.pick.permission">Chrome vous demandera l'autorisation pour ce site.</p>
         <button type="button" id="backToUrl" class="link" data-i18n="ed.backToUrl">Utiliser plutôt une adresse de recherche</button>
       </div>
@@ -82,14 +96,22 @@
           <p class="help" data-i18n-html="ed.tech.help">Pour les sites qui « emballent » la recherche dans l'adresse : <code>{payload}</code> dans l'adresse, le texte modèle contenant <code>{q}</code> ci-dessous, et les étapes d'encodage (<code>uri</code>, <code>hex</code>, <code>gzip</code>, <code>base64</code>) dans l'ordre. <code>{q:slug}</code> écrit les mots avec des tirets (<code>estonie-frontière</code>).</p>
           <div class="field">
             <label for="newPayload" data-i18n="ed.payload">Modèle (payload)</label>
-            <textarea id="newPayload" rows="3" maxlength="2000" spellcheck="false" placeholder='{"searchbar":"{q}"}'></textarea>
+            <textarea id="newPayload" rows="3" maxlength="2000" spellcheck="false" placeholder='{"searchbar":"{q}"}' aria-describedby="payloadErr"></textarea>
+            <p class="status err field-err" id="payloadErr"></p>
           </div>
           <div class="field">
             <label for="newEncode" data-i18n="ed.encode">Étapes d'encodage</label>
-            <input id="newEncode" autocomplete="off" spellcheck="false" placeholder="ex. hex   ou   uri, gzip, base64, uri" data-i18n-placeholder="ed.encode.placeholder">
+            <input id="newEncode" autocomplete="off" spellcheck="false" placeholder="ex. hex   ou   uri, gzip, base64, uri" data-i18n-placeholder="ed.encode.placeholder" aria-describedby="encodeErr">
+            <p class="status err field-err" id="encodeErr"></p>
           </div>
         </div>
         <p class="help" id="techFill" hidden></p>
+      </details>
+
+      <!-- Modification : re-détection, repliée (le formulaire ci-dessus est la saisie à la main) -->
+      <details id="redetect" hidden>
+        <summary data-i18n="ed.redetect.summary">Re-détecter l'adresse depuis le site</summary>
+        <div id="redetectSlot"></div>
       </details>
 
       <div class="bar">
@@ -102,37 +124,62 @@
       </div>
       <p id="addMsg" class="status" role="status"></p>
     </form>
-    <p id="listMsg" class="status" role="status"></p>
+  </section>
 
-    <h2 data-i18n="opt.settings">Réglages</h2>
-    <form id="settingsForm">
+  <section id="settingsView" hidden>
+    <header>
+      <h1 data-i18n="opt.title">Options</h1>
+      <button type="button" id="back"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M13 8H3.5M7.5 4L3.5 8l4 4"/></svg><span data-i18n="opt.back">Retour</span></button>
+    </header>
+
+
+
+    <!-- À régler : seulement quand quelque chose attend l'utilisateur -->
+    <div id="attention" class="attention" hidden>
+      <h2 data-i18n="attention.title">À régler</h2>
+      <p id="attentionText" class="help"></p>
+      <button type="button" id="authorizeBtn" class="secondary" data-i18n="attention.authorize">Autoriser ces sites</button>
+    </div>
+
+    <h2 data-i18n="opt.pixpalace">Pixpalace</h2>
+    <form id="settingsForm" novalidate>
       <div id="fields"></div>
-      <button type="submit" id="save" class="primary" data-i18n="opt.save">Enregistrer</button>
     </form>
+
+    <h2 data-i18n="opt.lang">Langue</h2>
     <div class="field lang">
-      <label for="langSelect" data-i18n="opt.lang">Langue</label>
+      <label for="langSelect" data-i18n="opt.lang.label">Langue de l'interface</label>
       <select id="langSelect">
         <option value="auto" data-i18n="opt.lang.auto">Automatique (langue du navigateur)</option>
         <option value="fr">Français</option>
         <option value="en">English</option>
       </select>
     </div>
-    <p id="settingsMsg" class="status" role="status"></p>
+
+    <h2 data-i18n="access.title">Accès rapide</h2>
+    <p class="help access-line"><span id="shortcutText"></span> <button type="button" id="shortcutBtn" class="link inline" data-i18n="access.change">Changer le raccourci</button></p>
+    <p class="help" data-i18n="access.panel">Le bouton colonne, en haut de la popup, garde TabulaPix ouvert à droite de la fenêtre pour enchaîner les recherches.</p>
 
     <h2 id="backupTitle" data-i18n="backup.title">Sauvegarde et partage</h2>
-    <p class="help" data-i18n="backup.help">Enregistrez votre configuration dans un fichier, pour la retrouver après une réinstallation ou la partager avec des collègues.</p>
+    <p class="help" data-i18n="backup.help">Pour retrouver votre configuration après une réinstallation, ou la partager avec des collègues.</p>
     <div class="bar">
       <button type="button" id="exportBtn" data-i18n="backup.export">Exporter</button>
       <button type="button" id="importBtn" data-i18n="backup.import">Importer…</button>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" hidden>
     <p id="backupMsg" class="status" role="status"></p>
-    <button type="button" id="authorizeBtn" class="primary" hidden></button>
+
+    <div id="removedLine" hidden>
+      <h2 data-i18n="opt.removed.title">Agences retirées de la liste</h2>
+      <p class="help"><span id="removedText"></span> <button type="button" id="restoreRemoved" class="link inline" data-i18n="opt.removed.restore">Restaurer</button></p>
+    </div>
+    <p id="restoreMsg" class="status ok" role="status"></p>
 
     <h2 data-i18n="factory.title">Configuration d'usine</h2>
     <p class="help" data-i18n="factory.help">Efface vos réglages, vos agences ajoutées ou modifiées et les autorisations de sites, et revient à la configuration livrée.</p>
     <button type="button" id="factoryBtn" class="danger" data-i18n="factory.button">Rétablir la configuration d'usine</button>
   </section>
+  </main>
   <footer class="credit">
     <p>Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/" target="_blank" rel="noopener">Jérémie</a>.</p>
     <p><a href="https://github.com/jeremiejung/TabulaPix" target="_blank" rel="noopener" data-i18n="footer.source">Code source sur GitHub</a></p>
