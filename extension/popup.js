@@ -323,10 +323,19 @@ function validate() {
   return error;
 }
 
-function showStep2(message) {
+// Message de l'étape « vérifier » ; les avertissements ont leur icône dessinée.
+function showStep2(message, warnings = []) {
   ed.form.hidden = false;
   ed.step2Msg.textContent = message || "";
-  ed.step2Msg.hidden = !message;
+  for (const w of warnings) {
+    const line = document.createElement("span");
+    line.className = "warn-line";
+    const text = document.createElement("span");
+    text.textContent = w;
+    line.append(icon("warn"), text);
+    ed.step2Msg.append(line);
+  }
+  ed.step2Msg.hidden = !message && !warnings.length;
   validate();
 }
 
@@ -335,7 +344,7 @@ async function saveDraft() {
   await chrome.storage.session.set({
     [AGENCY_DRAFT_KEY]: {
       ...draft, name: ed.name.value, url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value, folder: ed.folder.value,
-      detUrl: ed.detUrl.value, detQ: ed.detQ.value, step2: !ed.form.hidden, step2Msg: ed.step2Msg.textContent
+      detUrl: ed.detUrl.value, detQ: ed.detQ.value, step2: !ed.form.hidden, step2Msg: ed.step2Msg.innerText // innerText : garde les retours à la ligne des avertissements
     }
   });
 }
@@ -466,7 +475,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     ed.encode.value = (r.encode || []).join(", ");
     draft.fill = null;
     setMode("url");
-    showStep2([r.summary, ...r.warnings.map((w) => "⚠ " + w), draft.editing ? t("ed.check.edit") : t("ed.check.add")].join("\n"));
+    showStep2([r.summary, draft.editing ? t("ed.check.edit") : t("ed.check.add")].join("\n"), r.warnings);
     flashEl(ed.name, ed.url, ed.step2Msg);
   }
   await saveDraft();
@@ -965,6 +974,7 @@ const ICONS = {
   trash: '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/>',
   plus: '<path d="M8 3.5v9M3.5 8h9"/>',
   check: '<path d="M3.5 8.5l3 3 6-7"/>',
+  warn: '<path d="M8 2.5l6 11H2z"/><path d="M8 6.5v3.2M8 11.6v.1"/>',
   dot: '<circle cx="8" cy="8" r="4.5"/>',
   pencil: '<path d="M10.5 2.8l2.7 2.7L6 12.7l-3.3.6.6-3.3z"/><path d="M9 4.3l2.7 2.7"/>',
   eye: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>',

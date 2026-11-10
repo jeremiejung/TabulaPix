@@ -2,7 +2,9 @@
   color-scheme: light dark;
   /* Espacements : base 4 px. Serré à l'intérieur d'un groupe, large entre groupes. */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
-  --indent: 28px;              /* colonne des cases d'agence, dans un dossier comme hors dossier */
+  --indent: 28px;
+  /* Arrondis : deux valeurs (contrôles, blocs) et la pastille */
+  --r-control: 7px; --r-block: 9px; --r-pill: 999px;              /* colonne des cases d'agence, dans un dossier comme hors dossier */
   /* Identité : celle de l'icône, encre et rouge signal. Le rouge ne sert qu'à
      l'action principale, au focus et à la marque ; les dossiers ont leurs
      propres couleurs de repérage ; tout le reste est neutre. */
@@ -46,72 +48,72 @@ html.panel body { width: auto; }
 html.panel #pin { display: none; }
 
 /* Boutons-icônes */
-.icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 28px; height: 28px; padding: 0 6px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 7px; background: Canvas; color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 28px; height: 28px; padding: 0 6px; box-sizing: border-box; border: 1px solid var(--line); border-radius: var(--r-control); background: Canvas; color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 .icon-btn:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 .icon-btn.bare { border-color: transparent; background: none; min-width: 24px; height: 24px; padding: 0; }
 #organize .done { display: none; }
 #organize[aria-pressed="true"] { background: CanvasText; color: Canvas; border-color: CanvasText; padding: 0 9px 0 7px; }
 #organize[aria-pressed="true"] .done { display: inline; }
 
-input[type=search] { width: 100%; box-sizing: border-box; padding: 7px 9px; font-size: 14px; border: 1px solid color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: Canvas; color: inherit; }
+input[type=search] { width: 100%; box-sizing: border-box; padding: 7px 9px; font-size: 14px; border: 1px solid color-mix(in srgb, CanvasText 35%, transparent); border-radius: var(--r-control); background: Canvas; color: inherit; }
 input[type=search]:focus-visible { outline-offset: 0; }
 .bar { display: flex; gap: 6px; margin: 8px 0 6px; }
 .bar.quick { margin: var(--space-4) 0 var(--space-2); }
-.bar button { flex: 1; height: 26px; padding: 0 6px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
+.bar button { flex: 1; height: 26px; padding: 0 6px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: var(--r-control); cursor: pointer; }
 .bar button:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 
 /* Liste des agences */
 ul { list-style: none; margin: 0; padding: 0; }
-#list li.agency { display: flex; align-items: center; gap: 4px; border-radius: 6px; }
+#list li.agency { display: flex; align-items: center; gap: 4px; border-radius: var(--r-control); }
 #list li.agency label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 26px; cursor: pointer; }
 #list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-li .hint { margin-left: auto; padding: 1px 7px; font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 9px; }
+li .hint { margin-left: auto; padding: 1px 7px; font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: var(--r-pill); }
 #list.has-folders .root > .items { padding: 0 var(--space-2) 0 var(--indent); }
 
 /* Dossiers : un bloc teinté de la couleur du dossier */
 #list > li.group { display: block; }
 #list .group { --fc: var(--c-gray); }
-#list .group:not(.root) { margin: 0 0 6px; border-radius: 9px; background: color-mix(in srgb, var(--fc) 7%, Canvas); }
+#list .group:not(.root) { margin: 0 0 6px; border-radius: var(--r-block); background: color-mix(in srgb, var(--fc) 7%, Canvas); }
 #list .group:not(.root) input[type=checkbox] { accent-color: var(--fc); }
-.group-head { display: flex; align-items: center; gap: 2px; min-height: 32px; padding: 0 8px 0 2px; border-radius: 9px; background: color-mix(in srgb, var(--fc) 20%, Canvas); }
-.group:not(.collapsed) > .group-head { border-radius: 9px 9px 4px 4px; }
+.group-head { display: flex; align-items: center; gap: 2px; min-height: 32px; padding: 0 8px 0 2px; border-radius: var(--r-block); background: color-mix(in srgb, var(--fc) 20%, Canvas); }
+.group:not(.collapsed) > .group-head { border-radius: var(--r-block) var(--r-block) 4px 4px; }
 html.organizing .group-head label { flex: none; min-width: 26px; justify-content: center; padding: 0 1px; }
 .group-head label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
 .folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--fc) 50%, CanvasText); }
-.count { margin-left: auto; padding: 2px 7px; border-radius: 9px; font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--muted); background: color-mix(in srgb, Canvas 75%, transparent); }
+.count { margin-left: auto; padding: 2px 7px; border-radius: var(--r-pill); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--muted); background: color-mix(in srgb, Canvas 75%, transparent); }
 .count.some { color: color-mix(in srgb, var(--fc) 60%, CanvasText); background: Canvas; }
-.toggle { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 6px; background: none; color: color-mix(in srgb, var(--fc) 55%, CanvasText); cursor: pointer; }
+.toggle { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: var(--r-control); background: none; color: color-mix(in srgb, var(--fc) 55%, CanvasText); cursor: pointer; }
 .toggle:hover { background: color-mix(in srgb, var(--fc) 18%, transparent); }
 .toggle svg { transition: transform .18s cubic-bezier(.2, .7, .2, 1); }
 .group.collapsed .toggle svg { transform: rotate(-90deg); }
 .group:not(.root) > .items { padding: 3px var(--space-2) 5px var(--indent); }
 .group.collapsed > .items, .group.collapsed > .empty, .group.collapsed > .palette { display: none !important; }
 .group-label { margin: var(--space-3) 0 var(--space-1) var(--indent); font-size: 11px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
-.empty { display: none; margin: 4px 8px 8px 28px; padding: 6px 8px; font-size: 12px; color: var(--muted); border: 1px dashed color-mix(in srgb, CanvasText 28%, transparent); border-radius: 6px; }
+.empty { display: none; margin: 4px 8px 8px 28px; padding: 6px 8px; font-size: 12px; color: var(--muted); border: 1px dashed color-mix(in srgb, CanvasText 28%, transparent); border-radius: var(--r-control); }
 .items:empty + .empty { display: block; }
 html:not(.organizing) .root > .empty { display: none; }
 .root > .empty { margin-left: var(--indent); }
 
 /* Sites à autoriser */
-.perm-banner { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 7px 8px 7px 10px; border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--warn) 14%, Canvas); }
+.perm-banner { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 7px 8px 7px 10px; border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius: var(--r-block); background: color-mix(in srgb, var(--warn) 14%, Canvas); }
 .perm-banner[hidden] { display: none; }
 .perm-banner p { flex: 1; margin: 0; font-size: 12px; }
-.perm-banner button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: CanvasText; color: Canvas; font: 600 12px system-ui, sans-serif; cursor: pointer; }
-.perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--warn) 16%, Canvas); color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
+.perm-banner button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: var(--r-control); background: CanvasText; color: Canvas; font: 600 12px system-ui, sans-serif; cursor: pointer; }
+.perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent); border-radius: var(--r-pill); background: color-mix(in srgb, var(--warn) 16%, Canvas); color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 .perm-pill:hover { background: color-mix(in srgb, var(--warn) 30%, Canvas); }
 
 /* Mode Organiser */
 .organize-help { display: none; margin: 0 0 8px; font-size: 12px; color: var(--muted); }
 html.organizing .organize-help { display: block; }
-.grip { display: grid; place-items: center; flex: none; width: 24px; height: 24px; margin-left: auto; border-radius: 5px; color: var(--muted); cursor: grab; }
+.grip { display: grid; place-items: center; flex: none; width: 24px; height: 24px; margin-left: auto; border-radius: var(--r-control); color: var(--muted); cursor: grab; }
 .grip:hover { color: CanvasText; background: var(--line); }
 html.organizing #list li.agency:hover { background: color-mix(in srgb, CanvasText 5%, transparent); }
 .dragging { opacity: .4; }
 .group-head.drop-target { outline: 2px solid var(--fc); outline-offset: -2px; background: color-mix(in srgb, var(--fc) 34%, Canvas); }
-.fname-input { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; padding: 0 6px; border: 1px solid transparent; border-radius: 5px; background: none; color: color-mix(in srgb, var(--fc) 50%, CanvasText); font: 700 13px system-ui, sans-serif; }
+.fname-input { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; padding: 0 6px; border: 1px solid transparent; border-radius: var(--r-control); background: none; color: color-mix(in srgb, var(--fc) 50%, CanvasText); font: 700 13px system-ui, sans-serif; }
 .fname-input:hover { border-color: color-mix(in srgb, var(--fc) 40%, transparent); }
 .fname-input:focus { background: Canvas; border-color: var(--fc); outline: none; }
-.swatch { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 6px; background: none; cursor: pointer; }
+.swatch { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: var(--r-control); background: none; cursor: pointer; }
 .swatch::before { content: ""; width: 13px; height: 13px; border-radius: 50%; background: var(--fc); box-shadow: 0 0 0 2px Canvas; }
 .swatch:hover { background: color-mix(in srgb, var(--fc) 18%, transparent); }
 .fdel { color: var(--muted); }
@@ -122,7 +124,7 @@ html.organizing #list li.agency:hover { background: color-mix(in srgb, CanvasTex
 .chip[aria-pressed="true"] { box-shadow: 0 0 0 2px Canvas, 0 0 0 4px CanvasText; }
 #list .new-folder { display: flex; gap: 6px; margin: 8px 0 2px; }
 #list .add-agency { margin: 6px 0 2px; }
-.add-btn { display: flex; align-items: center; gap: 6px; width: 100%; height: 30px; padding: 0 8px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: none; color: inherit; font: 600 13px system-ui, sans-serif; cursor: pointer; }
+.add-btn { display: flex; align-items: center; gap: 6px; width: 100%; height: 30px; padding: 0 8px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: var(--r-control); background: none; color: inherit; font: 600 13px system-ui, sans-serif; cursor: pointer; }
 .add-btn:hover { border-style: solid; background: color-mix(in srgb, CanvasText 5%, Canvas); }
 #list li.agency .tool { color: var(--muted); }
 #list li.agency .tool:first-of-type { margin-left: auto; }
@@ -135,10 +137,10 @@ html.organizing #list li.agency label { cursor: grab; }
 html.organizing #list li.agency label:active { cursor: grabbing; }
 #list li.is-hidden .name { color: var(--muted); font-style: italic; }
 #list li.is-hidden .tool[aria-pressed="true"] { color: var(--accent); }
-.new-folder input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 8px; font-size: 13px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: none; color: inherit; }
+.new-folder input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 8px; font-size: 13px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: var(--r-control); background: none; color: inherit; }
 .new-folder input:focus { border-style: solid; }
 
-#go { width: 100%; margin-top: var(--space-2); padding: 8px; font-size: 13.5px; font-weight: 650; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
+#go { width: 100%; margin-top: var(--space-2); padding: 8px; font-size: 13.5px; font-weight: 650; color: var(--on-accent); background: var(--accent); border: 0; border-radius: var(--r-control); cursor: pointer; }
 #go:hover { background: var(--accent-hover); }
 #go:disabled, input[type=search]:disabled { opacity: .4; cursor: not-allowed; }
 #go:disabled:hover { background: var(--accent); }
@@ -152,7 +154,7 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 .field { margin: 0 0 10px; }
 .field label { display: block; font-weight: 600; margin-bottom: 3px; }
 /* Champs (éditeur, options) : même famille que le champ de recherche */
-.field input, .field textarea, .field select { width: 100%; box-sizing: border-box; min-height: 32px; padding: 6px 9px; font: 13px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 7px; }
+.field input, .field textarea, .field select { width: 100%; box-sizing: border-box; min-height: 32px; padding: 6px 9px; font: 13px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: var(--r-control); }
 .field select { padding-right: 6px; cursor: pointer; }
 .field textarea { min-height: 64px; font: 12px/1.4 ui-monospace, monospace; resize: vertical; }
 .field input:hover, .field textarea:hover, .field select:hover { border-color: color-mix(in srgb, CanvasText 45%, transparent); }
@@ -160,11 +162,11 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 .field input:disabled { opacity: .6; }
 .field input:user-invalid { border-color: var(--err); outline-color: var(--err); }
 details { margin: 0 0 10px; }
-summary { min-height: 24px; line-height: 24px; cursor: pointer; font-size: 12px; font-weight: 600; margin-bottom: 4px; border-radius: 5px; }
+summary { min-height: 24px; line-height: 24px; cursor: pointer; font-size: 12px; font-weight: 600; margin-bottom: 4px; border-radius: var(--r-control); }
 summary:hover { color: color-mix(in srgb, CanvasText 80%, var(--focus)); }
 .help { margin: 3px 0 6px; font-size: 12px; color: var(--muted); }
-.primary { min-height: 30px; padding: 0 14px; font: 600 13px system-ui, sans-serif; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
-#back, #edBack { flex: none; margin-left: auto; height: 28px; padding: 0 10px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
+.primary { min-height: 30px; padding: 0 14px; font: 600 13px system-ui, sans-serif; color: var(--on-accent); background: var(--accent); border: 0; border-radius: var(--r-control); cursor: pointer; }
+#back, #edBack { display: inline-flex; align-items: center; gap: 5px; flex: none; margin-left: auto; height: 28px; padding: 0 10px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: var(--r-control); cursor: pointer; }
 #back:hover, #edBack:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 #editorTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar button.primary { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
@@ -183,12 +185,12 @@ code { font-size: 12px; }
 #addForm { margin-top: 12px; padding-top: 10px; border-top: 1px dashed color-mix(in srgb, CanvasText 25%, transparent); }
 .primary:disabled { opacity: .45; cursor: default; }
 .checks { list-style: none; margin: 4px 0 8px; padding: 0; }
-.checks li { padding: 2px 4px; border-radius: 4px; }
+.checks li { padding: 2px 4px; border-radius: var(--r-control); }
 .checks li { display: flex; align-items: center; gap: 6px; }
 .checks .mark { display: inline-grid; place-items: center; color: var(--muted); }
 .checks .mark svg { width: 14px; height: 14px; }
 .checks li.done .mark { color: var(--ok); }
-.secondary { min-height: 30px; padding: 0 12px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: 7px; cursor: pointer; }
+.secondary { min-height: 30px; padding: 0 12px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid color-mix(in srgb, CanvasText 30%, transparent); border-radius: var(--r-control); cursor: pointer; }
 .secondary:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 #redetect { margin: 4px 0 10px; }
 #redetect[open] { padding: 0 0 4px; }
@@ -206,20 +208,20 @@ code { font-size: 12px; }
 .status.err { color: var(--err); }
 
 /* Agence « remplir le champ » */
-.fillbox { margin: 0 0 10px; padding: 7px 10px; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 7px; background: color-mix(in srgb, var(--accent) 6%, Canvas); }
+.fillbox { margin: 0 0 10px; padding: 7px 10px; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: var(--r-control); background: color-mix(in srgb, var(--accent) 6%, Canvas); }
 .link { display: block; min-height: 24px; text-align: left; padding: 0; border: 0; background: none; color: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; opacity: .85; }
 
 /* Signature */
 .credit { margin: 14px 0 0; font-size: 12px; text-align: center; color: var(--muted); }
 .credit p { margin: 2px 0; }
 .field.lang { margin-top: 14px; }
-.credit a { color: inherit; text-underline-offset: 2px; }
+.credit a { display: inline-block; min-height: 24px; line-height: 24px; color: inherit; text-underline-offset: 2px; }
 
 /* Sauvegarde, configuration d'usine */
 .link.inline { display: inline-flex; align-items: center; min-height: 24px; vertical-align: middle; font-size: 12px; }
 #exportBtn, #importBtn { cursor: pointer; }
 #authorizeBtn { margin-top: 4px; }
-.danger { min-height: 30px; padding: 0 14px; font: 600 13px system-ui, sans-serif; color: var(--err); background: none; border: 1px solid var(--err); border-radius: 7px; cursor: pointer; }
+.danger { min-height: 30px; padding: 0 14px; font: 600 13px system-ui, sans-serif; color: var(--err); background: none; border: 1px solid var(--err); border-radius: var(--r-control); cursor: pointer; }
 .danger:hover { color: var(--on-accent); background: var(--accent); }
 
 /* Colonne latérale : le pied de page reste collé en bas de la fenêtre. */
@@ -230,7 +232,7 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
 #editorView > header + #addForm { margin-top: 0; padding-top: 0; border-top: 0; }
 
 /* Liste vide (toutes les agences masquées ou supprimées) */
-.empty-list { margin: 6px 0; padding: 10px 12px; font-size: 12px; color: var(--muted); border: 1px dashed color-mix(in srgb, CanvasText 28%, transparent); border-radius: 8px; }
+.empty-list { margin: 6px 0; padding: 10px 12px; font-size: 12px; color: var(--muted); border: 1px dashed color-mix(in srgb, CanvasText 28%, transparent); border-radius: var(--r-block); }
 
 /* Mode contraste élevé (Windows) : les teintes disparaissent, on garde des contours */
 @media (forced-colors: active) {
@@ -256,3 +258,7 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
   html.organizing .group-head .fdel { display: none; }
   html.organizing .group-head:is(:hover, :focus-within) .fdel { display: inline-flex; }
 }
+
+/* Avertissements de la détection : icône dessinée + texte */
+.warn-line { display: flex; gap: 6px; align-items: flex-start; margin-top: 4px; color: CanvasText; }
+.warn-line svg { flex: none; width: 14px; height: 14px; margin-top: 1px; color: var(--warn); }

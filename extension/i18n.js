@@ -39,7 +39,7 @@ const I18N = {
 
     // Options
     "opt.title": "Options",
-    "opt.back": "← Retour",
+    "opt.back": "Retour",
     "folder.handle": "Glisser pour réordonner les dossiers",
     "folder.toggle": "Replier / déplier « {name} »",
     "folder.root": "Sans dossier",
@@ -238,7 +238,7 @@ const I18N = {
     "main.paste.title": "Keywords copied to the clipboard: paste them (Ctrl/Cmd+V) into the site's search field.",
 
     "opt.title": "Settings",
-    "opt.back": "← Back",
+    "opt.back": "Back",
     "folder.handle": "Drag to reorder folders",
     "folder.toggle": "Collapse / expand “{name}”",
     "folder.root": "No folder",
