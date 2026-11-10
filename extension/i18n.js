@@ -12,8 +12,7 @@ const LANGS = ["fr", "en"];
 const I18N = {
   fr: {
     // Écran de recherche
-    "main.pin": "Garder ouvert ⇥",
-    "main.pin.title": "Garder TabulaPix ouvert dans une colonne à droite de la fenêtre",
+    "main.pin.title": "Garder TabulaPix ouvert dans une colonne à droite de la fenêtre (l'icône de l'extension l'ouvrira ou la fermera ensuite)",
     "main.settings": "Options",
     "main.keywords": "Mots-clés…",
     "main.all": "Tout",
@@ -208,8 +207,7 @@ const I18N = {
   },
 
   en: {
-    "main.pin": "Keep open ⇥",
-    "main.pin.title": "Keep TabulaPix open in a column on the right of the window",
+    "main.pin.title": "Keep TabulaPix open in a column on the right of the window (the extension icon then opens or closes it)",
     "main.settings": "Settings",
     "main.keywords": "Keywords…",
     "main.all": "All",

@@ -13,6 +13,7 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 - **Bouton de recherche juste sous les mots-clés**, avec le nombre d'onglets.
 - **Sites encore à autoriser détectés** : une agence qui remplit le champ de recherche de son site sans l'autorisation de Chrome (configuration importée, autorisation refusée ou retirée) est signalée par un bandeau au-dessus de la liste et une pastille « à autoriser », avec un bouton **Autoriser** ; le bouton des options reste aussi disponible. À l'import, l'autorisation est demandée tout de suite quand Chrome le permet. La confirmation d'import est plus courte.
 - Liste redessinée : hiérarchie typographique plus nette, cases alignées, icônes dessinées, cibles de clic agrandies, petits textes agrandis.
+- Barre latérale : le bouton « Garder ouvert » devient une icône comme les autres ; tant que la colonne est ouverte, l'icône de la barre d'outils agit sur elle au lieu d'ouvrir une popup par-dessus.
 - Barre latérale : le pied de page (liens vers jeremie.eu et le code source) reste désormais collé au bas de la fenêtre.
 
 ## 3.3.0 — 7 novembre 2026 (Chrome Web Store)

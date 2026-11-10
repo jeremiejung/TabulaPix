@@ -13,6 +13,7 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 - **Search button right under the keywords**, showing the number of tabs.
 - **Sites still to be allowed are detected**: an agency that fills in its site's search field without Chrome's permission (imported configuration, permission refused or removed) is flagged by a banner above the list and a “to allow” badge, with an **Allow** button; the settings button stays available too. On import, the permission is asked for right away when Chrome allows it. The import confirmation is shorter.
 - Redesigned list: clearer type hierarchy, aligned checkboxes, drawn icons, larger click targets, small text enlarged.
+- Side panel: the “Keep open” button becomes an icon like the others; while the column is open, the toolbar icon acts on it instead of opening a popup on top of it.
 - Side panel: the footer (links to jeremie.eu and the source code) now stays at the bottom of the window.
 
 ## 3.3.0 — 7 November 2026 (Chrome Web Store)

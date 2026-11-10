@@ -15,7 +15,7 @@ input[type=checkbox] { width: 15px; height: 15px; margin: 0; flex: none; }
 
 header { display: flex; align-items: center; gap: 6px; margin: 0 0 10px; }
 h1 { font-size: 16px; font-weight: 750; letter-spacing: -.01em; margin: 0; }
-#pin { margin-left: auto; padding: 3px 7px; font-size: 11px; cursor: pointer; }
+#pin { margin-left: auto; }
 html.panel #organize { margin-left: auto; }
 /* Panneau latéral : prend la largeur de la colonne, sans bouton « Garder ouvert » */
 html.panel body { width: auto; }

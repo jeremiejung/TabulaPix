@@ -68,6 +68,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
+/* Colonne latérale ouverte : un clic sur l'icône de l'extension agit sur la
+   colonne (Chrome l'ouvre ou la ferme) au lieu d'ouvrir une popup par-dessus.
+   Colonne fermée partout : la popup revient. */
+async function syncActionWithPanel() {
+  let open;
+  try { open = (await chrome.runtime.getContexts({ contextTypes: ["SIDE_PANEL"] })).length > 0; }
+  catch (_) { return; } // Chrome trop ancien : comportement par défaut
+  await chrome.action.setPopup({ popup: open ? "" : "popup.html" });
+  try { await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: open }); } catch (_) { /* sans colonne */ }
+}
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== "panel") return;
+  syncActionWithPanel();
+  port.onDisconnect.addListener(() => setTimeout(syncActionWithPanel, 200));
+});
+syncActionWithPanel();
+
 // Ne garde que les recherches qui pointent, en https, vers le site déclaré
 // pour cette agence (config.js ou agence ajoutée par l'utilisateur).
 function validJobs(jobs, options, agencies) {

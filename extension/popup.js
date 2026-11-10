@@ -54,6 +54,16 @@ document.getElementById("pin").addEventListener("click", () => {
   });
 });
 
+// Colonne latérale : on le signale au script d'arrière-plan, qui fait alors
+// agir l'icône de l'extension sur la colonne (pas de popup en plus).
+if (!isPopup) {
+  const connectPanel = () => {
+    const port = chrome.runtime.connect({ name: "panel" });
+    port.onDisconnect.addListener(() => setTimeout(connectPanel, 1000)); // script d'arrière-plan redémarré
+  };
+  connectPanel();
+}
+
 /* ---------- Vue Options (dans la popup / le panneau) ---------- */
 
 const mainForm = document.getElementById("form");

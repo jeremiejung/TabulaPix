@@ -56,7 +56,7 @@ If you had edited `config.js`, note your changes before replacing the files, the
    Your last keywords are shown again (already selected) the next time you open TabulaPix: just type to replace them.
    If a tab is already open on an agency's site (for example after a previous search), it is reused: the new search shows there instead of opening one more tab.
 
-**Keep open:** the **Keep open ⇥** button at the top of the popup shows TabulaPix in a column on the right of the window (Chrome's side panel, version 116 or later). The column stays open when you switch tabs, so you can chain searches without reopening the extension. To close it: the cross at the top of the column. It can also be reopened from Chrome's side panel icon.
+**Keep open:** the **column** button (first icon at the top of the popup) shows TabulaPix in a column on the right of the window (Chrome's side panel, version 116 or later). The column stays open when you switch tabs, so you can chain searches without reopening the extension. While the column is open, the TabulaPix icon in the toolbar acts on the column (it doesn't open a popup on top of it); once the column is closed, the icon opens the popup again. To close it: the cross at the top of the column. It can also be reopened from Chrome's side panel icon.
 
 For **Bloomberg, Abacapress and Pixpalace**, the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more).
 
