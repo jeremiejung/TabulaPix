@@ -66,15 +66,15 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 ## Mode Organiser
 
-Le **crayon** en haut de la liste passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir ; le champ et le bouton de recherche, ainsi que Tout / Aucune, sont désactivés pendant ce temps, pour ne pas y rester par mégarde). En usage courant, la liste ne montre que les noms et les cases ; tout ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
+Le bouton **Organiser** en haut (icône liste, à côté du bouton colonne) passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir ; le champ et le bouton de recherche, ainsi que Tout / Aucune, sont désactivés pendant ce temps, pour ne pas y rester par mégarde). En usage courant, la liste ne montre que les noms et les cases ; tout ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
 
 - **Ordre et dossiers** : faites glisser une agence par son nom ou sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier (en mode Organiser seulement), **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
-- **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, supprimez-le avec la corbeille (ses agences sont conservées, hors dossier), créez-en un en bas de la liste.
+- **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, supprimez-le avec la corbeille (ses agences sont conservées, hors dossier ; **Annuler** pendant quelques secondes), créez-en un en bas de la liste.
 - **Agences**, sur chaque ligne :
   - **œil** : masque l'agence (elle disparaît de la liste, sa place est conservée) ou la réaffiche ; les agences masquées n'apparaissent, grisées, qu'en mode Organiser.
     - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte avec son œil. **AFP (forum)** est aussi masquée par défaut.
   - **crayon** : modifie l'agence (voir plus bas) ;
-  - **corbeille** : supprime n'importe quelle agence, y compris celles fournies ; les agences fournies supprimées se récupèrent dans ⚙ avec **Restaurer**.
+  - **corbeille** : supprime n'importe quelle agence, y compris celles fournies, tout de suite ; une ligne **Annuler** prend sa place quelques secondes (les agences fournies supprimées se récupèrent aussi plus tard dans ⚙ avec **Restaurer**).
 - **+ Ajouter une agence**, en bas de la liste, ouvre l'écran d'ajout (**← Retour** revient à la liste).
 
 ### Ajouter une agence

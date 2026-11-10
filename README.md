@@ -66,15 +66,15 @@ You need to be logged in to your agency accounts in Chrome, as usual: the extens
 
 ## Organise mode
 
-The **pencil** at the top of the list switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes; everything about agencies and folders is done here, right in the list.
+The **Organise** button at the top (list icon, next to the column button) switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes; everything about agencies and folders is done here, right in the list.
 
 - **Order and folders**: drag an agency by its name or its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard (in Organise mode only), **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
-- **Folders**: rename a folder right in its title, change its colour with its dot, delete it with the bin (its agencies are kept, outside any folder), create one at the bottom of the list.
+- **Folders**: rename a folder right in its title, change its colour with its dot, delete it with the bin (its agencies are kept, outside any folder; **Undo** for a few seconds), create one at the bottom of the list.
 - **Agencies**, on each line:
   - **eye**: hides the agency (it disappears from the list, its place is kept) or shows it again; hidden agencies appear greyed out in Organise mode only.
     - **Reuters** comes in two versions, depending on your contract: **Reuters (points)** for credit-based accounts (shows your points balance), shown by default, and **Reuters (standard)** for accounts without points (free download), hidden by default: show the one that matches your account with its eye. **AFP (forum)** is also hidden by default.
   - **pencil**: edits the agency (see below);
-  - **bin**: deletes any agency, built-in ones included; deleted built-in agencies can be brought back in ⚙ with **Restore**.
+  - **bin**: deletes any agency, built-in ones included, at once; an **Undo** line takes its place for a few seconds (deleted built-in agencies can also be brought back later in ⚙ with **Restore**).
 - **+ Add an agency**, at the bottom of the list, opens the add screen (**← Back** returns to the list).
 
 ### Adding an agency

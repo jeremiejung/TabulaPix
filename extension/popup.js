@@ -97,7 +97,10 @@ function flash(text, el = settingsMsg) {
 // Supprime une agence (mode Organiser). Une agence fournie est seulement
 // retirée de la liste : « Restaurer » dans les options la fait revenir.
 async function deleteAgency(a) {
-  if (!confirm(t(a.custom ? "opt.delete.confirm" : "opt.delete.builtinConfirm", { name: a.name }))) return;
+  // Pas de fenêtre de confirmation : la suppression est immédiate et annulable.
+  const snapshot = await chrome.storage.local.get(UNDO_KEYS);
+  const li = list.querySelector(`li.agency[data-id="${CSS.escape(a.id)}"]`);
+  const place = li ? { folder: li.closest("li.group").dataset.folder, index: [...li.parentElement.children].indexOf(li) } : null;
   if (a.custom) {
     // Agence ajoutée : effacée partout (case, ordre, masquage, dossier).
     const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: [], [ORDER_KEY]: [], [HIDDEN_KEY]: [], [FOLDER_OF_KEY]: {} });
@@ -114,7 +117,59 @@ async function deleteAgency(a) {
     delete data[OVERRIDES_KEY][a.id];
     await chrome.storage.local.set({ [REMOVED_KEY]: [...new Set(data[REMOVED_KEY].concat(a.id))], [OVERRIDES_KEY]: data[OVERRIDES_KEY] });
   }
-  await releaseUnusedOrigins();
+  // Autorisations libérées seulement à la fin du délai d'annulation.
+  offerUndo(t("undo.agency", { name: a.name }), snapshot, place, `li.agency[data-id="${CSS.escape(a.id)}"]`);
+}
+
+/* ---------- Suppression annulable ---------- */
+/* La ligne supprimée laisse place, au même endroit, à « X supprimée —
+   Annuler » pendant quelques secondes (annoncé aux lecteurs d'écran). */
+const UNDO_MS = 6000;
+const UNDO_KEYS = ["customAgencies", "checkedAgencies", "agencyOrder", "hiddenAgencies", "agencyFolderOf", "agencyFolders", "removedAgencies", "agencyOverrides"];
+let undo = null; // { label, snapshot, place, restored, timer }
+function offerUndo(label, snapshot, place, restored) {
+  if (undo) finishUndo();
+  undo = { label, snapshot, place, restored, timer: setTimeout(finishUndo, UNDO_MS) };
+  applyUndo();
+  announce(`${label} ${t("undo.hint")}`);
+}
+function finishUndo() {
+  if (!undo) return;
+  clearTimeout(undo.timer);
+  undo = null;
+  list.querySelector(".undo-row")?.remove();
+  releaseUnusedOrigins();
+}
+async function doUndo() {
+  const u = undo;
+  if (!u) return;
+  clearTimeout(u.timer);
+  undo = null;
+  const absent = UNDO_KEYS.filter((k) => !(k in u.snapshot)); // clés créées par la suppression
+  if (absent.length) await chrome.storage.local.remove(absent);
+  highlightFresh(u.restored);
+  await chrome.storage.local.set(u.snapshot); // la liste se reconstruit, la ligne revient surlignée
+  announce(t("undo.done"));
+}
+// Place la ligne « supprimée — Annuler » (après chaque reconstruction de la liste).
+function applyUndo() {
+  list.querySelector(".undo-row")?.remove();
+  if (!undo || !undo.place) return;
+  const row = document.createElement("li");
+  row.className = "undo-row";
+  const text = document.createElement("span");
+  text.textContent = undo.label;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "link inline";
+  btn.textContent = t("undo.action");
+  btn.dataset.key = "undo";
+  btn.addEventListener("click", doUndo);
+  row.append(text, btn);
+  const { folder, index, listIndex } = undo.place;
+  if (listIndex !== undefined) { list.insertBefore(row, list.children[listIndex] || null); return; }
+  const items = list.querySelector(`li.group[data-folder="${CSS.escape(folder || "")}"] > .items`);
+  if (items) items.insertBefore(row, items.children[index] || null);
 }
 
 // Masque ou réaffiche une agence (mode Organiser).
@@ -313,6 +368,8 @@ function renderChecks() {
   set(ed.chkField, Boolean(fill && fill.input), t("ed.chk.field"));
   set(ed.chkButton, Boolean(fill && fill.input), fill && fill.input && !fill.submit ? t("ed.chk.enter") : t("ed.chk.button"));
   ed.pickBtn.textContent = fill && fill.input ? t("ed.repick") : t("ed.pick");
+  // Un seul bouton principal à la fois : « Repérer » tant que rien n'est repéré.
+  ed.pickBtn.className = fill && fill.input ? "secondary" : "primary";
   ed.techFill.hidden = !(draft && draft.mode === "fill" && fill && fill.input);
   // En mode « remplir le champ », rien à montrer tant que le champ n'est pas repéré.
   ed.advanced.hidden = Boolean(draft && draft.mode === "fill" && !(fill && fill.input));
@@ -396,6 +453,20 @@ function showStep2(message, warnings = []) {
   validate();
 }
 
+// Ajout : une fois la détection faite, l'étape 1 se résume en une ligne
+// (« site · mots-clés — Modifier ») pour laisser la place à l'étape suivante.
+const step1Summary = $id("step1Summary");
+function collapseStep1(collapse) {
+  if (draft && draft.editing) collapse = false; // en modification, la détection est déjà repliée en bas
+  let host = "";
+  try { host = new URL(ed.detUrl.value.trim()).hostname; } catch (_) { /* rien */ }
+  if (collapse && !host) collapse = false;
+  ed.step1.hidden = collapse;
+  step1Summary.hidden = !collapse;
+  if (collapse) $id("step1Text").textContent = [host, ed.detQ.value.trim()].filter(Boolean).join(" · ");
+}
+$id("step1Edit").addEventListener("click", () => { collapseStep1(false); ed.detUrl.focus(); });
+
 // Résultat d'une détection : en modification, la détection est repliée en
 // bas du formulaire, donc son résultat s'affiche là, sous « Re-détecter ».
 function showDetectResult(message, warnings = []) {
@@ -451,6 +522,7 @@ for (const el of [ed.detUrl, ed.detQ]) {
 function resetEditor() {
   draft = null;
   layoutEditor(false);
+  step1Summary.hidden = true;
   ed.form.reset();
   ed.detUrl.value = ed.detQ.value = "";
   ed.detectMsg.textContent = ed.step2Msg.textContent = addMsg.textContent = pickMsg.textContent = "";
@@ -506,6 +578,7 @@ async function restoreDraft() {
   if (saved.editing) redetect.open = Boolean(saved.detUrl);
   setMode(saved.mode);
   if (saved.step2) showStep2(saved.step2Msg);
+  if (saved.step2 && !saved.editing && saved.detUrl) collapseStep1(true);
   await applyPickResult(data[PICK_RESULT_KEY]);
   return true;
 }
@@ -537,7 +610,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     // Re-détection d'une agence qui remplit déjà ce site : son repérage reste valable.
     if (!(draft.editing && draft.fill && hostOf(pageUrl, {}) === draft.pageHost)) draft.fill = null;
     setMode("fill");
-    showDetectResult(t("ed.notInUrl"));
+    showDetectResult("", [t("ed.notInUrl")]); // une mise en garde, pas une réussite
     flashEl(ed.name, ed.url, draft.editing ? ed.detectMsg : ed.step2Msg);
   } else {
     ed.url.value = r.url;
@@ -548,6 +621,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     showDetectResult([r.summary, draft.editing ? t("ed.check.edit") : t("ed.check.add")].join("\n"), r.warnings);
     flashEl(ed.name, ed.url, draft.editing ? ed.detectMsg : ed.step2Msg);
   }
+  collapseStep1(true);
   await saveDraft();
 });
 
@@ -775,10 +849,13 @@ async function createFolder(rawName, msgEl) {
 }
 
 async function deleteFolder(f) {
-  if (!confirm(t("folders.deleteConfirm", { name: f.name }))) return false;
+  const snapshot = await chrome.storage.local.get(UNDO_KEYS);
+  const group = list.querySelector(`li.group[data-folder="${CSS.escape(f.id)}"]`);
+  const place = group ? { listIndex: [...list.children].indexOf(group) } : null;
   const cur = await loadFolders();
   for (const [agencyId, folderId] of Object.entries(cur.folderOf)) if (folderId === f.id) delete cur.folderOf[agencyId];
   await chrome.storage.local.set({ [FOLDERS_KEY]: cur.folders.filter((x) => x.id !== f.id), [FOLDER_OF_KEY]: cur.folderOf });
+  offerUndo(t("undo.folder", { name: f.name }), snapshot, place, `li.group[data-folder="${CSS.escape(f.id)}"] > .group-head`);
   return true;
 }
 
@@ -1099,7 +1176,11 @@ function setOrganizing(on) {
 }
 organizeBtn.addEventListener("click", () => setOrganizing(!organizing));
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && organizing && !dragged && !mainForm.hidden) { e.preventDefault(); setOrganizing(false); }
+  if (e.key !== "Escape" || e.defaultPrevented) return;
+  if (organizing && !dragged && !mainForm.hidden) { e.preventDefault(); setOrganizing(false); }
+  // Éditeur, options : Échap revient d'un cran (au lieu de fermer la popup).
+  else if (!editorView.hidden) { e.preventDefault(); leaveEditor(); }
+  else if (!settingsView.hidden) { e.preventDefault(); showMain(); }
 });
 
 // Une ligne d'agence : case et nom ; en mode Organiser, une poignée à droite.
@@ -1307,7 +1388,8 @@ function folderHead(f, color, group) {
   if (organizing) {
     box.setAttribute("aria-label", f.name);
     const c = folderControls(f, color, msg);
-    head.append(toggle, label, c.nameInput, count, c.swatch, c.del, grip(t("folder.handle")));
+    c.nameInput.title = f.name;
+    head.append(toggle, label, c.swatch, c.nameInput, count, c.del, grip(t("folder.handle")));
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");
@@ -1345,6 +1427,7 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     }
     const ul = document.createElement("ul");
     ul.className = "items";
+    ul.setAttribute("aria-label", g.folder ? g.folder.name : t("folder.root")); // le dossier de chaque case
     for (const a of g.items) {
       const li = agencyItem(a, checked, hidden.has(a.id));
       const origin = [...missing].find(([, names]) => names.includes(a))?.[0];
@@ -1615,6 +1698,7 @@ async function refreshList() {
   renderPermBanner(missing);
   restoreFocus(list, key);
   applyFresh();
+  applyUndo();
   return data;
 }
 
