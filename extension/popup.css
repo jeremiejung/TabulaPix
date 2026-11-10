@@ -1,5 +1,8 @@
 :root {
   color-scheme: light dark;
+  /* Espacements : base 4 px. Serré à l'intérieur d'un groupe, large entre groupes. */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --indent: 28px;              /* colonne des cases d'agence, dans un dossier comme hors dossier */
   /* Identité : celle de l'icône, encre et rouge signal. Le rouge ne sert qu'à
      l'action principale, au focus et à la marque ; les dossiers ont leurs
      propres couleurs de repérage ; tout le reste est neutre. */
@@ -53,7 +56,7 @@ html.panel #pin { display: none; }
 input[type=search] { width: 100%; box-sizing: border-box; padding: 7px 9px; font-size: 14px; border: 1px solid color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: Canvas; color: inherit; }
 input[type=search]:focus-visible { outline-offset: 0; }
 .bar { display: flex; gap: 6px; margin: 8px 0 6px; }
-.bar.quick { margin: 10px 0 8px; }
+.bar.quick { margin: var(--space-4) 0 var(--space-2); }
 .bar button { flex: 1; height: 26px; padding: 0 6px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
 .bar button:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 
@@ -63,7 +66,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 #list li.agency label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 26px; cursor: pointer; }
 #list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 li .hint { margin-left: auto; padding: 1px 7px; font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 9px; }
-#list.has-folders .root > .items { padding-left: 8px; }
+#list.has-folders .root > .items { padding: 0 var(--space-2) 0 var(--indent); }
 
 /* Dossiers : un bloc teinté de la couleur du dossier */
 #list > li.group { display: block; }
@@ -72,7 +75,7 @@ li .hint { margin-left: auto; padding: 1px 7px; font-size: 12px; color: var(--mu
 #list .group:not(.root) input[type=checkbox] { accent-color: var(--fc); }
 .group-head { display: flex; align-items: center; gap: 2px; min-height: 32px; padding: 0 8px 0 2px; border-radius: 9px; background: color-mix(in srgb, var(--fc) 20%, Canvas); }
 .group:not(.collapsed) > .group-head { border-radius: 9px 9px 4px 4px; }
-html.organizing .group-head label { flex: none; min-width: 26px; justify-content: center; padding: 0 4px; }
+html.organizing .group-head label { flex: none; min-width: 26px; justify-content: center; padding: 0 1px; }
 .group-head label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
 .folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--fc) 50%, CanvasText); }
 .count { margin-left: auto; padding: 2px 7px; border-radius: 9px; font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--muted); background: color-mix(in srgb, Canvas 75%, transparent); }
@@ -81,13 +84,13 @@ html.organizing .group-head label { flex: none; min-width: 26px; justify-content
 .toggle:hover { background: color-mix(in srgb, var(--fc) 18%, transparent); }
 .toggle svg { transition: transform .18s cubic-bezier(.2, .7, .2, 1); }
 .group.collapsed .toggle svg { transform: rotate(-90deg); }
-.group:not(.root) > .items { padding: 3px 8px 5px 28px; }
+.group:not(.root) > .items { padding: 3px var(--space-2) 5px var(--indent); }
 .group.collapsed > .items, .group.collapsed > .empty, .group.collapsed > .palette { display: none !important; }
-.group-label { margin: 10px 0 2px 8px; font-size: 11px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.group-label { margin: var(--space-3) 0 var(--space-1) var(--indent); font-size: 11px; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
 .empty { display: none; margin: 4px 8px 8px 28px; padding: 6px 8px; font-size: 12px; color: var(--muted); border: 1px dashed color-mix(in srgb, CanvasText 28%, transparent); border-radius: 6px; }
 .items:empty + .empty { display: block; }
 html:not(.organizing) .root > .empty { display: none; }
-.root > .empty { margin-left: 8px; }
+.root > .empty { margin-left: var(--indent); }
 
 /* Sites à autoriser */
 .perm-banner { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 7px 8px 7px 10px; border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--warn) 14%, Canvas); }
@@ -135,7 +138,7 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 .new-folder input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 8px; font-size: 13px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: none; color: inherit; }
 .new-folder input:focus { border-style: solid; }
 
-#go { width: 100%; margin-top: 8px; padding: 8px; font-size: 13.5px; font-weight: 650; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
+#go { width: 100%; margin-top: var(--space-2); padding: 8px; font-size: 13.5px; font-weight: 650; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
 #go:hover { background: var(--accent-hover); }
 #go:disabled, input[type=search]:disabled { opacity: .4; cursor: not-allowed; }
 #go:disabled:hover { background: var(--accent); }
@@ -237,4 +240,19 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
   .chip, .swatch::before { forced-color-adjust: none; }
   .chip[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: 2px; }
   .flash, .group-head.flash { animation: none; }
+}
+
+/* Mode Organiser en largeur étroite (popup) : le nom passe d'abord. Les
+   outils d'une ligne n'apparaissent qu'au survol ou au focus de cette ligne ;
+   l'œil barré d'une agence masquée reste visible (c'est un état). En
+   colonne large, tout reste affiché. */
+#list { container: list / inline-size; }
+@container list (max-width: 330px) {
+  html.organizing #list li.agency .tool:not([aria-pressed="true"]) { display: none; }
+  html.organizing #list li.agency:is(:hover, :focus-within) .tool { display: inline-flex; }
+  html.organizing .group-head :is(.swatch, .fdel) { display: none; }
+  html.organizing .group-head:is(:hover, :focus-within) :is(.swatch, .fdel),
+  html.organizing .group-head .swatch[aria-expanded="true"] { display: grid; }
+  html.organizing .group-head .fdel { display: none; }
+  html.organizing .group-head:is(:hover, :focus-within) .fdel { display: inline-flex; }
 }
