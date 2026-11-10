@@ -380,9 +380,11 @@ async function releaseUnusedOrigins() {
   const options = await loadOptions();
   const keep = new Set((await loadAgencies(options)).all.filter((a) => a.fill)
     .map((a) => hostOf(a.url, options)).filter(Boolean).map(originPattern));
-  const { fillDraft } = await chrome.storage.session.get("fillDraft");
+  const { fillDraft, [AGENCY_DRAFT_KEY]: agencyDraft } = await chrome.storage.session.get(["fillDraft", AGENCY_DRAFT_KEY]);
   const pickHost = fillDraft && hostOf(String(fillDraft.url || ""), {});
   if (pickHost) keep.add(originPattern(pickHost));
+  // Agence en cours d'ajout dont le champ est déjà repéré (pas encore enregistrée).
+  if (agencyDraft && agencyDraft.fill && agencyDraft.pageHost) keep.add(originPattern(agencyDraft.pageHost));
   for (const origin of await optionalOriginsGranted()) {
     if (!keep.has(origin)) { try { await chrome.permissions.remove({ origins: [origin] }); } catch (_) { /* déjà retirée */ } }
   }
@@ -1745,6 +1747,9 @@ async function refreshList() {
 langReady.then(applyNewAgencyDefaults).then(refreshList).then((data) => {
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
+  // Popup fermée pendant le délai d'annulation d'une suppression : les
+  // autorisations devenues inutiles sont libérées à l'ouverture suivante.
+  releaseUnusedOrigins().catch(() => {});
 });
 
 chrome.storage.onChanged.addListener((changes, area) => {
