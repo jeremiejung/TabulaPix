@@ -522,7 +522,7 @@ addForm.addEventListener("submit", async (e) => {
         [CUSTOM_KEY]: data[CUSTOM_KEY].concat(agency),
         [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
       });
-      done = t("ed.added", { name: agency.name });
+      done = ""; // ajout : l'agence apparaît surlignée dans la liste, sans message
     }
   }
   // Dossier choisi dans le formulaire.
@@ -576,6 +576,9 @@ async function updateFolder(id, patch) {
   }) });
 }
 
+// Dossier qui vient d'être créé : surligné quand la liste se reconstruit.
+let freshFolderId = null;
+
 // Crée un dossier ; renvoie son nom, ou null (message affiché dans msgEl).
 async function createFolder(rawName, msgEl) {
   const name = String(rawName || "").trim();
@@ -584,7 +587,9 @@ async function createFolder(rawName, msgEl) {
   if (folders.length >= MAX_FOLDERS) { flash(t("folders.err.max", { max: MAX_FOLDERS }), msgEl); return null; }
   const used = new Set(folders.map(folderColor));
   const color = FOLDER_COLORS.find((c) => !used.has(c)) || FOLDER_COLORS[folders.length % FOLDER_COLORS.length];
-  await chrome.storage.local.set({ [FOLDERS_KEY]: folders.concat({ id: newFolderId(), name, color }) });
+  const id = newFolderId();
+  freshFolderId = id;
+  await chrome.storage.local.set({ [FOLDERS_KEY]: folders.concat({ id, name, color }) });
   return name;
 }
 
@@ -1163,8 +1168,7 @@ function newFolderRow() {
   add.setAttribute("aria-label", add.title);
   add.append(icon("plus"));
   const create = async () => {
-    const name = await createFolder(field.value, msg);
-    if (name) flash(t("folders.created", { name }), msg); // la liste se reconstruit d'elle-même
+    await createFolder(field.value, msg); // la liste se reconstruit, le dossier y est surligné
   };
   field.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); create(); } });
   add.addEventListener("click", create);
@@ -1373,6 +1377,10 @@ async function refreshList() {
   render(shown, data[STORAGE_KEY], folders, folderOf, ag.hidden, missing);
   renderPermBanner(missing);
   restoreFocus(list, key);
+  if (freshFolderId) {
+    const head = list.querySelector(`li.group[data-folder="${CSS.escape(freshFolderId)}"] .group-head`);
+    if (head) { head.scrollIntoView({ block: "nearest" }); flashEl(head); freshFolderId = null; }
+  }
   return data;
 }
 

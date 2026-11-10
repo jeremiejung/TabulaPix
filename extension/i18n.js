@@ -49,7 +49,6 @@ const I18N = {
     "folders.rename": "Nom du dossier « {name} »",
     "folders.delete": "Supprimer « {name} »",
     "folders.deleteConfirm": "Supprimer le dossier « {name} » ? Ses agences ne sont pas supprimées : elles sortent simplement du dossier.",
-    "folders.created": "Dossier « {name} » créé.",
     "folders.renamed": "Dossier renommé en « {name} ».",
     "folders.deleted": "Dossier « {name} » supprimé.",
     "folders.err.name": "Nom de dossier manquant (60 caractères au plus).",
@@ -166,7 +165,6 @@ const I18N = {
     "ed.restored": "« {name} » : configuration d'origine rétablie.",
     "ed.original": "« {name} » : configuration d'origine.",
     "ed.modified": "« {name} » modifiée.",
-    "ed.added": "« {name} » ajoutée.",
 
     // Détection automatique
     "det.noKeywords": "Indiquez les mots-clés que vous aviez cherchés.",
@@ -252,7 +250,6 @@ const I18N = {
     "folders.rename": "Name of the folder “{name}”",
     "folders.delete": "Delete “{name}”",
     "folders.deleteConfirm": "Delete the folder “{name}”? Its agencies are not deleted: they simply leave the folder.",
-    "folders.created": "Folder “{name}” created.",
     "folders.renamed": "Folder renamed to “{name}”.",
     "folders.deleted": "Folder “{name}” deleted.",
     "folders.err.name": "Folder name missing (60 characters at most).",
@@ -368,7 +365,6 @@ const I18N = {
     "ed.restored": "“{name}”: original settings restored.",
     "ed.original": "“{name}”: original settings.",
     "ed.modified": "“{name}” updated.",
-    "ed.added": "“{name}” added.",
 
     "det.noKeywords": "Enter the keywords you searched for.",
     "det.badUrl": "Invalid address: paste the full address of the results page.",
