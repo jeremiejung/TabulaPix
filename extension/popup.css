@@ -117,6 +117,8 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 
 #go { width: 100%; margin-top: 8px; padding: 8px; font-size: 13.5px; font-weight: 650; color: #fff; background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
 #go:hover { background: color-mix(in srgb, var(--accent) 88%, black); }
+#go:disabled, input[type=search]:disabled { opacity: .4; cursor: not-allowed; }
+#go:disabled:hover { background: var(--accent); }
 .go-count { font-weight: 400; opacity: .9; }
 .go-count:not(:empty)::before { content: "· "; }
 #msg { margin: 6px 0 0; font-size: 12px; }

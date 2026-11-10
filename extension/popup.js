@@ -900,11 +900,15 @@ function setOrganizing(on) {
   organizing = on;
   document.documentElement.classList.toggle("organizing", on);
   organizeBtn.setAttribute("aria-pressed", String(on));
-  return refreshList();
+  // Pas de recherche pendant l'organisation : on ne reste pas dans ce mode par mégarde.
+  const go = document.getElementById("go");
+  input.disabled = go.disabled = on;
+  go.title = input.title = on ? t("main.organize.blocked") : "";
+  return refreshList().then(() => { if (!on) input.focus(); });
 }
 organizeBtn.addEventListener("click", () => setOrganizing(!organizing));
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && organizing && !dragged && !mainForm.hidden) { e.preventDefault(); setOrganizing(false).then(() => organizeBtn.focus()); }
+  if (e.key === "Escape" && organizing && !dragged && !mainForm.hidden) { e.preventDefault(); setOrganizing(false); }
 });
 
 // Une ligne d'agence : case et nom ; en mode Organiser, une poignée à droite.
@@ -1320,7 +1324,7 @@ document.getElementById("none").addEventListener("click", () => setAll(false));
 let sweeping = false; // évite un double lancement (double Entrée)
 document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (sweeping) return;
+  if (sweeping || organizing) return;
   const q = input.value.trim();
   const ids = checkedIds();
   if (!q) return input.focus();
