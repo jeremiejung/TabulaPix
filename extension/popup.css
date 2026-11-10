@@ -204,12 +204,30 @@ code { font-size: 12px; }
 .flash { animation: flash-ok 1.6s ease-out; }
 @keyframes flash-head { from { box-shadow: inset 0 0 0 2px var(--fc); } to { box-shadow: inset 0 0 0 2px transparent; } }
 .group-head.flash { animation: flash-head 1.2s ease-out; }
-/* Ajouté ou modifié : la couleur tient environ une seconde, puis s'estompe
-   vers l'état normal de la ligne (pas d'état final imposé). */
-@keyframes fresh {
-  0%, 38% { background-color: color-mix(in srgb, var(--ok) 26%, Canvas); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ok) 75%, transparent); }
+/* Ajouté ou modifié : « tac tac tac tac… psssht ». Quatre éclats nets (230 ms
+   allumé / 230 ms éteint, sous la limite de 3 éclats par seconde), le
+   dernier tient puis s'estompe. Un calque par-dessus la ligne : le fond
+   propre d'un dossier ne clignote pas avec. 3,2 s en tout (FRESH_MS). */
+.fresh { position: relative; }
+.fresh::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: color-mix(in srgb, var(--ok) 30%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ok) 80%, transparent);
+  opacity: 0; animation: fresh-blink 3.2s linear; animation-delay: inherit;
 }
-.fresh { animation: fresh 2.6s cubic-bezier(.4, 0, .2, 1); }
+@keyframes fresh-blink {
+  0%, 7.1%     { opacity: 1; }
+  7.2%, 14.3%  { opacity: 0; }
+  14.4%, 21.5% { opacity: 1; }
+  21.6%, 28.7% { opacity: 0; }
+  28.8%, 35.9% { opacity: 1; }
+  36%, 43.1%   { opacity: 0; }
+  43.2%, 50%   { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  100%         { opacity: 0; }
+}
+/* Moins d'animations demandé : pas d'éclats, la teinte tient puis s'estompe. */
+@keyframes fresh-calm { 0%, 40% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .fresh::after { animation-name: fresh-calm; } }
 @media (prefers-reduced-motion: reduce) { .flash, .group-head.flash { animation: none; } .toggle svg { transition: none; } }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--err); }

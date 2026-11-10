@@ -671,7 +671,7 @@ async function updateFolder(id, patch) {
    reconstruite plusieurs fois de suite (un changement par réglage) : la
    surbrillance reprend alors là où elle en était (délai négatif), au lieu
    de repartir à zéro à chaque fois, ce qui faisait un effet stroboscope. */
-const FRESH_MS = 2600;
+const FRESH_MS = 3200; // durée de l'animation .fresh (popup.css)
 let fresh = null; // { selector, start, scrolled }
 function highlightFresh(selector) { fresh = { selector, start: performance.now(), scrolled: false }; }
 function applyFresh() {
