@@ -164,7 +164,7 @@ async function applyNewAgencyDefaults() {
  * l'extension ou la partager entre collègues :
  *   { format: "tabulapix-config", formatVersion, minReaderVersion,
  *     exportedAt, app, settings: { language, options },
- *     folders: [ { id, name, collapsed? } ],   // dossiers d'agences
+ *     folders: [ { id, name, color?, collapsed? } ], // dossiers d'agences
  *     agencies: [ … dans l'ordre de la liste … ],
  *     removedBuiltins: [ … agences fournies supprimées … ] }
  * Chaque agence : { id, builtin, name, checked, hidden, folder? } et, si
@@ -188,13 +188,16 @@ const CONFIG_FORMAT = "tabulapix-config";
 const CONFIG_FORMAT_VERSION = 2; // version du format écrit par cette extension (2 : dossiers repliés)
 const CONFIG_READER_VERSION = 1; // plus haut minReaderVersion que cette extension sait lire
 const CONFIG_MAX_BYTES = 1024 * 1024;
-const FOLDERS_KEY = "agencyFolders";     // [ { id, name, collapsed? } ]
+const FOLDERS_KEY = "agencyFolders";     // [ { id, name, color?, collapsed? } ]
 const FOLDER_OF_KEY = "agencyFolderOf";  // { idAgence: idDossier }
 const STORAGE_KEYS = {
   checked: "checkedAgencies", order: "agencyOrder", query: "lastQuery", seen: "seenAgencies"
 };
 
 // Dossiers : liste propre (id court, nom de 60 caractères au plus, replié ou non).
+// Couleurs proposées pour les dossiers (noms stables, enregistrés tels quels).
+const FOLDER_COLORS = ["blue", "teal", "green", "amber", "orange", "red", "pink", "violet", "gray"];
+
 function cleanFolders(list) {
   const out = [], ids = new Set();
   for (const f of Array.isArray(list) ? list.slice(0, 100) : []) {
@@ -203,7 +206,10 @@ function cleanFolders(list) {
     const name = String(f.name || "").trim();
     if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/.test(id) || ids.has(id) || !name || name.length > 60) continue;
     ids.add(id);
-    out.push(f.collapsed === true ? { id, name, collapsed: true } : { id, name });
+    const folder = { id, name };
+    if (FOLDER_COLORS.includes(f.color)) folder.color = f.color;
+    if (f.collapsed === true) folder.collapsed = true;
+    out.push(folder);
   }
   return out;
 }

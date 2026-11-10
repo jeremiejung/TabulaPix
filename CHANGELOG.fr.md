@@ -6,7 +6,10 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
-- **Dossiers d'agences** (agences filaires, agences d'auteurs, agences de service de presse…) : créés, renommés et supprimés dans ⚙ → Dossiers ; on range une agence en la faisant glisser sur le titre d'un dossier ou depuis l'éditeur d'agence. La case d'un dossier coche ou décoche toutes ses agences, et est à moitié cochée quand seules certaines le sont. Les dossiers se replient et se réordonnent ; tout est conservé dans le fichier de configuration exporté (format version 2, toujours lisible par la 3.3.0).
+- **Dossiers d'agences** (agences filaires, agences d'auteurs, agences de service de presse…), affichés en blocs chacun dans sa couleur (9 couleurs). La case d'un dossier coche ou décoche toutes ses agences, et est à moitié cochée quand seules certaines le sont ; le compteur ressort quand un dossier replié contient des agences cochées. Les dossiers se replient et se réordonnent ; tout est conservé dans le fichier de configuration exporté (format version 2, toujours lisible par la 3.3.0, qui garde les dossiers mais pas leur couleur).
+- **Mode Organiser** (crayon en haut) : poignées de glisser-déposer, dossiers renommés sur place, couleur, suppression, création en bas de la liste. En usage courant, la liste ne montre que les noms et les cases. Une agence est rangée dans un dossier quand on la lâche sur son titre (surligné), Échap annule un glisser, et Alt + ↑ / ↓ fait aussi passer une agence d'un dossier à l'autre et déplace les dossiers.
+- Dossiers dans ⚙ : un bloc par dossier avec sa couleur, son nom modifiable et la liste de ses agences (plus de fenêtre système pour renommer).
+- Liste redessinée : hiérarchie typographique plus nette, cases alignées, icônes dessinées, bouton **Lancer la recherche** indiquant le nombre d'onglets, cibles de clic agrandies, petits textes agrandis ; dans la barre latérale, le bouton reste visible en bas quand la liste est longue.
 - Barre latérale : le pied de page (liens vers jeremie.eu et le code source) reste désormais collé au bas de la fenêtre.
 
 ## 3.3.0 — 7 novembre 2026 (Chrome Web Store)

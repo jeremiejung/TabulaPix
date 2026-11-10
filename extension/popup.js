@@ -566,16 +566,131 @@ settingsForm.addEventListener("submit", async (e) => {
   flash(t("opt.saved"));
 });
 
-/* ---------- Dossiers (options) ---------- */
+// Après reconstruction d'une liste : remet le focus sur le même élément.
+const focusKey = () => document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : undefined;
+function restoreFocus(container, key) {
+  if (!key) return;
+  const el = container.querySelector(`[data-key="${CSS.escape(key)}"]`);
+  if (!el) return;
+  const palette = el.closest(".palette");
+  if (palette) { palette.hidden = false; palette.parentElement.querySelector(".swatch")?.setAttribute("aria-expanded", "true"); }
+  el.focus();
+}
+
+/* ---------- Dossiers : opérations communes (liste et options) ---------- */
 
 const folderAdmin = document.getElementById("folderAdmin");
 const folderMsg = document.getElementById("folderMsg");
 
-// Liste des dossiers (renommer, supprimer) et menu « Dossier » du formulaire.
+// Couleur d'un dossier : la sienne, sinon une couleur stable d'après sa place.
+const folderColor = (f, i) => (FOLDER_COLORS.includes(f.color) ? f.color : FOLDER_COLORS[i % FOLDER_COLORS.length]);
+const agenciesLabel = (n) => (n === 1 ? t("folders.count.one") : t("folders.count.many", { n }));
+
+async function updateFolder(id, patch) {
+  const { folders } = await loadFolders();
+  await chrome.storage.local.set({ [FOLDERS_KEY]: folders.map((f) => {
+    if (f.id !== id) return f;
+    const next = { ...f, ...patch };
+    if (!next.collapsed) delete next.collapsed;
+    return next;
+  }) });
+}
+
+// Crée un dossier ; renvoie son nom, ou null (message affiché dans msgEl).
+async function createFolder(rawName, msgEl) {
+  const name = String(rawName || "").trim();
+  if (!name || name.length > 60) { flash(t("folders.err.name"), msgEl); return null; }
+  const { folders } = await loadFolders();
+  if (folders.length >= MAX_FOLDERS) { flash(t("folders.err.max", { max: MAX_FOLDERS }), msgEl); return null; }
+  const used = new Set(folders.map(folderColor));
+  const color = FOLDER_COLORS.find((c) => !used.has(c)) || FOLDER_COLORS[folders.length % FOLDER_COLORS.length];
+  await chrome.storage.local.set({ [FOLDERS_KEY]: folders.concat({ id: newFolderId(), name, color }) });
+  return name;
+}
+
+async function deleteFolder(f) {
+  if (!confirm(t("folders.deleteConfirm", { name: f.name }))) return false;
+  const cur = await loadFolders();
+  for (const [agencyId, folderId] of Object.entries(cur.folderOf)) if (folderId === f.id) delete cur.folderOf[agencyId];
+  await chrome.storage.local.set({ [FOLDERS_KEY]: cur.folders.filter((x) => x.id !== f.id), [FOLDER_OF_KEY]: cur.folderOf });
+  return true;
+}
+
+// Commandes d'un dossier : nom modifiable sur place, pastille de couleur
+// (ouvre la palette), suppression. Renvoie les éléments à placer.
+function folderControls(f, color, msgEl) {
+  const nameInput = document.createElement("input");
+  nameInput.className = "fname-input";
+  nameInput.dataset.key = "n:" + f.id;
+  nameInput.value = f.name;
+  nameInput.maxLength = 60;
+  nameInput.autocomplete = "off";
+  nameInput.setAttribute("aria-label", t("folders.rename", { name: f.name }));
+  nameInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); nameInput.blur(); }
+    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); nameInput.value = f.name; nameInput.blur(); }
+  });
+  nameInput.addEventListener("change", async () => {
+    const n = nameInput.value.trim();
+    if (n === f.name) return;
+    if (!n || n.length > 60) { nameInput.value = f.name; return flash(t("folders.err.name"), msgEl); }
+    await updateFolder(f.id, { name: n });
+    flash(t("folders.renamed", { name: n }), msgEl);
+  });
+
+  const palette = document.createElement("div");
+  palette.className = "palette";
+  palette.hidden = true;
+  palette.setAttribute("role", "group");
+  palette.setAttribute("aria-label", t("folder.color", { name: f.name }));
+  for (const c of FOLDER_COLORS) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.dataset.key = "c:" + f.id + ":" + c;
+    b.style.setProperty("--fc", `var(--c-${c})`);
+    b.title = t("color." + c);
+    b.setAttribute("aria-label", b.title);
+    b.setAttribute("aria-pressed", String(c === color));
+    b.addEventListener("click", () => updateFolder(f.id, { color: c }));
+    palette.append(b);
+  }
+
+  const swatch = document.createElement("button");
+  swatch.type = "button";
+  swatch.className = "swatch";
+  swatch.dataset.key = "s:" + f.id;
+  swatch.title = t("folder.color", { name: f.name });
+  swatch.setAttribute("aria-label", swatch.title);
+  swatch.setAttribute("aria-expanded", "false");
+  swatch.addEventListener("click", () => {
+    palette.hidden = !palette.hidden;
+    swatch.setAttribute("aria-expanded", String(!palette.hidden));
+    if (!palette.hidden) palette.querySelector('[aria-pressed="true"]')?.focus();
+  });
+
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "icon-btn bare fdel";
+  del.title = t("folders.delete", { name: f.name });
+  del.setAttribute("aria-label", del.title);
+  del.append(icon("trash"));
+  del.addEventListener("click", async () => {
+    if (await deleteFolder(f)) flash(t("folders.deleted", { name: f.name }), msgEl);
+  });
+  return { nameInput, swatch, del, palette };
+}
+
+// Options : une carte par dossier (couleur, nom, agences), et le menu
+// « Dossier » du formulaire d'agence.
 async function renderFolderAdmin() {
+  const key = focusKey();
   const { folders, folderOf } = await loadFolders();
-  const counts = {};
-  for (const f of Object.values(folderOf)) counts[f] = (counts[f] || 0) + 1;
+  const members = {};
+  const names = new Map((await loadAgencies()).all.map((a) => [a.id, a.name]));
+  for (const [agencyId, folderId] of Object.entries(folderOf)) {
+    if (names.has(agencyId)) (members[folderId] ||= []).push(names.get(agencyId));
+  }
   folderAdmin.textContent = "";
   if (!folders.length) {
     const li = document.createElement("li");
@@ -583,46 +698,22 @@ async function renderFolderAdmin() {
     li.textContent = t("folders.none");
     folderAdmin.append(li);
   }
-  for (const f of folders) {
+  folders.forEach((f, i) => {
+    const color = folderColor(f, i);
     const li = document.createElement("li");
-    const name = document.createElement("span");
-    name.className = "fname";
-    name.textContent = f.name;
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.textContent = t("folders.count", { n: counts[f.id] || 0 });
-    const rename = document.createElement("button");
-    rename.type = "button";
-    rename.textContent = "✎";
-    rename.title = t("folders.rename", { name: f.name });
-    rename.setAttribute("aria-label", rename.title);
-    rename.addEventListener("click", async () => {
-      const value = prompt(t("folders.renamePrompt"), f.name);
-      if (value === null) return;
-      const n = value.trim();
-      if (!n || n.length > 60) return flash(t("folders.err.name"), folderMsg);
-      const cur = (await loadFolders()).folders;
-      await chrome.storage.local.set({ [FOLDERS_KEY]: cur.map((x) => (x.id === f.id ? { ...x, name: n } : x)) });
-      await renderFolderAdmin();
-      flash(t("folders.renamed", { name: n }), folderMsg);
-    });
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "fdel";
-    del.textContent = "✕";
-    del.title = t("folders.delete", { name: f.name });
-    del.setAttribute("aria-label", del.title);
-    del.addEventListener("click", async () => {
-      if (!confirm(t("folders.deleteConfirm", { name: f.name }))) return;
-      const cur = await loadFolders();
-      for (const [agencyId, folderId] of Object.entries(cur.folderOf)) if (folderId === f.id) delete cur.folderOf[agencyId];
-      await chrome.storage.local.set({ [FOLDERS_KEY]: cur.folders.filter((x) => x.id !== f.id), [FOLDER_OF_KEY]: cur.folderOf });
-      await renderFolderAdmin();
-      flash(t("folders.deleted", { name: f.name }), folderMsg);
-    });
-    li.append(name, tag, rename, del);
+    li.className = "folder-card";
+    li.style.setProperty("--fc", `var(--c-${color})`);
+    const { nameInput, swatch, del, palette } = folderControls(f, color, folderMsg);
+    const count = document.createElement("span");
+    count.className = "tag";
+    const list = members[f.id] || [];
+    count.textContent = agenciesLabel(list.length);
+    const who = document.createElement("p");
+    who.className = "members";
+    who.textContent = list.length ? list.join(" · ") : t("folders.members.none");
+    li.append(swatch, nameInput, count, del, palette, who);
     folderAdmin.append(li);
-  }
+  });
   // Menu « Dossier » du formulaire d'agence.
   const keep = ed.folder.value;
   ed.folder.textContent = "";
@@ -637,16 +728,14 @@ async function renderFolderAdmin() {
     ed.folder.append(o);
   }
   ed.folder.value = folders.some((f) => f.id === keep) ? keep : "";
+  restoreFocus(folderAdmin, key);
 }
 
 document.getElementById("folderForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const field = document.getElementById("newFolderName");
-  const name = field.value.trim();
-  if (!name || name.length > 60) return flash(t("folders.err.name"), folderMsg);
-  const { folders } = await loadFolders();
-  if (folders.length >= MAX_FOLDERS) return flash(t("folders.err.max", { max: MAX_FOLDERS }), folderMsg);
-  await chrome.storage.local.set({ [FOLDERS_KEY]: folders.concat({ id: newFolderId(), name }) });
+  const name = await createFolder(field.value, folderMsg);
+  if (!name) return;
   field.value = "";
   await renderFolderAdmin();
   flashEl(folderAdmin.lastElementChild);
@@ -835,34 +924,55 @@ function orderedAgencies(order) {
   return out;
 }
 
-// Une ligne d'agence (case, nom, poignée de glisser-déposer).
+/* ---------- Icônes (SVG dessinés, même trait partout) ---------- */
+const ICONS = {
+  chevron: '<path d="M4 6l4 4 4-4"/>',
+  grip: '<g fill="currentColor" stroke="none"><circle cx="6" cy="3.5" r="1.1"/><circle cx="10" cy="3.5" r="1.1"/><circle cx="6" cy="8" r="1.1"/><circle cx="10" cy="8" r="1.1"/><circle cx="6" cy="12.5" r="1.1"/><circle cx="10" cy="12.5" r="1.1"/></g>',
+  trash: '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/>',
+  plus: '<path d="M8 3.5v9M3.5 8h9"/>',
+};
+function icon(name) {
+  const tpl = document.createElement("template");
+  tpl.innerHTML = `<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">${ICONS[name]}</svg>`;
+  return tpl.content.firstChild;
+}
+
+/* ---------- Mode « Organiser » : ordre, dossiers, couleurs ---------- */
+let organizing = false;
+const organizeBtn = document.getElementById("organize");
+function setOrganizing(on) {
+  organizing = on;
+  document.documentElement.classList.toggle("organizing", on);
+  organizeBtn.setAttribute("aria-pressed", String(on));
+  return refreshList();
+}
+organizeBtn.addEventListener("click", () => setOrganizing(!organizing));
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && organizing && !dragged && settingsView.hidden) { e.preventDefault(); setOrganizing(false).then(() => organizeBtn.focus()); }
+});
+
+// Une ligne d'agence : case et nom ; en mode Organiser, une poignée à droite.
 function agencyItem(a, checked) {
   const li = document.createElement("li");
   li.className = "agency";
   li.dataset.id = a.id;
-  li.draggable = true;
-  const handle = document.createElement("span");
-  handle.className = "handle";
-  handle.textContent = "⋮⋮";
-  handle.title = t("main.handle");
-  handle.setAttribute("aria-hidden", "true");
   const label = document.createElement("label");
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "agency-box";
   box.value = a.id;
+  box.dataset.key = "a:" + a.id;
   box.checked = checked.includes(a.id);
   box.addEventListener("change", save);
   box.addEventListener("keydown", (e) => {
     if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     e.preventDefault();
-    const other = e.key === "ArrowUp" ? li.previousElementSibling : li.nextElementSibling;
-    if (!other) return;
-    e.key === "ArrowUp" ? other.before(li) : other.after(li);
-    box.focus();
-    saveOrder();
+    moveAgency(li, e.key === "ArrowUp");
   });
-  label.append(box, a.name);
+  const name = document.createElement("span");
+  name.className = "name";
+  name.textContent = a.name;
+  label.append(box, name);
   if (isManual(a)) {
     const hint = document.createElement("span");
     hint.className = "hint";
@@ -870,64 +980,151 @@ function agencyItem(a, checked) {
     hint.title = t("main.paste.title");
     label.append(hint);
   }
-  li.append(handle, label);
+  li.append(label);
+  if (organizing) li.append(grip(t("main.handle")));
   return li;
 }
 
-// Liste : un groupe par dossier (titre avec case à trois états), puis les
-// agences sans dossier. Sans dossier, la liste reste une liste simple.
+function grip(title) {
+  const g = document.createElement("span");
+  g.className = "grip";
+  g.draggable = true;
+  g.title = title;
+  g.setAttribute("aria-hidden", "true");
+  g.append(icon("grip"));
+  return g;
+}
+
+// Alt + ↑ / ↓ : monte ou descend l'agence ; au bord d'un dossier, elle passe
+// dans le dossier voisin (ou parmi les agences sans dossier).
+function moveAgency(li, up) {
+  const sib = up ? li.previousElementSibling : li.nextElementSibling;
+  if (sib) up ? sib.before(li) : sib.after(li);
+  else {
+    const groups = [...list.querySelectorAll("li.group")];
+    const target = groups[groups.indexOf(li.closest("li.group")) + (up ? -1 : 1)];
+    if (!target) return;
+    if (target.classList.contains("collapsed")) setCollapsed(target, false);
+    const items = target.querySelector(".items");
+    up ? items.append(li) : items.prepend(li);
+  }
+  li.querySelector("input").focus();
+  saveOrder();
+  saveFolderMembership();
+  updateFolderStates();
+}
+
+// Titre d'un dossier : flèche (replier), case à trois états, nom, compteur ;
+// en mode Organiser : nom modifiable, couleur, suppression, poignée.
+function folderHead(f, color, group) {
+  const head = document.createElement("div");
+  head.className = "group-head";
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "toggle";
+  toggle.dataset.key = "t:" + f.id;
+  toggle.title = t("folder.toggle", { name: f.name });
+  toggle.setAttribute("aria-label", toggle.title);
+  toggle.setAttribute("aria-expanded", String(!f.collapsed));
+  toggle.append(icon("chevron"));
+  toggle.addEventListener("click", () => setCollapsed(group, !group.classList.contains("collapsed"), true));
+  const label = document.createElement("label");
+  const box = document.createElement("input");
+  box.type = "checkbox";
+  box.className = "folder-box";
+  box.dataset.key = "f:" + f.id;
+  // Cocher le dossier coche (ou décoche) toutes ses agences.
+  box.addEventListener("change", () => {
+    group.querySelectorAll("input.agency-box").forEach((b) => (b.checked = box.checked));
+    save();
+  });
+  box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    e.preventDefault();
+    const other = e.key === "ArrowUp" ? group.previousElementSibling : group.nextElementSibling;
+    if (!other || !other.classList.contains("group") || other.classList.contains("root")) return;
+    e.key === "ArrowUp" ? other.before(group) : other.after(group);
+    box.focus();
+    saveFolderOrder();
+  });
+  const count = document.createElement("span");
+  count.className = "count";
+  label.append(box);
+  if (organizing) {
+    box.setAttribute("aria-label", f.name);
+    const c = folderControls(f, color, msg);
+    head.append(toggle, label, c.nameInput, c.swatch, c.del, grip(t("folder.handle")));
+    group.append(head, c.palette);
+  } else {
+    const name = document.createElement("span");
+    name.className = "folder-name";
+    name.textContent = f.name;
+    label.append(name, count);
+    head.append(toggle, label);
+    group.append(head);
+  }
+  return head;
+}
+
+// Liste : un bloc coloré par dossier, puis les agences sans dossier.
 function render(agencies, checked, folders, folderOf) {
+  list.classList.toggle("has-folders", folders.length > 0);
   const groups = folders.map((f) => ({ folder: f, items: [] }));
   const byFolder = new Map(groups.map((g) => [g.folder.id, g]));
   const root = { folder: null, items: [] };
   for (const a of agencies) (byFolder.get(folderOf[a.id]) || root).items.push(a);
 
-  for (const g of [...groups, root]) {
+  [...groups, root].forEach((g, i) => {
     const group = document.createElement("li");
     group.className = "group" + (g.folder ? "" : " root") + (g.folder && g.folder.collapsed ? " collapsed" : "");
     group.dataset.folder = g.folder ? g.folder.id : "";
     if (g.folder) {
-      const head = document.createElement("div");
-      head.className = "group-head";
-      head.draggable = true;
-      const handle = document.createElement("span");
-      handle.className = "handle";
-      handle.textContent = "⋮⋮";
-      handle.title = t("folder.handle");
-      handle.setAttribute("aria-hidden", "true");
-      const toggle = document.createElement("button");
-      toggle.type = "button";
-      toggle.className = "toggle";
-      toggle.title = t("folder.toggle");
-      toggle.setAttribute("aria-label", toggle.title);
-      toggle.setAttribute("aria-expanded", String(!g.folder.collapsed));
-      toggle.textContent = g.folder.collapsed ? "▸" : "▾";
-      toggle.addEventListener("click", () => toggleFolder(group, toggle));
-      const label = document.createElement("label");
-      const box = document.createElement("input");
-      box.type = "checkbox";
-      box.className = "folder-box";
-      // Cocher le dossier coche (ou décoche) toutes ses agences.
-      box.addEventListener("change", () => {
-        group.querySelectorAll("input.agency-box").forEach((b) => (b.checked = box.checked));
-        save();
-      });
-      const name = document.createElement("span");
-      name.className = "folder-name";
-      name.textContent = g.folder.name;
-      const count = document.createElement("span");
-      count.className = "count";
-      label.append(box, name, count);
-      head.append(handle, toggle, label);
-      group.append(head);
+      const color = folderColor(g.folder, i);
+      group.style.setProperty("--fc", `var(--c-${color})`);
+      folderHead(g.folder, color, group);
+    } else if (folders.length) {
+      const label = document.createElement("div");
+      label.className = "group-label";
+      label.textContent = t("folder.root");
+      group.append(label);
     }
     const ul = document.createElement("ul");
     ul.className = "items";
     for (const a of g.items) ul.append(agencyItem(a, checked));
-    group.append(ul);
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = t(!g.folder ? "folder.root.empty" : organizing ? "folder.empty.organize" : "folder.empty");
+    group.append(ul, empty);
     list.append(group);
-  }
+  });
+  if (organizing) list.append(newFolderRow());
   updateFolderStates();
+}
+
+// Mode Organiser : création d'un dossier en bas de la liste.
+function newFolderRow() {
+  const li = document.createElement("li");
+  li.className = "new-folder";
+  const field = document.createElement("input");
+  field.maxLength = 60;
+  field.autocomplete = "off";
+  field.placeholder = t("folders.new");
+  field.dataset.key = "new-folder";
+  field.setAttribute("aria-label", t("folders.new"));
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "icon-btn";
+  add.title = t("folders.create");
+  add.setAttribute("aria-label", add.title);
+  add.append(icon("plus"));
+  const create = async () => {
+    const name = await createFolder(field.value, msg);
+    if (name) flash(t("folders.created", { name }), msg); // la liste se reconstruit d'elle-même
+  };
+  field.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); create(); } });
+  add.addEventListener("click", create);
+  li.append(field, add);
+  return li;
 }
 
 // Case de chaque dossier : cochée, décochée ou à moitié cochée (déduite de
@@ -940,35 +1137,46 @@ function updateFolderStates() {
     box.checked = all.length > 0 && on === all.length;
     box.indeterminate = on > 0 && on < all.length;
     box.disabled = !all.length;
-    group.querySelector(".count").textContent = `${on}/${all.length}`;
+    const count = group.querySelector(".count");
+    if (count) {
+      count.textContent = `${on}/${all.length}`;
+      count.classList.toggle("some", on > 0);
+    }
   }
+  const n = checkedIds().length;
+  goCount.textContent = n ? (n === 1 ? t("main.tabs.one") : t("main.tabs.many", { n })) : "";
+}
+const goCount = document.getElementById("goCount");
+
+async function setCollapsed(group, collapsed, persist = true) {
+  group.classList.toggle("collapsed", collapsed);
+  group.querySelector(".toggle").setAttribute("aria-expanded", String(!collapsed));
+  if (persist) await updateFolder(group.dataset.folder, { collapsed });
 }
 
-async function toggleFolder(group, toggle) {
-  const collapsed = group.classList.toggle("collapsed");
-  toggle.textContent = collapsed ? "▸" : "▾";
-  toggle.setAttribute("aria-expanded", String(!collapsed));
-  const { [FOLDERS_KEY]: folders = [] } = await chrome.storage.local.get(FOLDERS_KEY);
-  await chrome.storage.local.set({ [FOLDERS_KEY]: cleanFolders(folders).map((f) => (f.id === group.dataset.folder ? (collapsed ? { ...f, collapsed: true } : { id: f.id, name: f.name }) : f)) });
-}
-
-/* Glisser-déposer : une agence (entre agences, ou sur le titre d'un dossier
-   pour l'y ranger), ou un dossier entier par son titre. */
-let dragged = null;
+/* Glisser-déposer (mode Organiser), par la poignée : une agence se place
+   entre deux agences, ou se range dans un dossier lâchée sur son titre ;
+   un dossier se déplace par la poignée de son titre. Échap annule. */
+let dragged = null, origin = null, dropHead = null;
+const clearDropHead = () => { if (dropHead) dropHead.classList.remove("drop-target"); dropHead = null; };
 list.addEventListener("dragstart", (e) => {
-  const head = e.target.closest(".group-head");
-  dragged = head ? head.parentElement : e.target.closest("li.agency");
-  if (!dragged) return;
-  dragged.classList.add("dragging");
+  const g = e.target.closest && e.target.closest(".grip");
+  if (!g) return;
+  const head = g.closest(".group-head");
+  dragged = head ? head.parentElement : g.closest("li.agency");
+  origin = { parent: dragged.parentElement, next: dragged.nextElementSibling };
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", dragged.dataset.id || dragged.dataset.folder);
+  e.dataTransfer.setDragImage(head || dragged, 12, 12);
+  requestAnimationFrame(() => dragged && dragged.classList.add("dragging"));
 });
 list.addEventListener("dragover", (e) => {
   if (!dragged) return;
   e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
   const half = (el) => { const r = el.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; };
   if (dragged.classList.contains("group")) {
-    // Dossier : se place avant ou après un autre dossier (jamais après le groupe « sans dossier »).
+    // Dossier : avant ou après un autre dossier (jamais après « sans dossier »).
     const over = e.target.closest("li.group");
     if (!over || over === dragged) return;
     if (over.classList.contains("root")) { over.before(dragged); return; }
@@ -976,25 +1184,34 @@ list.addEventListener("dragover", (e) => {
     return;
   }
   const head = e.target.closest(".group-head");
-  if (head) { // sur le titre d'un dossier : rangée dedans, à la fin
-    const items = head.parentElement.querySelector(".items");
-    if (dragged.parentElement !== items || items.lastElementChild !== dragged) items.append(dragged);
-    return;
-  }
+  if (head !== dropHead) { clearDropHead(); if (head) { dropHead = head; head.classList.add("drop-target"); } }
+  if (head) return; // rangé au lâcher seulement
   const over = e.target.closest("li.agency");
   if (over && over !== dragged) { half(over) ? over.before(dragged) : over.after(dragged); return; }
   const group = e.target.closest("li.group");
-  if (group && !over) { // zone vide d'un groupe (ex. dossier vide ou « sans dossier »)
+  if (group && !over) { // zone vide d'un groupe (dossier vide, « sans dossier »)
     const items = group.querySelector(".items");
     if (dragged.parentElement !== items) items.append(dragged);
   }
 });
-list.addEventListener("drop", (e) => e.preventDefault());
-list.addEventListener("dragend", () => {
+list.addEventListener("drop", (e) => {
+  e.preventDefault();
+  if (!dragged || !dropHead || dragged.classList.contains("group")) return;
+  const group = dropHead.parentElement;
+  group.querySelector(".items").append(dragged);
+  if (group.classList.contains("collapsed")) flashEl(dropHead);
+});
+list.addEventListener("dragend", (e) => {
   if (!dragged) return;
-  const wasFolder = dragged.classList.contains("group");
-  dragged.classList.remove("dragging");
+  const el = dragged, wasFolder = el.classList.contains("group");
+  clearDropHead();
+  el.classList.remove("dragging");
   dragged = null;
+  if (e.dataTransfer.dropEffect === "none") { // Échap ou lâché hors de la liste : rien ne change
+    origin.next && origin.next.parentElement === origin.parent ? origin.next.before(el) : origin.parent.append(el);
+    updateFolderStates();
+    return;
+  }
   if (wasFolder) saveFolderOrder();
   else { saveOrder(); saveFolderMembership(); }
   updateFolderStates();
@@ -1100,8 +1317,10 @@ async function refreshList() {
   const ordered = orderedAgencies(data[ORDER_KEY]);
   fullOrder = ordered.map((a) => a.id);
   const { folders, folderOf } = await loadFolders();
+  const key = focusKey();
   list.textContent = "";
   render(ordered.filter((a) => !ag.hidden.has(a.id)), data[STORAGE_KEY], folders, folderOf);
+  restoreFocus(list, key);
   return data;
 }
 

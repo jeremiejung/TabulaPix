@@ -50,8 +50,9 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 1. Click the TabulaPix icon.
 2. Type your keywords and tick the agencies you want (**All** / **None** buttons to go faster).
-   To change the order of the agencies, drag them by the **⋮⋮** handle on the left (or, with the keyboard, **Alt + ↑ / ↓** on a checkbox). The order is remembered and tabs open in that order.
-   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…): create them in ⚙ → Folders, then drag an agency onto a folder's title, or choose its folder when editing it. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). **▾** folds or unfolds a folder, and folders can be reordered by dragging their **⋮⋮** handle. Agencies outside any folder are listed after the folders.
+   Tabs open in the order of the list (see Organise mode below to change it).
+   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). **›** folds or unfolds a folder. The **Search** button shows how many tabs will open.
+   To organise, click the **pencil** at the top (**Organise** mode): drag an agency by its handle between two agencies, or onto a folder's title to put it there; drag a folder by its handle to reorder folders; rename a folder in place, change its colour with its dot, delete it with the bin, create one at the bottom of the list. With the keyboard: **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder. **Esc** or **Done** to finish. A drag cancelled with Esc changes nothing. Folders can also be managed in ⚙ → Folders, and an agency's folder chosen when editing it.
 3. Press **Enter** or **Search**: one tab opens per agency.
    Tabs open in the background: you stay on the tab you are on.
    Your last keywords are shown again (already selected) the next time you open TabulaPix: just type to replace them.
@@ -104,7 +105,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "exportedAt": "2026-11-06T10:00:00.000Z",
   "app": { "name": "TabulaPix", "version": "3.4.0" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
-  "folders": [{ "id": "f-wire", "name": "Wire agencies" }],
+  "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
     { "id": "reuters", "builtin": true, "name": "Reuters (points)", "folder": "f-wire", "checked": true, "hidden": false },
     { "id": "custom-abc123", "builtin": false, "name": "Alamy", "url": "https://www.alamy.com/search.html?qt={q}", "checked": true, "hidden": false }
@@ -115,7 +116,7 @@ The file created by **Export** is plain JSON, readable and editable:
 
 - `agencies` is in list order. Built-in agencies only carry `name`, `url`, `payload`, `encode` or `fill` when they were edited; added agencies always carry their address (and `fill` when they fill in a search field).
 - **Compatibility between versions**: new versions only *add* optional fields, never change the meaning of an existing one (`formatVersion` goes up). So a newer TabulaPix reads older files (missing fields get their default value), and an older TabulaPix reads newer files, ignoring what it doesn't know yet (the import summary says so; built-in agencies it doesn't know are counted separately). Only an incompatible change, to be avoided, would raise `minReaderVersion`: an older TabulaPix then refuses the file and asks for an update.
-- **Folders** (`folders: [{ "id", "name", "collapsed" }]`, and a `folder` field on each agency) are exported and imported with the rest, including whether each folder is folded. A folder's checkbox is not stored: it is derived from its agencies. An older version that doesn't show folders still keeps them and writes them back, so nothing is lost when colleagues with different versions exchange files (other fields that a future version might add are ignored).
+- **Folders** (`folders: [{ "id", "name", "color", "collapsed" }]`, and a `folder` field on each agency) are exported and imported with the rest, including each folder's colour (`blue`, `teal`, `green`, `amber`, `orange`, `red`, `pink`, `violet`, `gray`) and whether it is folded. A folder's checkbox is not stored: it is derived from its agencies. An older version that doesn't show folders still keeps them and writes them back, so nothing is lost when colleagues with different versions exchange files (other fields that a future version might add are ignored).
 
 ## Editing the built-in agencies (development)
 

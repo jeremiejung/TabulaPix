@@ -6,7 +6,10 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
-- **Agency folders** (wire agencies, photographers' agencies, press-service agencies…): created, renamed and deleted in ⚙ → Folders; agencies are moved into a folder by dragging them onto its title or from the agency editor. A folder's checkbox ticks or unticks all its agencies, and is half-ticked when only some are ticked. Folders can be folded and reordered; everything is kept in the exported configuration file (format version 2, still readable by 3.3.0).
+- **Agency folders** (wire agencies, photographers' agencies, press-service agencies…), each shown as a block in its own colour (9 colours). A folder's checkbox ticks or unticks all its agencies, and is half-ticked when only some are ticked; the counter stands out when a folded folder holds ticked agencies. Folders can be folded and reordered; everything is kept in the exported configuration file (format version 2, still readable by 3.3.0, which keeps folders but not their colour).
+- **Organise mode** (pencil at the top): drag handles, folders renamed in place, colour, delete, create at the bottom of the list. In normal use the list only shows names and checkboxes. An agency is put into a folder when dropped on its title (highlighted), Esc cancels a drag, and Alt + ↑ / ↓ also moves agencies between folders and moves folders.
+- Folders in ⚙: one card per folder with its colour, editable name and the list of its agencies (no more system dialog to rename).
+- Redesigned list: clearer type hierarchy, aligned checkboxes, drawn icons, **Search** button showing the number of tabs, larger click targets, small text enlarged; in the side panel the button stays visible at the bottom when the list is long.
 - Side panel: the footer (links to jeremie.eu and the source code) now stays at the bottom of the window.
 
 ## 3.3.0 — 7 November 2026 (Chrome Web Store)
