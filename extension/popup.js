@@ -58,13 +58,14 @@ chrome.windows.getCurrent().then(async (w) => {
   } catch (_) { /* Chrome trop ancien : on garde la popup */ }
 });
 
+const headMsg = document.getElementById("headMsg"); // erreurs du bouton colonne, juste sous l'en-tête
 document.getElementById("pin").addEventListener("click", () => {
   if (windowId === null || !chrome.sidePanel) {
-    msg.textContent = t("main.panelUnavailable");
+    headMsg.textContent = t("main.panelUnavailable");
     return;
   }
   chrome.sidePanel.open({ windowId }).then(() => window.close(), () => {
-    msg.textContent = t("main.panelError");
+    headMsg.textContent = t("main.panelError");
   });
 });
 
@@ -296,16 +297,41 @@ function setMode(mode) {
   validate();
 }
 
+// Erreurs de saisie affichées sous le champ en cause, une fois ce champ
+// modifié (pas de rouge sur un formulaire qu'on vient d'ouvrir).
+const touched = new Set();
+const fieldErr = { name: $id("nameErr"), url: $id("urlErr"), payload: $id("payloadErr"), encode: $id("encodeErr") };
+const fieldInput = { name: ed.name, url: ed.url, payload: ed.payload, encode: ed.encode };
+function showFieldErrors(nameError, specError) {
+  const errors = {};
+  if (nameError) errors.name = nameError;
+  if (specError) {
+    // À quel champ revient l'erreur d'adresse ?
+    const where = [t("spec.payloadLong"), t("spec.payloadMissing")].includes(specError) ? "payload"
+      : specError === t("spec.encode", { steps: ENCODE_STEPS.join(", ") }) ? "encode" : "url";
+    errors[where] = specError;
+  }
+  for (const [k, el] of Object.entries(fieldErr)) {
+    // Modèle ou encodage : on les signale dès que l'adresse a été touchée.
+    const show = errors[k] && (touched.has(k) || (k !== "name" && touched.has("url")));
+    el.textContent = show ? errors[k] : "";
+    if (show) fieldInput[k].setAttribute("aria-invalid", "true"); else fieldInput[k].removeAttribute("aria-invalid");
+    if (show && k !== "name" && k !== "url") ed.advanced.open = true; // champs repliés : on les montre
+  }
+}
+
 // Vérifie le formulaire ; active « Ajouter » seulement quand tout est bon.
 function validate() {
   if (!draft) return t("ed.err.nothing");
   let error = "";
   const name = ed.name.value.trim();
   if (!name || name.length > 40) error = t("ed.err.name");
+  const nameError = error;
   const { spec, error: specError } = checkSpec(
     { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" },
     { allowOptions: draft.builtin }
   );
+  showFieldErrors(nameError, specError);
   if (!error && specError) error = specError;
   if (!error && draft.mode === "fill" && !(draft.fill && draft.fill.input)) error = t("ed.err.pickNeeded");
   ed.submit.disabled = Boolean(error);
@@ -314,20 +340,37 @@ function validate() {
   return error;
 }
 
-// Message de l'étape « vérifier » ; les avertissements ont leur icône dessinée.
-function showStep2(message, warnings = []) {
-  ed.form.hidden = false;
-  ed.step2Msg.textContent = message || "";
+// Écrit un message et ses avertissements (icône dessinée) dans el.
+function writeMessage(el, message, warnings = []) {
+  el.textContent = message || "";
   for (const w of warnings) {
     const line = document.createElement("span");
     line.className = "warn-line";
     const text = document.createElement("span");
     text.textContent = w;
     line.append(icon("warn"), text);
-    ed.step2Msg.append(line);
+    el.append(line);
   }
+}
+
+// Message de l'étape « vérifier », en haut du formulaire.
+function showStep2(message, warnings = []) {
+  ed.form.hidden = false;
+  writeMessage(ed.step2Msg, message, warnings);
   ed.step2Msg.hidden = !message && !warnings.length;
   validate();
+}
+
+// Résultat d'une détection : en modification, la détection est repliée en
+// bas du formulaire, donc son résultat s'affiche là, sous « Re-détecter ».
+function showDetectResult(message, warnings = []) {
+  if (draft.editing) {
+    ed.detectMsg.className = "status ok";
+    writeMessage(ed.detectMsg, message, warnings);
+    showStep2("");
+  } else {
+    showStep2(message, warnings);
+  }
 }
 
 async function saveDraft() {
@@ -375,7 +418,8 @@ function resetEditor() {
   layoutEditor(false);
   ed.form.reset();
   ed.detUrl.value = ed.detQ.value = "";
-  ed.detectMsg.textContent = ed.step2Msg.textContent = addMsg.textContent = "";
+  ed.detectMsg.textContent = ed.step2Msg.textContent = addMsg.textContent = pickMsg.textContent = "";
+  touched.clear();
   ed.form.hidden = true;
   ed.title.textContent = t("ed.addTitle");
   ed.name.disabled = false;
@@ -458,16 +502,16 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
     // Re-détection d'une agence qui remplit déjà ce site : son repérage reste valable.
     if (!(draft.editing && draft.fill && hostOf(pageUrl, {}) === draft.pageHost)) draft.fill = null;
     setMode("fill");
-    showStep2(t("ed.notInUrl"));
-    flashEl(ed.name, ed.url, ed.step2Msg);
+    showDetectResult(t("ed.notInUrl"));
+    flashEl(ed.name, ed.url, draft.editing ? ed.detectMsg : ed.step2Msg);
   } else {
     ed.url.value = r.url;
     ed.payload.value = r.payload || "";
     ed.encode.value = (r.encode || []).join(", ");
     draft.fill = null;
     setMode("url");
-    showStep2([r.summary, draft.editing ? t("ed.check.edit") : t("ed.check.add")].join("\n"), r.warnings);
-    flashEl(ed.name, ed.url, ed.step2Msg);
+    showDetectResult([r.summary, draft.editing ? t("ed.check.edit") : t("ed.check.add")].join("\n"), r.warnings);
+    flashEl(ed.name, ed.url, draft.editing ? ed.detectMsg : ed.step2Msg);
   }
   await saveDraft();
 });
@@ -491,6 +535,7 @@ ed.backToUrl.addEventListener("click", async () => {
 for (const el of [ed.name, ed.url, ed.payload, ed.encode]) {
   el.addEventListener("input", () => {
     if (!draft) return;
+    touched.add(Object.keys(fieldInput).find((k) => fieldInput[k] === el));
     if (el === ed.url && draft.mode === "fill" && draft.fill) {
       const before = draft.pageHost;
       const now = hostOf(ed.url.value, cachedOptions);
@@ -501,12 +546,14 @@ for (const el of [ed.name, ed.url, ed.payload, ed.encode]) {
   });
 }
 
+const pickMsg = $id("pickMsg"); // messages du repérage, sous son bouton
+
 /* Repérage sur le site : autorisation Chrome, puis le script d'arrière-plan
    ouvre le site ; le résultat revient dans le brouillon (pickResult). */
 ed.pickBtn.addEventListener("click", () => {
   const builtin = draft.builtin ? ORIGINAL_BY_ID.get(draft.id) : null;
   const { spec, error } = checkSpec({ url: ed.url.value }, { allowOptions: Boolean(builtin) });
-  if (error) return flash(error, addMsg);
+  if (error) return flash(error, pickMsg);
   const pageUrl = builtin ? applyOptions(spec.url, cachedOptions) : spec.url;
   const host = hostOf(pageUrl, {});
   draft.pageHost = host;
@@ -517,11 +564,11 @@ ed.pickBtn.addEventListener("click", () => {
   chrome.permissions.request({ origins: [originPattern(host)] }).then(async (granted) => {
     if (!granted) {
       chrome.storage.session.remove("fillDraft");
-      return flash(t("ed.permRefused", { host }), addMsg);
+      return flash(t("ed.permRefused", { host }), pickMsg);
     }
     const res = await chrome.runtime.sendMessage({ type: "pick", draft: pick }).catch(() => null);
-    if (!res || !res.ok) return flash((res && res.error) || t("ed.pickFailed"), addMsg);
-    addMsg.textContent = t("ed.siteOpening");
+    if (!res || !res.ok) return flash((res && res.error) || t("ed.pickFailed"), pickMsg);
+    pickMsg.textContent = t("ed.siteOpening");
     if (isPopup) window.close();
   });
 });
@@ -559,6 +606,7 @@ ed.reset.addEventListener("click", async () => {
 /* Étape 3 : ajouter (ou enregistrer la modification) */
 addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  ["name", "url", "payload", "encode"].forEach((k) => touched.add(k));
   const error = validate();
   if (error) return flash(error, addMsg);
   const id = draft.id;

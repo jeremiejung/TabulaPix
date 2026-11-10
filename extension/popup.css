@@ -161,7 +161,13 @@ html.organizing #list li.agency label:active { cursor: grabbing; }
 .field select { padding-right: 6px; cursor: pointer; }
 .field textarea { min-height: 64px; font: 12px/1.4 ui-monospace, monospace; resize: vertical; }
 .field input:hover, .field textarea:hover, .field select:hover { border-color: color-mix(in srgb, CanvasText 45%, transparent); }
-.field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible { outline-offset: 0; border-color: var(--focus); }
+/* Champs de saisie : focus à l'encre (pas en rouge), pour ne pas le confondre
+   avec une erreur ; le rouge signale les erreurs, sous le champ. */
+.field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible,
+input[type=search]:focus-visible, .new-folder input:focus-visible, .fname-input:focus-visible {
+  outline: 2px solid CanvasText; outline-offset: 0; border-color: CanvasText;
+}
+.field :is(input, textarea)[aria-invalid="true"]:focus-visible, .new-folder input[aria-invalid="true"]:focus-visible { outline-color: var(--err); border-color: var(--err); }
 .field input:disabled { opacity: .6; }
 .field input:user-invalid { border-color: var(--err); outline-color: var(--err); }
 details { margin: 0 0 10px; }
@@ -292,3 +298,9 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
 /* Avertissements de la détection : icône dessinée + texte */
 .warn-line { display: flex; gap: 6px; align-items: flex-start; margin-top: 4px; color: CanvasText; }
 .warn-line svg { flex: none; width: 14px; height: 14px; margin-top: 1px; color: var(--warn); }
+
+/* Erreurs au plus près de leur cause : sous le champ, sous le bouton */
+.field .field-err { margin: 4px 0 0; }
+.field :is(input, textarea)[aria-invalid="true"] { border-color: var(--err); }
+#headMsg { margin: 0 0 8px; }
+#pickMsg { margin: 6px 0 2px; }
