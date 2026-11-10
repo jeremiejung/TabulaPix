@@ -153,3 +153,6 @@ vite.config.ts.timestamp-*
 
 # Impeccable design-skill working files (critiques, live sessions)
 .impeccable/
+
+# Claude Code skills (installed per user in ~/.claude/skills, not part of TabulaPix)
+.claude/skills/
