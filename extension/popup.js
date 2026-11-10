@@ -67,6 +67,9 @@ const addMsg = document.getElementById("addMsg");
 
 function flash(text, el = settingsMsg) {
   el.textContent = text;
+  // Sous le bouton de recherche, un message (erreur) reste jusqu'à l'action
+  // suivante : s'il s'effaçait tout seul, la liste remonterait d'un coup.
+  if (el === msg) return;
   setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
 }
 
@@ -84,7 +87,6 @@ async function deleteAgency(a) {
     delete data[OVERRIDES_KEY][a.id];
     await chrome.storage.local.set({ [REMOVED_KEY]: [...new Set(data[REMOVED_KEY].concat(a.id))], [OVERRIDES_KEY]: data[OVERRIDES_KEY] });
   }
-  flash(t("opt.deleted", { name: a.name }), msg);
 }
 
 // Masque ou réaffiche une agence (mode Organiser).
@@ -144,7 +146,7 @@ async function showSettings() {
   authorizeBtn.hidden = !missingOrigins.length;
   authorizeBtn.textContent = t("backup.authorize", { n: missingOrigins.length });
   renderOptionFields(await loadOptions());
-  settingsMsg.textContent = "";
+  settingsMsg.textContent = document.getElementById("restoreMsg").textContent = "";
   showView(settingsView);
   document.getElementById("back").focus();
 }
@@ -164,11 +166,11 @@ async function showEditor(a) {
   (ed.step1.hidden ? ed.name : ed.detUrl).focus();
 }
 
-// Retour à la liste après l'éditeur, avec un message et l'agence surlignée.
-async function leaveEditor(message, id) {
+// Retour à la liste après l'éditeur : l'agence ajoutée ou modifiée y est
+// surlignée (pas de message, qui ferait bouger la liste en disparaissant).
+async function leaveEditor(id) {
   resetEditor();
   await showMain();
-  if (message) flash(message, msg);
   const li = id && list.querySelector(`li.agency[data-id="${CSS.escape(id)}"]`);
   if (li) { li.scrollIntoView({ block: "nearest" }); flashEl(li); }
 }
@@ -477,7 +479,7 @@ ed.reset.addEventListener("click", async () => {
   const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
   delete overrides[id];
   await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
-  await leaveEditor(t("ed.restored", { name: ORIGINAL_BY_ID.get(id).name }), id);
+  await leaveEditor(id);
 });
 
 /* Étape 3 : ajouter (ou enregistrer la modification) */
@@ -488,7 +490,6 @@ addForm.addEventListener("submit", async (e) => {
   const id = draft.id;
   const name = ed.name.value.trim();
   const raw = { url: ed.url.value, payload: draft.mode === "url" ? ed.payload.value : "", encode: draft.mode === "url" ? ed.encode.value : "" };
-  let done;
 
   if (draft.builtin) {
     // Agence intégrée : modification de son adresse et, pour celles qui
@@ -505,7 +506,7 @@ addForm.addEventListener("submit", async (e) => {
     if (same) delete overrides[id];
     else overrides[id] = { ...spec, ...(fillChanged ? { fill: picked } : {}), ...(renamed ? { name } : {}) };
     await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
-    done = same ? t("ed.original", { name: original.name }) : t("ed.modified", { name });
+
   } else {
     const agency = cleanCustomAgency({ id, name, ...raw, fill: draft.mode === "fill" ? draft.fill : undefined });
     if (!agency) return flash(t("ed.err.invalid"), addMsg);
@@ -515,21 +516,21 @@ addForm.addEventListener("submit", async (e) => {
       const after = data[CUSTOM_KEY].map((c) => (c && c.id === id ? agency : c));
       await chrome.storage.local.set({ [CUSTOM_KEY]: after });
       if (before.fill && !agency.fill) releasePermission(before, after);
-      done = t("ed.modified", { name: agency.name });
+
     } else {
       if (data[CUSTOM_KEY].length >= MAX_CUSTOM) return flash(t("ed.err.max", { max: MAX_CUSTOM }), addMsg);
       await chrome.storage.local.set({
         [CUSTOM_KEY]: data[CUSTOM_KEY].concat(agency),
         [STORAGE_KEY]: data[STORAGE_KEY].concat(id) // cochée d'office
       });
-      done = ""; // ajout : l'agence apparaît surlignée dans la liste, sans message
+
     }
   }
   // Dossier choisi dans le formulaire.
   const { folderOf } = await loadFolders();
   if (ed.folder.value) folderOf[id] = ed.folder.value; else delete folderOf[id];
   await chrome.storage.local.set({ [FOLDER_OF_KEY]: folderOf });
-  await leaveEditor(done, id);
+  await leaveEditor(id);
 });
 
 settingsForm.addEventListener("submit", async (e) => {
@@ -620,7 +621,6 @@ function folderControls(f, color, msgEl) {
     if (n === f.name) return;
     if (!n || n.length > 60) { nameInput.value = f.name; return flash(t("folders.err.name"), msgEl); }
     await updateFolder(f.id, { name: n });
-    flash(t("folders.renamed", { name: n }), msgEl);
   });
 
   const palette = document.createElement("div");
@@ -661,7 +661,7 @@ function folderControls(f, color, msgEl) {
   del.setAttribute("aria-label", del.title);
   del.append(icon("trash"));
   del.addEventListener("click", async () => {
-    if (await deleteFolder(f)) flash(t("folders.deleted", { name: f.name }), msgEl);
+    await deleteFolder(f);
   });
   return { nameInput, swatch, del, palette };
 }
@@ -698,8 +698,7 @@ document.getElementById("restoreRemoved").addEventListener("click", async () => 
   await renderRemoved();
   const done = document.getElementById("restoreMsg");
   done.textContent = t(n === 1 ? "opt.removed.restored.one" : "opt.removed.restored.many", { n });
-  flashEl(done);
-  setTimeout(() => { done.textContent = ""; }, 4000);
+  flashEl(done); // reste affiché jusqu'à la sortie des options
 
 });
 
@@ -986,10 +985,8 @@ async function missingFillOrigins(agencies) {
 
 // La demande doit partir directement du clic (aucune attente avant).
 function askPermission(origins) {
-  chrome.permissions.request({ origins }).then((granted) => {
-    flash(t(granted ? "perm.granted" : "perm.refused"), msg);
-    refreshList();
-  }).catch(() => flash(t("perm.refused"), msg));
+  // Accordée : le bandeau et la pastille disparaissent ; refusée : ils restent.
+  chrome.permissions.request({ origins }).then(() => refreshList()).catch(() => {});
 }
 
 let pendingOrigins = [];
@@ -1271,6 +1268,7 @@ const boxes = () => Array.from(list.querySelectorAll("input.agency-box"));
 const checkedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);
 
 function save() {
+  msg.textContent = "";
   updateFolderStates();
   chrome.storage.local.set({ [STORAGE_KEY]: checkedIds() });
 }
@@ -1373,6 +1371,7 @@ async function refreshList() {
   // Plus aucune attente ici : vider puis reconstruire d'un seul tenant (sinon
   // deux mises à jour simultanées dupliqueraient les lignes).
   const key = focusKey();
+  if (!sweeping) msg.textContent = "";
   list.textContent = "";
   render(shown, data[STORAGE_KEY], folders, folderOf, ag.hidden, missing);
   renderPermBanner(missing);
