@@ -83,7 +83,7 @@ In three steps:
   1. **Detect**: run a search on the agency's website, then paste the address of the results page and the keywords you typed (e.g. “Estonia border”) and click **Detect**.
   2. **Check**: TabulaPix suggests a name (the site's domain, e.g. `search.reaphoto.com` → “Reaphoto”) and fills in the search address, with a green highlight on what it just filled in.
      - If the keywords are in the address (plain, with dashes, or wrapped: URL encoding, hexadecimal, base64, gzip and combinations of them), it is ready.
-     - Otherwise (search stored on the server, like Pixpalace, or a page whose address doesn't change), TabulaPix will fill in the site's search field: click **Locate the field on the site**. Chrome asks for permission for that site (and that site only), the site opens with a TabulaPix banner: click its search field, then its button (or “No button: use Enter”; **⇅** moves the banner). TabulaPix then reopens on this step, with “✓ Search field” and “✓ Search button”.
+     - Otherwise (search stored on the server, like Pixpalace, or a page whose address doesn't change), TabulaPix will fill in the site's search field: click **Locate the field on the site**. Chrome asks for permission for that site (and that site only), the site opens with a TabulaPix banner: click its search field, then its button (or “No button: use Enter”; the banner can be dragged anywhere, and **⇅** moves it). TabulaPix then reopens on this step, with “✓ Search field” and “✓ Search button”.
      - **Try** runs a test search in a new tab, with the current settings.
   3. **Add the agency**: the button only becomes active when everything is correct; TabulaPix goes back to the list, where the agency appears ticked and highlighted.
 

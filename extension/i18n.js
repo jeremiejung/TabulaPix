@@ -206,7 +206,7 @@ const I18N = {
     "pick.noButton": "Pas de bouton : utiliser Entrée",
     "pick.cancel": "Annuler",
     "pick.close": "Fermer",
-    "pick.move": "Déplacer ce bandeau en haut / en bas de l'écran",
+    "pick.move": "Déplacer ce bandeau en haut / en bas de l'écran (vous pouvez aussi le faire glisser)",
     "pick.done": "✓ Champ et bouton repérés. Revenez dans TabulaPix pour vérifier puis ajouter « {name} ».",
     "pick.failed": "Enregistrement impossible : recommencez depuis TabulaPix."
   },
@@ -401,7 +401,7 @@ const I18N = {
     "pick.noButton": "No button: use Enter",
     "pick.cancel": "Cancel",
     "pick.close": "Close",
-    "pick.move": "Move this banner to the top / bottom of the screen",
+    "pick.move": "Move this banner to the top / bottom of the screen (you can also drag it)",
     "pick.done": "✓ Field and button located. Go back to TabulaPix to check, then add “{name}”.",
     "pick.failed": "Could not save: start again from TabulaPix."
   }

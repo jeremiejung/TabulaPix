@@ -334,8 +334,10 @@ function pickerUI(agencyName, T) {
   const root = host.attachShadow({ mode: "closed" });
   root.innerHTML = `<style>
     .panel{pointer-events:auto;position:fixed;top:12px;left:50%;transform:translateX(-50%);max-width:520px;
-      background:#111;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:12px 16px;border-radius:8px;
-      box-shadow:0 4px 18px rgba(0,0,0,.35);border-top:3px solid #D7141A}
+      background:#111;color:#fff;font:14px/1.4 system-ui,sans-serif;padding:12px 16px;border-radius:9px;
+      border:2px solid #fff;cursor:grab;touch-action:none;user-select:none;
+      box-shadow:inset 0 3px 0 #D7141A,0 0 0 1px rgba(0,0,0,.55),0 6px 20px rgba(0,0,0,.4)}
+    .panel.dragging{cursor:grabbing}
     .t{font-weight:700;margin-bottom:4px}.t::before{content:"";display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#D7141A;vertical-align:1px}.msg{margin:2px 0 8px}.err{color:#ff8a80}
     button{font:600 13px system-ui,sans-serif;margin-right:6px;padding:4px 10px;border-radius:4px;border:0;cursor:pointer}
     .alt{background:#444;color:#fff}.ok{background:#D7141A;color:#fff}
@@ -347,6 +349,32 @@ function pickerUI(agencyName, T) {
   document.documentElement.append(host);
   const $ = (s) => root.querySelector(s);
   const box = $(".box");
+
+  // Le bandeau se déplace aussi en le faisant glisser (ailleurs que sur ses boutons).
+  const panel = $(".panel");
+  const resetPosition = () => { panel.style.left = panel.style.top = panel.style.bottom = panel.style.transform = ""; };
+  panel.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || e.target.closest("button")) return;
+    const r = panel.getBoundingClientRect();
+    const dx = e.clientX - r.left, dy = e.clientY - r.top;
+    panel.setPointerCapture(e.pointerId);
+    panel.classList.add("dragging");
+    const move = (ev) => {
+      const x = Math.min(Math.max(0, ev.clientX - dx), innerWidth - r.width);
+      const y = Math.min(Math.max(0, ev.clientY - dy), innerHeight - r.height);
+      Object.assign(panel.style, { left: x + "px", top: y + "px", bottom: "auto", transform: "none" });
+    };
+    const up = () => {
+      panel.classList.remove("dragging");
+      panel.removeEventListener("pointermove", move);
+      panel.removeEventListener("pointerup", up);
+      panel.removeEventListener("pointercancel", up);
+    };
+    panel.addEventListener("pointermove", move);
+    panel.addEventListener("pointerup", up);
+    panel.addEventListener("pointercancel", up);
+    e.preventDefault();
+  });
 
   let step = "input";
   let picked = { input: "", submit: "" };
@@ -423,7 +451,7 @@ function pickerUI(agencyName, T) {
     const actions = $(".actions");
     actions.textContent = "";
     const btn = (label, cls, fn, title) => { const b = document.createElement("button"); b.className = cls; b.textContent = label; if (title) b.title = title; b.addEventListener("click", fn); actions.append(b); };
-    const moveBtn = () => btn("⇅", "alt", () => $(".panel").classList.toggle("bottom"), T["pick.move"]);
+    const moveBtn = () => btn("⇅", "alt", () => { resetPosition(); $(".panel").classList.toggle("bottom"); }, T["pick.move"]);
     if (step === "input") {
       m.textContent = message || T["pick.step1"];
       btn(T["pick.cancel"], "alt", cancel);
