@@ -72,8 +72,12 @@ document.getElementById("pin").addEventListener("click", () => {
 // agir l'icône de l'extension sur la colonne (pas de popup en plus).
 if (!isPopup) {
   const connectPanel = () => {
-    const port = chrome.runtime.connect({ name: "panel" });
-    port.onDisconnect.addListener(() => setTimeout(connectPanel, 1000)); // script d'arrière-plan redémarré
+    let port;
+    try { port = chrome.runtime.connect({ name: "panel" }); } catch (_) { return; } // extension rechargée : page périmée
+    port.onDisconnect.addListener(() => {
+      void chrome.runtime.lastError; // coupure attendue (script d'arrière-plan redémarré) : rien à signaler
+      setTimeout(connectPanel, 1000);
+    });
   };
   connectPanel();
 }
