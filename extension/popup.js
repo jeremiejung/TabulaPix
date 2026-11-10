@@ -947,6 +947,8 @@ function agencyItem(a, checked, isHidden = false) {
     const del = toolButton("trash", t("opt.delete", { name: a.name }), () => deleteAgency(a));
     del.classList.add("fdel");
     li.append(eye, edit, del, grip(t("main.handle")));
+    li.draggable = true; // on la glisse aussi par son nom
+    label.title = t("main.handle");
   }
   return li;
 }
@@ -1206,7 +1208,7 @@ async function setCollapsed(group, collapsed, persist = true) {
 let dragged = null, origin = null, dropHead = null;
 const clearDropHead = () => { if (dropHead) dropHead.classList.remove("drop-target"); dropHead = null; };
 list.addEventListener("dragstart", (e) => {
-  const g = e.target.closest && e.target.closest(".grip");
+  const g = e.target.closest && (e.target.closest(".grip") || (organizing && e.target.closest("li.agency")));
   if (!g) return;
   const head = g.closest(".group-head");
   dragged = head ? head.parentElement : g.closest("li.agency");

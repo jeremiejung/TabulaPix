@@ -68,7 +68,7 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 Le **crayon** en haut de la liste passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir). En usage courant, la liste ne montre que les noms et les cases ; tout ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
 
-- **Ordre et dossiers** : faites glisser une agence par sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
+- **Ordre et dossiers** : faites glisser une agence par son nom ou sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
 - **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, supprimez-le avec la corbeille (ses agences sont conservées, hors dossier), créez-en un en bas de la liste.
 - **Agences**, sur chaque ligne :
   - **œil** : masque l'agence (elle disparaît de la liste, sa place est conservée) ou la réaffiche ; les agences masquées n'apparaissent, grisées, qu'en mode Organiser.

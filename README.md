@@ -68,7 +68,7 @@ You need to be logged in to your agency accounts in Chrome, as usual: the extens
 
 The **pencil** at the top of the list switches to **Organise** mode (**Esc** or **Done** to leave it). In normal use, the list only shows names and checkboxes; everything about agencies and folders is done here, right in the list.
 
-- **Order and folders**: drag an agency by its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard, **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
+- **Order and folders**: drag an agency by its name or its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard, **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
 - **Folders**: rename a folder right in its title, change its colour with its dot, delete it with the bin (its agencies are kept, outside any folder), create one at the bottom of the list.
 - **Agencies**, on each line:
   - **eye**: hides the agency (it disappears from the list, its place is kept) or shows it again; hidden agencies appear greyed out in Organise mode only.

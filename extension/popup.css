@@ -108,6 +108,8 @@ html.organizing #list li.agency:hover { background: color-mix(in srgb, CanvasTex
 #list li.agency .tool + .grip { margin-left: 0; }
 #list li.agency .tool svg { width: 15px; height: 15px; }
 #list li.is-hidden label { cursor: default; }
+html.organizing #list li.agency label { cursor: grab; }
+html.organizing #list li.agency label:active { cursor: grabbing; }
 #list li.is-hidden .name { color: var(--muted); font-style: italic; }
 #list li.is-hidden .tool[aria-pressed="true"] { color: var(--accent); }
 .new-folder input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 8px; font-size: 13px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: none; color: inherit; }
