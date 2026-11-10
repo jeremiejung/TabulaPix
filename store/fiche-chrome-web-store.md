@@ -23,14 +23,12 @@ Lus automatiquement dans le paquet (fichiers `_locales`) :
 ```text
 TabulaPix — une recherche, toutes vos agences photo.
 
-La même image à chercher sur dix agences ? Tapez vos mots-clés une seule fois : TabulaPix ouvre chaque agence dans son onglet, résultats déjà affichés, avec vos propres comptes. Vous restez sur la page où vous êtes.
+La même recherche sur dix agences ? Tapez vos mots-clés une seule fois : TabulaPix ouvre chaque agence dans son onglet, avec vos propres comptes.
 
-• Une douzaine d'agences de presse et de banques d'images prêtes à l'emploi
-• Vos agences rangées dans des dossiers en couleur, cochées d'un clic
-• Ajoutez n'importe quelle agence : collez une page de résultats, TabulaPix comprend le reste
-• Même un site qui cache sa recherche : montrez-lui une fois son champ, il s'en souvient
-• Colonne latérale et raccourci Alt+Maj+Y pour enchaîner les recherches
-• Configuration à sauvegarder ou à partager entre collègues
+• Quelques agences de presse et banques d'images prêtes à l'emploi
+• Ajoutez les autres en quelques clics
+• Rangez-les dans des dossiers
+• Sauvegardez votre configuration et partagez-la
 • En français et en anglais
 
 Rien ne quitte votre ordinateur : pas de compte, pas de serveur, aucune donnée collectée.
@@ -45,14 +43,12 @@ Code source : https://github.com/jeremiejung/TabulaPix
 ```text
 TabulaPix — one search, all your picture agencies.
 
-Looking for the same picture on ten agencies? Type your keywords once: TabulaPix opens each agency in its own tab, results already showing, with your own accounts. You stay on the page you are on.
+The same search on ten agencies? Type your keywords once: TabulaPix opens each agency in its own tab, with your own accounts.
 
-• A dozen news picture agencies and stock libraries ready to use
-• Your agencies sorted into colour folders, ticked in one click
-• Add any agency: paste a results page, TabulaPix works out the rest
-• Even a site that hides its search: show it the search field once, it remembers
-• Side panel and Alt+Shift+Y shortcut to chain searches
-• Configuration to back up or share with colleagues
+• A few news picture agencies and stock libraries ready to use
+• Add the others in a few clicks
+• Sort them into folders
+• Back up your configuration and share it
 • In English and French
 
 Nothing leaves your computer: no account, no server, no data collected.
