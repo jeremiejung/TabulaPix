@@ -24,8 +24,8 @@ langSelect.addEventListener("change", async () => {
   await loadLang();
   applyI18n();
   // Textes construits par le code : on les refait dans la nouvelle langue.
-  await renderManageList();
-  await renderFolderAdmin();
+  await renderRemoved();
+  fillFolderSelect();
   renderOptionFields(await loadOptions());
   if (draft) { setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
   else { ed.title.textContent = t("ed.addTitle"); }
@@ -60,7 +60,7 @@ const mainForm = document.getElementById("form");
 const settingsView = document.getElementById("settingsView");
 const settingsForm = document.getElementById("settingsForm");
 const addForm = document.getElementById("addForm");
-const manageList = document.getElementById("manageList");
+const editorView = document.getElementById("editorView");
 const fields = document.getElementById("fields");
 const settingsMsg = document.getElementById("settingsMsg");
 const addMsg = document.getElementById("addMsg");
@@ -70,73 +70,35 @@ function flash(text, el = settingsMsg) {
   setTimeout(() => { if (el.textContent === text) el.textContent = ""; }, 3000);
 }
 
-// Liste « Agences affichées » : case = visible ; ✕ = supprimer (agences perso).
-async function renderManageList() {
-  const ag = await loadAgencies();
-  const { [ORDER_KEY]: order = [] } = await chrome.storage.local.get(ORDER_KEY);
-  ALL = ag.all;
-  AGENCY_BY_ID = new Map(ALL.map((a) => [a.id, a]));
-  manageList.textContent = "";
-  for (const a of orderedAgencies(order)) {
-    const li = document.createElement("li");
-    li.dataset.id = a.id;
-    const label = document.createElement("label");
-    const box = document.createElement("input");
-    box.type = "checkbox";
-    box.checked = !ag.hidden.has(a.id);
-    box.addEventListener("change", async () => {
-      const { [HIDDEN_KEY]: hidden = [] } = await chrome.storage.local.get(HIDDEN_KEY);
-      const set = new Set(hidden);
-      box.checked ? set.delete(a.id) : set.add(a.id);
-      await chrome.storage.local.set({ [HIDDEN_KEY]: [...set] });
-    });
-    label.append(box, a.name);
-    if (a.custom || a.modified) {
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = a.custom ? (a.fill ? t("opt.tag.customFill") : t("opt.tag.custom")) : t("opt.tag.modified");
-      label.append(" ", tag);
-    }
-    li.append(label);
-    if (a.id === editing) li.classList.add("editing");
-    const edit = document.createElement("button");
-    edit.type = "button";
-    edit.className = "edit";
-    edit.textContent = "✎";
-    edit.title = t("opt.edit", { name: a.name });
-    edit.setAttribute("aria-label", edit.title);
-    edit.addEventListener("click", () => startEdit(a));
-    li.append(edit);
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "del";
-    del.textContent = "✕";
-    del.title = t("opt.delete", { name: a.name });
-    del.setAttribute("aria-label", del.title);
-    del.addEventListener("click", async () => {
-      if (!confirm(t(a.custom ? "opt.delete.confirm" : "opt.delete.builtinConfirm", { name: a.name }))) return;
-      if (a.custom) {
-        const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
-        const rest = custom.filter((c) => c && c.id !== a.id);
-        await chrome.storage.local.set({ [CUSTOM_KEY]: rest });
-        if (a.fill) releasePermission(a, rest);
-      } else {
-        // Agence fournie : retirée de la liste (récupérable avec « Restaurer »),
-        // ses modifications sont oubliées.
-        const data = await chrome.storage.local.get({ [REMOVED_KEY]: [], [OVERRIDES_KEY]: {} });
-        delete data[OVERRIDES_KEY][a.id];
-        await chrome.storage.local.set({ [REMOVED_KEY]: [...new Set(data[REMOVED_KEY].concat(a.id))], [OVERRIDES_KEY]: data[OVERRIDES_KEY] });
-      }
-      if (editing === a.id) resetEditor();
-      await renderManageList();
-      flash(t("opt.deleted", { name: a.name }), listMsg);
-    });
-    li.append(del);
-    manageList.append(li);
+// Supprime une agence (mode Organiser). Une agence fournie est seulement
+// retirée de la liste : « Restaurer » dans les options la fait revenir.
+async function deleteAgency(a) {
+  if (!confirm(t(a.custom ? "opt.delete.confirm" : "opt.delete.builtinConfirm", { name: a.name }))) return;
+  if (a.custom) {
+    const { [CUSTOM_KEY]: custom = [] } = await chrome.storage.local.get(CUSTOM_KEY);
+    const rest = custom.filter((c) => c && c.id !== a.id);
+    await chrome.storage.local.set({ [CUSTOM_KEY]: rest });
+    if (a.fill) releasePermission(a, rest);
+  } else {
+    const data = await chrome.storage.local.get({ [REMOVED_KEY]: [], [OVERRIDES_KEY]: {} });
+    delete data[OVERRIDES_KEY][a.id];
+    await chrome.storage.local.set({ [REMOVED_KEY]: [...new Set(data[REMOVED_KEY].concat(a.id))], [OVERRIDES_KEY]: data[OVERRIDES_KEY] });
   }
-  // Agences fournies supprimées : récupérables d'un clic.
-  const removedLine = document.getElementById("removedLine");
-  removedLine.hidden = !ag.removed.size;
+  flash(t("opt.deleted", { name: a.name }), msg);
+}
+
+// Masque ou réaffiche une agence (mode Organiser).
+async function setHidden(id, hide) {
+  const { [HIDDEN_KEY]: hidden = [] } = await chrome.storage.local.get(HIDDEN_KEY);
+  const set = new Set(hidden);
+  hide ? set.add(id) : set.delete(id);
+  await chrome.storage.local.set({ [HIDDEN_KEY]: [...set] });
+}
+
+// Options : agences fournies supprimées, récupérables d'un clic.
+async function renderRemoved() {
+  const ag = await loadAgencies();
+  document.getElementById("removedLine").hidden = !ag.removed.size;
   document.getElementById("removedText").textContent = t("opt.removed.line", { n: ag.removed.size });
 }
 
@@ -166,26 +128,49 @@ function renderOptionFields(values) {
 let cachedOptions = {}; // réglages en mémoire (l'autorisation doit partir directement du clic)
 loadOptions().then((o) => { cachedOptions = o; });
 
+// Trois écrans dans la même page : recherche, éditeur d'agence, options.
+function showView(view) {
+  mainForm.hidden = view !== mainForm;
+  editorView.hidden = view !== editorView;
+  settingsView.hidden = view !== settingsView;
+  scrollTo(0, 0);
+}
+
 async function showSettings() {
-  await renderFolderAdmin();
-  if (!(await restoreDraft())) resetEditor();
-  await renderManageList();
+  await renderRemoved();
   renderOptionFields(await loadOptions());
-  settingsMsg.textContent = listMsg.textContent = "";
-  mainForm.hidden = true;
-  settingsView.hidden = false;
+  settingsMsg.textContent = "";
+  showView(settingsView);
   document.getElementById("back").focus();
 }
 
 async function showMain() {
   await refreshList();
-  settingsView.hidden = true;
-  mainForm.hidden = false;
-  input.focus();
+  showView(mainForm);
+  if (!organizing) input.focus();
+}
+
+// Éditeur d'agence : a = agence à modifier ; sans a, ajout (ou brouillon repris).
+async function showEditor(a) {
+  fillFolderSelect();
+  if (a) startEdit(a);
+  else if (!(await restoreDraft())) resetEditor();
+  showView(editorView);
+  (ed.step1.hidden ? ed.name : ed.detUrl).focus();
+}
+
+// Retour à la liste après l'éditeur, avec un message et l'agence surlignée.
+async function leaveEditor(message, id) {
+  resetEditor();
+  await showMain();
+  if (message) flash(message, msg);
+  const li = id && list.querySelector(`li.agency[data-id="${CSS.escape(id)}"]`);
+  if (li) { li.scrollIntoView({ block: "nearest" }); flashEl(li); }
 }
 
 document.getElementById("settings").addEventListener("click", showSettings);
 document.getElementById("back").addEventListener("click", showMain);
+document.getElementById("edBack").addEventListener("click", () => leaveEditor());
 
 /* ---------- Éditeur d'agence : détecter → vérifier → ajouter ---------- */
 
@@ -204,11 +189,9 @@ const ed = {
   folder: $id("newFolder"),
   form: addForm
 };
-const listMsg = $id("listMsg");
 
 // Brouillon : { id, editing, builtin, mode: "url" | "fill", fill }
 let draft = null;
-let editing = null; // id de l'agence en cours de modification (surlignée dans la liste)
 
 // Retire l'autorisation d'un site quand plus aucune agence ajoutée ne le remplit
 // (jamais pour les sites des agences intégrées, autorisés d'office).
@@ -311,7 +294,6 @@ async function saveDraft() {
 
 function resetEditor() {
   draft = null;
-  editing = null;
   ed.step1.hidden = false;
   ed.form.reset();
   ed.detUrl.value = ed.detQ.value = "";
@@ -331,7 +313,6 @@ function startEdit(a) {
   // Agence fournie qui remplit un champ : pas de détection, seulement l'adresse
   // de la page et le repérage du champ.
   ed.step1.hidden = Boolean(!a.custom && a.fill);
-  editing = a.id;
   loadFolders().then(({ folderOf }) => { ed.folder.value = folderOf[a.id] || ""; saveDraft(); });
   ed.title.textContent = t("ed.editTitle", { name: a.name });
   ed.name.value = a.name;
@@ -344,8 +325,6 @@ function startEdit(a) {
   setMode(draft.mode);
   showStep2("");
   saveDraft();
-  renderManageList();
-  ed.title.scrollIntoView({ block: "start" });
 }
 
 // Reprend un brouillon (ex. après le repérage sur le site, qui ferme la popup).
@@ -354,7 +333,6 @@ async function restoreDraft() {
   const saved = data[AGENCY_DRAFT_KEY];
   if (!saved) return false;
   draft = { id: saved.id, editing: saved.editing, builtin: saved.builtin, mode: saved.mode, fill: saved.fill || null, pageHost: saved.pageHost, review: saved.review };
-  editing = saved.editing ? saved.id : null;
   ed.title.textContent = saved.editing ? t("ed.editTitle", { name: saved.name }) : t("ed.addTitle");
   ed.detUrl.value = saved.detUrl || "";
   ed.detQ.value = saved.detQ || "";
@@ -365,7 +343,7 @@ async function restoreDraft() {
   ed.encode.value = saved.encode || "";
   ed.submit.textContent = saved.editing ? t("ed.saveEdit") : t("ed.add");
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
-  await renderFolderAdmin();
+  fillFolderSelect();
   ed.folder.value = saved.folder || "";
   ed.step1.hidden = Boolean(saved.builtin && saved.mode === "fill");
   setMode(saved.mode);
@@ -480,17 +458,14 @@ ed.tryBtn.addEventListener("click", async () => {
   flash(res && res.ok ? t("ed.tryStarted", { q }) : (res && res.error) || t("ed.tryFailed"), addMsg);
 });
 
-ed.cancel.addEventListener("click", async () => { resetEditor(); await renderManageList(); });
+ed.cancel.addEventListener("click", () => leaveEditor());
 
 ed.reset.addEventListener("click", async () => {
   const id = draft.id;
   const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
   delete overrides[id];
   await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
-  resetEditor();
-  await renderManageList();
-  flashEl(manageList.querySelector(`li[data-id="${id}"]`));
-  flash(t("ed.restored", { name: ORIGINAL_BY_ID.get(id).name }), listMsg);
+  await leaveEditor(t("ed.restored", { name: ORIGINAL_BY_ID.get(id).name }), id);
 });
 
 /* Étape 3 : ajouter (ou enregistrer la modification) */
@@ -542,12 +517,7 @@ addForm.addEventListener("submit", async (e) => {
   const { folderOf } = await loadFolders();
   if (ed.folder.value) folderOf[id] = ed.folder.value; else delete folderOf[id];
   await chrome.storage.local.set({ [FOLDER_OF_KEY]: folderOf });
-  resetEditor();
-  await renderManageList();
-  const li = manageList.querySelector(`li[data-id="${id}"]`);
-  li?.scrollIntoView({ block: "nearest" });
-  flashEl(li);
-  flash(done, listMsg);
+  await leaveEditor(done, id);
 });
 
 settingsForm.addEventListener("submit", async (e) => {
@@ -579,12 +549,10 @@ function restoreFocus(container, key) {
 
 /* ---------- Dossiers : opérations communes (liste et options) ---------- */
 
-const folderAdmin = document.getElementById("folderAdmin");
-const folderMsg = document.getElementById("folderMsg");
+let currentFolders = []; // dossiers affichés (tenu à jour par refreshList)
 
 // Couleur d'un dossier : la sienne, sinon une couleur stable d'après sa place.
 const folderColor = (f, i) => (FOLDER_COLORS.includes(f.color) ? f.color : FOLDER_COLORS[i % FOLDER_COLORS.length]);
-const agenciesLabel = (n) => (n === 1 ? t("folders.count.one") : t("folders.count.many", { n }));
 
 async function updateFolder(id, patch) {
   const { folders } = await loadFolders();
@@ -681,66 +649,22 @@ function folderControls(f, color, msgEl) {
   return { nameInput, swatch, del, palette };
 }
 
-// Options : une carte par dossier (couleur, nom, agences), et le menu
-// « Dossier » du formulaire d'agence.
-async function renderFolderAdmin() {
-  const key = focusKey();
-  const { folders, folderOf } = await loadFolders();
-  const members = {};
-  const names = new Map((await loadAgencies()).all.map((a) => [a.id, a.name]));
-  for (const [agencyId, folderId] of Object.entries(folderOf)) {
-    if (names.has(agencyId)) (members[folderId] ||= []).push(names.get(agencyId));
-  }
-  folderAdmin.textContent = "";
-  if (!folders.length) {
-    const li = document.createElement("li");
-    li.className = "help";
-    li.textContent = t("folders.none");
-    folderAdmin.append(li);
-  }
-  folders.forEach((f, i) => {
-    const color = folderColor(f, i);
-    const li = document.createElement("li");
-    li.className = "folder-card";
-    li.style.setProperty("--fc", `var(--c-${color})`);
-    const { nameInput, swatch, del, palette } = folderControls(f, color, folderMsg);
-    const count = document.createElement("span");
-    count.className = "tag";
-    const list = members[f.id] || [];
-    count.textContent = agenciesLabel(list.length);
-    const who = document.createElement("p");
-    who.className = "members";
-    who.textContent = list.length ? list.join(" · ") : t("folders.members.none");
-    li.append(swatch, nameInput, count, del, palette, who);
-    folderAdmin.append(li);
-  });
-  // Menu « Dossier » du formulaire d'agence.
+// Menu « Dossier » de l'éditeur d'agence (les dossiers viennent de la liste).
+function fillFolderSelect() {
   const keep = ed.folder.value;
   ed.folder.textContent = "";
   const none = document.createElement("option");
   none.value = "";
   none.textContent = t("ed.folder.none");
   ed.folder.append(none);
-  for (const f of folders) {
+  for (const f of currentFolders) {
     const o = document.createElement("option");
     o.value = f.id;
     o.textContent = f.name;
     ed.folder.append(o);
   }
-  ed.folder.value = folders.some((f) => f.id === keep) ? keep : "";
-  restoreFocus(folderAdmin, key);
+  ed.folder.value = currentFolders.some((f) => f.id === keep) ? keep : "";
 }
-
-document.getElementById("folderForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const field = document.getElementById("newFolderName");
-  const name = await createFolder(field.value, folderMsg);
-  if (!name) return;
-  field.value = "";
-  await renderFolderAdmin();
-  flashEl(folderAdmin.lastElementChild);
-  flash(t("folders.created", { name }), folderMsg);
-});
 
 ed.folder.addEventListener("change", () => saveDraft());
 
@@ -753,8 +677,8 @@ let missingOrigins = [];
 
 document.getElementById("restoreRemoved").addEventListener("click", async () => {
   await chrome.storage.local.set({ [REMOVED_KEY]: [] });
-  await renderManageList();
-  flash(t("opt.removed.restored"), listMsg);
+  await renderRemoved();
+  flash(t("opt.removed.restored"), settingsMsg);
 });
 
 // Export : un fichier JSON téléchargé (aucun envoi nulle part).
@@ -848,8 +772,7 @@ async function reloadSettingsView() {
   cachedOptions = await loadOptions();
   renderOptionFields(cachedOptions);
   resetEditor();
-  await renderFolderAdmin();
-  await renderManageList();
+  await renderRemoved();
 }
 
 /* ---------- Construction des URL ---------- */
@@ -930,6 +853,9 @@ const ICONS = {
   grip: '<g fill="currentColor" stroke="none"><circle cx="6" cy="3.5" r="1.1"/><circle cx="10" cy="3.5" r="1.1"/><circle cx="6" cy="8" r="1.1"/><circle cx="10" cy="8" r="1.1"/><circle cx="6" cy="12.5" r="1.1"/><circle cx="10" cy="12.5" r="1.1"/></g>',
   trash: '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.7 8.5h5.6l.7-8.5"/>',
   plus: '<path d="M8 3.5v9M3.5 8h9"/>',
+  pencil: '<path d="M10.5 2.8l2.7 2.7L6 12.7l-3.3.6.6-3.3z"/><path d="M9 4.3l2.7 2.7"/>',
+  eye: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>',
+  eyeOff: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><path d="M2.5 13.5l11-11"/>',
 };
 function icon(name) {
   const tpl = document.createElement("template");
@@ -948,11 +874,11 @@ function setOrganizing(on) {
 }
 organizeBtn.addEventListener("click", () => setOrganizing(!organizing));
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && organizing && !dragged && settingsView.hidden) { e.preventDefault(); setOrganizing(false).then(() => organizeBtn.focus()); }
+  if (e.key === "Escape" && organizing && !dragged && !mainForm.hidden) { e.preventDefault(); setOrganizing(false).then(() => organizeBtn.focus()); }
 });
 
 // Une ligne d'agence : case et nom ; en mode Organiser, une poignée à droite.
-function agencyItem(a, checked) {
+function agencyItem(a, checked, isHidden = false) {
   const li = document.createElement("li");
   li.className = "agency";
   li.dataset.id = a.id;
@@ -962,7 +888,9 @@ function agencyItem(a, checked) {
   box.className = "agency-box";
   box.value = a.id;
   box.dataset.key = "a:" + a.id;
-  box.checked = checked.includes(a.id);
+  box.checked = !isHidden && checked.includes(a.id);
+  box.disabled = isHidden;
+  if (isHidden) li.classList.add("is-hidden");
   box.addEventListener("change", save);
   box.addEventListener("keydown", (e) => {
     if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
@@ -981,7 +909,39 @@ function agencyItem(a, checked) {
     label.append(hint);
   }
   li.append(label);
-  if (organizing) li.append(grip(t("main.handle")));
+  if (organizing) {
+    const eye = toolButton(isHidden ? "eyeOff" : "eye", t(isHidden ? "ag.show" : "ag.hide", { name: a.name }), () => setHidden(a.id, !isHidden));
+    eye.setAttribute("aria-pressed", String(isHidden));
+    eye.dataset.key = "h:" + a.id;
+    const edit = toolButton("pencil", t("opt.edit", { name: a.name }), () => showEditor(a));
+    const del = toolButton("trash", t("opt.delete", { name: a.name }), () => deleteAgency(a));
+    del.classList.add("fdel");
+    li.append(eye, edit, del, grip(t("main.handle")));
+  }
+  return li;
+}
+
+function toolButton(name, title, onClick) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "icon-btn bare tool";
+  b.title = title;
+  b.setAttribute("aria-label", title);
+  b.append(icon(name));
+  b.addEventListener("click", onClick);
+  return b;
+}
+
+// Mode Organiser : ajout d'une agence (ouvre l'éditeur).
+function addAgencyRow() {
+  const li = document.createElement("li");
+  li.className = "add-agency";
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "add-btn";
+  b.append(icon("plus"), document.createTextNode(t("ed.addTitle")));
+  b.addEventListener("click", async () => { await chrome.storage.session.remove(AGENCY_DRAFT_KEY); showEditor(); });
+  li.append(b);
   return li;
 }
 
@@ -1035,7 +995,7 @@ function folderHead(f, color, group) {
   box.dataset.key = "f:" + f.id;
   // Cocher le dossier coche (ou décoche) toutes ses agences.
   box.addEventListener("change", () => {
-    group.querySelectorAll("input.agency-box").forEach((b) => (b.checked = box.checked));
+    group.querySelectorAll("input.agency-box:not(:disabled)").forEach((b) => (b.checked = box.checked));
     save();
   });
   box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier
@@ -1067,7 +1027,7 @@ function folderHead(f, color, group) {
 }
 
 // Liste : un bloc coloré par dossier, puis les agences sans dossier.
-function render(agencies, checked, folders, folderOf) {
+function render(agencies, checked, folders, folderOf, hidden = new Set()) {
   list.classList.toggle("has-folders", folders.length > 0);
   const groups = folders.map((f) => ({ folder: f, items: [] }));
   const byFolder = new Map(groups.map((g) => [g.folder.id, g]));
@@ -1090,14 +1050,14 @@ function render(agencies, checked, folders, folderOf) {
     }
     const ul = document.createElement("ul");
     ul.className = "items";
-    for (const a of g.items) ul.append(agencyItem(a, checked));
+    for (const a of g.items) ul.append(agencyItem(a, checked, hidden.has(a.id)));
     const empty = document.createElement("p");
     empty.className = "empty";
     empty.textContent = t(!g.folder ? "folder.root.empty" : organizing ? "folder.empty.organize" : "folder.empty");
     group.append(ul, empty);
     list.append(group);
   });
-  if (organizing) list.append(newFolderRow());
+  if (organizing) list.append(newFolderRow(), addAgencyRow());
   updateFolderStates();
 }
 
@@ -1131,7 +1091,7 @@ function newFolderRow() {
 // ses agences, jamais enregistrée), et compteur « cochées / total ».
 function updateFolderStates() {
   for (const group of list.querySelectorAll("li.group:not(.root)")) {
-    const all = [...group.querySelectorAll("input.agency-box")];
+    const all = [...group.querySelectorAll("input.agency-box:not(:disabled)")];
     const on = all.filter((b) => b.checked).length;
     const box = group.querySelector("input.folder-box");
     box.checked = all.length > 0 && on === all.length;
@@ -1261,7 +1221,7 @@ async function saveFolderOrder() {
 }
 
 function setAll(state) {
-  boxes().forEach((b) => (b.checked = state));
+  boxes().forEach((b) => { if (!b.disabled) b.checked = state; });
   save();
 }
 
@@ -1317,9 +1277,11 @@ async function refreshList() {
   const ordered = orderedAgencies(data[ORDER_KEY]);
   fullOrder = ordered.map((a) => a.id);
   const { folders, folderOf } = await loadFolders();
+  currentFolders = folders;
   const key = focusKey();
   list.textContent = "";
-  render(ordered.filter((a) => !ag.hidden.has(a.id)), data[STORAGE_KEY], folders, folderOf);
+  // Mode Organiser : les agences masquées apparaissent aussi (grisées), pour les réafficher.
+  render(organizing ? ordered : ordered.filter((a) => !ag.hidden.has(a.id)), data[STORAGE_KEY], folders, folderOf, ag.hidden);
   restoreFocus(list, key);
   return data;
 }
@@ -1332,11 +1294,11 @@ langReady.then(applyNewAgencyDefaults).then(refreshList).then((data) => {
 chrome.storage.onChanged.addListener((changes, area) => {
   // Agences modifiées ailleurs (autre fenêtre) : on met la liste à jour.
   if (area === "local" && (changes[CUSTOM_KEY] || changes[HIDDEN_KEY] || changes[OVERRIDES_KEY] || changes[FOLDERS_KEY] || changes[FOLDER_OF_KEY])) {
-    if (!settingsView.hidden) { renderManageList(); renderFolderAdmin(); } else refreshList();
+    if (!settingsView.hidden) renderRemoved(); else refreshList();
   }
   // Repérage terminé sur le site (colonne latérale restée ouverte) : on l'affiche.
   if (area === "session" && changes[PICK_RESULT_KEY] && changes[PICK_RESULT_KEY].newValue) {
-    if (settingsView.hidden) showSettings(); else applyPickResult(changes[PICK_RESULT_KEY].newValue);
+    if (editorView.hidden) showEditor(); else applyPickResult(changes[PICK_RESULT_KEY].newValue);
   }
 });
 
@@ -1352,5 +1314,5 @@ if (location.hash === "#import") {
 // Réouverture après un repérage : on revient directement à l'étape « vérifier ».
 chrome.storage.session.get([AGENCY_DRAFT_KEY, PICK_RESULT_KEY]).then((data) => {
   const d = data[AGENCY_DRAFT_KEY], r = data[PICK_RESULT_KEY];
-  if (d && ((r && r.draftId === d.id) || d.review)) showSettings();
+  if (d && ((r && r.draftId === d.id) || d.review)) langReady.then(() => showEditor());
 });

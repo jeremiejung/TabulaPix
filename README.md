@@ -50,10 +50,8 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 1. Click the TabulaPix icon.
 2. Type your keywords and tick the agencies you want (**All** / **None** buttons to go faster).
-   Tabs open in the order of the list (see Organise mode below to change it).
-   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). **›** folds or unfolds a folder. The **Search** button shows how many tabs will open.
-   To organise, click the **pencil** at the top (**Organise** mode): drag an agency by its handle between two agencies, or onto a folder's title to put it there; drag a folder by its handle to reorder folders; rename a folder in place, change its colour with its dot, delete it with the bin, create one at the bottom of the list. With the keyboard: **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder. **Esc** or **Done** to finish. A drag cancelled with Esc changes nothing. Folders can also be managed in ⚙ → Folders, and an agency's folder chosen when editing it.
-3. Press **Enter** or **Search**: one tab opens per agency.
+   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). **›** folds or unfolds a folder. Tabs open in the order of the list.
+3. Press **Enter** or **Search**, right under the keywords: one tab opens per agency (the button shows how many).
    Tabs open in the background: you stay on the tab you are on.
    Your last keywords are shown again (already selected) the next time you open TabulaPix: just type to replace them.
    If a tab is already open on an agency's site (for example after a previous search), it is reused: the new search shows there instead of opening one more tab.
@@ -66,29 +64,45 @@ If an agency added later has neither an address with `{q}` nor automatic field f
 
 You need to be logged in to your agency accounts in Chrome, as usual: the extension only opens tabs.
 
-## Settings
+## Organise mode
 
-The **⚙** button at the top of the popup (or of the column) shows the settings right in the popup; **← Back** returns to the search.
+The **pencil** at the top of the list switches to **Organise** mode (**Esc** or **Done** to leave it). In normal use, the list only shows names and checkboxes; everything about agencies and folders is done here, right in the list.
 
-- **Agencies shown**: untick the agencies you don't use, they disappear from the list (their place in the order is kept if you show them again). **✕** deletes any agency, built-in ones included; deleted built-in agencies can be brought back with **Restore**, below the list.
-  - **Reuters** comes in two versions, depending on your contract: **Reuters (points)** for credit-based accounts (shows your points balance), shown by default, and **Reuters (standard)** for accounts without points (free download), hidden by default: show the one that matches your account. **AFP (forum)** is also hidden by default.
-- **Add an agency**, in three steps:
+- **Order and folders**: drag an agency by its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard, **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
+- **Folders**: rename a folder right in its title, change its colour with its dot, delete it with the bin (its agencies are kept, outside any folder), create one at the bottom of the list.
+- **Agencies**, on each line:
+  - **eye**: hides the agency (it disappears from the list, its place is kept) or shows it again; hidden agencies appear greyed out in Organise mode only.
+    - **Reuters** comes in two versions, depending on your contract: **Reuters (points)** for credit-based accounts (shows your points balance), shown by default, and **Reuters (standard)** for accounts without points (free download), hidden by default: show the one that matches your account with its eye. **AFP (forum)** is also hidden by default.
+  - **pencil**: edits the agency (see below);
+  - **bin**: deletes any agency, built-in ones included; deleted built-in agencies can be brought back in ⚙ with **Restore**.
+- **+ Add an agency**, at the bottom of the list, opens the add screen (**← Back** returns to the list).
+
+### Adding an agency
+
+In three steps:
   1. **Detect**: run a search on the agency's website, then paste the address of the results page and the keywords you typed (e.g. “Estonia border”) and click **Detect**.
   2. **Check**: TabulaPix suggests a name (the site's domain, e.g. `search.reaphoto.com` → “Reaphoto”) and fills in the search address, with a green highlight on what it just filled in.
      - If the keywords are in the address (plain, with dashes, or wrapped: URL encoding, hexadecimal, base64, gzip and combinations of them), it is ready.
      - Otherwise (search stored on the server, like Pixpalace, or a page whose address doesn't change), TabulaPix will fill in the site's search field: click **Locate the field on the site**. Chrome asks for permission for that site (and that site only), the site opens with a TabulaPix banner: click its search field, then its button (or “No button: use Enter”; **⇅** moves the banner). TabulaPix then reopens on this step, with “✓ Search field” and “✓ Search button”.
      - **Try** runs a test search in a new tab, with the current settings.
-  3. **Add the agency**: the button only becomes active when everything is correct; the agency appears in the list, ticked and highlighted.
+  3. **Add the agency**: the button only becomes active when everything is correct; TabulaPix goes back to the list, where the agency appears ticked and highlighted.
 
-  The “Type the address by hand” link lets you type an address directly, with `{q}` in place of the keywords (or `{q:slug}` if the site separates words with dashes: “Estonia border” → `Estonia-border`). Without `{q}`, the page opens and the keywords are copied to be pasted. **Technical details** (folded) show the template and encoding steps, or where the located field and button are. Added agencies are tagged “custom” (“custom · field” for those that fill in a field) and are deleted with ✕; deleting an agency that fills in a field also removes the permission granted for its site.
+  The “Type the address by hand” link lets you type an address directly, with `{q}` in place of the keywords (or `{q:slug}` if the site separates words with dashes: “Estonia border” → `Estonia-border`). Without `{q}`, the page opens and the keywords are copied to be pasted. **Technical details** (folded) show the template and encoding steps, or where the located field and button are. Deleting an agency that fills in a field also removes the permission granted for its site.
 
-  Locating ignores ids generated on every page load (e.g. `…__bfac60392382`) and relies on stable landmarks (field name, class, button label…); if the site has several identical search forms, TabulaPix uses the first visible one and the button closest to the field. If the site changes its page, locate the field again (✎ then **Locate again**).
-- **Edit an agency** (**✎** button): the same form, straight at the “check” step, with **Save**. Every agency can be renamed, built-in ones included; for built-in agencies, a “modified” tag appears and **Restore the original** goes back to the shipped name and settings.
-  - **Bloomberg, Abacapress and Pixpalace** fill in their site's search field: if one of them changes its page and the search no longer starts, open ✎ then **Locate again** to show it the field and button again (no extra permission is requested; Bloomberg's specific delay is kept). Their address can be edited, but must stay on the same site.
+  Locating ignores ids generated on every page load (e.g. `…__bfac60392382`) and relies on stable landmarks (field name, class, button label…); if the site has several identical search forms, TabulaPix uses the first visible one and the button closest to the field. If the site changes its page, locate the field again (pencil then **Locate again**).
+### Editing an agency
+
+- **Edit an agency** (its pencil): the same screen, straight at the “check” step, with **Save**, and a **Folder** menu. Every agency can be renamed, built-in ones included; for built-in agencies, **Restore the original** goes back to the shipped name and settings.
+  - **Bloomberg, Abacapress and Pixpalace** fill in their site's search field: if one of them changes its page and the search no longer starts, open its pencil then **Locate again** to show it the field and button again (no extra permission is requested; Bloomberg's specific delay is kept). Their address can be edited, but must stay on the same site.
+## Settings
+
+The **⚙** button at the top shows the settings right in the popup; **← Back** returns to the search.
+
 - **Language**: English or French. By default, TabulaPix follows the browser language (“Automatic”); the change applies immediately. The name and description shown in `chrome://extensions` and on the Chrome Web Store always follow the browser language.
 - **Pixpalace subdomain**: the part before `.pixpalace.com` in the address of your Pixpalace space (`www` by default). For example, for `https://mynewsroom.pixpalace.com/home`, type `mynewsroom`.
 
 - **Backup and sharing**: **Export** saves your whole configuration to a `.json` file (agencies and their order, names, addresses, field locations, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches). **Import…** loads such a file, after showing a summary and asking for confirmation: use it after reinstalling, or to share a configuration with colleagues. Every agency in the file is checked like an agency added by hand; invalid ones are ignored. If the file contains agencies that fill in their site's search field, an **Allow the sites** button asks Chrome for those sites in one go. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
+- **Deleted built-in agencies**: **Restore** brings them back (shown only when there are some).
 - **Factory settings**: **Restore factory settings** erases your settings, your added, edited or deleted agencies and the site permissions you granted, and goes back to the shipped configuration (after confirmation; export first if you want to keep yours).
 
 These settings stay in Chrome on your computer and are kept across updates.
@@ -130,7 +144,7 @@ Everything is in **`extension/config.js`**. Each agency has a name and an addres
 }
 ```
 
-To have an agency unticked on a first install, add `defaultChecked: false`; to have it hidden (to be shown in ⚙ → Agencies shown), `defaultHidden: true` — applied the first time the agency appears, including on an update (this is the case for AFP (forum) and Reuters (standard)). A new agency is placed in the list right after the one that precedes it in `config.js`.
+To have an agency unticked on a first install, add `defaultChecked: false`; to have it hidden (to be shown with its eye in Organise mode), `defaultHidden: true` — applied the first time the agency appears, including on an update (this is the case for AFP (forum) and Reuters (standard)). A new agency is placed in the list right after the one that precedes it in `config.js`.
 
 Tip for finding the address: run a search on the site with easy-to-spot words (e.g. `midterms texas democrats`), copy the URL of the results page and replace the words with `{q}`. Depending on the site, spaces appear as `%20` or `+`: replace the whole thing, separators included.
 

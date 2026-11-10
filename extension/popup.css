@@ -33,6 +33,7 @@ html.panel #pin { display: none; }
 input[type=search] { width: 100%; box-sizing: border-box; padding: 7px 9px; font-size: 14px; border: 1px solid color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: Canvas; color: inherit; }
 input[type=search]:focus-visible { outline-offset: 0; }
 .bar { display: flex; gap: 6px; margin: 8px 0 6px; }
+.bar.quick { margin: 10px 0 8px; }
 .bar button { flex: 1; height: 26px; padding: 0 6px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
 .bar button:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 
@@ -89,15 +90,27 @@ html.organizing #list li.agency:hover { background: color-mix(in srgb, CanvasTex
 .chip { width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: var(--fc); cursor: pointer; }
 .chip[aria-pressed="true"] { box-shadow: 0 0 0 2px Canvas, 0 0 0 4px CanvasText; }
 #list .new-folder { display: flex; gap: 6px; margin: 8px 0 2px; }
+#list .add-agency { margin: 6px 0 2px; }
+.add-btn { display: flex; align-items: center; gap: 6px; width: 100%; height: 30px; padding: 0 8px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: none; color: inherit; font: 600 13px system-ui, sans-serif; cursor: pointer; }
+.add-btn:hover { border-style: solid; background: color-mix(in srgb, CanvasText 5%, Canvas); }
+#list li.agency .tool { color: var(--muted); }
+#list li.agency .tool:first-of-type { margin-left: auto; }
+#list li.agency .tool:hover { color: CanvasText; background: var(--line); }
+#list li.agency .tool.fdel:hover { color: var(--accent); }
+#list li.agency .tool + .grip { margin-left: 0; }
+#list li.agency .tool svg { width: 15px; height: 15px; }
+#list li.is-hidden label { cursor: default; }
+#list li.is-hidden .name { color: var(--muted); font-style: italic; }
+#list li.is-hidden .tool[aria-pressed="true"] { color: var(--accent); }
 .new-folder input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 8px; font-size: 13px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: 7px; background: none; color: inherit; }
 .new-folder input:focus { border-style: solid; }
 
-#go { width: 100%; margin-top: 10px; padding: 8px; font-size: 13.5px; font-weight: 650; color: #fff; background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
+#go { width: 100%; margin-top: 8px; padding: 8px; font-size: 13.5px; font-weight: 650; color: #fff; background: var(--accent); border: 0; border-radius: 7px; cursor: pointer; }
 #go:hover { background: color-mix(in srgb, var(--accent) 88%, black); }
 .go-count { font-weight: 400; opacity: .9; }
 .go-count:not(:empty)::before { content: "· "; }
-html.panel #go { position: sticky; bottom: 10px; box-shadow: 0 6px 16px -8px rgb(0 0 0 / .45); }
-#msg { margin: 8px 0 0; font-size: 12px; min-height: 1em; }
+#msg { margin: 6px 0 0; font-size: 12px; }
+#msg:empty { display: none; }
 
 /* Vue Options */
 [hidden] { display: none !important; }
@@ -109,29 +122,19 @@ html.panel #go { position: sticky; bottom: 10px; box-shadow: 0 6px 16px -8px rgb
 .field input:disabled { opacity: .6; }
 details { margin: 0 0 10px; }
 summary { cursor: pointer; font-size: 12px; margin-bottom: 6px; }
-#manageList li { display: flex; align-items: center; gap: 4px; border-radius: 4px; }
-#manageList li label { flex: 1; display: flex; align-items: center; gap: 6px; padding: 3px 0; cursor: pointer; }
-#manageList .edit { padding: 0 5px; border: 0; background: none; font-size: 13px; cursor: pointer; opacity: .7; }
-#manageList .edit:hover { opacity: 1; }
-#manageList li.editing { outline: 1px solid var(--accent); }
 .field input:user-invalid { border-color: var(--accent); outline-color: var(--accent); }
 .help { margin: 3px 0 6px; font-size: 12px; color: var(--muted); }
 .primary { padding: 5px 12px; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; }
-#back { margin-left: auto; padding: 3px 9px; font-size: 12px; cursor: pointer; }
+#back, #edBack { flex: none; margin-left: auto; height: 28px; padding: 0 10px; font: 600 12px system-ui, sans-serif; color: inherit; background: Canvas; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
+#back:hover, #edBack:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
+#editorTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar button.primary { color: #fff; background: var(--accent); border-color: var(--accent); }
+.bar button.primary:disabled { opacity: .45; }
 h2 { font-size: 13px; margin: 16px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); }
-h2:first-of-type { border-top: 0; padding-top: 0; }
-#manageList .tag { font-size: 11px; color: var(--muted); }
-#manageList .edit { margin-left: auto; }
-#manageList .del { padding: 0 6px; border: 0; background: none; color: var(--accent); font-size: 14px; cursor: pointer; }
+#settingsView > h2:first-of-type { border-top: 0; padding-top: 0; }
 code { font-size: 11px; }
 .status { margin: 6px 0 0; font-size: 12px; min-height: 1em; }
 
-/* Options : un bloc par dossier */
-#folderAdmin { margin: 6px 0; }
-#folderAdmin li.folder-card { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0 0 6px; padding: 3px 4px 4px; border-radius: 9px; background: color-mix(in srgb, var(--fc) 13%, Canvas); }
-#folderAdmin .tag { margin: 0 2px; font-size: 11px; color: var(--muted); white-space: nowrap; }
-#folderAdmin .members { flex-basis: 100%; margin: 0 6px 2px 28px; font-size: 12px; color: var(--muted); }
-#folderAdmin .palette { flex-basis: 100%; box-sizing: border-box; }
 .inline-form { display: flex; gap: 6px; margin: 4px 0; }
 .inline-form input { flex: 1; min-width: 0; padding: 4px 6px; font-size: 13px; }
 .inline-form button { padding: 3px 10px; cursor: pointer; }

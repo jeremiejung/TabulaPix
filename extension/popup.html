@@ -14,37 +14,21 @@
       <button type="button" id="settings" class="icon-btn" title="Options" aria-label="Options" data-i18n-title="main.settings"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M12.51 7.09 L14.25 7.18 L14.25 8.82 L12.51 8.91 L11.83 10.54 L12.99 11.84 L11.84 12.99 L10.54 11.83 L8.91 12.51 L8.82 14.25 L7.18 14.25 L7.09 12.51 L5.46 11.83 L4.16 12.99 L3.01 11.84 L4.17 10.54 L3.49 8.91 L1.75 8.82 L1.75 7.18 L3.49 7.09 L4.17 5.46 L3.01 4.16 L4.16 3.01 L5.46 4.17 L7.09 3.49 L7.18 1.75 L8.82 1.75 L8.91 3.49 L10.54 4.17 L11.84 3.01 L12.99 4.16 L11.83 5.46Z"/><circle cx="8" cy="8" r="2"/></svg></button>
     </header>
     <input id="q" type="search" placeholder="Mots-clés…" data-i18n-placeholder="main.keywords" autocomplete="off" autofocus required>
-    <div class="bar">
+    <button type="submit" id="go"><span data-i18n="main.go">Lancer la recherche</span> <span id="goCount" class="go-count"></span></button>
+    <p id="msg" role="status"></p>
+    <div class="bar quick">
       <button type="button" id="all" data-i18n="main.all">Tout</button>
       <button type="button" id="none" data-i18n="main.none">Aucune</button>
     </div>
     <p class="organize-help" data-i18n="main.organize.help">Glissez une agence par sa poignée, entre deux agences ou sur un dossier.</p>
     <ul id="list"></ul>
-    <button type="submit" id="go"><span data-i18n="main.go">Lancer la recherche</span> <span id="goCount" class="go-count"></span></button>
-    <p id="msg" role="status"></p>
   </form>
 
-  <section id="settingsView" hidden>
+  <section id="editorView" hidden>
     <header>
-      <h1 data-i18n="opt.title">Options</h1>
-      <button type="button" id="back" data-i18n="opt.back">← Retour</button>
+      <h1 id="editorTitle" data-i18n="ed.addTitle">Ajouter une agence</h1>
+      <button type="button" id="edBack" data-i18n="opt.back">← Retour</button>
     </header>
-
-    <h2 data-i18n="opt.shown">Agences affichées</h2>
-    <p class="intro" data-i18n="opt.shown.intro">Décochez celles que vous n'utilisez pas : elles disparaissent de la liste.</p>
-    <ul id="manageList"></ul>
-    <p id="removedLine" class="help" hidden><span id="removedText"></span> <button type="button" id="restoreRemoved" class="link inline" data-i18n="opt.removed.restore">Restaurer</button></p>
-
-    <h2 data-i18n="folders.title">Dossiers</h2>
-    <p class="help" data-i18n="folders.help">Classez vos agences en dossiers. Dans la liste de recherche, glissez une agence sur le titre d'un dossier pour l'y ranger ; la case d'un dossier coche ou décoche toutes ses agences.</p>
-    <ul id="folderAdmin"></ul>
-    <form id="folderForm" class="inline-form" novalidate>
-      <input id="newFolderName" maxlength="60" autocomplete="off" placeholder="Nouveau dossier…" data-i18n-placeholder="folders.new">
-      <button type="submit" data-i18n="folders.create">Créer</button>
-    </form>
-    <p id="folderMsg" class="status" role="status"></p>
-
-    <h2 id="editorTitle" data-i18n="ed.addTitle">Ajouter une agence</h2>
 
     <!-- Étape 1 : détection -->
     <div id="step1">
@@ -117,7 +101,15 @@
       </div>
       <p id="addMsg" class="status" role="status"></p>
     </form>
-    <p id="listMsg" class="status" role="status"></p>
+  </section>
+
+  <section id="settingsView" hidden>
+    <header>
+      <h1 data-i18n="opt.title">Options</h1>
+      <button type="button" id="back" data-i18n="opt.back">← Retour</button>
+    </header>
+
+
 
     <h2 data-i18n="opt.settings">Réglages</h2>
     <form id="settingsForm">
@@ -143,6 +135,11 @@
     <input type="file" id="importFile" accept=".json,application/json" hidden>
     <p id="backupMsg" class="status" role="status"></p>
     <button type="button" id="authorizeBtn" class="primary" hidden></button>
+
+    <div id="removedLine" hidden>
+      <h2 data-i18n="opt.removed.title">Agences fournies supprimées</h2>
+      <p class="help"><span id="removedText"></span> <button type="button" id="restoreRemoved" class="link inline" data-i18n="opt.removed.restore">Restaurer</button></p>
+    </div>
 
     <h2 data-i18n="factory.title">Configuration d'usine</h2>
     <p class="help" data-i18n="factory.help">Efface vos réglages, vos agences ajoutées ou modifiées et les autorisations de sites, et revient à la configuration livrée.</p>

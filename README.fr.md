@@ -50,10 +50,8 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 
 1. Cliquez sur l'icône TabulaPix.
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
-   Les onglets s'ouvrent dans l'ordre de la liste (pour le changer, voir le mode Organiser ci-dessous).
-   Les **dossiers** regroupent les agences (agences filaires, agences d'auteurs, agences de service de presse…), chacun dans sa couleur. La case d'un dossier coche ou décoche toutes ses agences d'un coup ; elle est à moitié cochée quand seules certaines le sont (le compteur indique combien). **›** replie ou déplie un dossier. Le bouton **Lancer la recherche** indique combien d'onglets vont s'ouvrir.
-   Pour organiser, cliquez sur le **crayon** en haut (mode **Organiser**) : faites glisser une agence par sa poignée entre deux agences, ou sur le titre d'un dossier pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer ; renommez un dossier directement, changez sa couleur avec sa pastille, supprimez-le avec la corbeille, créez-en un en bas de la liste. Au clavier : **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier. **Échap** ou **Terminé** pour finir. Un glisser annulé avec Échap ne change rien. Les dossiers se gèrent aussi dans ⚙ → Dossiers, et le dossier d'une agence se choisit en la modifiant.
-3. Appuyez sur **Entrée** ou **Lancer la recherche** : un onglet s'ouvre par agence.
+   Les **dossiers** regroupent les agences (agences filaires, agences d'auteurs, agences de service de presse…), chacun dans sa couleur. La case d'un dossier coche ou décoche toutes ses agences d'un coup ; elle est à moitié cochée quand seules certaines le sont (le compteur indique combien). **›** replie ou déplie un dossier. Les onglets s'ouvrent dans l'ordre de la liste.
+3. Appuyez sur **Entrée** ou **Lancer la recherche**, juste sous les mots-clés : un onglet s'ouvre par agence (le bouton indique combien).
    Les onglets s'ouvrent en arrière-plan : vous restez sur l'onglet où vous êtes.
    Les derniers mots-clés lancés sont réaffichés (déjà sélectionnés) à la prochaine ouverture : tapez directement pour les remplacer.
    Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus.
@@ -66,29 +64,45 @@ Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automa
 
 Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude : l'extension ne fait qu'ouvrir des onglets.
 
-## Options
+## Mode Organiser
 
-Le bouton **⚙** en haut de la popup (ou de la colonne) affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
+Le **crayon** en haut de la liste passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir). En usage courant, la liste ne montre que les noms et les cases ; tout ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
 
-- **Agences affichées** : décochez les agences que vous n'utilisez pas, elles disparaissent de la liste (leur place dans l'ordre est conservée si vous les réaffichez). **✕** supprime n'importe quelle agence, y compris celles fournies ; les agences fournies supprimées se récupèrent avec **Restaurer**, sous la liste.
-  - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte. **AFP (forum)** est aussi masquée par défaut.
-- **Ajouter une agence**, en trois étapes :
+- **Ordre et dossiers** : faites glisser une agence par sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
+- **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, supprimez-le avec la corbeille (ses agences sont conservées, hors dossier), créez-en un en bas de la liste.
+- **Agences**, sur chaque ligne :
+  - **œil** : masque l'agence (elle disparaît de la liste, sa place est conservée) ou la réaffiche ; les agences masquées n'apparaissent, grisées, qu'en mode Organiser.
+    - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte avec son œil. **AFP (forum)** est aussi masquée par défaut.
+  - **crayon** : modifie l'agence (voir plus bas) ;
+  - **corbeille** : supprime n'importe quelle agence, y compris celles fournies ; les agences fournies supprimées se récupèrent dans ⚙ avec **Restaurer**.
+- **+ Ajouter une agence**, en bas de la liste, ouvre l'écran d'ajout (**← Retour** revient à la liste).
+
+### Ajouter une agence
+
+En trois étapes :
   1. **Détecter** : faites une recherche sur le site de l'agence, puis collez l'adresse de la page de résultats et les mots-clés que vous avez tapés (ex. « Estonie frontière ») et cliquez sur **Détecter**.
   2. **Vérifier** : TabulaPix propose un nom (le domaine du site, ex. `search.reaphoto.com` → « Reaphoto ») et remplit l'adresse de recherche, avec une surbrillance verte sur ce qu'il vient de remplir.
      - Si les mots-clés sont dans l'adresse (en clair, avec des tirets, ou emballés : encodage URL, hexadécimal, base64, gzip et leurs combinaisons), c'est prêt.
      - Sinon (recherche enregistrée côté serveur, comme Pixpalace, ou page qui ne change pas d'adresse), TabulaPix remplira le champ de recherche du site : cliquez sur **Repérer le champ sur le site**. Chrome demande l'autorisation pour ce site (et lui seul), le site s'ouvre avec un bandeau TabulaPix : cliquez sur son champ de recherche, puis sur son bouton (ou « Pas de bouton : utiliser Entrée » ; **⇅** déplace le bandeau). TabulaPix se rouvre ensuite sur cette étape, avec « ✓ Champ de recherche » et « ✓ Bouton de recherche ».
      - **Essayer** lance une recherche d'essai dans un nouvel onglet, avec les réglages en cours.
-  3. **Ajouter l'agence** : le bouton ne s'active que lorsque tout est correct ; l'agence apparaît dans la liste, cochée, en surbrillance.
+  3. **Ajouter l'agence** : le bouton ne s'active que lorsque tout est correct ; TabulaPix revient à la liste, où l'agence apparaît cochée, en surbrillance.
 
-  Le lien « Saisir l'adresse à la main » permet de taper directement une adresse avec `{q}` à la place des mots-clés (ou `{q:slug}` si le site sépare les mots par des tirets : « Estonie frontière » → `Estonie-frontière`). Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. Les **Détails techniques** (repliés) montrent le modèle et les étapes d'encodage, ou l'emplacement du champ et du bouton repérés. Les agences ajoutées portent la mention « perso » (« perso · champ » pour celles qui remplissent un champ) et se suppriment avec ✕ ; supprimer une agence qui remplit un champ retire aussi l'autorisation donnée pour son site.
+  Le lien « Saisir l'adresse à la main » permet de taper directement une adresse avec `{q}` à la place des mots-clés (ou `{q:slug}` si le site sépare les mots par des tirets : « Estonie frontière » → `Estonie-frontière`). Sans `{q}`, la page s'ouvre et les mots-clés sont copiés pour être collés. Les **Détails techniques** (repliés) montrent le modèle et les étapes d'encodage, ou l'emplacement du champ et du bouton repérés. Supprimer une agence qui remplit un champ retire aussi l'autorisation donnée pour son site.
 
-  Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, TabulaPix utilise le premier visible et le bouton le plus proche du champ. Si le site change sa page, refaites le repérage (✎ puis **Refaire le repérage**).
-- **Modifier une agence** (bouton **✎**) : même formulaire, directement à l'étape « vérifier », avec **Enregistrer**. Toutes les agences peuvent être renommées, y compris celles fournies ; pour celles-ci, la mention « modifiée » apparaît et **Rétablir l'original** revient au nom et aux réglages livrés.
-  - **Bloomberg, Abacapress et Pixpalace** remplissent le champ de recherche de leur site : si l'un d'eux change sa page et que la recherche ne part plus, ouvrez ✎ puis **Refaire le repérage** pour lui montrer à nouveau le champ et le bouton (aucune autorisation supplémentaire n'est demandée ; le délai propre à Bloomberg est conservé). Leur adresse peut être modifiée, mais doit rester sur le même site.
+  Le repérage ignore les identifiants générés à chaque chargement (ex. `…__bfac60392382`) et s'appuie sur des repères stables (nom du champ, classe, libellé du bouton…) ; si le site a plusieurs formulaires de recherche identiques, TabulaPix utilise le premier visible et le bouton le plus proche du champ. Si le site change sa page, refaites le repérage (crayon de l'agence puis **Refaire le repérage**).
+### Modifier une agence
+
+- **Modifier une agence** (son crayon) : même écran, directement à l'étape « vérifier », avec **Enregistrer** et un menu **Dossier**. Toutes les agences peuvent être renommées, y compris celles fournies ; pour celles-ci, **Rétablir l'original** revient au nom et aux réglages livrés.
+  - **Bloomberg, Abacapress et Pixpalace** remplissent le champ de recherche de leur site : si l'un d'eux change sa page et que la recherche ne part plus, ouvrez son crayon puis **Refaire le repérage** pour lui montrer à nouveau le champ et le bouton (aucune autorisation supplémentaire n'est demandée ; le délai propre à Bloomberg est conservé). Leur adresse peut être modifiée, mais doit rester sur le même site.
+## Options
+
+Le bouton **⚙** en haut affiche les réglages directement dans la popup ; **← Retour** revient à la recherche.
+
 - **Langue** : français ou anglais. Par défaut, TabulaPix suit la langue du navigateur (« Automatique ») ; le changement s'applique immédiatement. Le nom et la description affichés dans `chrome://extensions` et sur le Chrome Web Store suivent toujours la langue du navigateur.
 - **Sous-domaine Pixpalace** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`.
 
 - **Sauvegarde et partage** : **Exporter** enregistre toute votre configuration dans un fichier `.json` (agences et leur ordre, noms, adresses, repérages, agences cochées, masquées et supprimées, langue, sous-domaine Pixpalace — jamais vos recherches). **Importer…** recharge un tel fichier, après un récapitulatif et une confirmation : après une réinstallation, ou pour partager une configuration entre collègues. Chaque agence du fichier est vérifiée comme une agence ajoutée à la main ; les invalides sont ignorées. Si le fichier contient des agences qui remplissent le champ de recherche de leur site, un bouton **Autoriser les sites** les demande à Chrome en une fois. Depuis la popup, Importer ouvre TabulaPix dans un onglet (Chrome ferme la popup à l'ouverture du sélecteur de fichier).
+- **Agences fournies supprimées** : **Restaurer** les fait revenir (affiché seulement s'il y en a).
 - **Configuration d'usine** : **Rétablir la configuration d'usine** efface vos réglages, vos agences ajoutées, modifiées ou supprimées et les autorisations de sites accordées, et revient à la configuration livrée (après confirmation ; exportez d'abord si vous voulez garder la vôtre).
 
 Ces réglages restent dans Chrome sur votre ordinateur et sont conservés lors des mises à jour.
@@ -130,7 +144,7 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 }
 ```
 
-Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` ; pour qu'elle soit masquée (à afficher dans ⚙ → Agences affichées), `defaultHidden: true` — appliqué la première fois que l'agence apparaît, y compris lors d'une mise à jour (c'est le cas d'AFP (forum) et de Reuters (standard)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
+Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` ; pour qu'elle soit masquée (à réafficher avec son œil en mode Organiser), `defaultHidden: true` — appliqué la première fois que l'agence apparaît, y compris lors d'une mise à jour (c'est le cas d'AFP (forum) et de Reuters (standard)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
 
 Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
 
