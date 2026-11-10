@@ -204,6 +204,12 @@ code { font-size: 12px; }
 .flash { animation: flash-ok 1.6s ease-out; }
 @keyframes flash-head { from { box-shadow: inset 0 0 0 2px var(--fc); } to { box-shadow: inset 0 0 0 2px transparent; } }
 .group-head.flash { animation: flash-head 1.2s ease-out; }
+/* Ajouté ou modifié : la couleur tient environ une seconde, puis s'estompe
+   vers l'état normal de la ligne (pas d'état final imposé). */
+@keyframes fresh {
+  0%, 38% { background-color: color-mix(in srgb, var(--ok) 26%, Canvas); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ok) 75%, transparent); }
+}
+.fresh { animation: fresh 2.6s cubic-bezier(.4, 0, .2, 1); }
 @media (prefers-reduced-motion: reduce) { .flash, .group-head.flash { animation: none; } .toggle svg { transition: none; } }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--err); }

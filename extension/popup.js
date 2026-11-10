@@ -205,9 +205,8 @@ async function showEditor(a) {
 // surlignée (pas de message, qui ferait bouger la liste en disparaissant).
 async function leaveEditor(id) {
   resetEditor();
+  if (id) highlightFresh(`li.agency[data-id="${CSS.escape(id)}"]`);
   await showMain();
-  const li = id && list.querySelector(`li.agency[data-id="${CSS.escape(id)}"]`);
-  if (li) { li.scrollIntoView({ block: "nearest" }); flashEl(li); }
 }
 
 document.getElementById("settings").addEventListener("click", showSettings);
@@ -668,8 +667,23 @@ async function updateFolder(id, patch) {
   }) });
 }
 
-// Dossier qui vient d'être créé : surligné quand la liste se reconstruit.
-let freshFolderId = null;
+/* Ce qui vient d'être ajouté ou modifié est surligné. La liste peut être
+   reconstruite plusieurs fois de suite (un changement par réglage) : la
+   surbrillance reprend alors là où elle en était (délai négatif), au lieu
+   de repartir à zéro à chaque fois, ce qui faisait un effet stroboscope. */
+const FRESH_MS = 2600;
+let fresh = null; // { selector, start, scrolled }
+function highlightFresh(selector) { fresh = { selector, start: performance.now(), scrolled: false }; }
+function applyFresh() {
+  if (!fresh) return;
+  const elapsed = performance.now() - fresh.start;
+  if (elapsed >= FRESH_MS) { fresh = null; return; }
+  const el = list.querySelector(fresh.selector);
+  if (!el) return;
+  el.style.animationDelay = `${-Math.round(elapsed)}ms`;
+  el.classList.add("fresh");
+  if (!fresh.scrolled) { el.scrollIntoView({ block: "nearest" }); fresh.scrolled = true; }
+}
 
 // Crée un dossier ; renvoie son nom, ou null (message affiché dans msgEl).
 async function createFolder(rawName, msgEl) {
@@ -680,7 +694,7 @@ async function createFolder(rawName, msgEl) {
   const used = new Set(folders.map(folderColor));
   const color = FOLDER_COLORS.find((c) => !used.has(c)) || FOLDER_COLORS[folders.length % FOLDER_COLORS.length];
   const id = newFolderId();
-  freshFolderId = id;
+  highlightFresh(`li.group[data-folder="${id}"] > .group-head`);
   await chrome.storage.local.set({ [FOLDERS_KEY]: folders.concat({ id, name, color }) });
   return name;
 }
@@ -1492,10 +1506,7 @@ async function refreshList() {
   render(shown, data[STORAGE_KEY], folders, folderOf, ag.hidden, missing);
   renderPermBanner(missing);
   restoreFocus(list, key);
-  if (freshFolderId) {
-    const head = list.querySelector(`li.group[data-folder="${CSS.escape(freshFolderId)}"] .group-head`);
-    if (head) { head.scrollIntoView({ block: "nearest" }); flashEl(head); freshFolderId = null; }
-  }
+  applyFresh();
   return data;
 }
 
