@@ -188,10 +188,45 @@ async function showMain() {
 // Éditeur d'agence : a = agence à modifier ; sans a, ajout (ou brouillon repris).
 async function showEditor(a) {
   fillFolderSelect();
+  let prefilled = null;
   if (a) startEdit(a);
-  else if (!(await restoreDraft())) resetEditor();
+  else if (!(await restoreDraft())) { resetEditor(); prefilled = await prefillFromActiveTab(); }
   showView(editorView);
-  (draft && draft.editing ? ed.name : ed.detUrl).focus();
+  if (draft && draft.editing) ed.name.focus();
+  else if (prefilled === "both") detectBtn.focus();     // il ne reste qu'à cliquer « Détecter »
+  else if (prefilled === "url") ed.detQ.focus();
+  else ed.detUrl.focus();
+}
+
+// Ajout : on part de la page ouverte dans l'onglet actif (souvent la page de
+// résultats de l'agence) et des derniers mots-clés cherchés s'ils y figurent,
+// sinon du paramètre de recherche de l'adresse (q, query, search…).
+// Renvoie "both", "url" ou null.
+async function prefillFromActiveTab() {
+  let tab = null;
+  try { [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true }); } catch (_) { /* rien */ }
+  const url = tab && (tab.url || tab.pendingUrl);
+  if (!url || !/^https:\/\//i.test(url)) return null;
+  ed.detUrl.value = url;
+  const { [QUERY_KEY]: last = "" } = await chrome.storage.local.get(QUERY_KEY);
+  let q = "";
+  if (last) {
+    const r = await detectSearchUrl(url, last);
+    if (!r.error && !r.notFound) q = last;
+  }
+  if (!q) {
+    try {
+      const params = new URL(url).searchParams;
+      for (const k of ["q", "query", "search", "searchTerm", "keywords", "keyword", "text", "phrase", "term", "qt", "k", "kw", "s"]) {
+        const v = (params.get(k) || "").trim();
+        if (v) { q = v; break; }
+      }
+    } catch (_) { /* adresse illisible */ }
+  }
+  if (q) ed.detQ.value = q;
+  ed.detectMsg.className = "status ok";
+  ed.detectMsg.textContent = t(q ? "ed.prefilled" : "ed.prefilledUrl");
+  return q ? "both" : "url";
 }
 
 // Retour à la liste après l'éditeur : l'agence ajoutée ou modifiée y est
@@ -1083,7 +1118,8 @@ function agencyItem(a, checked, isHidden = false) {
   if (isHidden) li.classList.add("is-hidden");
   box.addEventListener("change", save);
   box.addEventListener("keydown", (e) => {
-    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    // Réordonner au clavier : seulement en mode Organiser (jamais par mégarde).
+    if (!organizing || !e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     e.preventDefault();
     moveAgency(li, e.key === "ArrowUp");
   });
@@ -1218,6 +1254,16 @@ function moveAgency(li, up) {
   saveOrder();
   saveFolderMembership();
   updateFolderStates();
+  const group = li.closest("li.group"), rows = [...group.querySelectorAll("li.agency")];
+  const where = group.dataset.folder ? group.querySelector(".fname-input, .folder-name").value || group.querySelector(".folder-name")?.textContent : t("folder.root");
+  announce(t("a11y.moved", { name: li.querySelector(".name").textContent, where, pos: rows.indexOf(li) + 1, total: rows.length }));
+}
+
+// Annonce pour les lecteurs d'écran (zone #live, polie).
+function announce(text) {
+  const live = document.getElementById("live");
+  live.textContent = "";
+  requestAnimationFrame(() => { live.textContent = text; });
 }
 
 // Titre d'un dossier : flèche (replier), case à trois états, nom, compteur ;
@@ -1244,14 +1290,16 @@ function folderHead(f, color, group) {
     group.querySelectorAll("input.agency-box:not(:disabled)").forEach((b) => (b.checked = box.checked));
     save();
   });
-  box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier
-    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+  box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier (mode Organiser)
+    if (!organizing || !e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     e.preventDefault();
     const other = e.key === "ArrowUp" ? group.previousElementSibling : group.nextElementSibling;
     if (!other || !other.classList.contains("group") || other.classList.contains("root")) return;
     e.key === "ArrowUp" ? other.before(group) : other.after(group);
     box.focus();
     saveFolderOrder();
+    const folders = [...list.querySelectorAll("li.group:not(.root)")];
+    announce(t("a11y.folderMoved", { name: f.name, pos: folders.indexOf(group) + 1, total: folders.length }));
   });
   const count = document.createElement("span");
   count.className = "count";
@@ -1259,7 +1307,7 @@ function folderHead(f, color, group) {
   if (organizing) {
     box.setAttribute("aria-label", f.name);
     const c = folderControls(f, color, msg);
-    head.append(toggle, label, c.nameInput, c.swatch, c.del, grip(t("folder.handle")));
+    head.append(toggle, label, c.nameInput, count, c.swatch, c.del, grip(t("folder.handle")));
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");
@@ -1371,6 +1419,10 @@ function updateFolderStates() {
     const count = group.querySelector(".count");
     if (count) {
       count.textContent = `${on}/${all.length}`;
+      count.setAttribute("aria-hidden", "true"); // « 2/3 » se lirait « 2 barre oblique 3 »…
+      let sr = count.nextElementSibling;
+      if (!sr || !sr.classList.contains("sr-only")) { sr = document.createElement("span"); sr.className = "sr-only"; count.after(sr); }
+      sr.textContent = t("folder.countSr", { on, total: all.length }); // …« 2 sur 3 cochées »
       count.classList.toggle("some", on > 0);
     }
   }

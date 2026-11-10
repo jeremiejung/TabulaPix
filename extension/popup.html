@@ -16,7 +16,7 @@
     </header>
     <p id="headMsg" class="status err" role="alert"></p>
     <input id="q" type="search" placeholder="Mots-clés…" data-i18n-placeholder="main.keywords" autocomplete="off" autofocus required>
-    <button type="submit" id="go"><span data-i18n="main.go">Lancer la recherche</span> <span id="goCount" class="go-count"></span></button>
+    <button type="submit" id="go"><span data-i18n="main.go">Lancer la recherche</span> <span id="goCount" class="go-count"></span><span class="go-paused" data-i18n="main.paused">Recherche en pause</span></button>
     <p id="msg" role="status"></p>
     <div class="bar quick">
       <button type="button" id="all" data-i18n="main.all">Tout</button>
@@ -26,7 +26,11 @@
       <p id="permText"></p>
       <button type="button" id="permBtn" data-i18n="perm.authorize">Autoriser</button>
     </div>
-    <p class="organize-help" data-i18n="main.organize.help">Glissez une agence par sa poignée, entre deux agences ou sur un dossier.</p>
+    <details class="organize-help">
+      <summary data-i18n="main.organize.short">Glissez pour ranger · Alt + ↑/↓ · Échap</summary>
+      <p data-i18n="main.organize.help">Glissez une agence par sa poignée, entre deux agences ou sur un dossier.</p>
+    </details>
+    <p id="live" class="sr-only" aria-live="polite"></p>
     <ul id="list"></ul>
   </form>
 
