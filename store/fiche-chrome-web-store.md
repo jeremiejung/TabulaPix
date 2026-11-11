@@ -66,6 +66,7 @@ Source code: https://github.com/jeremiejung/TabulaPix
 | Langue principale | Français (ajoutez l'anglais comme seconde langue de la fiche) |
 | Icône du Store (128 × 128) | `extension/icons/icon-128.png` |
 | Format des images | Toutes en PNG 24 bits sans transparence, comme exigé |
+| Fichiers modifiables | `store/psd/` : un PSD par image (mêmes noms), en calques — fond, capture, logo, trait, coches, et textes modifiables (police **Inter**, à installer : à l'ouverture, accepter de mettre à jour les calques de texte). Exporter ensuite en PNG 24 bits |
 | Captures d'écran (1280 × 800) | `store/images/capture-1-fr.png` à `capture-4-fr.png` (recherche, dossiers, ajout d'agence, repérage du champ) — versions `-en` pour la fiche anglaise |
 | Petite image promotionnelle (440 × 280) | `store/images/tuile-440x280-fr.png` — `-en` pour la fiche anglaise |
 | Image promotionnelle en haut de la page (1 400 × 560) | `store/images/banniere-1400x560-fr.png` — `-en` pour la fiche anglaise |
