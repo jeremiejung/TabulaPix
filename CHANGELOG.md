@@ -11,6 +11,7 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 - Hovering over an agency highlights its line in normal mode too, as in Organise mode.
 - Dragging keeps the line where it was grabbed under the mouse, instead of jumping so that its checkbox sits under the pointer.
 - Import: the confirmation is now a clearly flagged warning box in the page (instead of a browser dialog), saying that the current configuration will be entirely replaced and listing what the file contains, including the number of folders.
+- Changing the language in the settings now also translates the “Needs attention” block, the keyboard shortcut line and an open import confirmation.
 - Footer: the two signature lines are closer together, with the same click areas.
 - Organise mode: the one-line help is lighter (“Drag to arrange · Esc”); the Alt + ↑ / ↓ keyboard shortcut is still explained in the folded help and is now read out by screen readers on each checkbox.
 

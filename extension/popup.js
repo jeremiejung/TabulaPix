@@ -25,6 +25,9 @@ langSelect.addEventListener("change", async () => {
   applyI18n();
   // Textes construits par le code : on les refait dans la nouvelle langue.
   await renderRemoved();
+  await renderAttention();
+  await renderShortcut();
+  if (pendingImport) showImportConfirm(pendingImport, { focus: false }); // détail de l'import en cours
   fillFolderSelect();
   renderOptionFields(await currentOptionValues()); // la saisie en cours n'est pas perdue
   if (draft) { layoutEditor(Boolean(draft.editing)); setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
@@ -1056,7 +1059,7 @@ importFile.addEventListener("change", async () => {
    bien visible, avec le détail de ce qui sera importé, dossiers compris. */
 const importConfirm = $id("importConfirm");
 let pendingImport = null; // résultat de l'analyse du fichier, en attente de confirmation
-function showImportConfirm(result) {
+function showImportConfirm(result, { focus = true } = {}) {
   pendingImport = result;
   const s = result.summary;
   const items = [t("backup.sum.agencies", s), t("backup.sum.folders", s), t("backup.sum.checked", s),
@@ -1066,6 +1069,7 @@ function showImportConfirm(result) {
   $id("importNotes").textContent = notes;
   $id("importNotes").hidden = !notes;
   importConfirm.hidden = false;
+  if (!focus) return; // simple retraduction (changement de langue)
   importConfirm.scrollIntoView({ block: "nearest" });
   $id("importCancel").focus(); // le choix sans risque d'abord
 }
