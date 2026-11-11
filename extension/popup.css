@@ -114,7 +114,7 @@ html:not(.organizing) #list .grip { opacity: 0; transition: opacity .12s; }
 html:not(.organizing) #list li.agency:is(:hover, :has(:focus-visible)) > .grip,
 html:not(.organizing) #list .group-head:is(:hover, :has(:focus-visible)) > .grip { opacity: 1; }
 .group-head .count + .grip, .perm-pill + .grip { margin-left: 0; }
-html.organizing #list li.agency:hover { background: color-mix(in srgb, CanvasText 5%, transparent); }
+#list li.agency:hover { background: color-mix(in srgb, CanvasText 5%, transparent); }
 .dragging { opacity: .4; }
 .group-head.drop-target { outline: 2px solid var(--fc); outline-offset: -2px; background: color-mix(in srgb, var(--fc) 34%, Canvas); }
 /* Nom du dossier en mode Organiser : même apparence qu'en mode normal

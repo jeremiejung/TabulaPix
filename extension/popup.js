@@ -1586,7 +1586,9 @@ list.addEventListener("dragstart", (e) => {
   origin = { parent: dragged.parentElement, next: dragged.nextElementSibling };
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", dragged.dataset.id || dragged.dataset.folder);
-  e.dataTransfer.setDragImage(head || dragged, 12, 12);
+  // L'image suit la souris là où on l'a saisie (pas de saut vers la case).
+  const ghost = head || dragged, r = ghost.getBoundingClientRect();
+  e.dataTransfer.setDragImage(ghost, Math.round(e.clientX - r.left), Math.round(e.clientY - r.top));
   requestAnimationFrame(() => dragged && dragged.classList.add("dragging"));
 });
 list.addEventListener("dragover", (e) => {

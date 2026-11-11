@@ -8,6 +8,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 - **Réordonner à tout moment**, sans passer par le mode Organiser : au survol d’une agence ou d’un dossier, sa poignée apparaît pour le faire glisser ; Alt + ↑ / ↓ sur une case marche aussi à tout moment.
 - Un clic sur le titre d’un dossier le replie ou le déplie ; seule sa case coche ou décoche ses agences (plus de « tout coché » par mégarde).
+- Le survol d’une agence surligne sa ligne aussi en mode normal, comme en mode Organiser.
+- Pendant un glisser, la ligne reste saisie là où on l’a prise, au lieu de sauter pour placer sa case sous le pointeur.
 - Pied de page : les deux lignes de la signature sont rapprochées, avec les mêmes zones cliquables.
 - Mode Organiser : la ligne d’aide est allégée (« Glissez pour ranger · Échap ») ; le raccourci clavier Alt + ↑ / ↓ reste expliqué dans l’aide dépliable, et il est désormais annoncé par les lecteurs d’écran sur chaque case.
 
