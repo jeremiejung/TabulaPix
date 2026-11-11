@@ -1489,7 +1489,7 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     }
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = t(!g.folder ? "folder.root.empty" : organizing ? "folder.empty.organize" : "folder.empty");
+    empty.textContent = t(!g.folder ? "folder.root.empty" : "folder.empty");
     group.append(ul, empty);
     list.append(group);
   });
