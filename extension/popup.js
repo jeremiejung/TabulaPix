@@ -1234,6 +1234,7 @@ function agencyItem(a, checked, isHidden = false) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "agency-box";
+  if (organizing) box.setAttribute("aria-describedby", "organizeKbd"); // consigne clavier lue au focus
   box.value = a.id;
   box.dataset.key = "a:" + a.id;
   box.checked = !isHidden && checked.includes(a.id);
@@ -1407,6 +1408,7 @@ function folderHead(f, color, group) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "folder-box";
+  if (organizing) box.setAttribute("aria-describedby", "organizeKbd");
   box.dataset.key = "f:" + f.id;
   // Cocher le dossier coche (ou décoche) toutes ses agences.
   box.addEventListener("change", () => {

@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- Mode Organiser : la ligne d’aide est allégée (« Glissez pour ranger · Échap ») ; le raccourci clavier Alt + ↑ / ↓ reste expliqué dans l’aide dépliable, et il est désormais annoncé par les lecteurs d’écran sur chaque case.
+
 ## 3.4.0 — 10 novembre 2026 (Chrome Web Store)
 
 - **Dossiers d'agences** (agences filaires, agences d'auteurs, agences de service de presse…), affichés en blocs chacun dans sa couleur (9 couleurs). La case d'un dossier coche ou décoche toutes ses agences, et est à moitié cochée quand seules certaines le sont ; le compteur ressort quand un dossier replié contient des agences cochées. Les dossiers se replient et se réordonnent ; tout est conservé dans le fichier de configuration exporté (format version 2, toujours lisible par la 3.3.0, qui garde les dossiers mais pas leur couleur).

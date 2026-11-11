@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- Organise mode: the one-line help is lighter (“Drag to arrange · Esc”); the Alt + ↑ / ↓ keyboard shortcut is still explained in the folded help and is now read out by screen readers on each checkbox.
+
 ## 3.4.0 — 10 November 2026 (Chrome Web Store)
 
 - **Agency folders** (wire agencies, photographers' agencies, press-service agencies…), each shown as a block in its own colour (9 colours). A folder's checkbox ticks or unticks all its agencies, and is half-ticked when only some are ticked; the counter stands out when a folded folder holds ticked agencies. Folders can be folded and reordered; everything is kept in the exported configuration file (format version 2, still readable by 3.3.0, which keeps folders but not their colour).
