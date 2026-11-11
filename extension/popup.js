@@ -25,6 +25,9 @@ langSelect.addEventListener("change", async () => {
   applyI18n();
   // Textes construits par le code : on les refait dans la nouvelle langue.
   await renderRemoved();
+  await renderAttention();
+  await renderShortcut();
+  if (pendingImport) showImportConfirm(pendingImport, { focus: false }); // détail de l'import en cours
   fillFolderSelect();
   renderOptionFields(await currentOptionValues()); // la saisie en cours n'est pas perdue
   if (draft) { layoutEditor(Boolean(draft.editing)); setMode(draft.mode); ed.title.textContent = draft.editing ? t("ed.editTitle", { name: ed.name.value }) : t("ed.addTitle"); ed.submit.textContent = draft.editing ? t("ed.saveEdit") : t("ed.add"); }
@@ -285,6 +288,7 @@ async function showSettings() {
   await renderShortcut();
   renderOptionFields(await loadOptions());
   document.getElementById("restoreMsg").textContent = "";
+  hideImportConfirm();
   showView(settingsView);
   document.getElementById("back").focus();
 }
@@ -1034,7 +1038,7 @@ document.getElementById("importBtn").addEventListener("click", () => {
     window.close();
     return;
   }
-  importFile.value = "";
+  hideImportConfirm(); // une confirmation précédente laissée ouverte
   importFile.click();
 });
 
@@ -1047,13 +1051,46 @@ importFile.addEventListener("change", async () => {
   try { parsed = JSON.parse(await file.text()); } catch (_) { backupMsg.textContent = t("backup.err.json"); return; }
   const result = parseConfigImport(parsed);
   if (result.error) { backupMsg.textContent = t(result.error); return; }
+  backupMsg.textContent = "";
+  showImportConfirm(result);
+});
+
+/* Confirmation de l'import, dans la page (et non une fenêtre du navigateur) :
+   bien visible, avec le détail de ce qui sera importé, dossiers compris. */
+const importConfirm = $id("importConfirm");
+let pendingImport = null; // résultat de l'analyse du fichier, en attente de confirmation
+function showImportConfirm(result, { focus = true } = {}) {
+  pendingImport = result;
   const s = result.summary;
-  const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
-    s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
-  if (!confirm(t("backup.confirm", { summary }))) { backupMsg.textContent = ""; return; }
-  // On tente de demander tout de suite les sites nécessaires : Chrome ne
-  // l'accepte que peu après un clic (choix du fichier rapide). Sinon, la
-  // liste et les options proposent « Autoriser » tant qu'il en manque.
+  const items = [t("backup.sum.agencies", s), t("backup.sum.folders", s), t("backup.sum.checked", s),
+    s.modified ? t("backup.sum.modified", s) : "", s.removed ? t("backup.sum.removed", s) : ""].filter(Boolean);
+  $id("importSummary").replaceChildren(...items.map((text) => { const li = document.createElement("li"); li.textContent = text; return li; }));
+  const notes = [s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
+  $id("importNotes").textContent = notes;
+  $id("importNotes").hidden = !notes;
+  importConfirm.hidden = false;
+  if (!focus) return; // simple retraduction (changement de langue)
+  importConfirm.scrollIntoView({ block: "nearest" });
+  $id("importCancel").focus(); // le choix sans risque d'abord
+}
+function hideImportConfirm() {
+  pendingImport = null;
+  importConfirm.hidden = true;
+  importFile.value = ""; // le même fichier pourra être choisi à nouveau
+}
+$id("importCancel").addEventListener("click", () => { hideImportConfirm(); $id("importBtn").focus(); });
+importConfirm.addEventListener("keydown", (e) => { // Échap : annule l'import (sans quitter les options)
+  if (e.key !== "Escape") return;
+  e.preventDefault();
+  hideImportConfirm();
+  $id("importBtn").focus();
+});
+$id("importOk").addEventListener("click", async () => {
+  if (!pendingImport) return;
+  const result = pendingImport;
+  hideImportConfirm();
+  // Sites nécessaires demandés tout de suite : le clic sur « Remplacer » le
+  // permet. Sinon, la liste et les options proposent « Autoriser ».
   const asked = result.hosts.length
     ? chrome.permissions.request({ origins: result.hosts.map(originPattern) }).catch(() => false)
     : Promise.resolve(true);
@@ -1073,6 +1110,10 @@ importFile.addEventListener("change", async () => {
     missingOrigins = [];
     for (const origin of needed) if (!(await chrome.permissions.contains({ origins: [origin] }))) missingOrigins.push(origin);
     backupMsg.className = "status ok";
+    // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
+    const s = result.summary;
+    const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
+      s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
     backupMsg.textContent = t("backup.imported") + " " + summary + (missingOrigins.length ? "\n" + t("backup.needPerm") : "");
     await renderAttention();
   };
@@ -1234,6 +1275,7 @@ function agencyItem(a, checked, isHidden = false) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "agency-box";
+  if (!isHidden) box.setAttribute("aria-describedby", "organizeKbd"); // consigne clavier lue au focus
   box.value = a.id;
   box.dataset.key = "a:" + a.id;
   box.checked = !isHidden && checked.includes(a.id);
@@ -1241,8 +1283,8 @@ function agencyItem(a, checked, isHidden = false) {
   if (isHidden) li.classList.add("is-hidden");
   box.addEventListener("change", save);
   box.addEventListener("keydown", (e) => {
-    // Réordonner au clavier : seulement en mode Organiser (jamais par mégarde).
-    if (!organizing || !e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    // Réordonner au clavier, à tout moment (équivalent de la poignée).
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     e.preventDefault();
     moveAgency(li, e.key === "ArrowUp");
   });
@@ -1269,6 +1311,9 @@ function agencyItem(a, checked, isHidden = false) {
     li.append(eye, edit, del, grip(t("main.handle")));
     li.draggable = true; // on la glisse aussi par son nom
     label.title = t("main.handle");
+  } else {
+    // Hors Organiser : poignée affichée au survol, on réordonne sans changer de mode.
+    li.append(grip(t("main.handle")));
   }
   return li;
 }
@@ -1407,14 +1452,16 @@ function folderHead(f, color, group) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "folder-box";
+  box.setAttribute("aria-describedby", "organizeKbd");
+  box.setAttribute("aria-label", f.name); // la case seule : le nom n'en fait plus partie
   box.dataset.key = "f:" + f.id;
   // Cocher le dossier coche (ou décoche) toutes ses agences.
   box.addEventListener("change", () => {
     group.querySelectorAll("input.agency-box:not(:disabled)").forEach((b) => (b.checked = box.checked));
     save();
   });
-  box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier (mode Organiser)
-    if (!organizing || !e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+  box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     e.preventDefault();
     const other = e.key === "ArrowUp" ? group.previousElementSibling : group.nextElementSibling;
     if (!other || !other.classList.contains("group") || other.classList.contains("root")) return;
@@ -1428,7 +1475,6 @@ function folderHead(f, color, group) {
   count.className = "count";
   label.append(box);
   if (organizing) {
-    box.setAttribute("aria-label", f.name);
     const c = folderControls(f, color, msg);
     c.nameInput.title = f.name;
     head.append(toggle, label, c.swatch, c.nameInput, count, c.del, grip(t("folder.handle")));
@@ -1438,8 +1484,14 @@ function folderHead(f, color, group) {
     name.className = "folder-name";
     name.dir = "auto";
     name.textContent = f.name;
-    label.append(name, count);
-    head.append(toggle, label);
+    // Un clic sur le titre plie ou déplie le dossier ; seule la case coche tout
+    // (pas de « tout coché » par mégarde en voulant ouvrir le dossier).
+    head.classList.add("foldable");
+    head.addEventListener("click", (e) => {
+      if (e.target.closest("label, input, button, .grip")) return;
+      setCollapsed(group, !group.classList.contains("collapsed"), true);
+    });
+    head.append(toggle, label, name, count, grip(t("folder.handle")));
     group.append(head);
   }
   return head;
@@ -1478,7 +1530,7 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     }
     const empty = document.createElement("p");
     empty.className = "empty";
-    empty.textContent = t(!g.folder ? "folder.root.empty" : organizing ? "folder.empty.organize" : "folder.empty");
+    empty.textContent = t(!g.folder ? "folder.root.empty" : "folder.empty");
     group.append(ul, empty);
     list.append(group);
   });
@@ -1575,7 +1627,9 @@ list.addEventListener("dragstart", (e) => {
   origin = { parent: dragged.parentElement, next: dragged.nextElementSibling };
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", dragged.dataset.id || dragged.dataset.folder);
-  e.dataTransfer.setDragImage(head || dragged, 12, 12);
+  // L'image suit la souris là où on l'a saisie (pas de saut vers la case).
+  const ghost = head || dragged, r = ghost.getBoundingClientRect();
+  e.dataTransfer.setDragImage(ghost, Math.round(e.clientX - r.left), Math.round(e.clientY - r.top));
   requestAnimationFrame(() => dragged && dragged.classList.add("dragging"));
 });
 list.addEventListener("dragover", (e) => {

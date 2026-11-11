@@ -50,7 +50,9 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 1. Click the TabulaPix icon, or press **Alt + Shift + Y** (shortcut changeable in `chrome://extensions/shortcuts`).
 2. Type your keywords and tick the agencies you want (**All** / **None** buttons to go faster).
-   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). **›** folds or unfolds a folder. Tabs open in the order of the list.
+   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). A click on a folder's title (or on **›**) folds or unfolds it, without ticking anything. Tabs open in the order of the list.
+
+   **Reorder at any time**: hovering over an agency or a folder shows its handle (on the right); drag it between two agencies, or onto a folder's title (highlighted) to put an agency there. With the keyboard, **Alt + ↑ / ↓** on a checkbox does the same.
 3. Press **Enter** or **Search**, right under the keywords: one tab opens per agency (the button shows how many).
    Tabs open in the background: you stay on the tab you are on.
    Your last keywords are shown again (already selected) the next time you open TabulaPix: just type to replace them.
@@ -66,9 +68,9 @@ You need to be logged in to your agency accounts in Chrome, as usual: the extens
 
 ## Organise mode
 
-The **Organise** button at the top (list icon, next to the column button) switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes; everything about agencies and folders is done here, right in the list.
+The **Organise** button at the top (list icon, next to the column button) switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes (and lets you reorder them); everything else about agencies and folders is done here, right in the list.
 
-- **Order and folders**: drag an agency by its name or its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard (in Organise mode only), **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
+- **Order and folders**: as outside this mode, and an agency can also be dragged by its name: drag it by its name or its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard, **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
 - **Folders**: rename a folder right in its title, change its colour with its dot, delete it with the bin (its agencies are kept, outside any folder; **Undo** for a few seconds), create one at the bottom of the list.
 - **Agencies**, on each line:
   - **eye**: hides the agency (it disappears from the list, its place is kept) or shows it again; hidden agencies appear greyed out in Organise mode only.
@@ -103,7 +105,7 @@ The **⚙** button at the top shows the settings right in the popup; **← Back*
 - **Language**: English or French. By default, TabulaPix follows the browser language (“Automatic”); the change applies immediately. The name and description shown in `chrome://extensions` and on the Chrome Web Store always follow the browser language.
 - **Pixpalace** › **Subdomain**: the part before `.pixpalace.com` in the address of your Pixpalace space (`www` by default). For example, for `https://mynewsroom.pixpalace.com/home`, type `mynewsroom`. An invalid value is reported under the field and not saved.
 - **Quick access**: shows the keyboard shortcut that opens TabulaPix (Alt + Shift + Y by default), with a link to change it, and reminds you that the column button keeps TabulaPix open beside the page.
-- **Backup and sharing**: **Export** saves your whole configuration to a `.json` file (agencies and their order, names, addresses, field locations, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches). **Import…** loads such a file, after showing a summary and asking for confirmation: use it after reinstalling, or to share a configuration with colleagues. Every agency in the file is checked like an agency added by hand; invalid ones are ignored. If the file contains agencies that fill in their site's search field, TabulaPix asks Chrome for those sites right away when it can (Chrome only allows it shortly after a click); otherwise, and as long as a site is still not allowed (permission refused, or removed in Chrome), a banner above the list, a “to allow” badge on the agency and the **Allow these sites** button under “Needs attention” in the settings let you allow it at any time. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
+- **Backup and sharing**: **Export** saves your whole configuration to a `.json` file (agencies and their order, names, addresses, field locations, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches). **Import…** loads such a file, after a clearly flagged confirmation (your current configuration is entirely replaced) showing what the file contains — agencies, folders, ticked agencies: use it after reinstalling, or to share a configuration with colleagues. Every agency in the file is checked like an agency added by hand; invalid ones are ignored. If the file contains agencies that fill in their site's search field, TabulaPix asks Chrome for those sites right away when it can (Chrome only allows it shortly after a click); otherwise, and as long as a site is still not allowed (permission refused, or removed in Chrome), a banner above the list, a “to allow” badge on the agency and the **Allow these sites** button under “Needs attention” in the settings let you allow it at any time. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
 - **Agencies removed from the list**: names the deleted built-in agencies; **Restore** brings them back (shown only when there are some).
 - **Factory settings**: **Restore factory settings** erases your settings, your added, edited or deleted agencies and the site permissions you granted, and goes back to the shipped configuration (after confirmation; export first if you want to keep yours).
 
@@ -119,7 +121,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.4.0" },
+  "app": { "name": "TabulaPix", "version": "3.4.1" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [

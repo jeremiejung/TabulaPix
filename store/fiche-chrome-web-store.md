@@ -2,7 +2,7 @@
 
 Tout ce qu'il faut pour remplir le tableau de bord du Chrome Web Store (https://chrome.google.com/webstore/devconsole), dans l'ordre des onglets. Chaque texte est dans un bloc à copier-coller.
 
-Paquet à envoyer : `TabulaPix-3.4.0.zip` (ou plus récent).
+Paquet à envoyer : `TabulaPix-3.4.1.zip` (ou plus récent).
 
 ---
 
@@ -23,28 +23,17 @@ Lus automatiquement dans le paquet (fichiers `_locales`) :
 ```text
 TabulaPix — une recherche, toutes vos agences photo.
 
-Pour les services photo, iconographes et éditeurs photo : tapez vos mots-clés une seule fois, cochez vos agences, et TabulaPix ouvre un onglet par agence avec les résultats, en utilisant vos propres comptes. Vous restez sur l'onglet où vous êtes.
+La même recherche sur dix agences ? Tapez vos mots-clés une seule fois : TabulaPix ouvre chaque agence dans son onglet, avec vos propres comptes.
 
-AGENCES PRÊTES À L'EMPLOI
-Une douzaine d'agences de presse et de banques d'images parmi les plus utilisées par les rédactions sont déjà configurées. L'ordre et les cases cochées sont mémorisés ; masquez celles que vous n'utilisez pas.
-
-AJOUTEZ VOS AGENCES
-Faites une recherche sur le site d'une agence, collez l'adresse de la page de résultats et vos mots-clés : TabulaPix détecte tout seul comment y relancer la recherche, que les mots-clés soient en clair, séparés par des tirets ou encodés dans l'adresse. Un bouton « Essayer » permet de vérifier avant d'ajouter.
-Quand le site ne met pas la recherche dans l'adresse, montrez une fois à TabulaPix son champ de recherche et son bouton : il les remplira pour vous à chaque recherche.
-
-PRATIQUE
-• Agences rangées dans des dossiers en couleur, cochés d'un clic
-• Colonne latérale pour enchaîner les recherches, raccourci clavier Alt+Maj+Y
-• Réutilise l'onglet d'une agence déjà ouverte
-• Dernière recherche mémorisée
-• Toutes les agences renommables, modifiables ou supprimables, avec retour à la configuration d'usine
-• Sauvegarde de la configuration dans un fichier, à garder ou à partager entre collègues
+• Quelques agences de presse et banques d'images prêtes à l'emploi
+• Ajoutez les autres en quelques clics
+• Rangez-les dans des dossiers
+• Sauvegardez votre configuration et partagez-la
 • En français et en anglais
 
-CONFIDENTIALITÉ
-Aucun compte, aucune collecte de données, aucun serveur : TabulaPix ne fait aucune requête réseau et ne lit pas le contenu des pages. Vos réglages restent dans Chrome, sur votre ordinateur. L'accès à un site supplémentaire n'est demandé que lorsque vous ajoutez une agence qui en a besoin, et il est retiré si vous la supprimez.
+Rien ne quitte votre ordinateur : pas de compte, pas de serveur, aucune donnée collectée.
 
-TabulaPix est un outil indépendant, gratuit et open source (licence MIT), sans lien avec les agences de presse ni les banques d'images. Un abonnement à chaque agence reste nécessaire pour accéder à ses contenus.
+Outil indépendant, gratuit et open source (licence MIT). Un abonnement à chaque agence reste nécessaire pour voir ses contenus.
 
 Code source : https://github.com/jeremiejung/TabulaPix
 ```
@@ -54,28 +43,17 @@ Code source : https://github.com/jeremiejung/TabulaPix
 ```text
 TabulaPix — one search, all your picture agencies.
 
-For photo desks, picture researchers and photo editors: type your keywords once, tick your agencies, and TabulaPix opens one tab per agency with the results, using your own accounts. You stay on the tab you are on.
+The same search on ten agencies? Type your keywords once: TabulaPix opens each agency in its own tab, with your own accounts.
 
-READY-TO-USE AGENCIES
-A dozen of the news picture agencies and stock image libraries most used by newsrooms are already set up. Their order and ticks are remembered; hide the ones you don't use.
-
-ADD YOUR OWN AGENCIES
-Run a search on an agency's website, paste the address of the results page and your keywords: TabulaPix works out by itself how to run the search there again, whether the keywords are plain, separated by dashes or encoded in the address. A "Try" button lets you check before adding.
-When the site doesn't put the search in the address, show TabulaPix its search field and button once: it will fill them in for you on every search.
-
-HANDY
-• Agencies sorted into colour folders, ticked in one click
-• Side panel to chain searches, Alt+Shift+Y keyboard shortcut
-• Reuses an agency's tab that is already open
-• Remembers your last search
-• Every agency can be renamed, edited or deleted, with a way back to factory settings
-• Configuration backup to a file, to keep or to share with colleagues
+• A few news picture agencies and stock libraries ready to use
+• Add the others in a few clicks
+• Sort them into folders
+• Back up your configuration and share it
 • In English and French
 
-PRIVACY
-No account, no data collection, no server: TabulaPix makes no network requests and does not read page content. Your settings stay in Chrome, on your computer. Access to an additional site is only requested when you add an agency that needs it, and is removed if you delete that agency.
+Nothing leaves your computer: no account, no server, no data collected.
 
-TabulaPix is an independent, free and open-source tool (MIT licence), not affiliated with any news agency or stock image library. A subscription to each agency is still required to access its content.
+Independent, free and open-source tool (MIT licence). A subscription to each agency is still required to see its content.
 
 Source code: https://github.com/jeremiejung/TabulaPix
 ```
@@ -88,9 +66,9 @@ Source code: https://github.com/jeremiejung/TabulaPix
 | Langue principale | Français (ajoutez l'anglais comme seconde langue de la fiche) |
 | Icône du Store (128 × 128) | `extension/icons/icon-128.png` |
 | Format des images | Toutes en PNG 24 bits sans transparence, comme exigé |
-| Captures d'écran (1280 × 800) | `store/images/capture-1-fr.png`, `capture-2-fr.png`, `capture-3-fr.png` — versions `-en` pour la fiche anglaise |
-| Petite image promotionnelle (440 × 280) | `store/images/tuile-440x280.png` (en anglais, une seule version) |
-| Image promotionnelle en haut de la page (1 400 × 560) | `store/images/banniere-1400x560.png` (en anglais) |
+| Captures d'écran (1280 × 800) | `store/images/capture-1-fr.png` à `capture-4-fr.png` (recherche, dossiers, ajout d'agence, repérage du champ) — versions `-en` pour la fiche anglaise |
+| Petite image promotionnelle (440 × 280) | `store/images/tuile-440x280-fr.png` — `-en` pour la fiche anglaise |
+| Image promotionnelle en haut de la page (1 400 × 560) | `store/images/banniere-1400x560-fr.png` — `-en` pour la fiche anglaise |
 | Site web officiel | https://github.com/jeremiejung/TabulaPix |
 | URL d'assistance | https://github.com/jeremiejung/TabulaPix/issues |
 

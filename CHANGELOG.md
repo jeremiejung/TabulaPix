@@ -6,6 +6,18 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.4.1 — 11 November 2026 (Chrome Web Store)
+
+- **Reorder at any time**, without Organise mode: hovering over an agency or a folder shows its handle, to drag it; Alt + ↑ / ↓ on a checkbox works at any time too.
+- A click on a folder's title folds or unfolds it; only its checkbox ticks or unticks its agencies (no more ticking everything by mistake).
+- Hovering over an agency highlights its line in normal mode too, as in Organise mode.
+- Dragging keeps the line where it was grabbed under the mouse, instead of jumping so that its checkbox sits under the pointer.
+- Import: the confirmation is now a clearly flagged warning box in the page (instead of a browser dialog), saying that the current configuration will be entirely replaced and listing what the file contains, including the number of folders.
+- Changing the language in the settings now also translates the “Needs attention” block, the keyboard shortcut line and an open import confirmation.
+- Empty folder: the hint is the same in both modes (“Drag an agency onto the folder's title.”).
+- Footer: the two signature lines are closer together, with the same click areas.
+- Organise mode: the one-line help is lighter (“Drag to arrange · Esc”); the Alt + ↑ / ↓ keyboard shortcut is still explained in the folded help and is now read out by screen readers on each checkbox.
+
 ## 3.4.0 — 10 November 2026 (Chrome Web Store)
 
 - **Agency folders** (wire agencies, photographers' agencies, press-service agencies…), each shown as a block in its own colour (9 colours). A folder's checkbox ticks or unticks all its agencies, and is half-ticked when only some are ticked; the counter stands out when a folded folder holds ticked agencies. Folders can be folded and reordered; everything is kept in the exported configuration file (format version 2, still readable by 3.3.0, which keeps folders but not their colour).
