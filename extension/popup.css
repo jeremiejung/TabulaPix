@@ -78,8 +78,9 @@ li .hint { margin-left: auto; padding: 1px 7px; font-size: 12px; color: var(--mu
 #list .group:not(.root) input[type=checkbox] { accent-color: var(--fc); }
 .group-head { display: flex; align-items: center; gap: 2px; min-height: 32px; padding: 0 8px 0 2px; border-radius: var(--r-block); background: color-mix(in srgb, var(--fc) 20%, Canvas); }
 .group:not(.collapsed) > .group-head { border-radius: var(--r-block) var(--r-block) 4px 4px; }
-html.organizing .group-head label { flex: none; min-width: 26px; justify-content: center; padding: 0 1px; }
-.group-head label { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
+.group-head label { flex: none; min-width: 26px; display: flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 1px; cursor: pointer; }
+.group-head.foldable { cursor: pointer; }
+.group-head .folder-name { flex: 1; min-width: 0; margin-left: 2px; }
 .folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--fc) 50%, CanvasText); }
 .count { margin-left: auto; padding: 2px 7px; border-radius: var(--r-pill); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--muted); background: color-mix(in srgb, Canvas 75%, transparent); }
 .count.some { color: color-mix(in srgb, var(--fc) 60%, CanvasText); background: Canvas; }
@@ -108,6 +109,11 @@ html:not(.organizing) .root > .empty { display: none; }
 html.organizing .organize-help { display: block; }
 .grip { display: grid; place-items: center; flex: none; width: 24px; height: 24px; margin-left: auto; border-radius: var(--r-control); color: var(--muted); cursor: grab; }
 .grip:hover { color: CanvasText; background: var(--line); }
+/* Hors Organiser : la poignée n'apparaît qu'au survol (ou au focus) de sa ligne. */
+html:not(.organizing) #list .grip { opacity: 0; transition: opacity .12s; }
+html:not(.organizing) #list li.agency:is(:hover, :has(:focus-visible)) > .grip,
+html:not(.organizing) #list .group-head:is(:hover, :has(:focus-visible)) > .grip { opacity: 1; }
+.group-head .count + .grip, .perm-pill + .grip { margin-left: 0; }
 html.organizing #list li.agency:hover { background: color-mix(in srgb, CanvasText 5%, transparent); }
 .dragging { opacity: .4; }
 .group-head.drop-target { outline: 2px solid var(--fc); outline-offset: -2px; background: color-mix(in srgb, var(--fc) 34%, Canvas); }
@@ -262,7 +268,10 @@ code { font-size: 12px; }
    se réduit d'elle-même si la largeur manque, et les deux lignes la partagent. */
 .credit p { margin: 0; white-space: nowrap; font-size: min(11px, 4.1cqi); }
 .field.lang { margin-top: 14px; }
-.credit a { display: inline-block; min-height: 24px; line-height: 24px; color: inherit; text-underline-offset: 2px; }
+/* Lignes serrées, mais une zone cliquable de 24 px gardée (marges négatives). */
+.credit p { line-height: 15px; }
+.credit p + p { margin-top: 2px; }
+.credit a { display: inline-block; padding: 5px 0; margin: -5px 0; line-height: 15px; color: inherit; text-underline-offset: 2px; }
 
 /* Sauvegarde, configuration d'usine */
 .link.inline { display: inline-flex; align-items: center; min-height: 24px; vertical-align: middle; font-size: 12px; }

@@ -1234,7 +1234,7 @@ function agencyItem(a, checked, isHidden = false) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "agency-box";
-  if (organizing) box.setAttribute("aria-describedby", "organizeKbd"); // consigne clavier lue au focus
+  if (!isHidden) box.setAttribute("aria-describedby", "organizeKbd"); // consigne clavier lue au focus
   box.value = a.id;
   box.dataset.key = "a:" + a.id;
   box.checked = !isHidden && checked.includes(a.id);
@@ -1242,8 +1242,8 @@ function agencyItem(a, checked, isHidden = false) {
   if (isHidden) li.classList.add("is-hidden");
   box.addEventListener("change", save);
   box.addEventListener("keydown", (e) => {
-    // Réordonner au clavier : seulement en mode Organiser (jamais par mégarde).
-    if (!organizing || !e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+    // Réordonner au clavier, à tout moment (équivalent de la poignée).
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     e.preventDefault();
     moveAgency(li, e.key === "ArrowUp");
   });
@@ -1270,6 +1270,9 @@ function agencyItem(a, checked, isHidden = false) {
     li.append(eye, edit, del, grip(t("main.handle")));
     li.draggable = true; // on la glisse aussi par son nom
     label.title = t("main.handle");
+  } else {
+    // Hors Organiser : poignée affichée au survol, on réordonne sans changer de mode.
+    li.append(grip(t("main.handle")));
   }
   return li;
 }
@@ -1408,15 +1411,16 @@ function folderHead(f, color, group) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "folder-box";
-  if (organizing) box.setAttribute("aria-describedby", "organizeKbd");
+  box.setAttribute("aria-describedby", "organizeKbd");
+  box.setAttribute("aria-label", f.name); // la case seule : le nom n'en fait plus partie
   box.dataset.key = "f:" + f.id;
   // Cocher le dossier coche (ou décoche) toutes ses agences.
   box.addEventListener("change", () => {
     group.querySelectorAll("input.agency-box:not(:disabled)").forEach((b) => (b.checked = box.checked));
     save();
   });
-  box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier (mode Organiser)
-    if (!organizing || !e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
+  box.addEventListener("keydown", (e) => { // Alt + ↑ / ↓ : déplace le dossier
+    if (!e.altKey || (e.key !== "ArrowUp" && e.key !== "ArrowDown")) return;
     e.preventDefault();
     const other = e.key === "ArrowUp" ? group.previousElementSibling : group.nextElementSibling;
     if (!other || !other.classList.contains("group") || other.classList.contains("root")) return;
@@ -1430,7 +1434,6 @@ function folderHead(f, color, group) {
   count.className = "count";
   label.append(box);
   if (organizing) {
-    box.setAttribute("aria-label", f.name);
     const c = folderControls(f, color, msg);
     c.nameInput.title = f.name;
     head.append(toggle, label, c.swatch, c.nameInput, count, c.del, grip(t("folder.handle")));
@@ -1440,8 +1443,14 @@ function folderHead(f, color, group) {
     name.className = "folder-name";
     name.dir = "auto";
     name.textContent = f.name;
-    label.append(name, count);
-    head.append(toggle, label);
+    // Un clic sur le titre plie ou déplie le dossier ; seule la case coche tout
+    // (pas de « tout coché » par mégarde en voulant ouvrir le dossier).
+    head.classList.add("foldable");
+    head.addEventListener("click", (e) => {
+      if (e.target.closest("label, input, button, .grip")) return;
+      setCollapsed(group, !group.classList.contains("collapsed"), true);
+    });
+    head.append(toggle, label, name, count, grip(t("folder.handle")));
     group.append(head);
   }
   return head;

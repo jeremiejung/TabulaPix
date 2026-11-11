@@ -50,7 +50,9 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 1. Click the TabulaPix icon, or press **Alt + Shift + Y** (shortcut changeable in `chrome://extensions/shortcuts`).
 2. Type your keywords and tick the agencies you want (**All** / **None** buttons to go faster).
-   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). **›** folds or unfolds a folder. Tabs open in the order of the list.
+   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). A click on a folder's title (or on **›**) folds or unfolds it, without ticking anything. Tabs open in the order of the list.
+
+   **Reorder at any time**: hovering over an agency or a folder shows its handle (on the right); drag it between two agencies, or onto a folder's title (highlighted) to put an agency there. With the keyboard, **Alt + ↑ / ↓** on a checkbox does the same.
 3. Press **Enter** or **Search**, right under the keywords: one tab opens per agency (the button shows how many).
    Tabs open in the background: you stay on the tab you are on.
    Your last keywords are shown again (already selected) the next time you open TabulaPix: just type to replace them.
@@ -66,9 +68,9 @@ You need to be logged in to your agency accounts in Chrome, as usual: the extens
 
 ## Organise mode
 
-The **Organise** button at the top (list icon, next to the column button) switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes; everything about agencies and folders is done here, right in the list.
+The **Organise** button at the top (list icon, next to the column button) switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes (and lets you reorder them); everything else about agencies and folders is done here, right in the list.
 
-- **Order and folders**: drag an agency by its name or its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard (in Organise mode only), **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
+- **Order and folders**: as outside this mode, and an agency can also be dragged by its name: drag it by its name or its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard, **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
 - **Folders**: rename a folder right in its title, change its colour with its dot, delete it with the bin (its agencies are kept, outside any folder; **Undo** for a few seconds), create one at the bottom of the list.
 - **Agencies**, on each line:
   - **eye**: hides the agency (it disappears from the list, its place is kept) or shows it again; hidden agencies appear greyed out in Organise mode only.

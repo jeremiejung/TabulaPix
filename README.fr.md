@@ -50,7 +50,9 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 
 1. Cliquez sur l'icône TabulaPix, ou appuyez sur **Alt + Maj + Y** (raccourci modifiable dans `chrome://extensions/shortcuts`).
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
-   Les **dossiers** regroupent les agences (agences filaires, agences d'auteurs, agences de service de presse…), chacun dans sa couleur. La case d'un dossier coche ou décoche toutes ses agences d'un coup ; elle est à moitié cochée quand seules certaines le sont (le compteur indique combien). **›** replie ou déplie un dossier. Les onglets s'ouvrent dans l'ordre de la liste.
+   Les **dossiers** regroupent les agences (agences filaires, agences d'auteurs, agences de service de presse…), chacun dans sa couleur. La case d'un dossier coche ou décoche toutes ses agences d'un coup ; elle est à moitié cochée quand seules certaines le sont (le compteur indique combien). Un clic sur le titre d'un dossier (ou sur **›**) le replie ou le déplie, sans rien cocher. Les onglets s'ouvrent dans l'ordre de la liste.
+
+   **Réordonner à tout moment** : au survol d'une agence ou d'un dossier, sa poignée apparaît (à droite) ; faites-la glisser entre deux agences, ou sur le titre d'un dossier (surligné) pour y ranger une agence. Au clavier, **Alt + ↑ / ↓** sur une case fait de même.
 3. Appuyez sur **Entrée** ou **Lancer la recherche**, juste sous les mots-clés : un onglet s'ouvre par agence (le bouton indique combien).
    Les onglets s'ouvrent en arrière-plan : vous restez sur l'onglet où vous êtes.
    Les derniers mots-clés lancés sont réaffichés (déjà sélectionnés) à la prochaine ouverture : tapez directement pour les remplacer.
@@ -66,9 +68,9 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 ## Mode Organiser
 
-Le bouton **Organiser** en haut (icône liste, à côté du bouton colonne) passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir ; le champ et le bouton de recherche, ainsi que Tout / Aucune, sont désactivés pendant ce temps, pour ne pas y rester par mégarde). En usage courant, la liste ne montre que les noms et les cases ; tout ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
+Le bouton **Organiser** en haut (icône liste, à côté du bouton colonne) passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir ; le champ et le bouton de recherche, ainsi que Tout / Aucune, sont désactivés pendant ce temps, pour ne pas y rester par mégarde). En usage courant, la liste ne montre que les noms et les cases (et permet de les réordonner) ; tout le reste de ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
 
-- **Ordre et dossiers** : faites glisser une agence par son nom ou sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier (en mode Organiser seulement), **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
+- **Ordre et dossiers** : comme hors de ce mode, et une agence se glisse aussi par son nom : faites-la glisser par son nom ou sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
 - **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, supprimez-le avec la corbeille (ses agences sont conservées, hors dossier ; **Annuler** pendant quelques secondes), créez-en un en bas de la liste.
 - **Agences**, sur chaque ligne :
   - **œil** : masque l'agence (elle disparaît de la liste, sa place est conservée) ou la réaffiche ; les agences masquées n'apparaissent, grisées, qu'en mode Organiser.

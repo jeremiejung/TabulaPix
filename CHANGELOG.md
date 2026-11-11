@@ -6,6 +6,9 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Reorder at any time**, without Organise mode: hovering over an agency or a folder shows its handle, to drag it; Alt + ↑ / ↓ on a checkbox works at any time too.
+- A click on a folder's title folds or unfolds it; only its checkbox ticks or unticks its agencies (no more ticking everything by mistake).
+- Footer: the two signature lines are closer together, with the same click areas.
 - Organise mode: the one-line help is lighter (“Drag to arrange · Esc”); the Alt + ↑ / ↓ keyboard shortcut is still explained in the folded help and is now read out by screen readers on each checkbox.
 
 ## 3.4.0 — 10 November 2026 (Chrome Web Store)
