@@ -168,6 +168,16 @@
       <button type="button" id="importBtn" data-i18n="backup.import">Importer…</button>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <div id="importConfirm" class="replace-box" role="alertdialog" aria-labelledby="importConfirmTitle" aria-describedby="importConfirmText importSummary" hidden>
+      <p id="importConfirmTitle" class="replace-title"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.5l6 11H2z"/><path d="M8 6.5v3.2M8 11.6v.1"/></svg><span data-i18n="backup.replace.title">Remplacer votre configuration ?</span></p>
+      <p id="importConfirmText" data-i18n="backup.replace.text">Votre configuration actuelle sera entièrement remplacée par celle du fichier : agences, dossiers, cases cochées et options.</p>
+      <ul id="importSummary" class="replace-sum"></ul>
+      <p id="importNotes" class="help"></p>
+      <div class="replace-actions">
+        <button type="button" id="importOk" class="danger" data-i18n="backup.replace.ok">Remplacer ma configuration</button>
+        <button type="button" id="importCancel" class="secondary" data-i18n="backup.replace.cancel">Annuler</button>
+      </div>
+    </div>
     <p id="backupMsg" class="status" role="status"></p>
 
     <div id="removedLine" hidden>

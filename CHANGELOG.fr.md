@@ -10,6 +10,7 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 - Un clic sur le titre d’un dossier le replie ou le déplie ; seule sa case coche ou décoche ses agences (plus de « tout coché » par mégarde).
 - Le survol d’une agence surligne sa ligne aussi en mode normal, comme en mode Organiser.
 - Pendant un glisser, la ligne reste saisie là où on l’a prise, au lieu de sauter pour placer sa case sous le pointeur.
+- Import : la confirmation est maintenant un encadré d’avertissement bien visible dans la page (au lieu d’une fenêtre du navigateur), qui précise que la configuration actuelle sera entièrement remplacée et détaille le contenu du fichier, nombre de dossiers compris.
 - Pied de page : les deux lignes de la signature sont rapprochées, avec les mêmes zones cliquables.
 - Mode Organiser : la ligne d’aide est allégée (« Glissez pour ranger · Échap ») ; le raccourci clavier Alt + ↑ / ↓ reste expliqué dans l’aide dépliable, et il est désormais annoncé par les lecteurs d’écran sur chaque case.
 

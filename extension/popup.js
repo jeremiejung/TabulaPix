@@ -285,6 +285,7 @@ async function showSettings() {
   await renderShortcut();
   renderOptionFields(await loadOptions());
   document.getElementById("restoreMsg").textContent = "";
+  hideImportConfirm();
   showView(settingsView);
   document.getElementById("back").focus();
 }
@@ -1034,7 +1035,7 @@ document.getElementById("importBtn").addEventListener("click", () => {
     window.close();
     return;
   }
-  importFile.value = "";
+  hideImportConfirm(); // une confirmation précédente laissée ouverte
   importFile.click();
 });
 
@@ -1047,13 +1048,45 @@ importFile.addEventListener("change", async () => {
   try { parsed = JSON.parse(await file.text()); } catch (_) { backupMsg.textContent = t("backup.err.json"); return; }
   const result = parseConfigImport(parsed);
   if (result.error) { backupMsg.textContent = t(result.error); return; }
+  backupMsg.textContent = "";
+  showImportConfirm(result);
+});
+
+/* Confirmation de l'import, dans la page (et non une fenêtre du navigateur) :
+   bien visible, avec le détail de ce qui sera importé, dossiers compris. */
+const importConfirm = $id("importConfirm");
+let pendingImport = null; // résultat de l'analyse du fichier, en attente de confirmation
+function showImportConfirm(result) {
+  pendingImport = result;
   const s = result.summary;
-  const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
-    s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
-  if (!confirm(t("backup.confirm", { summary }))) { backupMsg.textContent = ""; return; }
-  // On tente de demander tout de suite les sites nécessaires : Chrome ne
-  // l'accepte que peu après un clic (choix du fichier rapide). Sinon, la
-  // liste et les options proposent « Autoriser » tant qu'il en manque.
+  const items = [t("backup.sum.agencies", s), t("backup.sum.folders", s), t("backup.sum.checked", s),
+    s.modified ? t("backup.sum.modified", s) : "", s.removed ? t("backup.sum.removed", s) : ""].filter(Boolean);
+  $id("importSummary").replaceChildren(...items.map((text) => { const li = document.createElement("li"); li.textContent = text; return li; }));
+  const notes = [s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
+  $id("importNotes").textContent = notes;
+  $id("importNotes").hidden = !notes;
+  importConfirm.hidden = false;
+  importConfirm.scrollIntoView({ block: "nearest" });
+  $id("importCancel").focus(); // le choix sans risque d'abord
+}
+function hideImportConfirm() {
+  pendingImport = null;
+  importConfirm.hidden = true;
+  importFile.value = ""; // le même fichier pourra être choisi à nouveau
+}
+$id("importCancel").addEventListener("click", () => { hideImportConfirm(); $id("importBtn").focus(); });
+importConfirm.addEventListener("keydown", (e) => { // Échap : annule l'import (sans quitter les options)
+  if (e.key !== "Escape") return;
+  e.preventDefault();
+  hideImportConfirm();
+  $id("importBtn").focus();
+});
+$id("importOk").addEventListener("click", async () => {
+  if (!pendingImport) return;
+  const result = pendingImport;
+  hideImportConfirm();
+  // Sites nécessaires demandés tout de suite : le clic sur « Remplacer » le
+  // permet. Sinon, la liste et les options proposent « Autoriser ».
   const asked = result.hosts.length
     ? chrome.permissions.request({ origins: result.hosts.map(originPattern) }).catch(() => false)
     : Promise.resolve(true);
@@ -1073,6 +1106,10 @@ importFile.addEventListener("change", async () => {
     missingOrigins = [];
     for (const origin of needed) if (!(await chrome.permissions.contains({ origins: [origin] }))) missingOrigins.push(origin);
     backupMsg.className = "status ok";
+    // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
+    const s = result.summary;
+    const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
+      s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
     backupMsg.textContent = t("backup.imported") + " " + summary + (missingOrigins.length ? "\n" + t("backup.needPerm") : "");
     await renderAttention();
   };

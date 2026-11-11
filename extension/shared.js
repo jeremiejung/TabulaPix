@@ -357,7 +357,7 @@ function parseConfigImport(file) {
       [OPTIONS_KEY]: options, [LANG_KEY]: lang, [STORAGE_KEYS.seen]: [...seen],
       [FOLDERS_KEY]: folders, [FOLDER_OF_KEY]: folderOf
     },
-    summary: { agencies: order.length, custom: custom.length, removed: removed.size, modified: Object.keys(overrides).length, checked: checked.length, skipped, unknown, newer },
+    summary: { agencies: order.length, custom: custom.length, folders: folders.length, removed: removed.size, modified: Object.keys(overrides).length, checked: checked.length, skipped, unknown, newer },
     hosts
   };
 }

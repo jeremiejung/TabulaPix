@@ -359,3 +359,14 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .attention h2 { margin: 0 0 2px; padding: 0; border: 0; }
 .attention .help { color: CanvasText; }
 .access-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; }
+
+/* Import : confirmation dans la page, bien visible (tout sera remplacé). */
+.replace-box { margin: 8px 0 6px; padding: 10px 12px 12px; border: 2px solid var(--err); border-radius: var(--r-block); background: color-mix(in srgb, var(--err) 9%, Canvas); }
+.replace-box[hidden] { display: none; }
+.replace-box p { margin: 0 0 6px; }
+.replace-title { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 750; color: color-mix(in srgb, var(--err) 75%, CanvasText); }
+.replace-title svg { flex: none; width: 17px; height: 17px; color: var(--err); }
+.replace-sum { margin: 0 0 8px; padding-left: 18px; font-size: 12px; line-height: 1.5; }
+.replace-box .help:empty, .replace-box .help[hidden] { display: none; }
+.replace-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.replace-actions button { width: 100%; }
