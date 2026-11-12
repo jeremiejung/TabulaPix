@@ -6,6 +6,11 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.5.2 — 12 November 2026 (Chrome Web Store)
+
+- Shipped folders that were never renamed now follow the interface language (Actualité ↔ News…); a name chosen by the user stays as it is.
+- Fixes (code audit): a future built-in agency will no longer reshuffle the list of someone who installed 3.5 and never reordered (the 3.4.1 order is only used for users coming from before the shipped folders); “Try” in the agency editor asks for the site's permission when a field-filling agency doesn't have it yet, instead of failing; dragging a folder no longer shows the empty “No folder” drop zone; the “New” counter is no longer rewritten on every opening when empty; the Organise help line gets a 24 px click target.
+
 ## 3.5.1 — 12 November 2026 (Chrome Web Store)
 
 - **“New” badge** on agencies that arrive with an update (not on a first install), in the colour of their folder: it stays for five openings of TabulaPix, and goes away as soon as the agency is ticked or moved.

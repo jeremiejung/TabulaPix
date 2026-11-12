@@ -50,7 +50,7 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 1. Click the TabulaPix icon, or press **Alt + Shift + Y** (shortcut changeable in `chrome://extensions/shortcuts`).
 2. Type your keywords and tick the agencies you want (**All** / **None** buttons to go faster).
-   **Folders** group agencies, each in its own colour. On installation, the agencies come sorted into six folders: News, Documentary, Aggregators, Celebrity, Stock and Archives (only News, Documentary and Aggregators are ticked); they are yours to rename, recolour, reorder or delete. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). A click on a folder's title (or on **›**) folds or unfolds it, without ticking anything. Tabs open in the order of the list.
+   **Folders** group agencies, each in its own colour. On installation, the agencies come sorted into six folders: News, Documentary, Aggregators, Celebrity, Stock and Archives (only News, Documentary and Aggregators are ticked); they are yours to rename, recolour, reorder or delete (as long as they keep their shipped name, they follow the interface language). A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). A click on a folder's title (or on **›**) folds or unfolds it, without ticking anything. Tabs open in the order of the list.
 
    **Reorder at any time**: hovering over an agency or a folder shows its handle (on the right); drag it between two agencies, or onto a folder's title (highlighted) to put an agency there. With the keyboard, **Alt + ↑ / ↓** on a checkbox does the same.
 3. Press **Enter** or **Search**, right under the keywords: one tab opens per agency (the button shows how many).
@@ -121,7 +121,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.5.1" },
+  "app": { "name": "TabulaPix", "version": "3.5.2" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
