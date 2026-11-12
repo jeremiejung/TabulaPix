@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **“New” badge** on agencies that arrive with an update (not on a first install), in the colour of their folder: it stays for five openings of TabulaPix, and goes away as soon as the agency is ticked or moved.
+
 ## 3.5.0 — 12 November 2026 (Chrome Web Store)
 
 - **14 new agencies**: Divergence, Hans Lucas, Myop, Signatures, Vu', AgencesONline, Bestimage, Bureau 233, Phototélé, Starface, Alamy, Unsplash, Gamma-Rapho, Photo12. Those that fill in their site's search field ask for Chrome's permission when they are ticked, so no new permission is requested on installation or update.

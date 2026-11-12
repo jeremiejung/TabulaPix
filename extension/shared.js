@@ -152,9 +152,11 @@ async function loadAgencies(options) {
 // choix de l'utilisateur est respecté. SEEN_KEY retient les agences déjà vues.
 const SEEN_KEY = "seenAgencies";
 const FOLDERS_DONE_KEY = "shippedFoldersDone"; // rangement proposé déjà appliqué (ou écarté)
+const NEW_KEY = "newAgencies"; // { id: ouvertures restantes } : pastille « Nouveau »
+const NEW_OPENS = 5;
 async function applyNewAgencyDefaults() {
   const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [CUSTOM_KEY]: [],
-    [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}, [STORAGE_KEYS.order]: [], [FOLDERS_DONE_KEY]: false });
+    [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}, [STORAGE_KEYS.order]: [], [FOLDERS_DONE_KEY]: false, [NEW_KEY]: {} });
   const seen = new Set(Array.isArray(data[SEEN_KEY]) ? data[SEEN_KEY] : []);
   const fresh = AGENCIES.filter((a) => !seen.has(a.id));
   if (!fresh.length && data[FOLDERS_DONE_KEY]) return;
@@ -213,6 +215,14 @@ async function applyNewAgencyDefaults() {
     for (const a of fresh) if (!removed.has(a.id) || twinOf.has(a.id)) place(a);
   }
   if (!data[FOLDERS_DONE_KEY] || fresh.length) update[FOLDER_OF_KEY] = folderOf;
+  // Pastille « Nouveau » sur les agences arrivées avec une mise à jour (pas à
+  // la première installation, où tout est nouveau), pour quelques ouvertures.
+  const arrived = seen.size ? fresh.filter((a) => !removed.has(a.id)) : [];
+  if (arrived.length) {
+    const marks = data[NEW_KEY] && typeof data[NEW_KEY] === "object" ? { ...data[NEW_KEY] } : {};
+    for (const a of arrived) marks[a.id] = NEW_OPENS;
+    update[NEW_KEY] = marks;
+  }
   await chrome.storage.local.set(update);
 }
 

@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Pastille « Nouveau »** sur les agences arrivées avec une mise à jour (pas à la première installation), dans la couleur de leur dossier : elle reste cinq ouvertures de TabulaPix et disparaît dès qu’on coche ou déplace l’agence.
+
 ## 3.5.0 — 12 novembre 2026 (Chrome Web Store)
 
 - **14 nouvelles agences** : Divergence, Hans Lucas, Myop, Signatures, Vu', AgencesONline, Bestimage, Bureau 233, Phototélé, Starface, Alamy, Unsplash, Gamma-Rapho, Photo12. Celles qui remplissent le champ de recherche de leur site demandent l’autorisation de Chrome quand on les coche : aucune nouvelle autorisation n’est demandée à l’installation ni à la mise à jour.

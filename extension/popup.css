@@ -106,6 +106,8 @@ html:not(.organizing) #list.drag-on .root > .items:empty + .empty { display: blo
 .perm-banner p { flex: 1; margin: 0; font-size: 12px; }
 .perm-banner button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: var(--r-control); background: CanvasText; color: Canvas; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 .perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent); border-radius: var(--r-pill); background: color-mix(in srgb, var(--warn) 16%, Canvas); color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
+/* « Nouveau » : discrète, dans la couleur du dossier (neutre hors dossier). */
+.new-pill { flex: none; padding: 0 6px; border-radius: var(--r-pill); font-size: 11px; font-weight: 650; line-height: 17px; color: color-mix(in srgb, var(--fc, CanvasText) 62%, CanvasText); background: color-mix(in srgb, var(--fc, CanvasText) 15%, Canvas); }
 .perm-pill:hover { background: color-mix(in srgb, var(--warn) 30%, Canvas); }
 
 /* Mode Organiser */

@@ -1300,6 +1300,13 @@ function agencyItem(a, checked, isHidden = false) {
   name.dir = "auto"; // noms en arabe, hébreu… dans le bon sens
   name.textContent = a.name;
   label.append(box, name);
+  if (!organizing && newAgencies.has(a.id)) {
+    const pill = document.createElement("span");
+    pill.className = "new-pill";
+    pill.textContent = t("main.new");
+    pill.title = t("main.new.title");
+    label.append(pill);
+  }
   if (isManual(a)) {
     const hint = document.createElement("span");
     hint.className = "hint";
@@ -1415,6 +1422,7 @@ function grip(title) {
 // Alt + ↑ / ↓ : monte ou descend l'agence ; au bord d'un dossier, elle passe
 // dans le dossier voisin (ou parmi les agences sans dossier).
 function moveAgency(li, up) {
+  clearNew(li.dataset.id);
   const sib = up ? li.previousElementSibling : li.nextElementSibling;
   if (sib) up ? sib.before(li) : sib.after(li);
   else {
@@ -1685,7 +1693,7 @@ list.addEventListener("dragend", (e) => {
     return;
   }
   if (wasFolder) saveFolderOrder();
-  else { saveOrder(); saveFolderMembership(); }
+  else { clearNew(el.dataset.id); saveOrder(); saveFolderMembership(); }
   updateFolderStates();
 });
 
@@ -1695,6 +1703,7 @@ const checkedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);
 
 function save() {
   msg.textContent = "";
+  for (const id of checkedIds()) clearNew(id); // cochée : plus besoin de la signaler
   updateFolderStates();
   chrome.storage.local.set({ [STORAGE_KEY]: checkedIds() });
   updatePermUI();
@@ -1828,7 +1837,26 @@ async function refreshList() {
   return data;
 }
 
-langReady.then(applyNewAgencyDefaults).then(refreshList).then((data) => {
+/* Pastille « Nouveau » : agences arrivées avec une mise à jour. Elle reste
+   quelques ouvertures, et disparaît dès qu'on coche ou déplace l'agence. */
+let newAgencies = new Set();
+async function loadNewAgencies() {
+  const { [NEW_KEY]: marks = {} } = await chrome.storage.local.get(NEW_KEY);
+  newAgencies = new Set(Object.keys(marks).filter((id) => marks[id] > 0));
+  const next = {};
+  for (const id of newAgencies) if (marks[id] - 1 > 0) next[id] = marks[id] - 1; // une ouverture de moins
+  await chrome.storage.local.set({ [NEW_KEY]: next });
+}
+function clearNew(id) {
+  if (!id || !newAgencies.delete(id)) return;
+  list.querySelector(`li.agency[data-id="${CSS.escape(id)}"] .new-pill`)?.remove();
+  chrome.storage.local.get(NEW_KEY).then(({ [NEW_KEY]: marks = {} }) => {
+    delete marks[id];
+    chrome.storage.local.set({ [NEW_KEY]: marks });
+  });
+}
+
+langReady.then(applyNewAgencyDefaults).then(loadNewAgencies).then(refreshList).then((data) => {
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
   // Popup fermée pendant le délai d'annulation d'une suppression : les
