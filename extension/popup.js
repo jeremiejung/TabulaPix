@@ -251,13 +251,22 @@ async function currentOptionValues() {
 
 // À régler : sites qu'il faut encore autoriser, avec le nom des agences.
 async function renderAttention() {
-  const missing = await missingFillOrigins((await loadAgencies()).all);
+  const missing = await missingFillOrigins(await checkedAgencies());
   missingOrigins = [...missing.keys()];
   const names = [...missing.values()].flat().map((a) => a.name);
   document.getElementById("attention").hidden = !names.length;
   document.getElementById("attentionText").textContent = names.length === 1
     ? t("perm.banner.one", { names: names[0] })
     : t("perm.banner.many", { n: names.length, names: names.join(", ") });
+  return names.length;
+}
+
+// Agences cochées et visibles : seules elles ont besoin de leur site autorisé
+// (une agence livrée décochée ne réclame rien tant qu'on ne la coche pas).
+async function checkedAgencies() {
+  const ag = await loadAgencies();
+  const { [STORAGE_KEY]: checked } = await chrome.storage.local.get({ [STORAGE_KEY]: DEFAULT_CHECKED });
+  return ag.all.filter((a) => checked.includes(a.id) && !ag.hidden.has(a.id));
 }
 
 // Accès rapide : le raccourci réellement défini dans Chrome.
@@ -1098,24 +1107,22 @@ $id("importOk").addEventListener("click", async () => {
   // Remplace la configuration (la dernière recherche est gardée).
   const { [QUERY_KEY]: lastQuery } = await chrome.storage.local.get(QUERY_KEY);
   await chrome.storage.local.clear();
-  await chrome.storage.local.set({ ...result.storage, ...(lastQuery ? { [QUERY_KEY]: lastQuery } : {}) });
+  // [FOLDERS_DONE_KEY] : pas de rangement proposé, le fichier est respecté tel quel.
+  await chrome.storage.local.set({ ...result.storage, [FOLDERS_DONE_KEY]: true, ...(lastQuery ? { [QUERY_KEY]: lastQuery } : {}) });
   await chrome.storage.session.remove([AGENCY_DRAFT_KEY, PICK_RESULT_KEY, "fillDraft", "pickSession"]);
   await applyNewAgencyDefaults();
 
   // Autorisations : on retire celles qui ne servent plus, on liste celles à accorder.
-  const needed = result.hosts.map(originPattern);
   await releaseUnusedOrigins();
   await reloadSettingsView();
   const report = async () => {
-    missingOrigins = [];
-    for (const origin of needed) if (!(await chrome.permissions.contains({ origins: [origin] }))) missingOrigins.push(origin);
+    const toAllow = await renderAttention(); // agences cochées dont le site reste à autoriser
     backupMsg.className = "status ok";
     // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
     const s = result.summary;
     const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
       s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
-    backupMsg.textContent = t("backup.imported") + " " + summary + (missingOrigins.length ? "\n" + t("backup.needPerm") : "");
-    await renderAttention();
+    backupMsg.textContent = t("backup.imported") + " " + summary + (toAllow ? "\n" + t("backup.needPerm") : "");
   };
   await report();
   asked.then(report); // une fois la demande de Chrome acceptée ou refusée
@@ -1484,6 +1491,7 @@ function folderHead(f, color, group) {
     name.className = "folder-name";
     name.dir = "auto";
     name.textContent = f.name;
+    name.title = f.name; // nom complet si la colonne est trop étroite
     // Un clic sur le titre plie ou déplie le dossier ; seule la case coche tout
     // (pas de « tout coché » par mégarde en voulant ouvrir le dossier).
     head.classList.add("foldable");
@@ -1525,7 +1533,7 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     for (const a of g.items) {
       const li = agencyItem(a, checked, hidden.has(a.id));
       const origin = [...missing].find(([, names]) => names.includes(a))?.[0];
-      if (origin && !organizing) li.append(permPill(origin));
+      if (origin && !organizing) li.insertBefore(permPill(origin), li.querySelector(".grip")); // avant la poignée
       ul.append(li);
     }
     const empty = document.createElement("p");
@@ -1625,6 +1633,7 @@ list.addEventListener("dragstart", (e) => {
   const head = g.closest(".group-head");
   dragged = head ? head.parentElement : g.closest("li.agency");
   origin = { parent: dragged.parentElement, next: dragged.nextElementSibling };
+  list.classList.add("drag-on"); // « Sans dossier » vide redevient visible, comme zone de dépôt
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", dragged.dataset.id || dragged.dataset.folder);
   // L'image suit la souris là où on l'a saisie (pas de saut vers la case).
@@ -1668,6 +1677,7 @@ list.addEventListener("dragend", (e) => {
   const el = dragged, wasFolder = el.classList.contains("group");
   clearDropHead();
   el.classList.remove("dragging");
+  list.classList.remove("drag-on");
   dragged = null;
   if (e.dataTransfer.dropEffect === "none") { // Échap ou lâché hors de la liste : rien ne change
     origin.next && origin.next.parentElement === origin.parent ? origin.next.before(el) : origin.parent.append(el);
@@ -1687,6 +1697,26 @@ function save() {
   msg.textContent = "";
   updateFolderStates();
   chrome.storage.local.set({ [STORAGE_KEY]: checkedIds() });
+  updatePermUI();
+}
+
+// Cocher une agence dont le site n'est pas encore autorisé fait apparaître
+// sa pastille et le bandeau ; la décocher les retire.
+let permRun = 0;
+async function updatePermUI() {
+  const run = ++permRun;
+  const checked = new Set(checkedIds());
+  const missing = await missingFillOrigins(ALL.filter((a) => checked.has(a.id)));
+  if (run !== permRun) return; // une coche plus récente a déjà relancé le calcul
+  renderPermBanner(missing);
+  list.querySelectorAll(".perm-pill").forEach((p) => p.remove());
+  if (organizing) return;
+  for (const [origin, agencies] of missing) {
+    for (const a of agencies) {
+      const li = list.querySelector(`li.agency[data-id="${CSS.escape(a.id)}"]`);
+      if (li) li.insertBefore(permPill(origin), li.querySelector(".grip"));
+    }
+  }
 }
 
 // Les visibles prennent l'ordre affiché ; chaque agence masquée reste juste
@@ -1784,7 +1814,7 @@ async function refreshList() {
   currentFolders = folders;
   // Mode Organiser : les agences masquées apparaissent aussi (grisées), pour les réafficher.
   const shown = organizing ? ordered : ordered.filter((a) => !ag.hidden.has(a.id));
-  const missing = await missingFillOrigins(shown.filter((a) => !ag.hidden.has(a.id)));
+  const missing = await missingFillOrigins(shown.filter((a) => !ag.hidden.has(a.id) && data[STORAGE_KEY].includes(a.id)));
   // Plus aucune attente ici : vider puis reconstruire d'un seul tenant (sinon
   // deux mises à jour simultanées dupliqueraient les lignes).
   const key = focusKey();
