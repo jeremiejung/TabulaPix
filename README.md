@@ -148,7 +148,7 @@ Everything is in **`extension/config.js`**. Each agency has a name and an addres
 }
 ```
 
-To have an agency unticked on a first install, add `defaultChecked: false`; to have it hidden (to be shown with its eye in Organise mode), `defaultHidden: true` — applied the first time the agency appears, including on an update (this is the case for AFP (forum) and Reuters (standard)). A new agency is placed in the list right after the one that precedes it in `config.js`.
+To have an agency unticked on a first install, add `defaultChecked: false`; to have it hidden (to be shown with its eye in Organise mode), `defaultHidden: true` — applied the first time the agency appears, including on an update (this is the case for AFP (forum) and Reuters (standard)). A new agency is placed in the list right after the one that precedes it in `config.js`; for existing users it arrives unticked and outside any folder. If a user had already added the same agency by hand (same site, and same search page or same name), their own is kept and the built-in one is set aside like a deleted agency (**Restore** in the settings brings it back).
 
 Tip for finding the address: run a search on the site with easy-to-spot words (e.g. `midterms texas democrats`), copy the URL of the results page and replace the words with `{q}`. Depending on the site, spaces appear as `%20` or `+`: replace the whole thing, separators included.
 

@@ -152,13 +152,37 @@ async function loadAgencies(options) {
 // choix de l'utilisateur est respecté. SEEN_KEY retient les agences déjà vues.
 const SEEN_KEY = "seenAgencies";
 async function applyNewAgencyDefaults() {
-  const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [] });
+  const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [CUSTOM_KEY]: [] });
   const seen = new Set(Array.isArray(data[SEEN_KEY]) ? data[SEEN_KEY] : []);
   const fresh = AGENCIES.filter((a) => !seen.has(a.id));
   if (!fresh.length) return;
   const hidden = new Set(Array.isArray(data[HIDDEN_KEY]) ? data[HIDDEN_KEY] : []);
   for (const a of fresh) if (a.defaultHidden) hidden.add(a.id);
-  await chrome.storage.local.set({ [SEEN_KEY]: AGENCIES.map((a) => a.id), [HIDDEN_KEY]: [...hidden] });
+  // Agence livrée que l'utilisateur avait déjà ajoutée lui-même (même site,
+  // même page de recherche ou même nom) : on garde la sienne, et la livrée
+  // est mise de côté comme une agence supprimée (« Restaurer » dans les options).
+  const removed = new Set(Array.isArray(data[REMOVED_KEY]) ? data[REMOVED_KEY] : []);
+  const custom = (Array.isArray(data[CUSTOM_KEY]) ? data[CUSTOM_KEY] : []).filter((c) => c && typeof c.url === "string");
+  if (seen.size && custom.length) { // pas à la première installation : rien d'ajouté à la main
+    const options = await loadOptions();
+    for (const a of fresh) if (custom.some((c) => sameAgencySite(a, c, options))) removed.add(a.id);
+  }
+  await chrome.storage.local.set({ [SEEN_KEY]: AGENCIES.map((a) => a.id), [HIDDEN_KEY]: [...hidden], [REMOVED_KEY]: [...removed] });
+}
+
+// Site et page de recherche d'une adresse : « www. » ignoré, mots-clés
+// remplacés, paramètres ignorés (www.alamy.com/search?qt={q} → alamy.com /search).
+function siteOf(url, options) {
+  try {
+    const u = new URL(applyOptions(url, options).replace(/\{(q|q:slug|payload)\}/g, "x"));
+    return { host: u.hostname.toLowerCase().replace(/^www\./, ""), path: u.pathname.replace(/\/+$/, "").toLowerCase() };
+  } catch (_) { return null; }
+}
+// Même agence ? Même site, et même page de recherche ou même nom.
+function sameAgencySite(builtin, custom, options) {
+  const a = siteOf(builtin.url, options), b = siteOf(custom.url, options);
+  if (!a || !b || a.host !== b.host) return false;
+  return a.path === b.path || String(builtin.name).trim().toLowerCase() === String(custom.name || "").trim().toLowerCase();
 }
 
 /* ---------- Fichier de configuration (export / import) ---------- */

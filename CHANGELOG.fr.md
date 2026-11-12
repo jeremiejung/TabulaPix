@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- Une agence fournie arrivant avec une mise à jour ne fait plus doublon avec une agence que l’utilisateur avait déjà ajoutée à la main (même site, et même page de recherche ou même nom) : la sienne est gardée, et celle fournie est mise de côté comme une agence supprimée (Restaurer dans les options).
+
 ## 3.4.1 — 11 novembre 2026 (Chrome Web Store)
 
 - **Réordonner à tout moment**, sans passer par le mode Organiser : au survol d’une agence ou d’un dossier, sa poignée apparaît pour le faire glisser ; Alt + ↑ / ↓ sur une case marche aussi à tout moment.
