@@ -181,7 +181,12 @@ async function applyNewAgencyDefaults() {
   const stored = Array.isArray(data[STORAGE_KEYS.order]) ? data[STORAGE_KEYS.order] : [];
   if (seen.size && fresh.length) {
     const freshIds = new Set(fresh.map((a) => a.id));
-    const base = stored.length ? stored : LEGACY_ORDER.concat(AGENCIES.map((a) => a.id).filter((id) => !LEGACY_ORDER.includes(id) && !freshIds.has(id)));
+    // Jamais réordonné : sa liste suivait l'ordre livré — celui de la 3.4.1 s'il
+    // arrive d'avant les dossiers livrés, sinon celui de config.js (sans les nouvelles).
+    const shipped = AGENCIES.map((a) => a.id).filter((id) => !freshIds.has(id));
+    const base = stored.length ? stored
+      : data[FOLDERS_DONE_KEY] ? shipped
+      : LEGACY_ORDER.concat(shipped.filter((id) => !LEGACY_ORDER.includes(id)));
     update[STORAGE_KEYS.order] = base.filter((id) => !freshIds.has(id)).concat(fresh.map((a) => a.id));
   }
 

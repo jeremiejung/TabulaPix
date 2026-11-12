@@ -763,6 +763,15 @@ ed.tryBtn.addEventListener("click", async () => {
   const q = ed.detQ.value.trim() || input.value.trim() || t("ed.sampleQuery");
   const url = await buildUrl(spec, q, await loadOptions());
   const fill = draft.mode === "fill" ? draft.fill : null;
+  if (fill) {
+    // Site pas encore autorisé (ex. agence fournie qui remplit un champ) : on
+    // le demande ici, le clic sur « Essayer » le permet.
+    const host = hostOf(url, {});
+    if (host && !(await chrome.permissions.contains({ origins: [originPattern(host)] }))) {
+      const granted = await chrome.permissions.request({ origins: [originPattern(host)] }).catch(() => false);
+      if (!granted) return flash(t("ed.permRefused", { host }), addMsg);
+    }
+  }
   const res = await chrome.runtime.sendMessage({ type: "try", url, q, fill, builtinId: builtin ? builtin.id : null }).catch(() => null);
   flash(res && res.ok ? t("ed.tryStarted", { q }) : (res && res.error) || t("ed.tryFailed"), addMsg);
 });
@@ -1641,7 +1650,7 @@ list.addEventListener("dragstart", (e) => {
   const head = g.closest(".group-head");
   dragged = head ? head.parentElement : g.closest("li.agency");
   origin = { parent: dragged.parentElement, next: dragged.nextElementSibling };
-  list.classList.add("drag-on"); // « Sans dossier » vide redevient visible, comme zone de dépôt
+  if (!head) list.classList.add("drag-on"); // agence : « Sans dossier » vide redevient visible, comme zone de dépôt
   e.dataTransfer.effectAllowed = "move";
   e.dataTransfer.setData("text/plain", dragged.dataset.id || dragged.dataset.folder);
   // L'image suit la souris là où on l'a saisie (pas de saut vers la case).
@@ -1843,6 +1852,7 @@ let newAgencies = new Set();
 async function loadNewAgencies() {
   const { [NEW_KEY]: marks = {} } = await chrome.storage.local.get(NEW_KEY);
   newAgencies = new Set(Object.keys(marks).filter((id) => marks[id] > 0));
+  if (!Object.keys(marks).length) return; // rien à décompter
   const next = {};
   for (const id of newAgencies) if (marks[id] - 1 > 0) next[id] = marks[id] - 1; // une ouverture de moins
   await chrome.storage.local.set({ [NEW_KEY]: next });
