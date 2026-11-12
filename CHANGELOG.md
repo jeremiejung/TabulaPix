@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.5.1 — 12 November 2026 (Chrome Web Store)
+
 - **“New” badge** on agencies that arrive with an update (not on a first install), in the colour of their folder: it stays for five openings of TabulaPix, and goes away as soon as the agency is ticked or moved.
 
 ## 3.5.0 — 12 November 2026 (Chrome Web Store)
