@@ -6,7 +6,7 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
-- A built-in agency arriving with an update no longer duplicates one the user had already added by hand (same site, and same search page or same name): theirs is kept, and the built-in one is set aside like a deleted agency (Restore in the settings).
+- A built-in agency arriving with an update no longer duplicates one the user had already added by hand (same address, parameters included apart from the keywords, or same site and same name): theirs is kept, and the built-in one is set aside like a deleted agency (Restore in the settings).
 
 ## 3.4.1 — 11 November 2026 (Chrome Web Store)
 

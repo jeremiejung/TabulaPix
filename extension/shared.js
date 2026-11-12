@@ -158,8 +158,8 @@ async function applyNewAgencyDefaults() {
   if (!fresh.length) return;
   const hidden = new Set(Array.isArray(data[HIDDEN_KEY]) ? data[HIDDEN_KEY] : []);
   for (const a of fresh) if (a.defaultHidden) hidden.add(a.id);
-  // Agence livrée que l'utilisateur avait déjà ajoutée lui-même (même site,
-  // même page de recherche ou même nom) : on garde la sienne, et la livrée
+  // Agence livrée que l'utilisateur avait déjà ajoutée lui-même (même adresse,
+  // paramètres compris, ou même site et même nom) : on garde la sienne, et la livrée
   // est mise de côté comme une agence supprimée (« Restaurer » dans les options).
   const removed = new Set(Array.isArray(data[REMOVED_KEY]) ? data[REMOVED_KEY] : []);
   const custom = (Array.isArray(data[CUSTOM_KEY]) ? data[CUSTOM_KEY] : []).filter((c) => c && typeof c.url === "string");
@@ -170,19 +170,26 @@ async function applyNewAgencyDefaults() {
   await chrome.storage.local.set({ [SEEN_KEY]: AGENCIES.map((a) => a.id), [HIDDEN_KEY]: [...hidden], [REMOVED_KEY]: [...removed] });
 }
 
-// Site et page de recherche d'une adresse : « www. » ignoré, mots-clés
-// remplacés, paramètres ignorés (www.alamy.com/search?qt={q} → alamy.com /search).
+// Adresse ramenée à l'essentiel pour comparer deux agences : « www. » ignoré,
+// paramètres triés, la valeur qui contient les mots-clés remplacée par « * »
+// (getty…/image?family=editorial&phrase={q} ≠ getty…/image?family=creative&phrase={q}).
 function siteOf(url, options) {
   try {
-    const u = new URL(applyOptions(url, options).replace(/\{(q|q:slug|payload)\}/g, "x"));
-    return { host: u.hostname.toLowerCase().replace(/^www\./, ""), path: u.pathname.replace(/\/+$/, "").toLowerCase() };
+    const u = new URL(applyOptions(url, options).replace(/\{(q|q:slug|payload)\}/g, "tpkw"));
+    const norm = (params) => [...params].map(([k, v]) => `${k.toLowerCase()}=${v.includes("tpkw") ? "*" : v}`).sort().join("&");
+    const hash = u.hash.replace(/tpkw/g, "*");
+    return {
+      host: u.hostname.toLowerCase().replace(/^www\./, ""),
+      key: [u.pathname.replace(/tpkw/g, "*").replace(/\/+$/, "").toLowerCase(), norm(u.searchParams), hash].join("|")
+    };
   } catch (_) { return null; }
 }
-// Même agence ? Même site, et même page de recherche ou même nom.
+// Même agence ? Même site, et même adresse (paramètres compris) ou même nom.
+// Dans le doute, non : un doublon visible vaut mieux qu'une agence mise de côté à tort.
 function sameAgencySite(builtin, custom, options) {
   const a = siteOf(builtin.url, options), b = siteOf(custom.url, options);
   if (!a || !b || a.host !== b.host) return false;
-  return a.path === b.path || String(builtin.name).trim().toLowerCase() === String(custom.name || "").trim().toLowerCase();
+  return a.key === b.key || String(builtin.name).trim().toLowerCase() === String(custom.name || "").trim().toLowerCase();
 }
 
 /* ---------- Fichier de configuration (export / import) ---------- */

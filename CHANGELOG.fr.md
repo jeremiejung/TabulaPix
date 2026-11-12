@@ -6,7 +6,7 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
-- Une agence fournie arrivant avec une mise à jour ne fait plus doublon avec une agence que l’utilisateur avait déjà ajoutée à la main (même site, et même page de recherche ou même nom) : la sienne est gardée, et celle fournie est mise de côté comme une agence supprimée (Restaurer dans les options).
+- Une agence fournie arrivant avec une mise à jour ne fait plus doublon avec une agence que l’utilisateur avait déjà ajoutée à la main (même adresse, paramètres compris hors mots-clés, ou même site et même nom) : la sienne est gardée, et celle fournie est mise de côté comme une agence supprimée (Restaurer dans les options).
 
 ## 3.4.1 — 11 novembre 2026 (Chrome Web Store)
 
