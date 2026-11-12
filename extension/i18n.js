@@ -41,6 +41,8 @@ const I18N = {
     "main.bgError": "TabulaPix n'a pas pu ouvrir les onglets (extension en cours de rechargement ?). Réessayez dans un instant.",
     "main.tabs.many": "{n} onglets",
     "main.paste": "coller",
+    "main.new": "Nouveau",
+    "main.new.title": "Arrivée avec la dernière mise à jour de TabulaPix",
     "main.paste.title": "Mots-clés copiés dans le presse-papiers : collez-les (Ctrl/Cmd+V) dans le champ de recherche du site.",
 
     // Options
@@ -264,6 +266,8 @@ const I18N = {
     "main.bgError": "TabulaPix could not open the tabs (extension reloading?). Try again in a moment.",
     "main.tabs.many": "{n} tabs",
     "main.paste": "paste",
+    "main.new": "New",
+    "main.new.title": "Arrived with the latest TabulaPix update",
     "main.paste.title": "Keywords copied to the clipboard: paste them (Ctrl/Cmd+V) into the site's search field.",
 
     "opt.pixpalace": "Pixpalace",
