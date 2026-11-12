@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.2 — 12 novembre 2026 (Chrome Web Store)
+
 - Les dossiers livrés jamais renommés suivent désormais la langue de l’interface (Actualité ↔ News…) ; un nom choisi par l’utilisateur reste tel quel.
 - Corrections (audit du code) : une future agence fournie ne mélangera plus la liste de qui a installé la 3.5 sans jamais réordonner (l’ordre de la 3.4.1 ne sert qu’aux utilisateurs venant d’avant les dossiers livrés) ; « Essayer » dans l’éditeur d’agence demande l’autorisation du site quand une agence qui remplit un champ ne l’a pas encore, au lieu d’échouer ; glisser un dossier n’affiche plus la zone vide « Sans dossier » ; le compteur de la pastille « Nouveau » n’est plus réécrit à chaque ouverture quand il est vide ; la ligne d’aide du mode Organiser a une zone cliquable de 24 px.
 
