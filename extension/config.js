@@ -56,7 +56,7 @@
  */
 const FOLDERS = [
   { id: "tp-actu", name: { fr: "Actualité", en: "News" }, color: "blue" },
-  { id: "tp-reportage", name: { fr: "Reportage & auteurs", en: "Reportage & photographers" }, color: "green" },
+  { id: "tp-reportage", name: { fr: "Reportage & auteurs", en: "Documentary" }, color: "green" },
   { id: "tp-agregateurs", name: { fr: "Agrégateurs", en: "Aggregators" }, color: "amber" },
   { id: "tp-people", name: { fr: "People", en: "Celebrity" }, color: "pink" },
   { id: "tp-stock", name: { fr: "Stock", en: "Stock" }, color: "violet" },
