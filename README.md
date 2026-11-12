@@ -50,7 +50,7 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 1. Click the TabulaPix icon, or press **Alt + Shift + Y** (shortcut changeable in `chrome://extensions/shortcuts`).
 2. Type your keywords and tick the agencies you want (**All** / **None** buttons to go faster).
-   **Folders** group agencies (wire agencies, photographers' agencies, press-service agencies…), each in its own colour. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). A click on a folder's title (or on **›**) folds or unfolds it, without ticking anything. Tabs open in the order of the list.
+   **Folders** group agencies, each in its own colour. On installation, the agencies come sorted into six folders: News, Documentary, Aggregators, Celebrity, Stock and Archives (only News, Documentary and Aggregators are ticked); they are yours to rename, recolour, reorder or delete. A folder's checkbox ticks or unticks all its agencies at once; it is half-ticked when only some of them are ticked (the counter shows how many). A click on a folder's title (or on **›**) folds or unfolds it, without ticking anything. Tabs open in the order of the list.
 
    **Reorder at any time**: hovering over an agency or a folder shows its handle (on the right); drag it between two agencies, or onto a folder's title (highlighted) to put an agency there. With the keyboard, **Alt + ↑ / ↓** on a checkbox does the same.
 3. Press **Enter** or **Search**, right under the keywords: one tab opens per agency (the button shows how many).
@@ -60,7 +60,7 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 **Keep open:** the **column** button (first icon at the top of the popup) shows TabulaPix in a column on the right of the window (Chrome's side panel, version 116 or later). The column stays open when you switch tabs, so you can chain searches without reopening the extension. While the column is open, the TabulaPix icon in the toolbar acts on the column (it doesn't open a popup on top of it); once the column is closed, the icon opens the popup again. To close it: the cross at the top of the column. It can also be reopened from Chrome's side panel icon.
 
-For **Bloomberg, Abacapress and Pixpalace**, the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more).
+For some agencies (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more). Apart from Bloomberg, Abacapress and Pixpalace, Chrome asks once for permission for the site: when you tick such an agency, a “to allow” badge and a banner offer to allow it.
 
 If an agency added later has neither an address with `{q}` nor automatic field filling, it is marked **“paste”**: the page opens and your keywords are copied to the clipboard; just press **Ctrl+V** (or **Cmd+V**) in the search field.
 
@@ -121,7 +121,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.4.1" },
+  "app": { "name": "TabulaPix", "version": "3.5.0" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
@@ -148,7 +148,7 @@ Everything is in **`extension/config.js`**. Each agency has a name and an addres
 }
 ```
 
-To have an agency unticked on a first install, add `defaultChecked: false`; to have it hidden (to be shown with its eye in Organise mode), `defaultHidden: true` — applied the first time the agency appears, including on an update (this is the case for AFP (forum) and Reuters (standard)). A new agency is placed in the list right after the one that precedes it in `config.js`.
+To have an agency unticked on a first install, add `defaultChecked: false`; to have it hidden (to be shown with its eye in Organise mode), `defaultHidden: true` — applied the first time the agency appears, including on an update (this is the case for AFP (forum) and Reuters (standard)). Folders are declared in `FOLDERS` (fixed `id`, French and English names, colour) and each agency gives its own (`folder`). On a first install, or the first time this version opens for a user who has not created any folder yet, the shipped folders are created and the agencies sorted into them (ticks, hidden agencies, names and relative order are kept; added agencies stay outside folders). After that, folders belong to the user: an update never creates, renames or deletes one. A new built-in agency goes into its folder if the user still has it (even renamed), otherwise outside any folder; for existing users it arrives unticked, at the end of the list. An import keeps the file as it is. If a user had already added the same agency by hand (same address, parameters included apart from the keywords, or same site and same name), their own is kept and the built-in one is set aside like a deleted agency (**Restore** in the settings brings it back).
 
 Tip for finding the address: run a search on the site with easy-to-spot words (e.g. `midterms texas democrats`), copy the URL of the results page and replace the words with `{q}`. Depending on the site, spaces appear as `%20` or `+`: replace the whole thing, separators included.
 
@@ -156,7 +156,7 @@ Newsroom-specific values are not hard-coded: they go through an option, inserted
 
 Some sites (AFP news, Sipa, Rea) “wrap” the search in the URL (hexadecimal, or gzip + base64). For them, the content is described in `payload` and the encoding steps in `encode` — see the comments at the top of `config.js`.
 
-For sites whose address cannot contain the search, the field to fill in and the button to click are given instead (`fill`), as CSS selectors. For a new site of this kind, also add its domain to `host_permissions` in `extension/manifest.json`.
+For sites whose address cannot contain the search, the field to fill in and the button to click are given instead (`fill`), as CSS selectors. Such a site needs Chrome's permission: either it is in `host_permissions` of `extension/manifest.json` (granted on installation, but adding one disables the extension for existing users until they accept it), or — preferred — the user allows it on demand: a “to allow” badge appears when the agency is ticked.
 
 After any change: `chrome://extensions` → **↻** (reload) button on TabulaPix.
 

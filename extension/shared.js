@@ -151,14 +151,91 @@ async function loadAgencies(options) {
 // première fois qu'elles apparaissent (installation ou mise à jour), puis le
 // choix de l'utilisateur est respecté. SEEN_KEY retient les agences déjà vues.
 const SEEN_KEY = "seenAgencies";
+const FOLDERS_DONE_KEY = "shippedFoldersDone"; // rangement proposé déjà appliqué (ou écarté)
 async function applyNewAgencyDefaults() {
-  const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [] });
+  const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [CUSTOM_KEY]: [],
+    [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}, [STORAGE_KEYS.order]: [], [FOLDERS_DONE_KEY]: false });
   const seen = new Set(Array.isArray(data[SEEN_KEY]) ? data[SEEN_KEY] : []);
   const fresh = AGENCIES.filter((a) => !seen.has(a.id));
-  if (!fresh.length) return;
+  if (!fresh.length && data[FOLDERS_DONE_KEY]) return;
   const hidden = new Set(Array.isArray(data[HIDDEN_KEY]) ? data[HIDDEN_KEY] : []);
   for (const a of fresh) if (a.defaultHidden) hidden.add(a.id);
-  await chrome.storage.local.set({ [SEEN_KEY]: AGENCIES.map((a) => a.id), [HIDDEN_KEY]: [...hidden] });
+  // Agence livrée que l'utilisateur avait déjà ajoutée lui-même (même adresse,
+  // paramètres compris, ou même site et même nom) : on garde la sienne, et la
+  // livrée est mise de côté comme une agence supprimée (« Restaurer » dans les options).
+  const removed = new Set(Array.isArray(data[REMOVED_KEY]) ? data[REMOVED_KEY] : []);
+  const custom = (Array.isArray(data[CUSTOM_KEY]) ? data[CUSTOM_KEY] : []).filter((c) => c && typeof c.url === "string");
+  const twinOf = new Map(); // agence livrée → agence ajoutée qui la remplace
+  if (seen.size && custom.length) { // pas à la première installation : rien d'ajouté à la main
+    const options = await loadOptions();
+    for (const a of fresh) {
+      const twin = custom.find((c) => sameAgencySite(a, c, options));
+      if (twin) { removed.add(a.id); twinOf.set(a.id, twin.id); }
+    }
+  }
+  const update = { [SEEN_KEY]: AGENCIES.map((a) => a.id), [HIDDEN_KEY]: [...hidden], [REMOVED_KEY]: [...removed] };
+  // Chez un utilisateur existant, les nouvelles agences vont en fin de liste,
+  // regroupées (et non intercalées entre les siennes, qui gardent leur place).
+  const stored = Array.isArray(data[STORAGE_KEYS.order]) ? data[STORAGE_KEYS.order] : [];
+  if (seen.size && fresh.length) {
+    const freshIds = new Set(fresh.map((a) => a.id));
+    const base = stored.length ? stored : LEGACY_ORDER.concat(AGENCIES.map((a) => a.id).filter((id) => !LEGACY_ORDER.includes(id) && !freshIds.has(id)));
+    update[STORAGE_KEYS.order] = base.filter((id) => !freshIds.has(id)).concat(fresh.map((a) => a.id));
+  }
+
+  // Dossiers livrés (FOLDERS, config.js).
+  let folders = Array.isArray(data[FOLDERS_KEY]) ? data[FOLDERS_KEY] : [];
+  const folderOf = data[FOLDER_OF_KEY] && typeof data[FOLDER_OF_KEY] === "object" ? { ...data[FOLDER_OF_KEY] } : {};
+  const place = (a) => { // l'agence (ou celle qui la remplace) dans son dossier livré
+    if (!a.folder || !folders.some((f) => f.id === a.folder)) return;
+    const id = twinOf.get(a.id) || a.id;
+    if (!folderOf[id]) folderOf[id] = a.folder;
+  };
+  if (!data[FOLDERS_DONE_KEY]) {
+    // Une seule fois (installation, ou première ouverture de cette version).
+    if (!folders.length) {
+      // Aucun dossier créé : on propose le rangement livré. Cases, masquage,
+      // noms et ordre relatif restent ceux de l'utilisateur ; ses agences
+      // ajoutées restent hors dossier (sauf celles qui remplacent une livrée).
+      const lang = typeof LANG === "string" ? LANG : "fr";
+      folders = FOLDERS.map((f) => ({ id: f.id, name: f.name[lang] || f.name.fr, color: f.color }));
+      for (const a of AGENCIES) place(a);
+      update[FOLDERS_KEY] = folders;
+    } else if (seen.size && !stored.length && !update[STORAGE_KEYS.order]) {
+      // Il a ses dossiers mais n'a jamais réordonné : on fige l'ordre d'avant
+      // (le nouvel ordre de config.js ne doit pas mélanger sa liste).
+      update[STORAGE_KEYS.order] = LEGACY_ORDER.filter((id) => AGENCIES.some((a) => a.id === id));
+    }
+    update[FOLDERS_DONE_KEY] = true;
+  } else {
+    // Mises à jour suivantes : une nouvelle agence livrée va dans son dossier
+    // s'il existe encore chez l'utilisateur (même renommé) ; sinon, hors dossier.
+    for (const a of fresh) if (!removed.has(a.id) || twinOf.has(a.id)) place(a);
+  }
+  if (!data[FOLDERS_DONE_KEY] || fresh.length) update[FOLDER_OF_KEY] = folderOf;
+  await chrome.storage.local.set(update);
+}
+
+// Adresse ramenée à l'essentiel pour comparer deux agences : « www. » ignoré,
+// paramètres triés, la valeur qui contient les mots-clés remplacée par « * »
+// (getty…/image?family=editorial&phrase={q} ≠ getty…/image?family=creative&phrase={q}).
+function siteOf(url, options) {
+  try {
+    const u = new URL(applyOptions(url, options).replace(/\{(q|q:slug|payload)\}/g, "tpkw"));
+    const norm = (params) => [...params].map(([k, v]) => `${k.toLowerCase()}=${v.includes("tpkw") ? "*" : v}`).sort().join("&");
+    const hash = u.hash.replace(/tpkw/g, "*");
+    return {
+      host: u.hostname.toLowerCase().replace(/^www\./, ""),
+      key: [u.pathname.replace(/tpkw/g, "*").replace(/\/+$/, "").toLowerCase(), norm(u.searchParams), hash].join("|")
+    };
+  } catch (_) { return null; }
+}
+// Même agence ? Même site, et même adresse (paramètres compris) ou même nom.
+// Dans le doute, non : un doublon visible vaut mieux qu'une agence mise de côté à tort.
+function sameAgencySite(builtin, custom, options) {
+  const a = siteOf(builtin.url, options), b = siteOf(custom.url, options);
+  if (!a || !b || a.host !== b.host) return false;
+  return a.key === b.key || String(builtin.name).trim().toLowerCase() === String(custom.name || "").trim().toLowerCase();
 }
 
 /* ---------- Fichier de configuration (export / import) ---------- */

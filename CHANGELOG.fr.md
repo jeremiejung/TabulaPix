@@ -6,6 +6,14 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.0 — 12 novembre 2026 (Chrome Web Store)
+
+- **14 nouvelles agences** : Divergence, Hans Lucas, Myop, Signatures, Vu', AgencesONline, Bestimage, Bureau 233, Phototélé, Starface, Alamy, Unsplash, Gamma-Rapho, Photo12. Celles qui remplissent le champ de recherche de leur site demandent l’autorisation de Chrome quand on les coche : aucune nouvelle autorisation n’est demandée à l’installation ni à la mise à jour.
+- **Dossiers livrés** : à l’installation, les agences arrivent rangées dans Actualité, Reportage & auteurs, Agrégateurs, People, Stock et Archives. Qui n’a encore créé aucun dossier reçoit une fois ce même rangement, en gardant ses cases, ses agences masquées et son ordre ; qui a déjà ses dossiers les garde intacts, et les nouvelles agences arrivent décochées en fin de liste.
+- Les sites à autoriser (bandeau, pastilles, « À régler ») ne concernent plus que les agences cochées.
+- « Sans dossier » n’est plus affiché quand il est vide, sauf pendant un glisser (pour y déposer une agence) ; un nom de dossier trop long pour la popup s’affiche en entier au survol.
+- Une agence fournie arrivant avec une mise à jour ne fait plus doublon avec une agence que l’utilisateur avait déjà ajoutée à la main (même adresse, paramètres compris hors mots-clés, ou même site et même nom) : la sienne est gardée, et celle fournie est mise de côté comme une agence supprimée (Restaurer dans les options).
+
 ## 3.4.1 — 11 novembre 2026 (Chrome Web Store)
 
 - **Réordonner à tout moment**, sans passer par le mode Organiser : au survol d’une agence ou d’un dossier, sa poignée apparaît pour le faire glisser ; Alt + ↑ / ↓ sur une case marche aussi à tout moment.

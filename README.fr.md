@@ -50,7 +50,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 
 1. Cliquez sur l'icône TabulaPix, ou appuyez sur **Alt + Maj + Y** (raccourci modifiable dans `chrome://extensions/shortcuts`).
 2. Tapez vos mots-clés, cochez les agences voulues (boutons **Tout** / **Aucune** pour aller vite).
-   Les **dossiers** regroupent les agences (agences filaires, agences d'auteurs, agences de service de presse…), chacun dans sa couleur. La case d'un dossier coche ou décoche toutes ses agences d'un coup ; elle est à moitié cochée quand seules certaines le sont (le compteur indique combien). Un clic sur le titre d'un dossier (ou sur **›**) le replie ou le déplie, sans rien cocher. Les onglets s'ouvrent dans l'ordre de la liste.
+   Les **dossiers** regroupent les agences, chacun dans sa couleur. À l'installation, les agences arrivent rangées dans six dossiers : Actualité, Reportage & auteurs, Agrégateurs, People, Stock et Archives (seuls Actualité, Reportage et Agrégateurs sont cochés) ; à vous de les renommer, recolorer, réordonner ou supprimer. La case d'un dossier coche ou décoche toutes ses agences d'un coup ; elle est à moitié cochée quand seules certaines le sont (le compteur indique combien). Un clic sur le titre d'un dossier (ou sur **›**) le replie ou le déplie, sans rien cocher. Les onglets s'ouvrent dans l'ordre de la liste.
 
    **Réordonner à tout moment** : au survol d'une agence ou d'un dossier, sa poignée apparaît (à droite) ; faites-la glisser entre deux agences, ou sur le titre d'un dossier (surligné) pour y ranger une agence. Au clavier, **Alt + ↑ / ↓** sur une case fait de même.
 3. Appuyez sur **Entrée** ou **Lancer la recherche**, juste sous les mots-clés : un onglet s'ouvre par agence (le bouton indique combien).
@@ -60,7 +60,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 
 **Garder ouvert :** le bouton **colonne** (première icône en haut de la popup) affiche TabulaPix dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Tant que la colonne est ouverte, l'icône TabulaPix de la barre d'outils agit sur la colonne (elle n'ouvre pas de popup par-dessus) ; une fois la colonne fermée, l'icône rouvre la popup. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
 
-Pour **Bloomberg, Abacapress et Pixpalace**, l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus).
+Pour certaines agences (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus). Hormis Bloomberg, Abacapress et Pixpalace, Chrome demande une fois l'autorisation pour le site : quand vous cochez une de ces agences, une pastille « à autoriser » et un bandeau proposent de l'autoriser.
 
 Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automatique, elle est marquée **« coller »** : la page s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche.
 
@@ -121,7 +121,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.4.1" },
+  "app": { "name": "TabulaPix", "version": "3.5.0" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Agences filaires", "color": "blue" }],
   "agencies": [
@@ -148,7 +148,7 @@ Tout se trouve dans **`extension/config.js`**. Chaque agence a un nom et une adr
 }
 ```
 
-Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` ; pour qu'elle soit masquée (à réafficher avec son œil en mode Organiser), `defaultHidden: true` — appliqué la première fois que l'agence apparaît, y compris lors d'une mise à jour (c'est le cas d'AFP (forum) et de Reuters (standard)). Une agence ajoutée se place dans la liste juste après celle qui la précède dans `config.js`.
+Pour qu'une agence soit décochée lors d'une première installation, ajoutez-lui `defaultChecked: false` ; pour qu'elle soit masquée (à réafficher avec son œil en mode Organiser), `defaultHidden: true` — appliqué la première fois que l'agence apparaît, y compris lors d'une mise à jour (c'est le cas d'AFP (forum) et de Reuters (standard)). Les dossiers sont déclarés dans `FOLDERS` (`id` fixe, noms en français et en anglais, couleur) et chaque agence indique le sien (`folder`). À une première installation, ou à la première ouverture de cette version chez un utilisateur qui n'a encore créé aucun dossier, les dossiers livrés sont créés et les agences y sont rangées (cases, agences masquées, noms et ordre relatif sont conservés ; les agences ajoutées restent hors dossier). Ensuite, les dossiers appartiennent à l'utilisateur : une mise à jour n'en crée, n'en renomme ni n'en supprime aucun. Une nouvelle agence fournie va dans son dossier si l'utilisateur l'a encore (même renommé), sinon hors dossier ; chez les utilisateurs existants, elle arrive décochée, en fin de liste. Un import respecte le fichier tel quel. Si un utilisateur avait déjà ajouté la même agence à la main (même adresse, paramètres compris hors mots-clés, ou même site et même nom), la sienne est gardée et celle fournie est mise de côté comme une agence supprimée (**Restaurer** dans les options la fait revenir).
 
 Astuce pour trouver l'adresse : faites une recherche sur le site avec des mots faciles à repérer (ex. `midterms texas democrats`), copiez l'URL de la page de résultats et remplacez les mots par `{q}`. Selon le site, les espaces y apparaissent sous la forme `%20` ou `+` : remplacez l'ensemble, séparateurs compris.
 
@@ -156,7 +156,7 @@ Les valeurs propres à une rédaction ne s'écrivent pas en dur : elles passent 
 
 Certains sites (AFP news, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
 
-Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Pour un nouveau site de ce type, ajoutez aussi son domaine dans `host_permissions` du fichier `extension/manifest.json`.
+Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Un tel site a besoin de l'autorisation de Chrome : soit il figure dans `host_permissions` du fichier `extension/manifest.json` (accordé à l'installation, mais en ajouter un désactive l'extension chez les utilisateurs existants jusqu'à ce qu'ils l'acceptent), soit — préférable — l'utilisateur l'autorise à la demande : une pastille « à autoriser » apparaît quand l'agence est cochée.
 
 Après toute modification : `chrome://extensions` → bouton **↻** (recharger) sur TabulaPix.
 

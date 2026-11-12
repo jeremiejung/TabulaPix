@@ -6,6 +6,14 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.5.0 — 12 November 2026 (Chrome Web Store)
+
+- **14 new agencies**: Divergence, Hans Lucas, Myop, Signatures, Vu', AgencesONline, Bestimage, Bureau 233, Phototélé, Starface, Alamy, Unsplash, Gamma-Rapho, Photo12. Those that fill in their site's search field ask for Chrome's permission when they are ticked, so no new permission is requested on installation or update.
+- **Shipped folders**: on installation, agencies come sorted into News, Documentary, Aggregators, Celebrity, Stock and Archives. Users who have not created any folder yet get the same sorting once, keeping their ticks, hidden agencies and order; users who already have folders keep theirs untouched, and new agencies arrive unticked at the end of their list.
+- Sites to allow (banner, badges, “Needs attention”) now only concern ticked agencies.
+- “No folder” is no longer shown when empty, except while dragging (to drop an agency there); a folder name too long for the popup shows in full on hover.
+- A built-in agency arriving with an update no longer duplicates one the user had already added by hand (same address, parameters included apart from the keywords, or same site and same name): theirs is kept, and the built-in one is set aside like a deleted agency (Restore in the settings).
+
 ## 3.4.1 — 11 November 2026 (Chrome Web Store)
 
 - **Reorder at any time**, without Organise mode: hovering over an agency or a folder shows its handle, to drag it; Alt + ↑ / ↓ on a checkbox works at any time too.
