@@ -230,7 +230,7 @@ const AGENCIES = [
   },
   {
     id: "phototele",
-    name: "Phototele",
+    name: "Phototélé",
     folder: "tp-people",
     defaultChecked: false,
     url: "https://www.phototele.com/prod/",

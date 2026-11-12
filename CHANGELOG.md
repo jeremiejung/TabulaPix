@@ -6,7 +6,7 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
-- **14 new agencies**: Divergence, Hans Lucas, Myop, Signatures, Vu', AgencesONline, Bestimage, Bureau 233, Phototele, Starface, Alamy, Unsplash, Gamma-Rapho, Photo12. Those that fill in their site's search field ask for Chrome's permission when they are ticked, so no new permission is requested on installation or update.
+- **14 new agencies**: Divergence, Hans Lucas, Myop, Signatures, Vu', AgencesONline, Bestimage, Bureau 233, Phototélé, Starface, Alamy, Unsplash, Gamma-Rapho, Photo12. Those that fill in their site's search field ask for Chrome's permission when they are ticked, so no new permission is requested on installation or update.
 - **Shipped folders**: on installation, agencies come sorted into News, Reportage & photographers, Aggregators, Celebrity, Stock and Archives. Users who have not created any folder yet get the same sorting once, keeping their ticks, hidden agencies and order; users who already have folders keep theirs untouched, and new agencies arrive unticked at the end of their list.
 - Sites to allow (banner, badges, “Needs attention”) now only concern ticked agencies.
 - “No folder” is no longer shown when empty, except while dragging (to drop an agency there); a folder name too long for the popup shows in full on hover.
