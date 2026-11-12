@@ -458,9 +458,18 @@ async function optionalOriginsGranted() {
 }
 
 // Dossiers et rattachement des agences (id d'agence → id de dossier existant).
+// Dossier livré jamais renommé (son nom est encore l'un des noms livrés) :
+// affiché dans la langue de l'interface. Un nom choisi par l'utilisateur reste tel quel.
+function localizeFolder(f) {
+  const shipped = typeof FOLDERS !== "undefined" ? FOLDERS.find((x) => x.id === f.id) : null;
+  if (!shipped || !Object.values(shipped.name).includes(f.name)) return f;
+  const lang = typeof LANG === "string" ? LANG : "fr";
+  return { ...f, name: shipped.name[lang] || shipped.name.fr };
+}
+
 async function loadFolders() {
   const data = await chrome.storage.local.get({ [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {} });
-  const folders = cleanFolders(data[FOLDERS_KEY]);
+  const folders = cleanFolders(data[FOLDERS_KEY]).map(localizeFolder);
   const ids = new Set(folders.map((f) => f.id));
   const raw = data[FOLDER_OF_KEY] && typeof data[FOLDER_OF_KEY] === "object" ? data[FOLDER_OF_KEY] : {};
   const folderOf = {};

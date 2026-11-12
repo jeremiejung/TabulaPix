@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- Les dossiers livrés jamais renommés suivent désormais la langue de l’interface (Actualité ↔ News…) ; un nom choisi par l’utilisateur reste tel quel.
+
 ## 3.5.1 — 12 novembre 2026 (Chrome Web Store)
 
 - **Pastille « Nouveau »** sur les agences arrivées avec une mise à jour (pas à la première installation), dans la couleur de leur dossier : elle reste cinq ouvertures de TabulaPix et disparaît dès qu’on coche ou déplace l’agence.
