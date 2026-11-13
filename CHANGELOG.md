@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- Settings: built-in agencies set aside because you already had the same one (added by hand) are no longer listed under “Agencies removed from the list”, and **Restore** no longer brings them back as duplicates; if you delete your own, the built-in one becomes restorable again. The import summary no longer counts them as deleted either.
+
 ## 3.5.3 — 13 November 2026 (Chrome Web Store)
 
 - **Hide a folder** with its eye in Organise mode, like an agency: the folder and its agencies disappear from the list and are never searched, their ticks being kept for when it is shown again. Hidden folders appear greyed out in Organise mode only, and keep their place in the folder order.

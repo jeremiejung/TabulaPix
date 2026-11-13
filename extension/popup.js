@@ -183,10 +183,19 @@ async function setHidden(id, hide) {
 }
 
 // Options : agences fournies supprimées, récupérables d'un clic.
-async function renderRemoved() {
+// Agences fournies retirées qu'on peut restaurer. Celles mises de côté parce
+// que l'utilisateur a déjà la même (ajoutée à la main) n'en font pas partie
+// tant que la sienne existe : les restaurer ne ferait qu'un doublon.
+async function restorableRemoved() {
   const ag = await loadAgencies();
-  document.getElementById("removedLine").hidden = !ag.removed.size;
-  const names = AGENCIES.filter((a) => ag.removed.has(a.id)).map((a) => a.name);
+  const options = await loadOptions();
+  return AGENCIES.filter((a) => ag.removed.has(a.id) && !ag.custom.some((c) => sameAgencySite(a, c, options)));
+}
+
+async function renderRemoved() {
+  const restorable = await restorableRemoved();
+  document.getElementById("removedLine").hidden = !restorable.length;
+  const names = restorable.map((a) => a.name);
   document.getElementById("removedText").textContent = t("opt.removed.line", { names: names.join(", ") });
 }
 
@@ -1031,8 +1040,11 @@ const authorizeBtn = document.getElementById("authorizeBtn");
 let missingOrigins = [];
 
 document.getElementById("restoreRemoved").addEventListener("click", async () => {
-  const n = (await loadAgencies()).removed.size;
-  await chrome.storage.local.set({ [REMOVED_KEY]: [] });
+  // Seulement celles qui sont listées : les doublons d'une agence ajoutée restent de côté.
+  const restorable = new Set((await restorableRemoved()).map((a) => a.id));
+  const n = restorable.size;
+  const { [REMOVED_KEY]: removed = [] } = await chrome.storage.local.get(REMOVED_KEY);
+  await chrome.storage.local.set({ [REMOVED_KEY]: removed.filter((id) => !restorable.has(id)) });
   await renderRemoved();
   const done = document.getElementById("restoreMsg");
   done.textContent = t(n === 1 ? "opt.removed.restored.one" : "opt.removed.restored.many", { n });
