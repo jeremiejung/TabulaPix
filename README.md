@@ -56,7 +56,7 @@ If you had edited `config.js`, note your changes before replacing the files, the
 3. Press **Enter** or **Search**, right under the keywords: one tab opens per agency (the button shows how many).
    Tabs open in the background: you stay on the tab you are on.
    Your last keywords are shown again (already selected) the next time you open TabulaPix: just type to replace them.
-   If a tab is already open on an agency's site (for example after a previous search), it is reused: the new search shows there instead of opening one more tab.
+   If a tab is already open on an agency's site (for example after a previous search), it is reused: the new search shows there instead of opening one more tab. This also works when the site sent that tab to its login page, on another address, right after TabulaPix opened it (sign in there, or search again: the same tab is used).
 
 **Keep open:** the **column** button (first icon at the top of the popup) shows TabulaPix in a column on the right of the window (Chrome's side panel, version 116 or later). The column stays open when you switch tabs, so you can chain searches without reopening the extension. While the column is open, the TabulaPix icon in the toolbar acts on the column (it doesn't open a popup on top of it); once the column is closed, the icon opens the popup again. To close it: the cross at the top of the column. It can also be reopened from Chrome's side panel icon.
 
@@ -121,7 +121,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.5.4" },
+  "app": { "name": "TabulaPix", "version": "3.5.5" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
@@ -187,6 +187,10 @@ See also the [privacy policy](PRIVACY.md).
 - Locating a field on an added site: the banner is only shown in the tab opened for that purpose; the result is only accepted from that tab, on that site, and only contains where the field and button are (no page content is read or kept).
 - Keywords are inserted as text (never as code) and encoded in addresses.
 - Updates: the Chrome Web Store version updates automatically, after Google reviews each version. A manual installation never updates itself: only replace its folder with a version coming from this repository. Protect the GitHub account with two-factor authentication.
+
+## Ideas
+
+Directions considered for future versions (sending an agency to a colleague by copy / paste, an encrypted vault for agency credentials) are listed in [`ROADMAP.md`](ROADMAP.md).
 
 ## Version numbers
 

@@ -56,7 +56,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 3. Appuyez sur **Entrée** ou **Lancer la recherche**, juste sous les mots-clés : un onglet s'ouvre par agence (le bouton indique combien).
    Les onglets s'ouvrent en arrière-plan : vous restez sur l'onglet où vous êtes.
    Les derniers mots-clés lancés sont réaffichés (déjà sélectionnés) à la prochaine ouverture : tapez directement pour les remplacer.
-   Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus.
+   Si un onglet est déjà ouvert sur le site d'une agence (par exemple après une recherche précédente), il est réutilisé : la nouvelle recherche s'y affiche au lieu d'ouvrir un onglet de plus. Ça marche aussi quand le site a renvoyé cet onglet vers sa page de connexion, sur une autre adresse, juste après son ouverture par TabulaPix (connectez-vous-y, ou relancez la recherche : c'est le même onglet qui sert).
 
 **Garder ouvert :** le bouton **colonne** (première icône en haut de la popup) affiche TabulaPix dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Tant que la colonne est ouverte, l'icône TabulaPix de la barre d'outils agit sur la colonne (elle n'ouvre pas de popup par-dessus) ; une fois la colonne fermée, l'icône rouvre la popup. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
 
@@ -121,7 +121,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.5.4" },
+  "app": { "name": "TabulaPix", "version": "3.5.5" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Agences filaires", "color": "blue" }],
   "agencies": [
@@ -187,6 +187,10 @@ Voir aussi la [politique de confidentialité](PRIVACY.md).
 - Repérage d'un champ sur un site ajouté : le bandeau n'est affiché que dans l'onglet ouvert pour ce repérage ; le résultat n'est accepté que de cet onglet, sur ce site, et ne contient que l'emplacement du champ et du bouton (aucun contenu de la page n'est lu ni conservé).
 - Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
 - Mises à jour : la version du Chrome Web Store se met à jour automatiquement, après examen de chaque version par Google. La version installée manuellement ne se met jamais à jour toute seule : ne remplacez son dossier que par une version venant de ce dépôt. Protégez le compte GitHub par la double authentification.
+
+## Idées
+
+Les pistes envisagées pour de futures versions (envoyer une agence à un collègue par copier / coller, coffre chiffré des identifiants d'agence) sont listées dans [`ROADMAP.fr.md`](ROADMAP.fr.md).
 
 ## Numéros de version
 

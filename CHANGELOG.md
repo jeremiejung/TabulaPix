@@ -6,6 +6,11 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.5.5 — 13 November 2026 (Chrome Web Store)
+
+- When an agency’s site sends the tab TabulaPix opened to its login page on another address (Hans Lucas, for example), searching again now reuses that tab instead of opening a new one each time. Only redirects right after opening count: a tab you take to another site yourself is never reused.
+- The background script no longer rewrites its session storage on every page load in unrelated tabs.
+
 ## 3.5.4 — 13 November 2026 (Chrome Web Store)
 
 - Settings: built-in agencies set aside because you already had the same one (added by hand) are no longer listed under “Agencies removed from the list”, and **Restore** no longer brings them back as duplicates; if you delete your own, the built-in one becomes restorable again. The import summary no longer counts them as deleted either.
