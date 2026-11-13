@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.4 — 13 novembre 2026 (Chrome Web Store)
+
 - Options : les agences fournies mises de côté parce que vous aviez déjà la même (ajoutée à la main) ne sont plus listées dans « Agences retirées de la liste », et **Restaurer** ne les fait plus revenir en doublon ; si vous supprimez la vôtre, celle fournie redevient restaurable. Le récapitulatif d’import ne les compte plus non plus comme supprimées.
 
 ## 3.5.3 — 13 novembre 2026 (Chrome Web Store)
