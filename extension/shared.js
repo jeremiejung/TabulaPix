@@ -259,7 +259,7 @@ function sameAgencySite(builtin, custom, options) {
  * l'extension ou la partager entre collègues :
  *   { format: "tabulapix-config", formatVersion, minReaderVersion,
  *     exportedAt, app, settings: { language, options },
- *     folders: [ { id, name, color?, collapsed? } ], // dossiers d'agences
+ *     folders: [ { id, name, color?, collapsed?, hidden? } ], // dossiers d'agences
  *     agencies: [ … dans l'ordre de la liste … ],
  *     removedBuiltins: [ … agences fournies supprimées … ] }
  * Chaque agence : { id, builtin, name, checked, hidden, folder? } et, si
@@ -280,10 +280,10 @@ function sameAgencySite(builtin, custom, options) {
  * agences (toutes cochées, aucune, ou certaines = à moitié coché).
  */
 const CONFIG_FORMAT = "tabulapix-config";
-const CONFIG_FORMAT_VERSION = 2; // version du format écrit par cette extension (2 : dossiers repliés)
+const CONFIG_FORMAT_VERSION = 3; // version du format écrit par cette extension (2 : dossiers repliés ; 3 : dossiers masqués)
 const CONFIG_READER_VERSION = 1; // plus haut minReaderVersion que cette extension sait lire
 const CONFIG_MAX_BYTES = 1024 * 1024;
-const FOLDERS_KEY = "agencyFolders";     // [ { id, name, color?, collapsed? } ]
+const FOLDERS_KEY = "agencyFolders";     // [ { id, name, color?, collapsed?, hidden? } ]
 const FOLDER_OF_KEY = "agencyFolderOf";  // { idAgence: idDossier }
 const STORAGE_KEYS = {
   checked: "checkedAgencies", order: "agencyOrder", query: "lastQuery", seen: "seenAgencies"
@@ -304,6 +304,7 @@ function cleanFolders(list) {
     const folder = { id, name };
     if (FOLDER_COLORS.includes(f.color)) folder.color = f.color;
     if (f.collapsed === true) folder.collapsed = true;
+    if (f.hidden === true) folder.hidden = true;
     out.push(folder);
   }
   return out;

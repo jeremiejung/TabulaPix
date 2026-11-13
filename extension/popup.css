@@ -156,6 +156,12 @@ html.organizing #list li.agency label { cursor: grab; }
 html.organizing #list li.agency label:active { cursor: grabbing; }
 #list li.is-hidden .name { color: var(--muted); font-style: italic; }
 #list li.is-hidden .tool[aria-pressed="true"] { color: var(--muted); } /* un état, pas une erreur */
+/* Dossier masqué (visible en mode Organiser seulement) : grisé comme une agence masquée */
+.group.is-hidden > .group-head .fname-input, .group.is-hidden .name { color: var(--muted); font-style: italic; }
+.group-head .tool { color: var(--muted); }
+.group-head .tool:hover { color: CanvasText; background: var(--line); }
+.group-head .fhide[aria-pressed="true"] { color: var(--muted); }
+.group.is-hidden > .group-head .count { display: none; } /* « 0/0 » ne dirait rien */
 .new-folder input { flex: 1; min-width: 0; height: 28px; box-sizing: border-box; padding: 0 8px; font-size: 13px; border: 1px dashed color-mix(in srgb, CanvasText 35%, transparent); border-radius: var(--r-control); background: none; color: inherit; }
 .new-folder input:focus { border-style: solid; }
 
@@ -314,9 +320,9 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
 @container list (max-width: 330px) {
   html.organizing #list li.agency .tool:not([aria-pressed="true"]) { display: none; }
   html.organizing #list li.agency:is(:hover, :focus-within) .tool { display: inline-flex; }
-  html.organizing .group-head .fdel { display: none; }
+  html.organizing .group-head .fdel, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
   html.organizing .group-head .count { display: none; } /* place au nom ; le compteur reste en mode normal */
-  html.organizing .group-head:is(:hover, :focus-within) .fdel { display: inline-flex; }
+  html.organizing .group-head:is(:hover, :focus-within) :is(.fdel, .fhide) { display: inline-flex; }
 }
 
 /* Avertissements de la détection : icône dessinée + texte */
