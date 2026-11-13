@@ -6,8 +6,11 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.3 — 13 novembre 2026 (Chrome Web Store)
+
 - **Masquer un dossier** avec son œil en mode Organiser, comme une agence : le dossier et ses agences disparaissent de la liste et ne sont jamais cherchés, leurs cases cochées étant gardées pour quand on le réaffiche. Les dossiers masqués n’apparaissent, grisés, qu’en mode Organiser, et gardent leur place dans l’ordre des dossiers.
 - Un dossier dont toutes les agences sont masquées n’apparaît plus en usage courant (il reste visible en mode Organiser) ; un dossier vraiment vide reste affiché, pour y déposer des agences.
+- Dans l’éditeur d’agence, les dossiers masqués sont signalés « (masqué) » dans le menu Dossier.
 - Fichier de configuration, format version 3 : les dossiers portent `hidden` (les versions plus anciennes l’ignorent).
 
 ## 3.5.2 — 12 novembre 2026 (Chrome Web Store)

@@ -1015,7 +1015,7 @@ function fillFolderSelect() {
   for (const f of currentFolders) {
     const o = document.createElement("option");
     o.value = f.id;
-    o.textContent = f.name;
+    o.textContent = f.hidden ? t("folder.hiddenTag", { name: f.name }) : f.name; // y ranger une agence la masque aussi
     ed.folder.append(o);
   }
   ed.folder.value = currentFolders.some((f) => f.id === keep) ? keep : "";
