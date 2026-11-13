@@ -6,7 +6,10 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.5 — 13 novembre 2026 (Chrome Web Store)
+
 - Quand le site d’une agence renvoie l’onglet ouvert par TabulaPix vers sa page de connexion sur une autre adresse (Hans Lucas, par exemple), une nouvelle recherche réutilise maintenant cet onglet au lieu d’en ouvrir un à chaque fois. Seules comptent les redirections juste après l’ouverture : un onglet que vous emmenez vous-même vers un autre site n’est jamais repris.
+- Le script d’arrière-plan ne réécrit plus son stockage de session à chaque chargement de page dans des onglets sans rapport.
 
 ## 3.5.4 — 13 novembre 2026 (Chrome Web Store)
 
