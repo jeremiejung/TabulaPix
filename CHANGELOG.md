@@ -6,6 +6,13 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.5.3 — 13 November 2026 (Chrome Web Store)
+
+- **Hide a folder** with its eye in Organise mode, like an agency: the folder and its agencies disappear from the list and are never searched, their ticks being kept for when it is shown again. Hidden folders appear greyed out in Organise mode only, and keep their place in the folder order.
+- A folder whose agencies are all hidden no longer shows in normal use (it still does in Organise mode); a truly empty folder still shows, as a place to drop agencies.
+- In the agency editor, hidden folders are marked “(hidden)” in the Folder menu.
+- Configuration file format version 3: folders carry `hidden` (older versions ignore it).
+
 ## 3.5.2 — 12 November 2026 (Chrome Web Store)
 
 - Shipped folders that were never renamed now follow the interface language (Actualité ↔ News…); a name chosen by the user stays as it is.

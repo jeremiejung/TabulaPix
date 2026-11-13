@@ -265,8 +265,10 @@ async function renderAttention() {
 // (une agence livrée décochée ne réclame rien tant qu'on ne la coche pas).
 async function checkedAgencies() {
   const ag = await loadAgencies();
+  const { folders, folderOf } = await loadFolders();
+  const hiddenFolders = new Set(folders.filter((f) => f.hidden).map((f) => f.id));
   const { [STORAGE_KEY]: checked } = await chrome.storage.local.get({ [STORAGE_KEY]: DEFAULT_CHECKED });
-  return ag.all.filter((a) => checked.includes(a.id) && !ag.hidden.has(a.id));
+  return ag.all.filter((a) => checked.includes(a.id) && !ag.hidden.has(a.id) && !hiddenFolders.has(folderOf[a.id]));
 }
 
 // Accès rapide : le raccourci réellement défini dans Chrome.
@@ -877,6 +879,7 @@ async function updateFolder(id, patch) {
     if (f.id !== id) return f;
     const next = { ...f, ...patch };
     if (!next.collapsed) delete next.collapsed;
+    if (!next.hidden) delete next.hidden;
     return next;
   }) });
 }
@@ -993,7 +996,12 @@ function folderControls(f, color, msgEl) {
   del.addEventListener("click", async () => {
     await deleteFolder(f);
   });
-  return { nameInput, swatch, del, palette };
+  // Œil : masque le dossier et ses agences en mode normal (comme pour une agence).
+  const eye = toolButton(f.hidden ? "eyeOff" : "eye", t(f.hidden ? "folder.show" : "folder.hide", { name: f.name }), () => updateFolder(f.id, { hidden: !f.hidden }));
+  eye.classList.add("fhide");
+  eye.setAttribute("aria-pressed", String(Boolean(f.hidden)));
+  eye.dataset.key = "fh:" + f.id;
+  return { nameInput, swatch, del, palette, eye };
 }
 
 // Menu « Dossier » de l'éditeur d'agence (les dossiers viennent de la liste).
@@ -1007,7 +1015,7 @@ function fillFolderSelect() {
   for (const f of currentFolders) {
     const o = document.createElement("option");
     o.value = f.id;
-    o.textContent = f.name;
+    o.textContent = f.hidden ? t("folder.hiddenTag", { name: f.name }) : f.name; // y ranger une agence la masque aussi
     ed.folder.append(o);
   }
   ed.folder.value = currentFolders.some((f) => f.id === keep) ? keep : "";
@@ -1218,6 +1226,7 @@ async function buildUrl(agency, q, options) {
 const ORDER_KEY = "agencyOrder";
 let ALL = AGENCIES; // intégrées + personnalisées (complété au chargement)
 let AGENCY_BY_ID = new Map(ALL.map((a) => [a.id, a]));
+let keptChecked = []; // coches des agences d'un dossier masqué (absentes de la liste)
 let fullOrder = []; // ordre de toutes les agences, masquées comprises
 
 // Ordre choisi par l'utilisateur ; une agence ajoutée depuis dans config.js
@@ -1283,7 +1292,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Une ligne d'agence : case et nom ; en mode Organiser, une poignée à droite.
-function agencyItem(a, checked, isHidden = false) {
+function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
   const li = document.createElement("li");
   li.className = "agency";
   li.dataset.id = a.id;
@@ -1295,7 +1304,7 @@ function agencyItem(a, checked, isHidden = false) {
   box.value = a.id;
   box.dataset.key = "a:" + a.id;
   box.checked = !isHidden && checked.includes(a.id);
-  box.disabled = isHidden;
+  box.disabled = isHidden || inHiddenFolder; // dossier masqué : coche gardée, mais inactive
   if (isHidden) li.classList.add("is-hidden");
   box.addEventListener("change", save);
   box.addEventListener("keydown", (e) => {
@@ -1478,6 +1487,7 @@ function folderHead(f, color, group) {
   box.className = "folder-box";
   box.setAttribute("aria-describedby", "organizeKbd");
   box.setAttribute("aria-label", f.name); // la case seule : le nom n'en fait plus partie
+  box.disabled = Boolean(f.hidden); // dossier masqué : rien n'y est cherché
   box.dataset.key = "f:" + f.id;
   // Cocher le dossier coche (ou décoche) toutes ses agences.
   box.addEventListener("change", () => {
@@ -1501,7 +1511,7 @@ function folderHead(f, color, group) {
   if (organizing) {
     const c = folderControls(f, color, msg);
     c.nameInput.title = f.name;
-    head.append(toggle, label, c.swatch, c.nameInput, count, c.del, grip(t("folder.handle")));
+    head.append(toggle, label, c.swatch, c.nameInput, count, c.eye, c.del, grip(t("folder.handle")));
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");
@@ -1523,16 +1533,21 @@ function folderHead(f, color, group) {
 }
 
 // Liste : un bloc coloré par dossier, puis les agences sans dossier.
-function render(agencies, checked, folders, folderOf, hidden = new Set(), missing = new Map()) {
+function render(agencies, checked, folders, folderOf, hidden = new Set(), missing = new Map(), withAgencies = new Set()) {
   list.classList.toggle("has-folders", folders.length > 0);
   const groups = folders.map((f) => ({ folder: f, items: [] }));
   const byFolder = new Map(groups.map((g) => [g.folder.id, g]));
   const root = { folder: null, items: [] };
   for (const a of agencies) (byFolder.get(folderOf[a.id]) || root).items.push(a);
 
+  let shownGroups = 0;
   [...groups, root].forEach((g, i) => {
+    // Mode normal : un dossier masqué, ou dont toutes les agences sont masquées,
+    // n'apparaît pas (il reste visible, grisé, en mode Organiser).
+    if (g.folder && !organizing && (g.folder.hidden || (withAgencies.has(g.folder.id) && !g.items.length))) return;
+    if (g.folder || g.items.length) shownGroups++;
     const group = document.createElement("li");
-    group.className = "group" + (g.folder ? "" : " root") + (g.folder && g.folder.collapsed ? " collapsed" : "");
+    group.className = "group" + (g.folder ? "" : " root") + (g.folder && g.folder.collapsed ? " collapsed" : "") + (g.folder && g.folder.hidden ? " is-hidden" : "");
     group.dataset.folder = g.folder ? g.folder.id : "";
     if (g.folder) {
       const color = folderColor(g.folder, i);
@@ -1548,7 +1563,7 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     ul.className = "items";
     ul.setAttribute("aria-label", g.folder ? g.folder.name : t("folder.root")); // le dossier de chaque case
     for (const a of g.items) {
-      const li = agencyItem(a, checked, hidden.has(a.id));
+      const li = agencyItem(a, checked, hidden.has(a.id), Boolean(g.folder && g.folder.hidden));
       const origin = [...missing].find(([, names]) => names.includes(a))?.[0];
       if (origin && !organizing) li.insertBefore(permPill(origin), li.querySelector(".grip")); // avant la poignée
       ul.append(li);
@@ -1559,8 +1574,8 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     group.append(ul, empty);
     list.append(group);
   });
-  if (!agencies.length && !folders.length) {
-    // Rien à afficher : toutes les agences sont masquées ou supprimées.
+  if (!shownGroups) {
+    // Rien à afficher : toutes les agences (ou tous les dossiers) sont masqués.
     const li = document.createElement("li");
     li.className = "empty-list";
     li.textContent = t(organizing ? "main.empty.organize" : "main.empty");
@@ -1714,7 +1729,7 @@ function save() {
   msg.textContent = "";
   for (const id of checkedIds()) clearNew(id); // cochée : plus besoin de la signaler
   updateFolderStates();
-  chrome.storage.local.set({ [STORAGE_KEY]: checkedIds() });
+  chrome.storage.local.set({ [STORAGE_KEY]: [...new Set(checkedIds().concat(keptChecked))] });
   updatePermUI();
 }
 
@@ -1767,7 +1782,13 @@ async function saveFolderOrder() {
   const { folders } = await loadFolders();
   const byId = new Map(folders.map((f) => [f.id, f]));
   const order = [...list.querySelectorAll("li.group:not(.root)")].map((g) => byId.get(g.dataset.folder)).filter(Boolean);
-  for (const f of folders) if (!order.includes(f)) order.push(f);
+  // Dossiers absents de la liste (masqués en mode normal) : juste après celui
+  // qui les précédait, comme les agences masquées.
+  folders.forEach((f, i) => {
+    if (order.includes(f)) return;
+    const pos = i > 0 ? order.indexOf(folders[i - 1]) : -1;
+    order.splice(pos + 1, 0, f);
+  });
   await chrome.storage.local.set({ [FOLDERS_KEY]: order });
 }
 
@@ -1830,15 +1851,22 @@ async function refreshList() {
   fullOrder = ordered.map((a) => a.id);
   const { folders, folderOf } = await loadFolders();
   currentFolders = folders;
+  // Agences d'un dossier masqué : absentes du mode normal (donc jamais cherchées),
+  // grisées en mode Organiser, comme les agences masquées.
+  const hiddenFolders = new Set(folders.filter((f) => f.hidden).map((f) => f.id));
+  const inHiddenFolder = (a) => hiddenFolders.has(folderOf[a.id]);
+  const withAgencies = new Set(ordered.map((a) => folderOf[a.id]).filter(Boolean)); // dossiers non vides
   // Mode Organiser : les agences masquées apparaissent aussi (grisées), pour les réafficher.
-  const shown = organizing ? ordered : ordered.filter((a) => !ag.hidden.has(a.id));
-  const missing = await missingFillOrigins(shown.filter((a) => !ag.hidden.has(a.id) && data[STORAGE_KEY].includes(a.id)));
+  const shown = organizing ? ordered : ordered.filter((a) => !ag.hidden.has(a.id) && !inHiddenFolder(a));
+  // Cases cochées hors de la liste affichée (dossier masqué) : gardées pour quand on le réaffiche.
+  keptChecked = organizing ? [] : data[STORAGE_KEY].filter((id) => { const a = AGENCY_BY_ID.get(id); return a && inHiddenFolder(a); });
+  const missing = await missingFillOrigins(shown.filter((a) => !ag.hidden.has(a.id) && !inHiddenFolder(a) && data[STORAGE_KEY].includes(a.id)));
   // Plus aucune attente ici : vider puis reconstruire d'un seul tenant (sinon
   // deux mises à jour simultanées dupliqueraient les lignes).
   const key = focusKey();
   if (!sweeping) msg.textContent = "";
   list.textContent = "";
-  render(shown, data[STORAGE_KEY], folders, folderOf, ag.hidden, missing);
+  render(shown, data[STORAGE_KEY], folders, folderOf, ag.hidden, missing, withAgencies);
   renderPermBanner(missing);
   restoreFocus(list, key);
   applyFresh();
