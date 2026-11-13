@@ -188,6 +188,10 @@ See also the [privacy policy](PRIVACY.md).
 - Keywords are inserted as text (never as code) and encoded in addresses.
 - Updates: the Chrome Web Store version updates automatically, after Google reviews each version. A manual installation never updates itself: only replace its folder with a version coming from this repository. Protect the GitHub account with two-factor authentication.
 
+## Ideas
+
+Directions considered for future versions (sending an agency to a colleague by copy / paste, an encrypted vault for agency credentials) are listed in [`ROADMAP.md`](ROADMAP.md).
+
 ## Version numbers
 
 The version number (`version` in `extension/manifest.json`) **only changes when submitting to the Chrome Web Store**, once per submission, however many changes were merged in between:

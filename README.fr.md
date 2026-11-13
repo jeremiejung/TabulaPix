@@ -188,6 +188,10 @@ Voir aussi la [politique de confidentialité](PRIVACY.md).
 - Les mots-clés sont insérés comme du texte (jamais comme du code) et encodés dans les adresses.
 - Mises à jour : la version du Chrome Web Store se met à jour automatiquement, après examen de chaque version par Google. La version installée manuellement ne se met jamais à jour toute seule : ne remplacez son dossier que par une version venant de ce dépôt. Protégez le compte GitHub par la double authentification.
 
+## Idées
+
+Les pistes envisagées pour de futures versions (envoyer une agence à un collègue par copier / coller, coffre chiffré des identifiants d'agence) sont listées dans [`ROADMAP.fr.md`](ROADMAP.fr.md).
+
 ## Numéros de version
 
 Le numéro de version (`version` dans `extension/manifest.json`) ne change **qu'au moment d'un envoi au Chrome Web Store**, une seule fois par envoi, quel que soit le nombre de modifications intégrées entre-temps :
