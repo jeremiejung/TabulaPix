@@ -450,7 +450,8 @@ function parseConfigImport(file) {
       [OPTIONS_KEY]: options, [LANG_KEY]: lang, [STORAGE_KEYS.seen]: [...seen],
       [FOLDERS_KEY]: folders, [FOLDER_OF_KEY]: folderOf
     },
-    summary: { agencies: order.length, custom: custom.length, folders: folders.length, removed: removed.size, modified: Object.keys(overrides).length, checked: checked.length, skipped, unknown, newer },
+    // Retirées « pour de vrai » : sans compter les doublons d'une agence ajoutée du fichier.
+    summary: { agencies: order.length, custom: custom.length, folders: folders.length, removed: AGENCIES.filter((a) => removed.has(a.id) && !custom.some((c) => sameAgencySite(a, c, options))).length, modified: Object.keys(overrides).length, checked: checked.length, skipped, unknown, newer },
     hosts
   };
 }

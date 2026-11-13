@@ -6,6 +6,10 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.4 — 13 novembre 2026 (Chrome Web Store)
+
+- Options : les agences fournies mises de côté parce que vous aviez déjà la même (ajoutée à la main) ne sont plus listées dans « Agences retirées de la liste », et **Restaurer** ne les fait plus revenir en doublon ; si vous supprimez la vôtre, celle fournie redevient restaurable. Le récapitulatif d’import ne les compte plus non plus comme supprimées.
+
 ## 3.5.3 — 13 novembre 2026 (Chrome Web Store)
 
 - **Masquer un dossier** avec son œil en mode Organiser, comme une agence : le dossier et ses agences disparaissent de la liste et ne sont jamais cherchés, leurs cases cochées étant gardées pour quand on le réaffiche. Les dossiers masqués n’apparaissent, grisés, qu’en mode Organiser, et gardent leur place dans l’ordre des dossiers.

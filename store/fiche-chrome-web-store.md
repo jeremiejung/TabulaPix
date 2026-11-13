@@ -2,7 +2,7 @@
 
 Tout ce qu'il faut pour remplir le tableau de bord du Chrome Web Store (https://chrome.google.com/webstore/devconsole), dans l'ordre des onglets. Chaque texte est dans un bloc à copier-coller.
 
-Paquet à envoyer : `TabulaPix-3.5.3.zip` (ou plus récent).
+Paquet à envoyer : `TabulaPix-3.5.4.zip` (ou plus récent).
 
 ---
 
