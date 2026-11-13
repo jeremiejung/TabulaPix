@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- Quand le site d’une agence renvoie l’onglet ouvert par TabulaPix vers sa page de connexion sur une autre adresse (Hans Lucas, par exemple), une nouvelle recherche réutilise maintenant cet onglet au lieu d’en ouvrir un à chaque fois. Seules comptent les redirections juste après l’ouverture : un onglet que vous emmenez vous-même vers un autre site n’est jamais repris.
+
 ## 3.5.4 — 13 novembre 2026 (Chrome Web Store)
 
 - Options : les agences fournies mises de côté parce que vous aviez déjà la même (ajoutée à la main) ne sont plus listées dans « Agences retirées de la liste », et **Restaurer** ne les fait plus revenir en doublon ; si vous supprimez la vôtre, celle fournie redevient restaurable. Le récapitulatif d’import ne les compte plus non plus comme supprimées.

@@ -41,6 +41,35 @@ function updatePending(change) {
   return run;
 }
 
+/* Onglets ouverts par TabulaPix pour une agence. Un site peut rediriger
+   l'onglet ailleurs dès son ouverture (page de connexion sur une autre
+   adresse…) : l'onglet reste celui de l'agence et sera réutilisé à la
+   recherche suivante, au lieu d'en ouvrir un nouveau. Seules comptent les
+   adresses atteintes juste après l'ouverture : un onglet que l'utilisateur
+   emmène ensuite vers un autre site n'est jamais repris. */
+const OWNERS = "agencyTabs"; // { idOnglet: { id: agence, hosts: [sites], at: ouverture } }
+const REDIRECT_MS = 15000;   // délai pendant lequel une redirection compte
+let ownersLock = Promise.resolve();
+function updateOwners(change) {
+  const run = ownersLock.then(async () => {
+    const owners = (await chrome.storage.session.get({ [OWNERS]: {} }))[OWNERS];
+    const result = await change(owners);
+    await chrome.storage.session.set({ [OWNERS]: owners });
+    return result;
+  });
+  ownersLock = run.catch(() => {});
+  return run;
+}
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (!info.url) return;
+  let host = null;
+  try { host = new URL(info.url).hostname; } catch (_) { return; }
+  updateOwners((owners) => {
+    const o = owners[tabId];
+    if (o && Date.now() - o.at < REDIRECT_MS && !o.hosts.includes(host)) o.hosts.push(host);
+  });
+});
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (sender.id !== chrome.runtime.id || !msg) return;
   // (LANG est tenu à jour par loadLang() au démarrage et à chaque changement.)
@@ -120,6 +149,17 @@ async function sweep(jobs, q) {
   // et Getty Actu partagent le même site).
   const claimed = new Set();
   const reuse = new Array(jobs.length).fill(null);
+  // D'abord l'onglet déjà ouvert par TabulaPix pour cette agence, même s'il a
+  // été redirigé (ex. page de connexion) sur une autre adresse.
+  const owners = (await chrome.storage.session.get({ [OWNERS]: {} }))[OWNERS];
+  jobs.forEach((job, i) => {
+    const t = existing.find((tab) => {
+      const o = owners[tab.id];
+      if (!o || o.id !== job.id || claimed.has(tab.id)) return false;
+      try { return o.hosts.includes(new URL(tab.url).hostname); } catch (_) { return false; }
+    });
+    if (t) { reuse[i] = t; claimed.add(t.id); }
+  });
   for (const minScore of [2, 1]) {
     jobs.forEach((job, i) => {
       if (reuse[i]) return;
@@ -139,6 +179,8 @@ async function sweep(jobs, q) {
       // Onglet fermé entre-temps : on en ouvre un nouveau, sans bloquer les autres agences.
       try { tab = await chrome.tabs.create({ url: job.url, active: false }); } catch (_) { continue; }
     }
+    // L'onglet est désormais celui de l'agence (redirections comprises).
+    if (job.id !== "essai") await updateOwners((o) => { o[tab.id] = { id: job.id, hosts: [job.host], at: Date.now() }; });
     if (job.fill) {
       // Enregistré tout de suite, avant que la page ait fini de charger.
       await updatePending((pending) => { pending[tab.id] = { q, id: job.id, host: job.host, fill: job.fill, attempts: 0 }; });
@@ -203,6 +245,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   updatePending((pending) => { delete pending[tabId]; });
+  updateOwners((owners) => { delete owners[tabId]; });
   // Repérage abandonné (onglet fermé) : on l'oublie.
   const { pickSession } = await chrome.storage.session.get("pickSession");
   if (pickSession && pickSession.tabId === tabId) chrome.storage.session.remove(["pickSession", "fillDraft"]);
