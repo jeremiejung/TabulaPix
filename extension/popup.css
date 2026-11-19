@@ -382,3 +382,8 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .replace-box .help:empty, .replace-box .help[hidden] { display: none; }
 .replace-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .replace-actions button { width: 100%; }
+
+/* Œil : l'icône de l'état suivant apparaît au survol / au focus clavier */
+.eye-toggle .ico-next { display: none; }
+.eye-toggle:is(:hover, :focus-visible) .ico-now { display: none; }
+.eye-toggle:is(:hover, :focus-visible) .ico-next { display: inline; }

@@ -1006,7 +1006,7 @@ function folderControls(f, color, msgEl) {
     await deleteFolder(f);
   });
   // Œil : masque le dossier et ses agences en mode normal (comme pour une agence).
-  const eye = toolButton(f.hidden ? "eyeOff" : "eye", t(f.hidden ? "folder.show" : "folder.hide", { name: f.name }), () => updateFolder(f.id, { hidden: !f.hidden }));
+  const eye = eyeButton(Boolean(f.hidden), t(f.hidden ? "folder.show" : "folder.hide", { name: f.name }), () => updateFolder(f.id, { hidden: !f.hidden }));
   eye.classList.add("fhide");
   eye.setAttribute("aria-pressed", String(Boolean(f.hidden)));
   eye.dataset.key = "fh:" + f.id;
@@ -1348,7 +1348,7 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
   }
   li.append(label);
   if (organizing) {
-    const eye = toolButton(isHidden ? "eyeOff" : "eye", t(isHidden ? "ag.show" : "ag.hide", { name: a.name }), () => setHidden(a.id, !isHidden));
+    const eye = eyeButton(isHidden, t(isHidden ? "ag.show" : "ag.hide", { name: a.name }), () => setHidden(a.id, !isHidden));
     eye.setAttribute("aria-pressed", String(isHidden));
     eye.dataset.key = "h:" + a.id;
     const edit = toolButton("pencil", t("opt.edit", { name: a.name }), () => showEditor(a));
@@ -1364,6 +1364,18 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     li.append(grip(t("main.handle")));
   }
   return li;
+}
+
+// Œil (masquer / réafficher) : au survol ou au focus, il montre l'état qu'on
+// obtiendra en cliquant (œil barré pour masquer, œil ouvert pour réafficher).
+function eyeButton(hidden, title, onClick) {
+  const b = toolButton(hidden ? "eyeOff" : "eye", title, onClick);
+  b.classList.add("eye-toggle");
+  b.firstChild.classList.add("ico-now");
+  const next = icon(hidden ? "eye" : "eyeOff");
+  next.classList.add("ico-next");
+  b.append(next);
+  return b;
 }
 
 function toolButton(name, title, onClick) {
