@@ -1286,6 +1286,8 @@ function setOrganizing(on) {
   organizing = on;
   document.documentElement.classList.toggle("organizing", on);
   organizeBtn.setAttribute("aria-pressed", String(on));
+  // Le mot affiché (« Terminé ») fait partie du nom lu par les lecteurs d'écran.
+  organizeBtn.setAttribute("aria-label", on ? `${t("main.organize.done")} — ${t("main.organize")}` : t("main.organize"));
   // Pas de recherche pendant l'organisation : on ne reste pas dans ce mode par mégarde.
   const go = document.getElementById("go");
   // …ni de sélection globale : « Tout » / « Aucune » attendent aussi la fin.

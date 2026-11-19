@@ -6,10 +6,11 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
-- **New agency: Magnum** (Reportage folder, unticked). It fills in its site's search field, so Chrome asks for permission for the site when you tick it; existing users get it with the “New” badge, and if you had already added Magnum yourself, yours is kept.
+## 3.5.6 — 19 November 2026 (Chrome Web Store)
 
+- **New agency: Magnum** (Reportage folder, unticked). It fills in its site's search field, so Chrome asks for permission for the site when you tick it; existing users get it with the “New” badge, and if you had already added Magnum yourself, yours is kept.
 - Organise mode: the eye now sits next to the handle (bin · pencil · eye), so it no longer moves when the other tools appear on hover in the popup — the bin used to slide under the mouse when you wanted to show a hidden agency again. Same order on folder titles.
-- The Organise button’s tooltip now says “Organise and edit”, since agencies are also edited, hidden and deleted in this mode.
+- The Organise button’s tooltip now says “Organise and edit”, since agencies are also edited, hidden and deleted in this mode; while the mode is on, screen readers also hear its visible “Done”.
 
 ## 3.5.5 — 13 November 2026 (Chrome Web Store)
 
