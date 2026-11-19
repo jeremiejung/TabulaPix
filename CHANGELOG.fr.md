@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.8 — 19 novembre 2026 (Chrome Web Store)
+
 - Le repérage du champ de recherche d’un site est plus robuste sur les sites « applications » modernes (ex. les bibliothèques spécialisées de la Ville de Paris) : les identifiants à petit compteur (`searchTextField_13`) et les classes générées courtes (`jss313`) ne sont plus enregistrés tels quels, car ils changent à chaque chargement ; TabulaPix utilise une description stable (ex. `input[type="search"]`, ou « identifiant qui commence par `searchTextField_` »). Les agences déjà repérées avec un tel identifiant remarchent : si `#nom_13` est introuvable, le champ dont l’identifiant commence par `nom_` est utilisé.
 
 ## 3.5.7 — 19 novembre 2026 (Chrome Web Store)

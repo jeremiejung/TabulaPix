@@ -605,10 +605,16 @@ async function fillAndSubmit(q, fill) {
   // Repère enregistré avec un identifiant à compteur (« #champ_13 », versions
   // d'avant 3.5.8) : si le compteur a changé, on cherche « l'identifiant qui
   // commence par champ_ ».
-  const loosen = (sel) => { const m = /^#((?:[A-Za-z][\w-]*?)[_-])\d+$/.exec(sel); return m ? `[id^="${m[1]}"]` : null; };
+  // Préfixe d'au moins 3 caractères (« q_ » serait trop vague) ; pour le champ,
+  // seulement un champ de saisie (pas l'étiquette « champ_13-label »).
+  const loosen = (sel, field) => {
+    const m = /^#((?:[A-Za-z][\w-]*?)[_-])\d+$/.exec(sel);
+    if (!m || m[1].length < 3) return null;
+    return field ? `input[id^="${m[1]}"], textarea[id^="${m[1]}"]` : `[id^="${m[1]}"]`;
+  };
   // Premier élément visible (un site peut avoir plusieurs formulaires identiques).
   const first = (list) => list.find(visible) || list[0] || null;
-  const find = (sel) => first(all(sel)) || (loosen(sel) ? first(all(loosen(sel))) : null);
+  const find = (sel) => first(all(sel)) || (loosen(sel, true) ? first(all(loosen(sel, true))) : null); // le champ
   // Bouton le plus proche du champ : dans son formulaire, sinon en remontant.
   const nearest = (sel, from) => {
     for (let node = from.parentElement; node; node = node.parentElement) {
