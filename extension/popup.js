@@ -1006,10 +1006,9 @@ function folderControls(f, color, msgEl) {
     await deleteFolder(f);
   });
   // Œil : masque le dossier et ses agences en mode normal (comme pour une agence).
-  const eye = eyeButton(Boolean(f.hidden), t(f.hidden ? "folder.show" : "folder.hide", { name: f.name }), () => updateFolder(f.id, { hidden: !f.hidden }));
+  const eye = eyeButton(Boolean(f.hidden), t(f.hidden ? "folder.show" : "folder.hide", { name: f.name }), () => updateFolder(f.id, { hidden: !f.hidden }), "fh:" + f.id);
   eye.classList.add("fhide");
   eye.setAttribute("aria-pressed", String(Boolean(f.hidden)));
-  eye.dataset.key = "fh:" + f.id;
   return { nameInput, swatch, del, palette, eye };
 }
 
@@ -1348,9 +1347,8 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
   }
   li.append(label);
   if (organizing) {
-    const eye = eyeButton(isHidden, t(isHidden ? "ag.show" : "ag.hide", { name: a.name }), () => setHidden(a.id, !isHidden));
+    const eye = eyeButton(isHidden, t(isHidden ? "ag.show" : "ag.hide", { name: a.name }), () => setHidden(a.id, !isHidden), "h:" + a.id);
     eye.setAttribute("aria-pressed", String(isHidden));
-    eye.dataset.key = "h:" + a.id;
     const edit = toolButton("pencil", t("opt.edit", { name: a.name }), () => showEditor(a));
     const del = toolButton("trash", t("opt.delete", { name: a.name }), () => deleteAgency(a));
     del.classList.add("fdel");
@@ -1368,9 +1366,20 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
 
 // Œil (masquer / réafficher) : au survol ou au focus, il montre l'état qu'on
 // obtiendra en cliquant (œil barré pour masquer, œil ouvert pour réafficher).
-function eyeButton(hidden, title, onClick) {
-  const b = toolButton(hidden ? "eyeOff" : "eye", title, onClick);
+// Juste après un clic, la liste est reconstruite sous la souris : le nouvel œil
+// garde alors l'icône du nouvel état (sinon il remontrerait l'ancienne) jusqu'à
+// ce que la souris le quitte ou que le focus parte.
+let eyeJustToggled = null;
+function eyeButton(hidden, title, onClick, key) {
+  const b = toolButton(hidden ? "eyeOff" : "eye", title, () => { eyeJustToggled = key; onClick(); });
+  b.dataset.key = key;
   b.classList.add("eye-toggle");
+  if (key === eyeJustToggled) {
+    b.classList.add("settled");
+    const release = () => { b.classList.remove("settled"); eyeJustToggled = null; };
+    b.addEventListener("mouseleave", release, { once: true });
+    b.addEventListener("blur", release, { once: true });
+  }
   b.firstChild.classList.add("ico-now");
   const next = icon(hidden ? "eye" : "eyeOff");
   next.classList.add("ico-next");

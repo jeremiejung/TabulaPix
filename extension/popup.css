@@ -387,3 +387,5 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .eye-toggle .ico-next { display: none; }
 .eye-toggle:is(:hover, :focus-visible) .ico-now { display: none; }
 .eye-toggle:is(:hover, :focus-visible) .ico-next { display: inline; }
+.eye-toggle.settled .ico-now { display: inline; } /* juste après le clic : le nouvel état, pas l'aperçu */
+.eye-toggle.settled .ico-next { display: none; }

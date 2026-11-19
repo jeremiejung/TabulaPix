@@ -6,7 +6,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
-- Mode Organiser : au survol (ou au focus) d’un œil, l’icône montre l’état qu’on obtiendra en cliquant — œil barré pour masquer, œil ouvert pour réafficher.
+## 3.5.7 — 19 novembre 2026 (Chrome Web Store)
+
+- Mode Organiser : au survol (ou au focus) d’un œil, l’icône montre l’état qu’on obtiendra en cliquant — œil barré pour masquer, œil ouvert pour réafficher. Juste après un clic, l’œil montre le nouvel état jusqu’à ce que la souris (ou le focus clavier) le quitte.
 
 ## 3.5.6 — 19 novembre 2026 (Chrome Web Store)
 
