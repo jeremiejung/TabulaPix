@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- Le repérage du champ de recherche d’un site est plus robuste sur les sites « applications » modernes (ex. les bibliothèques spécialisées de la Ville de Paris) : les identifiants à petit compteur (`searchTextField_13`) et les classes générées courtes (`jss313`) ne sont plus enregistrés tels quels, car ils changent à chaque chargement ; TabulaPix utilise une description stable (ex. `input[type="search"]`, ou « identifiant qui commence par `searchTextField_` »). Les agences déjà repérées avec un tel identifiant remarchent : si `#nom_13` est introuvable, le champ dont l’identifiant commence par `nom_` est utilisé.
+
 ## 3.5.7 — 19 novembre 2026 (Chrome Web Store)
 
 - Mode Organiser : au survol (ou au focus) d’un œil, l’icône montre l’état qu’on obtiendra en cliquant — œil barré pour masquer, œil ouvert pour réafficher. Juste après un clic, l’œil montre le nouvel état jusqu’à ce que la souris (ou le focus clavier) le quitte.

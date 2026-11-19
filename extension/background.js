@@ -456,10 +456,15 @@ function pickerUI(agencyName, T) {
     || (t.length >= 6 && /^[0-9a-f]+$/i.test(t) && /\d/.test(t) && /[a-f]/i.test(t))
     || (t.length >= 12 && /\d/.test(t) && /[a-z]/i.test(t));
   const stable = (v) => Boolean(v) && v.length <= 200 && !String(v).split(/[^A-Za-z0-9]+/).some(unstableToken);
+  // Identifiants et classes : en plus, un nombre seul (compteur « champ_13 »,
+  // « -2 ») et les classes générées courtes (« jss313 », « css42 ») changent
+  // d'un chargement à l'autre.
+  const unstableNameToken = (t) => unstableToken(t) || /^\d+$/.test(t) || /^[a-z]{1,4}\d{2,}$/i.test(t);
+  const stableName = (v) => Boolean(v) && v.length <= 200 && !String(v).split(/[^A-Za-z0-9]+/).some(unstableNameToken);
   const stablePrefix = (v) => {
     let out = "";
     for (const part of String(v).match(/[A-Za-z0-9]+|[^A-Za-z0-9]+/g) || []) {
-      if (/^[A-Za-z0-9]+$/.test(part) && unstableToken(part)) break;
+      if (/^[A-Za-z0-9]+$/.test(part) && unstableNameToken(part)) break;
       out += part;
     }
     return out;
@@ -473,13 +478,13 @@ function pickerUI(agencyName, T) {
     const tag = el.tagName.toLowerCase();
     const count = (sel) => { try { return el.matches(sel) ? document.querySelectorAll(sel).length : 0; } catch (_) { return 0; } };
     const parts = []; // morceaux combinables : [attr="…"], .classe
-    if (stable(el.id)) parts.push("#" + CSS.escape(el.id));
+    if (stableName(el.id)) parts.push("#" + CSS.escape(el.id));
     for (const attr of ["name", "aria-label", "placeholder", "data-testid", "title", "type", "role", "value"]) {
       const v = el.getAttribute(attr);
       if (v && stable(v) && !(attr === "value" && !/^(submit|button)$/i.test(el.type || ""))) parts.push(`[${attr}=${quote(v)}]`);
     }
-    for (const c of [...el.classList].filter(stable).slice(0, 4)) parts.push("." + CSS.escape(c));
-    if (el.id && !stable(el.id) && stablePrefix(el.id).length >= 3) parts.push(`[id^=${quote(stablePrefix(el.id))}]`);
+    for (const c of [...el.classList].filter(stableName).slice(0, 4)) parts.push("." + CSS.escape(c));
+    if (el.id && !stableName(el.id) && stablePrefix(el.id).length >= 3) parts.push(`[id^=${quote(stablePrefix(el.id))}]`);
 
     const candidates = [];
     parts.forEach((a, i) => {
@@ -490,9 +495,9 @@ function pickerUI(agencyName, T) {
     const scope = el.closest("form[role=search], [role=search], form");
     if (scope && scope !== el) {
       const sTag = scope.tagName.toLowerCase();
-      const sParts = [...scope.classList].filter(stable).slice(0, 2).map((c) => "." + CSS.escape(c));
+      const sParts = [...scope.classList].filter(stableName).slice(0, 2).map((c) => "." + CSS.escape(c));
       if (scope.getAttribute("role")) sParts.unshift(`[role=${quote(scope.getAttribute("role"))}]`);
-      if (stable(scope.id)) sParts.unshift("#" + CSS.escape(scope.id));
+      if (stableName(scope.id)) sParts.unshift("#" + CSS.escape(scope.id));
       if (sParts.length) candidates.slice().forEach((c) => candidates.push(`${sTag}${sParts[0]} ${c}`));
     }
     const scored = candidates.map((sel) => ({ sel, n: count(sel) })).filter((c) => c.n > 0)
@@ -502,7 +507,7 @@ function pickerUI(agencyName, T) {
     // Dernier recours : chemin dans la page, sans identifiants générés.
     const path = [];
     for (let cur = el; cur && cur.nodeType === 1 && cur !== document.documentElement; cur = cur.parentElement) {
-      if (cur !== el && stable(cur.id)) { path.unshift("#" + CSS.escape(cur.id)); break; }
+      if (cur !== el && stableName(cur.id)) { path.unshift("#" + CSS.escape(cur.id)); break; }
       let part = cur.tagName.toLowerCase();
       const same = cur.parentElement ? [...cur.parentElement.children].filter((c) => c.tagName === cur.tagName) : [];
       if (same.length > 1) part += `:nth-of-type(${same.indexOf(cur) + 1})`;
@@ -597,12 +602,17 @@ async function fillAndSubmit(q, fill) {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const all = (sel, root = document) => { try { return [...root.querySelectorAll(sel)]; } catch (_) { return []; } };
   const visible = (el) => el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+  // Repère enregistré avec un identifiant à compteur (« #champ_13 », versions
+  // d'avant 3.5.8) : si le compteur a changé, on cherche « l'identifiant qui
+  // commence par champ_ ».
+  const loosen = (sel) => { const m = /^#((?:[A-Za-z][\w-]*?)[_-])\d+$/.exec(sel); return m ? `[id^="${m[1]}"]` : null; };
   // Premier élément visible (un site peut avoir plusieurs formulaires identiques).
-  const find = (sel) => { const list = all(sel); return list.find(visible) || list[0] || null; };
+  const first = (list) => list.find(visible) || list[0] || null;
+  const find = (sel) => first(all(sel)) || (loosen(sel) ? first(all(loosen(sel))) : null);
   // Bouton le plus proche du champ : dans son formulaire, sinon en remontant.
   const nearest = (sel, from) => {
     for (let node = from.parentElement; node; node = node.parentElement) {
-      const list = all(sel, node);
+      const list = all(sel, node).concat(loosen(sel) ? all(loosen(sel), node) : []);
       if (list.length) return list.find(visible) || list[0];
     }
     return null;
