@@ -6,6 +6,10 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.5.7 — 19 November 2026 (Chrome Web Store)
+
+- Organise mode: hovering (or focusing) an eye shows the state a click will give — crossed eye to hide, open eye to show again. Right after a click, the eye shows the new state until the mouse (or keyboard focus) leaves it.
+
 ## 3.5.6 — 19 November 2026 (Chrome Web Store)
 
 - **New agency: Magnum** (Reportage folder, unticked). It fills in its site's search field, so Chrome asks for permission for the site when you tick it; existing users get it with the “New” badge, and if you had already added Magnum yourself, yours is kept.
