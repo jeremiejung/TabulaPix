@@ -6,6 +6,9 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- Organise mode: the eye now sits next to the handle (bin · pencil · eye), so it no longer moves when the other tools appear on hover in the popup — the bin used to slide under the mouse when you wanted to show a hidden agency again. Same order on folder titles.
+- The Organise button’s tooltip now says “Organise and edit”, since agencies are also edited, hidden and deleted in this mode.
+
 ## 3.5.5 — 13 November 2026 (Chrome Web Store)
 
 - When an agency’s site sends the tab TabulaPix opened to its login page on another address (Hans Lucas, for example), searching again now reuses that tab instead of opening a new one each time. Only redirects right after opening count: a tab you take to another site yourself is never reused.
