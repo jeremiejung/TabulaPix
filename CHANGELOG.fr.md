@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Nouvelle agence : Magnum** (dossier Reportage, décochée). Elle remplit le champ de recherche de son site : Chrome demande l’autorisation pour le site quand on la coche. Les utilisateurs existants la reçoivent avec la pastille « Nouveau », et si vous aviez déjà ajouté Magnum vous-même, c’est la vôtre qui est gardée.
+
 - Mode Organiser : l’œil est maintenant contre la poignée (corbeille · crayon · œil) ; il ne bouge plus quand les autres outils apparaissent au survol dans la popup — la corbeille venait se placer sous la souris quand on voulait réafficher une agence masquée. Même ordre sur les titres de dossier.
 - L’info-bulle du bouton Organiser dit maintenant « Organiser et modifier », puisqu’on y modifie, masque et supprime aussi les agences.
 
