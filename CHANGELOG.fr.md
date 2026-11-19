@@ -6,6 +6,12 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.5.6 — 19 novembre 2026 (Chrome Web Store)
+
+- **Nouvelle agence : Magnum** (dossier Reportage, décochée). Elle remplit le champ de recherche de son site : Chrome demande l’autorisation pour le site quand on la coche. Les utilisateurs existants la reçoivent avec la pastille « Nouveau », et si vous aviez déjà ajouté Magnum vous-même, c’est la vôtre qui est gardée.
+- Mode Organiser : l’œil est maintenant contre la poignée (corbeille · crayon · œil) ; il ne bouge plus quand les autres outils apparaissent au survol dans la popup — la corbeille venait se placer sous la souris quand on voulait réafficher une agence masquée. Même ordre sur les titres de dossier.
+- L’info-bulle du bouton Organiser dit maintenant « Organiser et modifier », puisqu’on y modifie, masque et supprime aussi les agences ; mode actif, les lecteurs d’écran entendent aussi le « Terminé » affiché.
+
 ## 3.5.5 — 13 novembre 2026 (Chrome Web Store)
 
 - Quand le site d’une agence renvoie l’onglet ouvert par TabulaPix vers sa page de connexion sur une autre adresse (Hans Lucas, par exemple), une nouvelle recherche réutilise maintenant cet onglet au lieu d’en ouvrir un à chaque fois. Seules comptent les redirections juste après l’ouverture : un onglet que vous emmenez vous-même vers un autre site n’est jamais repris.

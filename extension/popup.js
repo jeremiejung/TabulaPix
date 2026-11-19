@@ -1286,6 +1286,8 @@ function setOrganizing(on) {
   organizing = on;
   document.documentElement.classList.toggle("organizing", on);
   organizeBtn.setAttribute("aria-pressed", String(on));
+  // Le mot affiché (« Terminé ») fait partie du nom lu par les lecteurs d'écran.
+  organizeBtn.setAttribute("aria-label", on ? `${t("main.organize.done")} — ${t("main.organize")}` : t("main.organize"));
   // Pas de recherche pendant l'organisation : on ne reste pas dans ce mode par mégarde.
   const go = document.getElementById("go");
   // …ni de sélection globale : « Tout » / « Aucune » attendent aussi la fin.
@@ -1352,7 +1354,9 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     const edit = toolButton("pencil", t("opt.edit", { name: a.name }), () => showEditor(a));
     const del = toolButton("trash", t("opt.delete", { name: a.name }), () => deleteAgency(a));
     del.classList.add("fdel");
-    li.append(eye, edit, del, grip(t("main.handle")));
+    // L'œil en dernier, contre la poignée : quand crayon et corbeille apparaissent
+    // au survol (popup étroite), ils s'ajoutent à sa gauche et l'œil ne bouge pas.
+    li.append(del, edit, eye, grip(t("main.handle")));
     li.draggable = true; // on la glisse aussi par son nom
     label.title = t("main.handle");
   } else {
@@ -1523,7 +1527,7 @@ function folderHead(f, color, group) {
   if (organizing) {
     const c = folderControls(f, color, msg);
     c.nameInput.title = f.name;
-    head.append(toggle, label, c.swatch, c.nameInput, count, c.eye, c.del, grip(t("folder.handle")));
+    head.append(toggle, label, c.swatch, c.nameInput, count, c.del, c.eye, grip(t("folder.handle"))); // l'œil reste en place au survol
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");

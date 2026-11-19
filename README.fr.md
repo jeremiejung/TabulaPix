@@ -60,7 +60,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 
 **Garder ouvert :** le bouton **colonne** (première icône en haut de la popup) affiche TabulaPix dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Tant que la colonne est ouverte, l'icône TabulaPix de la barre d'outils agit sur la colonne (elle n'ouvre pas de popup par-dessus) ; une fois la colonne fermée, l'icône rouvre la popup. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
 
-Pour certaines agences (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus). Hormis Bloomberg, Abacapress et Pixpalace, Chrome demande une fois l'autorisation pour le site : quand vous cochez une de ces agences, une pastille « à autoriser » et un bandeau proposent de l'autoriser.
+Pour certaines agences (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Magnum, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus). Hormis Bloomberg, Abacapress et Pixpalace, Chrome demande une fois l'autorisation pour le site : quand vous cochez une de ces agences, une pastille « à autoriser » et un bandeau proposent de l'autoriser.
 
 Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automatique, elle est marquée **« coller »** : la page s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche.
 
@@ -68,11 +68,11 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 ## Mode Organiser
 
-Le bouton **Organiser** en haut (icône liste, à côté du bouton colonne) passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir ; le champ et le bouton de recherche, ainsi que Tout / Aucune, sont désactivés pendant ce temps, pour ne pas y rester par mégarde). En usage courant, la liste ne montre que les noms et les cases (et permet de les réordonner) ; tout le reste de ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
+Le bouton **Organiser** en haut (icône liste, à côté du bouton colonne ; son info-bulle dit « Organiser et modifier », puisqu'on y modifie, masque et supprime aussi les agences) passe en mode **Organiser** (**Échap** ou **Terminé** pour en sortir ; le champ et le bouton de recherche, ainsi que Tout / Aucune, sont désactivés pendant ce temps, pour ne pas y rester par mégarde). En usage courant, la liste ne montre que les noms et les cases (et permet de les réordonner) ; tout le reste de ce qui concerne les agences et les dossiers se fait ici, directement dans la liste.
 
 - **Ordre et dossiers** : comme hors de ce mode, et une agence se glisse aussi par son nom : faites-la glisser par son nom ou sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
 - **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, masquez-le avec son **œil** (le dossier et ses agences disparaissent de la liste et ne sont jamais cherchés ; leurs cases cochées sont gardées pour quand vous le réaffichez), supprimez-le avec la corbeille (ses agences sont conservées, hors dossier ; **Annuler** pendant quelques secondes), créez-en un en bas de la liste. Un dossier dont toutes les agences sont masquées n'apparaît pas non plus en usage courant ; les dossiers masqués n'apparaissent, grisés, qu'en mode Organiser.
-- **Agences**, sur chaque ligne :
+- **Agences**, sur chaque ligne (de droite à gauche, contre la poignée : œil, crayon, corbeille — l'œil reste en place quand les autres outils apparaissent au survol dans la popup, la corbeille ne vient donc jamais sous la souris) :
   - **œil** : masque l'agence (elle disparaît de la liste, sa place est conservée) ou la réaffiche ; les agences masquées n'apparaissent, grisées, qu'en mode Organiser.
     - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte avec son œil. **AFP (forum)** est aussi masquée par défaut.
   - **crayon** : modifie l'agence (voir plus bas) ;
@@ -121,7 +121,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.5.5" },
+  "app": { "name": "TabulaPix", "version": "3.5.6" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Agences filaires", "color": "blue" }],
   "agencies": [

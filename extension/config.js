@@ -159,6 +159,16 @@ const AGENCIES = [
     fill: { input: "#kw1", submit: "#adv_search_submit" }
   },
   {
+    id: "magnum",
+    name: "Magnum",
+    folder: "tp-reportage",
+    defaultChecked: false, // remplit le champ : autorisation demandée quand on la coche
+    url: "https://pro.magnumphotos.com/CS.aspx?VP3=DamView",
+    // L'identifiant du champ est généré par le site (« a4.1.6.14.4.2:MainAutoComp ») :
+    // on ne garde que sa fin, stable, pour survivre à une renumérotation de la page.
+    fill: { input: '[id$=":MainAutoComp"]', submit: 'a[aria-label="Search"]' }
+  },
+  {
     id: "myop",
     name: "Myop",
     folder: "tp-reportage",

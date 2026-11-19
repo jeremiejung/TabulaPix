@@ -60,7 +60,7 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 **Keep open:** the **column** button (first icon at the top of the popup) shows TabulaPix in a column on the right of the window (Chrome's side panel, version 116 or later). The column stays open when you switch tabs, so you can chain searches without reopening the extension. While the column is open, the TabulaPix icon in the toolbar acts on the column (it doesn't open a popup on top of it); once the column is closed, the icon opens the popup again. To close it: the cross at the top of the column. It can also be reopened from Chrome's side panel icon.
 
-For some agencies (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more). Apart from Bloomberg, Abacapress and Pixpalace, Chrome asks once for permission for the site: when you tick such an agency, a “to allow” badge and a banner offer to allow it.
+For some agencies (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Magnum, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more). Apart from Bloomberg, Abacapress and Pixpalace, Chrome asks once for permission for the site: when you tick such an agency, a “to allow” badge and a banner offer to allow it.
 
 If an agency added later has neither an address with `{q}` nor automatic field filling, it is marked **“paste”**: the page opens and your keywords are copied to the clipboard; just press **Ctrl+V** (or **Cmd+V**) in the search field.
 
@@ -68,11 +68,11 @@ You need to be logged in to your agency accounts in Chrome, as usual: the extens
 
 ## Organise mode
 
-The **Organise** button at the top (list icon, next to the column button) switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes (and lets you reorder them); everything else about agencies and folders is done here, right in the list.
+The **Organise** button at the top (list icon, next to the column button; its tooltip reads “Organise and edit”, since agencies are also edited, hidden and deleted there) switches to **Organise** mode (**Esc** or **Done** to leave it; the search field and button, and All / None, are disabled meanwhile, so that you don't stay in this mode by mistake). In normal use, the list only shows names and checkboxes (and lets you reorder them); everything else about agencies and folders is done here, right in the list.
 
 - **Order and folders**: as outside this mode, and an agency can also be dragged by its name: drag it by its name or its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard, **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
 - **Folders**: rename a folder right in its title, change its colour with its dot, hide it with its **eye** (the folder and its agencies disappear from the list and are never searched; their ticks are kept for when you show it again), delete it with the bin (its agencies are kept, outside any folder; **Undo** for a few seconds), create one at the bottom of the list. A folder whose agencies are all hidden doesn't show in normal use either; hidden folders appear greyed out in Organise mode only.
-- **Agencies**, on each line:
+- **Agencies**, on each line (from right to left, next to the handle: eye, pencil, bin — the eye stays in place when the other tools appear on hover in the popup, so the bin never lands under the mouse):
   - **eye**: hides the agency (it disappears from the list, its place is kept) or shows it again; hidden agencies appear greyed out in Organise mode only.
     - **Reuters** comes in two versions, depending on your contract: **Reuters (points)** for credit-based accounts (shows your points balance), shown by default, and **Reuters (standard)** for accounts without points (free download), hidden by default: show the one that matches your account with its eye. **AFP (forum)** is also hidden by default.
   - **pencil**: edits the agency (see below);
@@ -121,7 +121,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.5.5" },
+  "app": { "name": "TabulaPix", "version": "3.5.6" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
