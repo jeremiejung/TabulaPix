@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Tab groups by folder** (option, off by default, in Settings › Tabs): the tabs of each folder open in a Chrome tab group with the folder’s name and colour; agencies outside folders stay ungrouped; a later search reuses the folder’s group if it is still open (even renamed). A second option collapses the groups after the search. New `tabGroups` permission, which Chrome shows no warning for.
+
 ## 3.5.8 — 19 November 2026 (Chrome Web Store)
 
 - Locating a site’s search field is more robust on modern “application” sites (e.g. the Paris specialised libraries): ids with a short counter (`searchTextField_13`) and short generated classes (`jss313`) are no longer recorded as such, since they change on every load; TabulaPix uses a stable description instead (e.g. `input[type="search"]`, or “id starting with `searchTextField_`”). Agencies already located with such an id keep working: if `#name_13` is not found, the field whose id starts with `name_` is used.

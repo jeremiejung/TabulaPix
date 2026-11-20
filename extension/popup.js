@@ -302,10 +302,29 @@ function showView(view) {
   scrollTo(0, 0);
 }
 
+// Onglets en groupes (un par dossier) : enregistré dès qu'on coche.
+const tabGroupsOn = document.getElementById("tabGroupsOn"), tabGroupsCollapse = document.getElementById("tabGroupsCollapse");
+async function renderTabGroups() {
+  const { [TAB_GROUPS_KEY]: pref = {} } = await chrome.storage.local.get(TAB_GROUPS_KEY);
+  tabGroupsOn.checked = Boolean(pref.enabled);
+  tabGroupsCollapse.checked = Boolean(pref.collapsed);
+  tabGroupsCollapse.disabled = !pref.enabled;
+}
+for (const box of [tabGroupsOn, tabGroupsCollapse]) {
+  box.addEventListener("change", async () => {
+    tabGroupsCollapse.disabled = !tabGroupsOn.checked;
+    await chrome.storage.local.set({ [TAB_GROUPS_KEY]: { enabled: tabGroupsOn.checked, collapsed: tabGroupsCollapse.checked } });
+    const saved = document.getElementById("tabGroupsSaved");
+    saved.textContent = t("opt.saved");
+    setTimeout(() => { if (saved.textContent === t("opt.saved")) saved.textContent = ""; }, 2500);
+  });
+}
+
 async function showSettings() {
   await renderRemoved();
   await renderAttention(); // sites encore à autoriser (import, refus…)
   await renderShortcut();
+  await renderTabGroups();
   renderOptionFields(await loadOptions());
   document.getElementById("restoreMsg").textContent = "";
   hideImportConfirm();
@@ -1237,6 +1256,7 @@ async function buildUrl(agency, q, options) {
 const ORDER_KEY = "agencyOrder";
 let ALL = AGENCIES; // intégrées + personnalisées (complété au chargement)
 let AGENCY_BY_ID = new Map(ALL.map((a) => [a.id, a]));
+let currentFolderOf = {}; // dossier de chaque agence (pour les groupes d'onglets)
 let keptChecked = []; // coches des agences d'un dossier masqué (absentes de la liste)
 let fullOrder = []; // ordre de toutes les agences, masquées comprises
 
@@ -1863,7 +1883,13 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   // L'ouverture des onglets est confiée au script d'arrière-plan : la popup
   // se ferme dès qu'un onglet passe au premier plan.
   chrome.storage.local.set({ [QUERY_KEY]: q });
-  const jobs = selected.map((a, i) => ({ id: a.id, url: urls[i] }));
+  // Dossier de chaque agence (nom affiché, couleur) : sert aux groupes d'onglets.
+  const jobs = selected.map((a, i) => {
+    const job = { id: a.id, url: urls[i] };
+    const idx = currentFolders.findIndex((f) => f.id === currentFolderOf[a.id]);
+    if (idx >= 0) job.folder = { id: currentFolders[idx].id, name: currentFolders[idx].name, color: folderColor(currentFolders[idx], idx) };
+    return job;
+  });
   sweeping = true;
   try { await chrome.runtime.sendMessage({ type: "sweep", jobs, q }); }
   catch (_) { msg.textContent = t("main.bgError"); return; } // ex. extension en cours de rechargement
@@ -1888,6 +1914,7 @@ async function refreshList() {
   fullOrder = ordered.map((a) => a.id);
   const { folders, folderOf } = await loadFolders();
   currentFolders = folders;
+  currentFolderOf = folderOf;
   // Agences d'un dossier masqué : absentes du mode normal (donc jamais cherchées),
   // grisées en mode Organiser, comme les agences masquées.
   const hiddenFolders = new Set(folders.filter((f) => f.hidden).map((f) => f.id));

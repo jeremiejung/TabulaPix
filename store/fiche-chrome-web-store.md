@@ -119,6 +119,12 @@ On agency sites the extension is allowed to access, injects a small function tha
 Lets the user keep TabulaPix open in Chrome's side panel ("Keep open" button) to chain several searches.
 ```
 
+**tabGroups**
+
+```text
+Optional feature, off by default: when the user turns on "Open tabs in groups, one per folder", the tabs opened by a search are placed in Chrome tab groups named and coloured after the user's agency folders (and optionally collapsed). Nothing is read or transmitted.
+```
+
 **Justification de l'autorisation d'accès à l'hôte** (une seule boîte pour les deux groupes ; 722 caractères sur 1000)
 
 ```text

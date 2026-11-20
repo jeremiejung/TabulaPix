@@ -370,6 +370,9 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .attention[hidden] { display: none; }
 .attention h2 { margin: 0 0 2px; padding: 0; border: 0; }
 .attention .help { color: CanvasText; }
+.check-line { display: flex; align-items: center; gap: 8px; min-height: 28px; font-size: 13px; cursor: pointer; }
+.check-line.sub { margin-left: 23px; }
+.check-line:has(input:disabled) { color: var(--muted); cursor: default; }
 .access-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; }
 
 /* Import : confirmation dans la page, bien visible (tout sera remplacé). */

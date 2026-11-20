@@ -34,6 +34,7 @@ Les recherches s'ouvrent sur les sites des agences, avec vos propres comptes : c
 ## Autorisations
 
 - **Onglets** (`tabs`) : ouvrir les recherches et réutiliser l'onglet d'une agence déjà ouverte. Les adresses des onglets sont lues au moment de la recherche, jamais enregistrées ni transmises.
+- **Groupes d'onglets** (`tabGroups`) : si l'option est activée, ranger les onglets de chaque dossier dans un groupe d'onglets nommé. Rien n'est lu ni transmis.
 - **Accès à certains sites** (`scripting`, Bloomberg, Abacapress, Pixpalace) : taper les mots-clés dans le champ de recherche de ces sites et cliquer sur leur bouton.
 - **Accès facultatif à d'autres sites** : demandé site par site, uniquement quand vous ajoutez une agence dont il faut remplir le champ de recherche, et retiré quand vous la supprimez.
 - **Stockage** (`storage`), **presse-papiers** (`clipboardWrite`), **panneau latéral** (`sidePanel`) : vos réglages, copier les mots-clés pour les sites où il faut les coller, afficher TabulaPix dans la colonne latérale.
@@ -78,6 +79,7 @@ Searches open on the agencies' websites, with your own accounts: these sites rec
 ## Permissions
 
 - **Tabs** (`tabs`): open the searches and reuse an agency's tab that is already open. Tab addresses are read at search time, never stored or transmitted.
+- **Tab groups** (`tabGroups`): if the option is on, put each folder's tabs in a named tab group. Nothing is read or transmitted.
 - **Access to some sites** (`scripting`, Bloomberg, Abacapress, Pixpalace): type the keywords into these sites' search field and click their button.
 - **Optional access to other sites**: requested one site at a time, only when you add an agency whose search field must be filled in, and removed when you delete it.
 - **Storage** (`storage`), **clipboard** (`clipboardWrite`), **side panel** (`sidePanel`): your settings, copying keywords for sites where they must be pasted, showing TabulaPix in the side panel.
