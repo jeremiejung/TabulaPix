@@ -6,7 +6,9 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
-- **Tab groups by folder** (option, off by default, in Settings › Tabs): the tabs of each folder open in a Chrome tab group with the folder’s name and colour; agencies outside folders stay ungrouped; a later search reuses the folder’s group if it is still open (even renamed). A second option collapses the groups after the search. New `tabGroups` permission, which Chrome shows no warning for.
+## 3.6.0 — 20 November 2026 (Chrome Web Store)
+
+- **Tab groups by folder** (option, off by default, in Settings › Tabs): the tabs of each folder open in a Chrome tab group with the folder’s name and colour; agencies outside folders stay ungrouped; a later search reuses the folder’s group if it is still open (even renamed). A second option collapses the groups after the search. New `tabGroups` permission, which Chrome shows no warning for. Pinned agency tabs stay pinned, outside groups, and a group holding the tab you are looking at is never collapsed.
 
 ## 3.5.8 — 19 November 2026 (Chrome Web Store)
 

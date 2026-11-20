@@ -6,7 +6,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
-- **Groupes d’onglets par dossier** (option, désactivée par défaut, dans Options › Onglets) : les onglets de chaque dossier s’ouvrent dans un groupe d’onglets Chrome, au nom et à la couleur du dossier ; les agences sans dossier restent hors groupe ; une recherche suivante reprend le groupe du dossier s’il est encore ouvert (même renommé). Une seconde option replie les groupes après la recherche. Nouvelle autorisation `tabGroups`, pour laquelle Chrome n’affiche aucun avertissement.
+## 3.6.0 — 20 novembre 2026 (Chrome Web Store)
+
+- **Groupes d’onglets par dossier** (option, désactivée par défaut, dans Options › Onglets) : les onglets de chaque dossier s’ouvrent dans un groupe d’onglets Chrome, au nom et à la couleur du dossier ; les agences sans dossier restent hors groupe ; une recherche suivante reprend le groupe du dossier s’il est encore ouvert (même renommé). Une seconde option replie les groupes après la recherche. Nouvelle autorisation `tabGroups`, pour laquelle Chrome n’affiche aucun avertissement. Les onglets d’agence épinglés restent épinglés, hors groupe, et un groupe qui contient l’onglet affiché n’est jamais replié.
 
 ## 3.5.8 — 19 novembre 2026 (Chrome Web Store)
 

@@ -227,7 +227,9 @@ async function groupTabs(byFolder) {
   const { [GROUP_IDS]: known = {} } = await chrome.storage.session.get(GROUP_IDS);
   for (const { folder, tabs } of byFolder.values()) {
     const byWindow = new Map();
-    for (const t of tabs) { if (!byWindow.has(t.windowId)) byWindow.set(t.windowId, []); byWindow.get(t.windowId).push(t.id); }
+    // Un onglet épinglé ne peut pas entrer dans un groupe : il reste où il est
+    // (sinon Chrome refuserait tout le groupe).
+    for (const t of tabs) { if (t.pinned) continue; if (!byWindow.has(t.windowId)) byWindow.set(t.windowId, []); byWindow.get(t.windowId).push(t.id); }
     for (const [windowId, tabIds] of byWindow) {
       const key = folder.id + ":" + windowId;
       let groupId = null;
@@ -238,10 +240,14 @@ async function groupTabs(byFolder) {
       try {
         const isNew = groupId === null;
         groupId = await chrome.tabs.group(isNew ? { tabIds, createProperties: { windowId } } : { tabIds, groupId });
+        // Jamais replié s'il contient l'onglet affiché : Chrome le masquerait
+        // et sauterait vers un autre onglet sous les yeux de l'utilisateur.
+        const [active] = await chrome.tabs.query({ active: true, windowId });
+        const collapsed = Boolean(pref.collapsed) && !(active && active.groupId === groupId);
         // Nom et couleur seulement à la création : un groupe renommé dans Chrome le reste.
         await chrome.tabGroups.update(groupId, isNew
-          ? { title: folder.name, color: GROUP_COLORS[folder.color] || "grey", collapsed: Boolean(pref.collapsed) }
-          : { collapsed: Boolean(pref.collapsed) });
+          ? { title: folder.name, color: GROUP_COLORS[folder.color] || "grey", collapsed }
+          : { collapsed });
         known[key] = groupId;
       } catch (_) { /* fenêtre fermée, onglet déplacé entre-temps… */ }
     }
