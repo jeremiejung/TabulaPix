@@ -2,7 +2,7 @@
 
 Tout ce qu'il faut pour remplir le tableau de bord du Chrome Web Store (https://chrome.google.com/webstore/devconsole), dans l'ordre des onglets. Chaque texte est dans un bloc à copier-coller.
 
-Paquet à envoyer : `TabulaPix-3.5.8.zip` (ou plus récent).
+Paquet à envoyer : `TabulaPix-3.6.0.zip` (ou plus récent).
 
 ---
 
@@ -117,6 +117,12 @@ On agency sites the extension is allowed to access, injects a small function tha
 
 ```text
 Lets the user keep TabulaPix open in Chrome's side panel ("Keep open" button) to chain several searches.
+```
+
+**tabGroups**
+
+```text
+Optional feature, off by default: when the user turns on "Open tabs in groups, one per folder", the tabs opened by a search are placed in Chrome tab groups named and coloured after the user's agency folders (and optionally collapsed). Nothing is read or transmitted.
 ```
 
 **Justification de l'autorisation d'accès à l'hôte** (une seule boîte pour les deux groupes ; 722 caractères sur 1000)

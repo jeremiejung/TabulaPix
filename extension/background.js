@@ -142,7 +142,10 @@ function validJobs(jobs, options, agencies) {
     try { u = new URL(job.url); } catch (_) { continue; }
     const host = agencyHost(agency, options);
     if (u.protocol !== "https:" || !host || u.hostname !== host) continue;
-    out.push({ id: agency.id, url: job.url, host, fill: agency.fill || null });
+    const folder = job.folder && typeof job.folder === "object" && /^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/.test(String(job.folder.id))
+      ? { id: String(job.folder.id), name: String(job.folder.name || "").slice(0, 60), color: FOLDER_COLORS.includes(job.folder.color) ? job.folder.color : "gray" }
+      : null;
+    out.push({ id: agency.id, url: job.url, host, fill: agency.fill || null, folder });
   }
   return out;
 }
@@ -178,6 +181,7 @@ async function sweep(jobs, q) {
   }
 
   // Les onglets s'ouvrent en arrière-plan : l'utilisateur reste sur son onglet.
+  const byFolder = new Map(); // dossier → { folder, tabs } pour les groupes d'onglets
   for (const [i, job] of jobs.entries()) {
     let tab;
     const started = Date.now();
@@ -200,11 +204,55 @@ async function sweep(jobs, q) {
         return true;
       });
     }
+    if (job.folder) {
+      if (!byFolder.has(job.folder.id)) byFolder.set(job.folder.id, { folder: job.folder, tabs: [] });
+      byFolder.get(job.folder.id).tabs.push(tab);
+    }
     if (job.fill) {
       // Enregistré tout de suite, avant que la page ait fini de charger.
       await updatePending((pending) => { pending[tab.id] = { q, id: job.id, host: job.host, fill: job.fill, attempts: 0 }; });
     }
   }
+  await groupTabs(byFolder);
+}
+
+/* Groupes d'onglets (option) : un groupe Chrome par dossier, à son nom et
+   dans sa couleur ; à la recherche suivante, le groupe du dossier est repris
+   s'il est encore ouvert dans la fenêtre (même renommé par l'utilisateur). */
+const GROUP_COLORS = { blue: "blue", teal: "cyan", green: "green", amber: "yellow", orange: "orange", red: "red", pink: "pink", violet: "purple", gray: "grey" };
+const GROUP_IDS = "folderTabGroups"; // { "dossier:fenêtre": idGroupe } (session)
+async function groupTabs(byFolder) {
+  const { [TAB_GROUPS_KEY]: pref = {} } = await chrome.storage.local.get(TAB_GROUPS_KEY);
+  if (!pref.enabled || !byFolder.size || !chrome.tabGroups) return;
+  const { [GROUP_IDS]: known = {} } = await chrome.storage.session.get(GROUP_IDS);
+  for (const { folder, tabs } of byFolder.values()) {
+    const byWindow = new Map();
+    // Un onglet épinglé ne peut pas entrer dans un groupe : il reste où il est
+    // (sinon Chrome refuserait tout le groupe).
+    for (const t of tabs) { if (t.pinned) continue; if (!byWindow.has(t.windowId)) byWindow.set(t.windowId, []); byWindow.get(t.windowId).push(t.id); }
+    for (const [windowId, tabIds] of byWindow) {
+      const key = folder.id + ":" + windowId;
+      let groupId = null;
+      try { const g = await chrome.tabGroups.get(known[key]); if (g.windowId === windowId) groupId = g.id; } catch (_) { /* groupe fermé */ }
+      if (groupId === null) {
+        try { const [g] = await chrome.tabGroups.query({ windowId, title: folder.name }); if (g) groupId = g.id; } catch (_) { /* rien */ }
+      }
+      try {
+        const isNew = groupId === null;
+        groupId = await chrome.tabs.group(isNew ? { tabIds, createProperties: { windowId } } : { tabIds, groupId });
+        // Jamais replié s'il contient l'onglet affiché : Chrome le masquerait
+        // et sauterait vers un autre onglet sous les yeux de l'utilisateur.
+        const [active] = await chrome.tabs.query({ active: true, windowId });
+        const collapsed = Boolean(pref.collapsed) && !(active && active.groupId === groupId);
+        // Nom et couleur seulement à la création : un groupe renommé dans Chrome le reste.
+        await chrome.tabGroups.update(groupId, isNew
+          ? { title: folder.name, color: GROUP_COLORS[folder.color] || "grey", collapsed }
+          : { collapsed });
+        known[key] = groupId;
+      } catch (_) { /* fenêtre fermée, onglet déplacé entre-temps… */ }
+    }
+  }
+  await chrome.storage.session.set({ [GROUP_IDS]: known });
 }
 
 // Score 2 : même site et même chemin ; 1 : même site ; 0 : autre site.

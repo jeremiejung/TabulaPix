@@ -105,6 +105,7 @@ The **⚙** button at the top shows the settings right in the popup; **← Back*
 - **Language**: English or French. By default, TabulaPix follows the browser language (“Automatic”); the change applies immediately. The name and description shown in `chrome://extensions` and on the Chrome Web Store always follow the browser language.
 - **Pixpalace** › **Subdomain**: the part before `.pixpalace.com` in the address of your Pixpalace space (`www` by default). For example, for `https://mynewsroom.pixpalace.com/home`, type `mynewsroom`. An invalid value is reported under the field and not saved.
 - **Quick access**: shows the keyboard shortcut that opens TabulaPix (Alt + Shift + Y by default), with a link to change it, and reminds you that the column button keeps TabulaPix open beside the page.
+- **Tabs**: **Open tabs in groups, one per folder** (off by default) puts each folder's tabs in a Chrome tab group with the folder's name and colour (agencies outside folders stay ungrouped); a later search reuses the folder's group if it is still open, even renamed. **Collapse the groups after the search** folds them.
 - **Backup and sharing**: **Export** saves your whole configuration to a `.json` file (agencies and their order, names, addresses, field locations, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches). **Import…** loads such a file, after a clearly flagged confirmation (your current configuration is entirely replaced) showing what the file contains — agencies, folders, ticked agencies: use it after reinstalling, or to share a configuration with colleagues. Every agency in the file is checked like an agency added by hand; invalid ones are ignored. If the file contains agencies that fill in their site's search field, TabulaPix asks Chrome for those sites right away when it can (Chrome only allows it shortly after a click); otherwise, and as long as a site is still not allowed (permission refused, or removed in Chrome), a banner above the list, a “to allow” badge on the agency and the **Allow these sites** button under “Needs attention” in the settings let you allow it at any time. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
 - **Agencies removed from the list**: names the deleted built-in agencies; **Restore** brings them back (shown only when there are some).
 - **Factory settings**: **Restore factory settings** erases your settings, your added, edited or deleted agencies and the site permissions you granted, and goes back to the shipped configuration (after confirmation; export first if you want to keep yours).
@@ -121,7 +122,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.5.8" },
+  "app": { "name": "TabulaPix", "version": "3.6.0" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
@@ -174,6 +175,7 @@ A text cursor in a rounded frame with a white background (readable in dark mode)
   - `clipboardWrite`: copy the keywords for “paste” sites;
   - `sidePanel`: show TabulaPix in the right-hand column;
   - `tabs`: see the addresses of open tabs, to reuse an agency's tab that is already open instead of opening a new one. Nothing is stored or transmitted. For this, Chrome shows the “Read your browsing history” warning;
+  - `tabGroups`: put the tabs of each folder in a named tab group, only when the “Tabs” option is on (no warning from Chrome);
   - access to an additional site, requested case by case (Chrome prompt) only when you add an agency whose search field must be filled in, and removed when you delete it;
   - `scripting` + access to `mercury.bloomberg.com`, `search.abacapress.com` and `*.pixpalace.com`: only to type the keywords into these three sites' search field and click the button. The extension reads nothing else on these pages. For this, Chrome shows a “Read and change your data on these sites” warning.
 
