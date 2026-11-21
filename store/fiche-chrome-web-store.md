@@ -104,7 +104,7 @@ For an agency whose search cannot be passed in its address and whose search fiel
 **tabs**
 
 ```text
-Opens one tab per agency in the background when the user launches a search, and reads the addresses of open tabs to reuse the tab already open on an agency's site instead of opening duplicates. Tab addresses are only read at search time; they are never stored or transmitted.
+Opens one tab per agency in the background when the user launches a search, and reads the addresses of open tabs to reuse the tab already open on an agency's site instead of opening duplicates. Tab addresses are only read at search time; they are never stored or transmitted. For agencies whose search shows an empty page when signed out, the title of the agency's tab is read when the search finishes loading, to recognise that page and open the agency's sign-in page instead; the title is neither stored nor transmitted.
 ```
 
 **scripting**

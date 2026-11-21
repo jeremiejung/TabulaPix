@@ -6,6 +6,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Se connecter à une agence** : pour les agences qui ont une page de connexion (Sipa, livrée ainsi), une icône « Se connecter » apparaît au survol dans la liste, à côté de la poignée. Elle ouvre la page de connexion dans l’onglet de l’agence s’il est ouvert (et relance la dernière recherche de cet onglet une fois connecté), sinon dans un nouvel onglet, qui devient celui de l’agence. Toute agence peut recevoir une page de connexion dans son crayon (Détails techniques › Page de connexion), ou la perdre ; elle est gardée dans le fichier de configuration (format 4).
+- **Sipa sans session** : une recherche ouverte sans être connecté à Sipa affichait une page noire. TabulaPix la reconnaît désormais au titre de l’onglet (« Sipa Press », sans « > Recherche »), ouvre la page de connexion de Sipa dans le même onglet et, dès que vous êtes connecté, relance la recherche. Une seule fois par recherche, et oublié au bout de 10 minutes.
+
 ## 3.6.0 — 20 novembre 2026 (Chrome Web Store)
 
 - **Groupes d’onglets par dossier** (option, désactivée par défaut, dans Options › Onglets) : les onglets de chaque dossier s’ouvrent dans un groupe d’onglets Chrome, au nom et à la couleur du dossier ; les agences sans dossier restent hors groupe ; une recherche suivante reprend le groupe du dossier s’il est encore ouvert (même renommé). Une seconde option replie les groupes après la recherche. Nouvelle autorisation `tabGroups`, pour laquelle Chrome n’affiche aucun avertissement. Les onglets d’agence épinglés restent épinglés, hors groupe, et un groupe qui contient l’onglet affiché n’est jamais replié.

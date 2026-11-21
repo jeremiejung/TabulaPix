@@ -14,6 +14,12 @@
  *   defaultChecked  (facultatif) false = décochée au premier lancement
  *   defaultHidden   (facultatif) true = masquée la première fois qu'elle
  *                   apparaît (à réafficher avec son œil, mode Organiser)
+ *   login    (facultatif) page de connexion du site : l'icône « Se connecter »
+ *            de la liste l'ouvre (dans l'onglet de l'agence s'il existe)
+ *   loggedOutTitle  (facultatif, avec login) titre exact de l'onglet quand
+ *            la recherche s'affiche sans session (page vide) : TabulaPix
+ *            ouvre alors la page de connexion, puis relance la recherche
+ *            une fois l'utilisateur connecté
  *   url      adresse de recherche. Marqueurs possibles :
  *              {q}        → les mots-clés, encodés pour une URL (cas le plus courant)
  *              {payload}  → le résultat du champ « payload » ci-dessous
@@ -104,7 +110,11 @@ const AGENCIES = [
     folder: "tp-actu",
     url: "https://www.sipa.com/search/fr/1/0x{payload}",
     payload: '{"searchbar":"{q}","is_searchandgo":"false","ordermode":"2","orderby":"1","folding":"0"}',
-    encode: ["hex"]
+    encode: ["hex"],
+    // Sans session, la recherche s'affiche en page noire, titrée « Sipa Press »
+    // (connecté : « Sipa Press > Recherche: … »).
+    login: "https://www.sipa.com/login",
+    loggedOutTitle: "Sipa Press"
   },
   {
     id: "abacapress",

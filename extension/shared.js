@@ -80,6 +80,13 @@ function cleanFill(f) {
   return out;
 }
 
+// Page de connexion d'une agence : adresse https complète, ou null.
+function cleanLogin(v) {
+  const url = String(v || "").trim();
+  if (!url || url.length > 2000 || /[{}]/.test(url)) return null;
+  try { const u = new URL(url); return u.protocol === "https:" && u.hostname ? u.href : null; } catch (_) { return null; }
+}
+
 // Agence ajoutée par l'utilisateur : copie propre, ou null.
 function cleanCustomAgency(a) {
   if (!a || typeof a !== "object") return null;
@@ -90,7 +97,8 @@ function cleanCustomAgency(a) {
   if (a.fill && !fill) return null;
   const { spec } = checkSpec(a);
   if (!spec) return null;
-  return fill ? { id, name, ...spec, fill, custom: true } : { id, name, ...spec, custom: true };
+  const login = cleanLogin(a.login); // page de connexion invalide : simplement ignorée
+  return { id, name, ...spec, ...(fill ? { fill } : {}), ...(login ? { login } : {}), custom: true };
 }
 
 // Origine (pour l'autorisation Chrome) d'une agence à remplissage.
@@ -105,7 +113,9 @@ function hostOf(url, options) {
 // Agence intégrée + modification de l'utilisateur, traitée comme une agence
 // ajoutée : autre adresse, autre site, passage en « remplir le champ »
 // (override.fill = repères) ou en « adresse de recherche » (override.fill = false).
-// Le délai propre au site (Bloomberg) n'est gardé que sur le même site.
+// Le délai propre au site (Bloomberg) n'est gardé que sur le même site, comme
+// la page de connexion livrée et la détection de la page « sans session ».
+// override.login : autre page de connexion, ou false = aucune.
 function applyOverride(agency, override, options) {
   if (!override || typeof override !== "object") return agency;
   const { spec } = checkSpec(override, { allowOptions: true });
@@ -119,6 +129,10 @@ function applyOverride(agency, override, options) {
   if (name && name.length <= 40) out.name = name; // agence fournie renommée
   delete out.payload; delete out.encode;
   if (spec.payload !== undefined) { out.payload = spec.payload; out.encode = spec.encode; }
+  if (!sameHost) { delete out.login; delete out.loggedOutTitle; }
+  const login = cleanLogin(override.login);
+  if (override.login === false) { delete out.login; delete out.loggedOutTitle; }
+  else if (login && (login !== agency.login || !sameHost)) { out.login = login; delete out.loggedOutTitle; }
   if (override.fill === false) delete out.fill;
   else if (picked) {
     delete picked.delay;
@@ -264,7 +278,8 @@ function sameAgencySite(builtin, custom, options) {
  *     agencies: [ … dans l'ordre de la liste … ],
  *     removedBuiltins: [ … agences fournies supprimées … ] }
  * Chaque agence : { id, builtin, name, checked, hidden, folder? } et, si
- * elle est ajoutée ou modifiée, url / payload / encode / fill.
+ * elle est ajoutée ou modifiée, url / payload / encode / fill / login
+ * (page de connexion ; false = celle de l'agence fournie retirée).
  * La dernière recherche n'est jamais exportée.
  *
  * Compatibilité entre versions :
@@ -281,7 +296,7 @@ function sameAgencySite(builtin, custom, options) {
  * agences (toutes cochées, aucune, ou certaines = à moitié coché).
  */
 const CONFIG_FORMAT = "tabulapix-config";
-const CONFIG_FORMAT_VERSION = 3; // version du format écrit par cette extension (2 : dossiers repliés ; 3 : dossiers masqués)
+const CONFIG_FORMAT_VERSION = 4; // version du format écrit par cette extension (2 : dossiers repliés ; 3 : dossiers masqués ; 4 : page de connexion)
 const CONFIG_READER_VERSION = 1; // plus haut minReaderVersion que cette extension sait lire
 const CONFIG_MAX_BYTES = 1024 * 1024;
 const FOLDERS_KEY = "agencyFolders";     // [ { id, name, color?, collapsed?, hidden? } ]
@@ -341,9 +356,9 @@ async function buildConfigExport() {
     if (folderIds.has(folderOf[id])) entry.folder = folderOf[id];
     const src = builtin ? overrides[id] : a;
     if (builtin && src && typeof src === "object") {
-      for (const k of ["name", "url", "payload", "encode", "fill"]) if (src[k] !== undefined) entry[k] = src[k];
+      for (const k of ["name", "url", "payload", "encode", "fill", "login"]) if (src[k] !== undefined) entry[k] = src[k];
     } else if (!builtin) {
-      for (const k of ["url", "payload", "encode", "fill"]) if (a[k] !== undefined) entry[k] = a[k];
+      for (const k of ["url", "payload", "encode", "fill", "login"]) if (a[k] !== undefined) entry[k] = a[k];
     }
     return entry;
   });
@@ -401,8 +416,8 @@ function parseConfigImport(file) {
       if (!original) { unknown++; continue; } // agence fournie par une autre version
       if (removed.has(e.id) || order.includes(e.id)) { skipped++; continue; }
       seen.add(e.id);
-      const hasOverride = ["name", "url", "payload", "encode", "fill"].some((k) => e[k] !== undefined)
-        && (e.name !== original.name || e.url !== undefined || e.fill !== undefined);
+      const hasOverride = ["name", "url", "payload", "encode", "fill", "login"].some((k) => e[k] !== undefined)
+        && (e.name !== original.name || e.url !== undefined || e.fill !== undefined || e.login !== undefined);
       if (hasOverride) {
         const ov = { url: e.url !== undefined ? e.url : original.url };
         if (e.payload !== undefined) { ov.payload = e.payload; ov.encode = e.encode; }
@@ -411,10 +426,12 @@ function parseConfigImport(file) {
         else if (e.fill && typeof e.fill === "object") { const f = cleanFill(e.fill); if (f) { delete f.delay; ov.fill = f; } }
         const name = String(e.name || "").trim();
         if (name && name !== original.name && name.length <= 40) ov.name = name;
+        if (e.login === false && original.login) ov.login = false; // page de connexion livrée retirée
+        else { const login = cleanLogin(e.login); if (login && login !== original.login) ov.login = login; }
         const applied = applyOverride(original, ov, options);
         if (applied.modified) {
           const { spec } = checkSpec(ov, { allowOptions: true });
-          overrides[e.id] = { ...spec, ...(ov.fill !== undefined ? { fill: ov.fill } : {}), ...(ov.name ? { name: ov.name } : {}) };
+          overrides[e.id] = { ...spec, ...(ov.fill !== undefined ? { fill: ov.fill } : {}), ...(ov.name ? { name: ov.name } : {}), ...(ov.login !== undefined ? { login: ov.login } : {}) };
         }
       }
     } else {

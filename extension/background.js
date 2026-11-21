@@ -97,6 +97,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     } else if (msg.type === "try") {
       tryAgency(msg).then(sendResponse);
       return true;
+    } else if (msg.type === "login" && typeof msg.id === "string") {
+      openLogin(msg.id).then(sendResponse, () => sendResponse({ ok: false }));
+      return true;
     } else if (msg.type === "panelOpened") {
       syncActionWithPanel().then(() => sendResponse({ ok: true }), () => sendResponse({ ok: false }));
       return true;
@@ -145,7 +148,8 @@ function validJobs(jobs, options, agencies) {
     const folder = job.folder && typeof job.folder === "object" && /^[A-Za-z0-9][A-Za-z0-9_-]{0,39}$/.test(String(job.folder.id))
       ? { id: String(job.folder.id), name: String(job.folder.name || "").slice(0, 60), color: FOLDER_COLORS.includes(job.folder.color) ? job.folder.color : "gray" }
       : null;
-    out.push({ id: agency.id, url: job.url, host, fill: agency.fill || null, folder });
+    out.push({ id: agency.id, url: job.url, host, fill: agency.fill || null, folder,
+      login: cleanLogin(agency.login), wallTitle: agency.login && typeof agency.loggedOutTitle === "string" ? agency.loggedOutTitle : null });
   }
   return out;
 }
@@ -201,6 +205,8 @@ async function sweep(jobs, q) {
       await updateOwners((o) => {
         const known = o[tab.id] && o[tab.id].id === job.id ? o[tab.id].hosts : [];
         o[tab.id] = { id: job.id, hosts: [...new Set([job.host, ...known, ...seen])], at: started };
+        // Agence à page de connexion : la recherche, pour la relancer après connexion.
+        if (job.login) o[tab.id].login = { search: job.url, page: job.login, title: job.wallTitle, state: "search", since: started };
         return true;
       });
     }
@@ -309,6 +315,112 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
     await updatePending((pending) => { if (!pending[tabId]) pending[tabId] = { ...job, attempts: job.attempts + 1 }; });
   }
 });
+
+/* ---------- Connexion aux agences ---------- */
+/*
+ * Certaines agences (Sipa) affichent, sans session, une page vide à la place
+ * des résultats, à la même adresse. On la reconnaît au titre de l'onglet
+ * (loggedOutTitle, config.js : lisible grâce à l'autorisation « tabs », sans
+ * accès au contenu de la page), on ouvre la page de connexion dans le même
+ * onglet, puis, dès que l'onglet quitte la page de connexion sur le site de
+ * l'agence, on relance la recherche. Même relance après un clic sur l'icône
+ * « Se connecter » de la liste.
+ * État (dans l'entrée de l'onglet, OWNERS) : login = { search, page, title,
+ * state: "search" (résultats à vérifier) | "signin" (connexion en cours,
+ * relance à faire) | "done", since }. La recherche reste connue après coup,
+ * pour que l'icône « Se connecter » puisse la relancer.
+ */
+const LOGIN_MS = 10 * 60 * 1000; // au-delà, la connexion est oubliée : pas de relance surprise
+const TITLE_SETTLE_MS = 1200;    // le titre peut encore changer juste après le chargement
+const sameUrl = (a, b) => { try { return new URL(a).href === new URL(b).href; } catch (_) { return false; } };
+const withoutQuery = (url) => String(url).split(/[?#]/)[0];
+const DONE = { state: "done", title: null };
+
+async function ownerOf(tabId) {
+  return (await chrome.storage.session.get({ [OWNERS]: {} }))[OWNERS][tabId] || null;
+}
+function setLoginState(tabId, patch) {
+  return updateOwners((owners) => {
+    const o = owners[tabId];
+    if (!o || !o.login) return false;
+    Object.assign(o.login, patch);
+    return true;
+  });
+}
+
+chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
+  if (info.status === "complete") watchLogin(tabId, tab).catch(() => { /* onglet fermé… */ });
+});
+
+async function watchLogin(tabId, tab) {
+  const o = await ownerOf(tabId);
+  const w = o && o.login;
+  if (!w || w.state === "done") return;
+  if (Date.now() - w.since > LOGIN_MS) return setLoginState(tabId, DONE);
+  if (w.state === "search") {
+    if (!w.title || !sameUrl(tab.url, w.search)) return; // seulement la page de résultats elle-même
+    await new Promise((r) => setTimeout(r, TITLE_SETTLE_MS));
+    const now = await chrome.tabs.get(tabId);
+    const again = await ownerOf(tabId); // une autre recherche a pu partir entre-temps
+    if (!sameUrl(now.url, w.search) || !again || !again.login || again.login.state !== "search" || again.login.search !== w.search) return;
+    if (now.title !== w.title) return setLoginState(tabId, DONE); // connecté : rien à faire
+    // Page vide, sans session : une seule fois par recherche (pas de boucle si
+    // le site garde ce titre après la connexion).
+    await setLoginState(tabId, { state: "signin", since: Date.now(), title: null });
+    await chrome.tabs.update(tabId, { url: w.page });
+    return;
+  }
+  // state "signin" : on attend que l'onglet quitte la page de connexion.
+  let u, search;
+  try { u = new URL(tab.url); search = new URL(w.search); } catch (_) { return; }
+  if (sameUrl(tab.url, w.search)) return setLoginState(tabId, DONE); // le site y est revenu de lui-même
+  if (withoutQuery(u.href) === withoutQuery(new URL(w.page).href)) return; // encore la page de connexion (ou erreur)
+  // Ailleurs que sur le site de l'agence (ex. connexion centralisée) : on attend encore.
+  if (u.hostname !== search.hostname) return;
+  await setLoginState(tabId, DONE);
+  await chrome.tabs.update(tabId, { url: w.search });
+}
+
+// Icône « Se connecter » de la liste : la page de connexion dans l'onglet de
+// l'agence s'il est ouvert (sa dernière recherche sera relancée après), sinon
+// dans un nouvel onglet, qui devient celui de l'agence.
+async function openLogin(id) {
+  const options = await loadOptions();
+  const agency = (await loadAgencies(options)).all.find((a) => a.id === id);
+  const page = agency && cleanLogin(agency.login);
+  if (!page) return { ok: false };
+  const owners = (await chrome.storage.session.get({ [OWNERS]: {} }))[OWNERS];
+  const { [PICK_KEY]: pick } = await chrome.storage.session.get(PICK_KEY);
+  let tab = null;
+  for (const t of await chrome.tabs.query({ windowType: "normal" })) {
+    const o = owners[t.id];
+    if (!o || o.id !== id || (pick && pick.tabId === t.id)) continue;
+    try { if (o.hosts.includes(new URL(t.url).hostname)) { tab = t; break; } } catch (_) { /* adresse illisible */ }
+  }
+  const now = Date.now();
+  if (tab) {
+    const o = owners[tab.id];
+    await updateOwners((all) => {
+      const e = all[tab.id];
+      if (!e) return false;
+      // Dernière recherche connue de l'onglet : relancée une fois connecté.
+      if (o.login && o.login.search) e.login = { ...o.login, state: "signin", since: now, title: null };
+      return true;
+    });
+    await chrome.tabs.update(tab.id, { url: page, active: true });
+    try { await chrome.windows.update(tab.windowId, { focused: true }); } catch (_) { /* rien */ }
+  } else {
+    tab = await chrome.tabs.create({ url: page, active: true });
+    let pageHost = null;
+    try { pageHost = new URL(page).hostname; } catch (_) { /* rien */ }
+    const host = agencyHost(agency, options);
+    await updateOwners((all) => {
+      all[tab.id] = { id, hosts: [...new Set([host, pageHost].filter(Boolean))], at: now };
+      return true;
+    });
+  }
+  return { ok: true };
+}
 
 chrome.tabs.onRemoved.addListener(async (tabId) => {
   updatePending((pending) => { delete pending[tabId]; });
