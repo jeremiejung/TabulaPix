@@ -6,8 +6,10 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.6.5 — 21 November 2026 (Chrome Web Store)
+
 - **Signing in to an agency**: for agencies with a sign-in page (Sipa as shipped), a “Sign in” icon appears on hover in the list, next to the handle. It opens the sign-in page in the agency’s tab if it is open (and runs that tab’s last search again once you are signed in), otherwise in a new tab, which then becomes the agency’s tab. Any agency can be given a sign-in page in its pencil (Technical details › Sign-in page), or have it removed; it is kept in the configuration file (format 4).
-- **Sipa without a session**: a search opened while signed out of Sipa showed a black page. TabulaPix now recognises it from the tab’s title (“Sipa Press”, without “> Search”), opens the Sipa sign-in page in the same tab and, as soon as you are signed in, runs the search again. Only once per search, and forgotten after 10 minutes.
+- **Sipa without a session**: a search opened while signed out of Sipa showed a black page. TabulaPix now recognises it from the tab’s title (“Sipa Press”, without “> Search”), opens the Sipa sign-in page in the same tab and, as soon as you are signed in, runs the search again. Only once per search, and forgotten after 10 minutes; a password-reset or sign-up page on the way is not interrupted.
 
 ## 3.6.0 — 20 November 2026 (Chrome Web Store)
 

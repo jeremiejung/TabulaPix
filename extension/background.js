@@ -333,7 +333,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 const LOGIN_MS = 10 * 60 * 1000; // au-delà, la connexion est oubliée : pas de relance surprise
 const TITLE_SETTLE_MS = 1200;    // le titre peut encore changer juste après le chargement
 const sameUrl = (a, b) => { try { return new URL(a).href === new URL(b).href; } catch (_) { return false; } };
-const withoutQuery = (url) => String(url).split(/[?#]/)[0];
+const ACCOUNT_PAGES = /pass(word|wd)?|forgot|lost|reset|recover|regist|sign-?up|subscri|inscri|create|mot-?de-?passe|oubli/i;
 const DONE = { state: "done", title: null };
 
 async function ownerOf(tabId) {
@@ -374,9 +374,14 @@ async function watchLogin(tabId, tab) {
   let u, search;
   try { u = new URL(tab.url); search = new URL(w.search); } catch (_) { return; }
   if (sameUrl(tab.url, w.search)) return setLoginState(tabId, DONE); // le site y est revenu de lui-même
-  if (withoutQuery(u.href) === withoutQuery(new URL(w.page).href)) return; // encore la page de connexion (ou erreur)
+  // Encore la page de connexion, ou une page sous elle (/login/, /login?error…).
+  const page = new URL(w.page), base = page.pathname.replace(/\/+$/, "");
+  if (u.hostname === page.hostname && (u.pathname.replace(/\/+$/, "") === base || u.pathname.startsWith(base + "/"))) return;
   // Ailleurs que sur le site de l'agence (ex. connexion centralisée) : on attend encore.
   if (u.hostname !== search.hostname) return;
+  // Mot de passe oublié, création de compte… : l'utilisateur n'est pas encore
+  // connecté, on ne l'interrompt pas (la relance attend la page suivante).
+  if (ACCOUNT_PAGES.test(u.pathname)) return;
   await setLoginState(tabId, DONE);
   await chrome.tabs.update(tabId, { url: w.search });
 }
