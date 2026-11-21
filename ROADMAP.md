@@ -42,6 +42,6 @@ Directions considered for future versions, with what has already been decided. N
 
 **To plan for.**
 - Declare the handling of “authentication information” to the Chrome Web Store; update the listing (“no password stored **in plain text**, nor sent”) and the privacy policy.
-- A dedicated security audit before release; a dedicated version (e.g. 3.6.0).
+- A dedicated security audit before release; a dedicated version (e.g. 3.7.0).
 
 **Proven alternative to mention to users.** KeePassXC (free, audited) with a `.kdbx` file on the desk's Drive: same principle, if the newsroom accepts installing software.

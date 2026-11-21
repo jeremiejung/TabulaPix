@@ -408,7 +408,7 @@ const ed = {
   pickBtn: $id("pickBtn"), backToUrl: $id("backToUrl"), advanced: $id("advanced"),
   techUrl: $id("techUrl"), techFill: $id("techFill"), payload: $id("newPayload"), encode: $id("newEncode"),
   tryBtn: $id("tryBtn"), submit: $id("agencySubmit"), reset: $id("resetAgency"), cancel: $id("cancelEdit"),
-  folder: $id("newFolder"),
+  folder: $id("newFolder"), login: $id("newLogin"), loginErr: $id("loginErr"),
   form: addForm
 };
 
@@ -525,6 +525,12 @@ function validate() {
   );
   showFieldErrors(nameError, specError);
   if (!error && specError) error = specError;
+  // Page de connexion : facultative, mais une adresse complète si elle est remplie.
+  const loginError = ed.login.value.trim() && !cleanLogin(ed.login.value) ? t("spec.login") : "";
+  const showLogin = Boolean(loginError && touched.has("login"));
+  ed.loginErr.textContent = showLogin ? loginError : "";
+  if (showLogin) { ed.login.setAttribute("aria-invalid", "true"); ed.advanced.open = true; } else ed.login.removeAttribute("aria-invalid");
+  if (!error && loginError) error = loginError;
   if (!error && draft.mode === "fill" && !(draft.fill && draft.fill.input)) error = t("ed.err.pickNeeded");
   ed.submit.disabled = Boolean(error);
   ed.tryBtn.disabled = Boolean(specError) || (draft.mode === "fill" && !(draft.fill && draft.fill.input));
@@ -583,7 +589,7 @@ async function saveDraft() {
   if (!draft) return chrome.storage.session.remove(AGENCY_DRAFT_KEY);
   await chrome.storage.session.set({
     [AGENCY_DRAFT_KEY]: {
-      ...draft, name: ed.name.value, url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value, folder: ed.folder.value,
+      ...draft, name: ed.name.value, url: ed.url.value, payload: ed.payload.value, encode: ed.encode.value, folder: ed.folder.value, login: ed.login.value,
       detUrl: ed.detUrl.value, detQ: ed.detQ.value, step2: !ed.form.hidden, step2Msg: ed.step2Msg.innerText // innerText : garde les retours à la ligne des avertissements
     }
   });
@@ -649,6 +655,7 @@ function startEdit(a) {
   ed.url.value = a.url;
   ed.payload.value = a.payload || "";
   ed.encode.value = (a.encode || []).join(", ");
+  ed.login.value = a.login || "";
   ed.reset.hidden = !a.modified;
   ed.submit.textContent = t("ed.saveEdit");
   setMode(draft.mode);
@@ -670,6 +677,7 @@ async function restoreDraft() {
   ed.url.value = saved.url || "";
   ed.payload.value = saved.payload || "";
   ed.encode.value = saved.encode || "";
+  ed.login.value = saved.login || "";
   ed.submit.textContent = saved.editing ? t("ed.saveEdit") : t("ed.add");
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
   fillFolderSelect();
@@ -741,10 +749,10 @@ ed.backToUrl.addEventListener("click", async () => {
 });
 
 // Saisie : on revérifie ; une autre page = repérage à refaire.
-for (const el of [ed.name, ed.url, ed.payload, ed.encode]) {
+for (const el of [ed.name, ed.url, ed.payload, ed.encode, ed.login]) {
   el.addEventListener("input", () => {
     if (!draft) return;
-    touched.add(Object.keys(fieldInput).find((k) => fieldInput[k] === el));
+    touched.add(el === ed.login ? "login" : Object.keys(fieldInput).find((k) => fieldInput[k] === el));
     if (el === ed.url && draft.mode === "fill" && draft.fill) {
       const before = draft.pageHost;
       const now = hostOf(ed.url.value, cachedOptions);
@@ -824,7 +832,7 @@ ed.reset.addEventListener("click", async () => {
 /* Étape 3 : ajouter (ou enregistrer la modification) */
 addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  ["name", "url", "payload", "encode"].forEach((k) => touched.add(k));
+  ["name", "url", "payload", "encode", "login"].forEach((k) => touched.add(k));
   const error = validate();
   if (error) return flash(error, addMsg);
   const id = draft.id;
@@ -849,14 +857,21 @@ addForm.addEventListener("submit", async (e) => {
       if (!unchanged) fillOverride = picked;
     }
     const renamed = name !== original.name;
+    // Page de connexion : undefined = celle de l'original, false = aucune.
+    const login = cleanLogin(ed.login.value);
+    // (Agence déplacée sur un autre site : la page de connexion livrée n'y suit que si on la garde explicitement.)
+    const movedSite = hostOf(spec.url, cachedOptions) !== hostOf(original.url, cachedOptions);
+    const loginOverride = login ? (login === original.login && !movedSite ? undefined : login) : (original.login ? false : undefined);
     const same = spec.url === original.url && (spec.payload || "") === (original.payload || "")
-      && (spec.encode || []).join() === (original.encode || []).join() && fillOverride === undefined && !renamed;
+      && (spec.encode || []).join() === (original.encode || []).join() && fillOverride === undefined && !renamed
+      && loginOverride === undefined;
     if (same) delete overrides[id];
-    else overrides[id] = { ...spec, ...(fillOverride !== undefined ? { fill: fillOverride } : {}), ...(renamed ? { name } : {}) };
+    else overrides[id] = { ...spec, ...(fillOverride !== undefined ? { fill: fillOverride } : {}), ...(renamed ? { name } : {}),
+      ...(loginOverride !== undefined ? { login: loginOverride } : {}) };
     await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
 
   } else {
-    const agency = cleanCustomAgency({ id, name, ...raw, fill: draft.mode === "fill" ? draft.fill : undefined });
+    const agency = cleanCustomAgency({ id, name, ...raw, fill: draft.mode === "fill" ? draft.fill : undefined, login: ed.login.value });
     if (!agency) return flash(t("ed.err.invalid"), addMsg);
     const data = await chrome.storage.local.get({ [CUSTOM_KEY]: [], [STORAGE_KEY]: DEFAULT_CHECKED });
     const before = data[CUSTOM_KEY].find((c) => c && c.id === id);
@@ -1290,6 +1305,7 @@ const ICONS = {
   dot: '<circle cx="8" cy="8" r="4.5"/>',
   pencil: '<path d="M10.5 2.8l2.7 2.7L6 12.7l-3.3.6.6-3.3z"/><path d="M9 4.3l2.7 2.7"/>',
   eye: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>',
+  login: '<path d="M9.5 2.5h3.5v11H9.5"/><path d="M2.5 8h7.5M7 5l3 3-3 3"/>',
   eyeOff: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><path d="M2.5 13.5l11-11"/>',
 };
 function icon(name) {
@@ -1379,9 +1395,23 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     label.title = t("main.handle");
   } else {
     // Hors Organiser : poignée affichée au survol, on réordonne sans changer de mode.
+    // Agence avec une page de connexion : l'icône « Se connecter » à côté.
+    if (a.login && !isHidden) {
+      const login = toolButton("login", t("ag.login", { name: a.name }), () => openLogin(a));
+      login.classList.add("login-tool");
+      login.dataset.key = "l:" + a.id;
+      li.append(login);
+    }
     li.append(grip(t("main.handle")));
   }
   return li;
+}
+
+// Page de connexion de l'agence, dans son onglet s'il est ouvert (le script
+// d'arrière-plan relancera ensuite la dernière recherche de cet onglet).
+async function openLogin(a) {
+  const res = await chrome.runtime.sendMessage({ type: "login", id: a.id }).catch(() => null);
+  if (res && res.ok && isPopup) window.close();
 }
 
 // Œil (masquer / réafficher) : au survol ou au focus, il montre l'état qu'on

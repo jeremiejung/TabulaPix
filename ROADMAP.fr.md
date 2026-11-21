@@ -42,6 +42,6 @@ Pistes envisagées pour de futures versions, avec ce qui a déjà été décidé
 
 **À prévoir.**
 - Déclarer au Chrome Web Store la gestion d'« informations d'authentification » ; adapter la fiche (« aucun mot de passe enregistré **en clair**, ni transmis ») et la politique de confidentialité.
-- Audit de sécurité spécifique avant publication ; version dédiée (ex. 3.6.0).
+- Audit de sécurité spécifique avant publication ; version dédiée (ex. 3.7.0).
 
 **Alternative éprouvée à mentionner aux utilisateurs.** KeePassXC (gratuit, audité) avec un fichier `.kdbx` sur le Drive du service : même principe, si la rédaction accepte d'installer un logiciel.

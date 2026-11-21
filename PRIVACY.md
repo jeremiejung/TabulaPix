@@ -33,7 +33,7 @@ Les recherches s'ouvrent sur les sites des agences, avec vos propres comptes : c
 
 ## Autorisations
 
-- **Onglets** (`tabs`) : ouvrir les recherches et réutiliser l'onglet d'une agence déjà ouverte. Les adresses des onglets sont lues au moment de la recherche, jamais enregistrées ni transmises.
+- **Onglets** (`tabs`) : ouvrir les recherches et réutiliser l'onglet d'une agence déjà ouverte. Les adresses des onglets sont lues au moment de la recherche, jamais enregistrées ni transmises. Pour les agences qui le prévoient (Sipa), le titre de l'onglet de l'agence est lu à la fin du chargement de la recherche, pour reconnaître une page affichée sans session et ouvrir la page de connexion ; il n'est ni enregistré ni transmis.
 - **Groupes d'onglets** (`tabGroups`) : si l'option est activée, ranger les onglets de chaque dossier dans un groupe d'onglets nommé. Rien n'est lu ni transmis.
 - **Accès à certains sites** (`scripting`, Bloomberg, Abacapress, Pixpalace) : taper les mots-clés dans le champ de recherche de ces sites et cliquer sur leur bouton.
 - **Accès facultatif à d'autres sites** : demandé site par site, uniquement quand vous ajoutez une agence dont il faut remplir le champ de recherche, et retiré quand vous la supprimez.
@@ -78,7 +78,7 @@ Searches open on the agencies' websites, with your own accounts: these sites rec
 
 ## Permissions
 
-- **Tabs** (`tabs`): open the searches and reuse an agency's tab that is already open. Tab addresses are read at search time, never stored or transmitted.
+- **Tabs** (`tabs`): open the searches and reuse an agency's tab that is already open. Tab addresses are read at search time, never stored or transmitted. For agencies that provide for it (Sipa), the title of the agency's tab is read when the search finishes loading, to recognise a page shown without a session and open the sign-in page; it is neither stored nor transmitted.
 - **Tab groups** (`tabGroups`): if the option is on, put each folder's tabs in a named tab group. Nothing is read or transmitted.
 - **Access to some sites** (`scripting`, Bloomberg, Abacapress, Pixpalace): type the keywords into these sites' search field and click their button.
 - **Optional access to other sites**: requested one site at a time, only when you add an agency whose search field must be filled in, and removed when you delete it.
