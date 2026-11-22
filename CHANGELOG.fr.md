@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.6 — 22 novembre 2026 (Chrome Web Store)
+
 - **Moins d’autorisations à l’installation** : Chrome n’annonce plus que « Consulter votre historique de navigation » (`tabs`, nécessaire pour réutiliser les onglets des agences).
   - Bloomberg, Abacapress et Pixpalace sont autorisées à la demande, comme les autres agences dont on remplit le champ de recherche (pastille et bandeau « à autoriser »). Les utilisateurs actuels gardent Bloomberg et Abacapress ; Pixpalace est à autoriser de nouveau, une fois, pour votre seul sous-domaine.
   - Les groupes d’onglets (`tabGroups`) ne sont demandés qu’en activant l’option, et rendus en la désactivant. Contrairement à ce qu’indiquait la 3.6.0, Chrome affichait bien un avertissement (« Afficher et gérer vos groupes d’onglets »). Si vous utilisiez déjà l’option, elle continue de fonctionner.

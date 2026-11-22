@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.6.6 — 22 November 2026 (Chrome Web Store)
+
 - **Fewer permissions on installation**: Chrome now only announces “Read your browsing history” (`tabs`, needed to reuse agency tabs).
   - Bloomberg, Abacapress and Pixpalace are allowed on demand, like the other agencies whose search field is filled in (“to allow” badge and banner). Existing users keep Bloomberg and Abacapress; Pixpalace must be allowed again once, for your subdomain only.
   - Tab groups (`tabGroups`) are requested only when you turn the option on, and given back when you turn it off. Contrary to what 3.6.0 said, Chrome did show a warning for them (“View and manage your tab groups”). If you already used the option, it keeps working.
