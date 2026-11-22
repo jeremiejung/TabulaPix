@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.7 — 22 novembre 2026 (Chrome Web Store)
+
 - Le haut de la fenêtre (mots-clés, bouton **Lancer la recherche**, boutons Organiser et Options) reste visible quand la liste des agences défile ; un filet le sépare de la liste dès qu’elle passe dessous.
 
 ## 3.6.6 — 22 novembre 2026 (Chrome Web Store)
