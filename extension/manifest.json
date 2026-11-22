@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_appName__",
-  "version": "3.6.5",
+  "version": "3.6.6",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
   "icons": {
@@ -31,16 +31,12 @@
   },
   "permissions": [
     "storage",
-    "clipboardWrite",
     "scripting",
     "tabs",
-    "tabGroups",
     "sidePanel"
   ],
-  "host_permissions": [
-    "https://mercury.bloomberg.com/*",
-    "https://search.abacapress.com/*",
-    "https://*.pixpalace.com/*"
+  "optional_permissions": [
+    "tabGroups"
   ],
   "optional_host_permissions": [
     "https://*/*"

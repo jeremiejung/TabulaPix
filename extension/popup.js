@@ -303,22 +303,44 @@ function showView(view) {
 }
 
 // Onglets en groupes (un par dossier) : enregistré dès qu'on coche.
+// L'autorisation « groupes d'onglets » n'est demandée qu'à ce moment-là
+// (Chrome l'annoncerait sinon à l'installation, pour une option désactivée
+// par défaut) ; décocher la rend.
 const tabGroupsOn = document.getElementById("tabGroupsOn"), tabGroupsCollapse = document.getElementById("tabGroupsCollapse");
 async function renderTabGroups() {
   const { [TAB_GROUPS_KEY]: pref = {} } = await chrome.storage.local.get(TAB_GROUPS_KEY);
-  tabGroupsOn.checked = Boolean(pref.enabled);
+  const granted = await chrome.permissions.contains(TAB_GROUPS_PERMISSION).catch(() => false);
+  tabGroupsOn.checked = Boolean(pref.enabled) && granted; // autorisation retirée dans Chrome : décochée
   tabGroupsCollapse.checked = Boolean(pref.collapsed);
-  tabGroupsCollapse.disabled = !pref.enabled;
+  tabGroupsCollapse.disabled = !tabGroupsOn.checked;
 }
-for (const box of [tabGroupsOn, tabGroupsCollapse]) {
-  box.addEventListener("change", async () => {
-    tabGroupsCollapse.disabled = !tabGroupsOn.checked;
-    await chrome.storage.local.set({ [TAB_GROUPS_KEY]: { enabled: tabGroupsOn.checked, collapsed: tabGroupsCollapse.checked } });
-    const saved = document.getElementById("tabGroupsSaved");
-    saved.textContent = t("opt.saved");
-    setTimeout(() => { if (saved.textContent === t("opt.saved")) saved.textContent = ""; }, 2500);
-  });
+function saveTabGroups() {
+  tabGroupsCollapse.disabled = !tabGroupsOn.checked;
+  return chrome.storage.local.set({ [TAB_GROUPS_KEY]: { enabled: tabGroupsOn.checked, collapsed: tabGroupsCollapse.checked } });
 }
+function showTabGroupsStatus(text, error = false) {
+  const saved = document.getElementById("tabGroupsSaved");
+  saved.classList.toggle("is-err", error);
+  saved.textContent = text;
+  setTimeout(() => { if (saved.textContent === text) saved.textContent = ""; }, 2500);
+}
+tabGroupsOn.addEventListener("change", async () => {
+  if (!tabGroupsOn.checked) {
+    await saveTabGroups();
+    chrome.permissions.remove(TAB_GROUPS_PERMISSION).catch(() => {});
+    return showTabGroupsStatus(t("opt.saved"));
+  }
+  // La demande part directement du clic ; l'option est enregistrée tout de
+  // suite (si la popup se ferme pendant la demande, rien n'est perdu : sans
+  // autorisation, les onglets ne sont simplement pas regroupés).
+  const asked = chrome.permissions.request(TAB_GROUPS_PERMISSION).catch(() => false);
+  await saveTabGroups();
+  if (await asked) return showTabGroupsStatus(t("opt.saved"));
+  tabGroupsOn.checked = false;
+  await saveTabGroups();
+  showTabGroupsStatus(t("tabs.refused"), true);
+});
+tabGroupsCollapse.addEventListener("change", async () => { await saveTabGroups(); showTabGroupsStatus(t("opt.saved")); });
 
 async function showSettings() {
   await renderRemoved();
@@ -1897,6 +1919,9 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   if (!ids.length) { msg.textContent = t("main.noAgency"); return; }
 
   const selected = ids.map((id) => AGENCY_BY_ID.get(id)); // dans l'ordre affiché
+  // Agences « à coller » : copie tout de suite, pendant le clic (aucune
+  // autorisation Chrome n'est nécessaire pour une page de l'extension).
+  if (selected.some(isManual)) navigator.clipboard.writeText(q).catch(() => { /* sans gravité */ });
   let urls;
   try {
     const options = await loadOptions();
@@ -1904,10 +1929,6 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   } catch (err) {
     msg.textContent = t("main.configError", { error: err.message });
     return;
-  }
-
-  if (selected.some(isManual)) {
-    try { await navigator.clipboard.writeText(q); } catch (_) { /* sans gravité */ }
   }
 
   // L'ouverture des onglets est confiée au script d'arrière-plan : la popup

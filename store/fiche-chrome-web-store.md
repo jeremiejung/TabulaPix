@@ -2,7 +2,7 @@
 
 Tout ce qu'il faut pour remplir le tableau de bord du Chrome Web Store (https://chrome.google.com/webstore/devconsole), dans l'ordre des onglets. Chaque texte est dans un bloc à copier-coller.
 
-Paquet à envoyer : `TabulaPix-3.6.5.zip` (ou plus récent).
+Paquet à envoyer : `TabulaPix-3.6.6.zip` (ou plus récent).
 
 ---
 
@@ -95,12 +95,6 @@ TabulaPix lets photo editors run the same keyword search on several news picture
 Stores the user's settings locally (chrome.storage.local): ticked agencies and their order, hidden, added or edited agencies, the last search, the interface language and the Pixpalace subdomain. Nothing is transmitted.
 ```
 
-**clipboardWrite**
-
-```text
-For an agency whose search cannot be passed in its address and whose search field is not filled automatically, TabulaPix opens the agency's page and copies the keywords to the clipboard so the user can paste them. Only happens when the user launches a search.
-```
-
 **tabs**
 
 ```text
@@ -122,17 +116,14 @@ Lets the user keep TabulaPix open in Chrome's side panel ("Keep open" button) to
 **tabGroups**
 
 ```text
-Optional feature, off by default: when the user turns on "Open tabs in groups, one per folder", the tabs opened by a search are placed in Chrome tab groups named and coloured after the user's agency folders (and optionally collapsed). Nothing is read or transmitted.
+Optional permission, never requested at install. Optional feature, off by default: only when the user turns on "Open tabs in groups, one per folder", the tabs opened by a search are placed in Chrome tab groups named and coloured after the user's agency folders (and optionally collapsed). Nothing is read or transmitted.
 ```
 
-**Justification de l'autorisation d'accès à l'hôte** (une seule boîte pour les deux groupes ; 722 caractères sur 1000)
+**Justification de l'autorisation d'accès à l'hôte** (566 caractères sur 1000)
 
 ```text
-https://mercury.bloomberg.com/*, https://search.abacapress.com/*, https://*.pixpalace.com/*
-These three built-in agencies do not accept the search in their URL, so TabulaPix types the keywords into their search field and clicks their search button (see "scripting"). Pixpalace uses a wildcard because each newsroom has its own subdomain (set by the user). Used only on these sites, only after the user launches a search.
-
-https://*/*
-Never requested at install. Requested at runtime, for one single site at a time, only when the user adds a custom agency whose search must be typed into the site's search field; Chrome shows its permission prompt for that site. The permission is removed when the user deletes that agency.
+https://*/* (optional host permissions only; no host permission is requested at install)
+Requested at runtime, for one single site at a time, only for agencies whose search cannot be passed in their URL, so TabulaPix types the keywords into the site's search field and clicks its search button (see "scripting"): when the user ticks such a built-in agency, or adds such a custom agency. Chrome shows its permission prompt for that exact site. Used only on that site, only after the user launches a search. The permission is removed when the user deletes that agency.
 ```
 
 ### Code distant (*Remote code*)

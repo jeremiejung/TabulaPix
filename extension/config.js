@@ -43,11 +43,12 @@
  *            clique sur le bouton (« submit » est facultatif : sinon, Entrée).
  *            « delay » (facultatif, en millisecondes, 300 par défaut) : pause
  *            avant de taper puis avant de cliquer, pour les sites lents.
- *            Chrome doit autoriser le site : soit il figure dans
- *            "host_permissions" de manifest.json (accordé à l'installation ;
- *            en ajouter un désactive l'extension chez les utilisateurs jusqu'à
- *            ce qu'ils l'acceptent), soit l'utilisateur l'autorise à la demande
- *            (pastille « à autoriser » quand l'agence est cochée) — préférable.
+ *            Chrome doit autoriser le site : l'utilisateur l'autorise à la
+ *            demande (pastille « à autoriser » quand l'agence est cochée).
+ *            Ne pas l'ajouter aux "host_permissions" de manifest.json :
+ *            Chrome l'annoncerait à l'installation, et en ajouter un
+ *            désactiverait l'extension chez les utilisateurs jusqu'à ce
+ *            qu'ils l'acceptent.
  *            Pour trouver un sélecteur : clic droit sur le champ → Inspecter →
  *            clic droit sur la ligne surlignée → Copier → Copier le sélecteur.
  */

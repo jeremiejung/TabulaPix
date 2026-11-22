@@ -60,7 +60,7 @@ If you had edited `config.js`, note your changes before replacing the files, the
 
 **Keep open:** the **column** button (first icon at the top of the popup) shows TabulaPix in a column on the right of the window (Chrome's side panel, version 116 or later). The column stays open when you switch tabs, so you can chain searches without reopening the extension. While the column is open, the TabulaPix icon in the toolbar acts on the column (it doesn't open a popup on top of it); once the column is closed, the icon opens the popup again. To close it: the cross at the top of the column. It can also be reopened from Chrome's side panel icon.
 
-For some agencies (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Magnum, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more). Apart from Bloomberg, Abacapress and Pixpalace, Chrome asks once for permission for the site: when you tick such an agency, a “to allow” badge and a banner offer to allow it.
+For some agencies (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Magnum, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), the address cannot contain the search: the extension opens the page, types your keywords into the search field and clicks the button for you (allow a second or two more). Chrome asks once for permission for the site: when you tick such an agency, a “to allow” badge and a banner offer to allow it (on installation, for the ticked ones: Bloomberg, Abacapress and Pixpalace).
 
 If an agency added later has neither an address with `{q}` nor automatic field filling, it is marked **“paste”**: the page opens and your keywords are copied to the clipboard; just press **Ctrl+V** (or **Cmd+V**) in the search field.
 
@@ -103,7 +103,7 @@ The **⚙** button at the top shows the settings right in the popup; **← Back*
 - **Needs attention** (at the top, only when needed): lists the added or imported agencies whose site Chrome has not allowed yet, with an **Allow these sites** button.
 
 - **Language**: English or French. By default, TabulaPix follows the browser language (“Automatic”); the change applies immediately. The name and description shown in `chrome://extensions` and on the Chrome Web Store always follow the browser language.
-- **Pixpalace** › **Subdomain**: the part before `.pixpalace.com` in the address of your Pixpalace space (`www` by default). For example, for `https://mynewsroom.pixpalace.com/home`, type `mynewsroom`. An invalid value is reported under the field and not saved.
+- **Pixpalace** › **Subdomain**: the part before `.pixpalace.com` in the address of your Pixpalace space (`www` by default). For example, for `https://mynewsroom.pixpalace.com/home`, type `mynewsroom`: Chrome then asks for permission for that address (“to allow” badge). An invalid value is reported under the field and not saved.
 - **Quick access**: shows the keyboard shortcut that opens TabulaPix (Alt + Shift + Y by default), with a link to change it, and reminds you that the column button keeps TabulaPix open beside the page.
 - **Tabs**: **Open tabs in groups, one per folder** (off by default) puts each folder's tabs in a Chrome tab group with the folder's name and colour (agencies outside folders stay ungrouped); a later search reuses the folder's group if it is still open, even renamed. **Collapse the groups after the search** folds them.
 - **Backup and sharing**: **Export** saves your whole configuration to a `.json` file (agencies and their order, names, addresses, field locations, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches). **Import…** loads such a file, after a clearly flagged confirmation (your current configuration is entirely replaced) showing what the file contains — agencies, folders, ticked agencies: use it after reinstalling, or to share a configuration with colleagues. Every agency in the file is checked like an agency added by hand; invalid ones are ignored. If the file contains agencies that fill in their site's search field, TabulaPix asks Chrome for those sites right away when it can (Chrome only allows it shortly after a click); otherwise, and as long as a site is still not allowed (permission refused, or removed in Chrome), a banner above the list, a “to allow” badge on the agency and the **Allow these sites** button under “Needs attention” in the settings let you allow it at any time. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
@@ -122,7 +122,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.6.5" },
+  "app": { "name": "TabulaPix", "version": "3.6.6" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
@@ -157,7 +157,7 @@ Newsroom-specific values are not hard-coded: they go through an option, inserted
 
 Some sites (AFP news, Sipa, Rea) “wrap” the search in the URL (hexadecimal, or gzip + base64). For them, the content is described in `payload` and the encoding steps in `encode` — see the comments at the top of `config.js`.
 
-For sites whose address cannot contain the search, the field to fill in and the button to click are given instead (`fill`), as CSS selectors. Such a site needs Chrome's permission: either it is in `host_permissions` of `extension/manifest.json` (granted on installation, but adding one disables the extension for existing users until they accept it), or — preferred — the user allows it on demand: a “to allow” badge appears when the agency is ticked.
+For sites whose address cannot contain the search, the field to fill in and the button to click are given instead (`fill`), as CSS selectors. Such a site needs Chrome's permission, which the user grants on demand: a “to allow” badge appears when the agency is ticked. Don't add it to `host_permissions` in `extension/manifest.json`: Chrome would announce it on installation, and adding one disables the extension for existing users until they accept it.
 
 After any change: `chrome://extensions` → **↻** (reload) button on TabulaPix.
 
@@ -172,12 +172,13 @@ A text cursor in a rounded frame with a white background (readable in dark mode)
 - The only data stored: ticked agencies, their order, hidden, edited or added agencies, the last search and your settings, stored locally in Chrome (`chrome.storage.local`), never transmitted. Only the last search is kept (no history); it disappears when the extension is uninstalled.
 - Permissions requested:
   - `storage`: remember your ticks and settings;
-  - `clipboardWrite`: copy the keywords for “paste” sites;
   - `sidePanel`: show TabulaPix in the right-hand column;
   - `tabs`: see the addresses of open tabs, to reuse an agency's tab that is already open instead of opening a new one, and the title of an agency's tab to recognise a page shown without a session (Sipa). Nothing is stored beyond the browser session, nothing is transmitted. For this, Chrome shows the “Read your browsing history” warning;
-  - `tabGroups`: put the tabs of each folder in a named tab group, only when the “Tabs” option is on (no warning from Chrome);
-  - access to an additional site, requested case by case (Chrome prompt) only when you add an agency whose search field must be filled in, and removed when you delete it;
-  - `scripting` + access to `mercury.bloomberg.com`, `search.abacapress.com` and `*.pixpalace.com`: only to type the keywords into these three sites' search field and click the button. The extension reads nothing else on these pages. For this, Chrome shows a “Read and change your data on these sites” warning.
+  - `tabGroups` (optional): put the tabs of each folder in a named tab group. Requested only when you turn on the “Tabs” option (Chrome then shows “View and manage your tab groups”), given back when you turn it off;
+  - `scripting` + access to a site, requested one site at a time (Chrome prompt) only for agencies whose search field must be filled in (Bloomberg, Abacapress, Pixpalace, Magnum…, or an agency you add), and removed when you delete it: only to type the keywords into that site's search field and click the button. The extension reads nothing else on these pages.
+  - Copying the keywords for “paste” sites needs no permission: it happens when you click **Search**.
+
+On installation, Chrome therefore only announces “Read your browsing history” (`tabs`).
 
 See also the [privacy policy](PRIVACY.md).
 

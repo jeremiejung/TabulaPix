@@ -60,7 +60,7 @@ Si vous aviez modifié `config.js`, notez vos changements avant de remplacer les
 
 **Garder ouvert :** le bouton **colonne** (première icône en haut de la popup) affiche TabulaPix dans une colonne à droite de la fenêtre (panneau latéral de Chrome, version 116 ou plus récente). La colonne reste ouverte quand vous changez d'onglet ; vous pouvez enchaîner les recherches sans rouvrir l'extension. Tant que la colonne est ouverte, l'icône TabulaPix de la barre d'outils agit sur la colonne (elle n'ouvre pas de popup par-dessus) ; une fois la colonne fermée, l'icône rouvre la popup. Pour la fermer : la croix en haut de la colonne. Elle se rouvre aussi depuis l'icône « panneau latéral » de Chrome.
 
-Pour certaines agences (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Magnum, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus). Hormis Bloomberg, Abacapress et Pixpalace, Chrome demande une fois l'autorisation pour le site : quand vous cochez une de ces agences, une pastille « à autoriser » et un bandeau proposent de l'autoriser.
+Pour certaines agences (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Magnum, Myop, Signatures, Vu', Bestimage, Bureau 233, Phototélé, Starface), l'adresse ne peut pas contenir la recherche : l'extension ouvre la page, tape vos mots-clés dans le champ de recherche et clique sur le bouton à votre place (comptez une ou deux secondes de plus). Chrome demande une fois l'autorisation pour le site : quand vous cochez une de ces agences, une pastille « à autoriser » et un bandeau proposent de l'autoriser (à l'installation, pour celles qui sont cochées : Bloomberg, Abacapress et Pixpalace).
 
 Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automatique, elle est marquée **« coller »** : la page s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche.
 
@@ -103,7 +103,7 @@ Le bouton **⚙** en haut affiche les réglages directement dans la popup ; **�
 - **À régler** (en haut, seulement si besoin) : liste les agences ajoutées ou importées dont Chrome n'a pas encore autorisé le site, avec un bouton **Autoriser ces sites**.
 
 - **Langue** : français ou anglais. Par défaut, TabulaPix suit la langue du navigateur (« Automatique ») ; le changement s'applique immédiatement. Le nom et la description affichés dans `chrome://extensions` et sur le Chrome Web Store suivent toujours la langue du navigateur.
-- **Pixpalace** › **Sous-domaine** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction`. Une valeur invalide est signalée sous le champ et n'est pas enregistrée.
+- **Pixpalace** › **Sous-domaine** : la partie avant `.pixpalace.com` dans l'adresse de votre espace Pixpalace (par défaut `www`). Par exemple, pour `https://maredaction.pixpalace.com/home`, saisissez `maredaction` : Chrome demande alors l'autorisation pour cette adresse (pastille « à autoriser »). Une valeur invalide est signalée sous le champ et n'est pas enregistrée.
 - **Accès rapide** : affiche le raccourci clavier qui ouvre TabulaPix (Alt + Maj + Y par défaut), avec un lien pour le changer, et rappelle que le bouton colonne garde TabulaPix ouvert à côté de la page.
 - **Onglets** : **Ouvrir les onglets en groupes, un par dossier** (désactivé par défaut) range les onglets de chaque dossier dans un groupe d'onglets Chrome, au nom et à la couleur du dossier (les agences sans dossier restent hors groupe) ; une recherche suivante reprend le groupe du dossier s'il est encore ouvert, même renommé. **Replier les groupes après la recherche** les referme.
 - **Sauvegarde et partage** : **Exporter** enregistre toute votre configuration dans un fichier `.json` (agences et leur ordre, noms, adresses, repérages, agences cochées, masquées et supprimées, langue, sous-domaine Pixpalace — jamais vos recherches). **Importer…** recharge un tel fichier, après une confirmation bien signalée (votre configuration actuelle est entièrement remplacée) qui détaille le contenu du fichier — agences, dossiers, agences cochées : après une réinstallation, ou pour partager une configuration entre collègues. Chaque agence du fichier est vérifiée comme une agence ajoutée à la main ; les invalides sont ignorées. Si le fichier contient des agences qui remplissent le champ de recherche de leur site, TabulaPix demande ces sites à Chrome tout de suite quand c'est possible (Chrome ne l'accepte que peu après un clic) ; sinon, et tant qu'un site n'est pas autorisé (autorisation refusée, ou retirée dans Chrome), un bandeau au-dessus de la liste, une pastille « à autoriser » sur l'agence et le bouton **Autoriser ces sites** sous « À régler » dans les options permettent de l'autoriser à tout moment. Depuis la popup, Importer ouvre TabulaPix dans un onglet (Chrome ferme la popup à l'ouverture du sélecteur de fichier).
@@ -122,7 +122,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
   "formatVersion": 2,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.6.5" },
+  "app": { "name": "TabulaPix", "version": "3.6.6" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Agences filaires", "color": "blue" }],
   "agencies": [
@@ -157,7 +157,7 @@ Les valeurs propres à une rédaction ne s'écrivent pas en dur : elles passent 
 
 Certains sites (AFP news, Sipa, Rea) « emballent » la recherche dans l'URL (hexadécimal, ou gzip + base64). Pour eux, on décrit le contenu dans `payload` et les étapes d'encodage dans `encode` — voir les commentaires en tête de `config.js`.
 
-Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Un tel site a besoin de l'autorisation de Chrome : soit il figure dans `host_permissions` du fichier `extension/manifest.json` (accordé à l'installation, mais en ajouter un désactive l'extension chez les utilisateurs existants jusqu'à ce qu'ils l'acceptent), soit — préférable — l'utilisateur l'autorise à la demande : une pastille « à autoriser » apparaît quand l'agence est cochée.
+Pour les sites dont l'adresse ne peut pas contenir la recherche, on indique plutôt le champ à remplir et le bouton à cliquer (`fill`), sous forme de sélecteurs CSS. Un tel site a besoin de l'autorisation de Chrome, que l'utilisateur accorde à la demande : une pastille « à autoriser » apparaît quand l'agence est cochée. Ne pas l'ajouter aux `host_permissions` du fichier `extension/manifest.json` : Chrome l'annoncerait à l'installation, et en ajouter un désactive l'extension chez les utilisateurs existants jusqu'à ce qu'ils l'acceptent.
 
 Après toute modification : `chrome://extensions` → bouton **↻** (recharger) sur TabulaPix.
 
@@ -172,12 +172,13 @@ Un curseur de texte dans un cadre arrondi à fond blanc (lisible en thème sombr
 - Seules données enregistrées : la liste des agences cochées, leur ordre, les agences masquées, modifiées ou ajoutées, la dernière recherche lancée et vos options, stockés localement dans Chrome (`chrome.storage.local`), jamais transmis. Seule la dernière recherche est gardée (pas d'historique) ; elle disparaît en désinstallant l'extension.
 - Permissions demandées :
   - `storage` : mémoriser les cases cochées ;
-  - `clipboardWrite` : copier les mots-clés pour les sites « coller » ;
   - `sidePanel` : afficher TabulaPix dans la colonne de droite.
   - `tabs` : voir les adresses des onglets ouverts, pour réutiliser celui d'une agence déjà ouverte au lieu d'en ouvrir un nouveau, et le titre de l'onglet d'une agence pour reconnaître une page affichée sans session (Sipa). Rien n'est gardé au-delà de la session du navigateur, rien n'est transmis. Chrome affiche pour cela l'avertissement « Lire votre historique de navigation ».
-  - `tabGroups` : ranger les onglets de chaque dossier dans un groupe d'onglets nommé, seulement si l'option « Onglets » est activée (aucun avertissement de Chrome).
-  - accès à un site supplémentaire, demandé au cas par cas (fenêtre de Chrome) uniquement quand vous ajoutez une agence de type « Remplir le champ de recherche du site », et retiré quand vous la supprimez ;
-  - `scripting` + accès à `mercury.bloomberg.com`, `search.abacapress.com` et `*.pixpalace.com` : uniquement pour taper les mots-clés dans le champ de recherche de ces trois sites et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages. Chrome affichera pour cela un avertissement « lire et modifier vos données sur ces sites ».
+  - `tabGroups` (facultative) : ranger les onglets de chaque dossier dans un groupe d'onglets nommé. Demandée seulement quand vous activez l'option « Onglets » (Chrome affiche alors « Afficher et gérer vos groupes d'onglets »), rendue quand vous la désactivez.
+  - `scripting` + accès à un site, demandé site par site (fenêtre de Chrome) uniquement pour les agences dont il faut remplir le champ de recherche (Bloomberg, Abacapress, Pixpalace, Magnum…, ou une agence que vous ajoutez), et retiré quand vous la supprimez : uniquement pour taper les mots-clés dans le champ de recherche de ce site et cliquer sur le bouton. L'extension ne lit rien d'autre sur ces pages.
+  - La copie des mots-clés pour les sites « coller » ne demande aucune autorisation : elle se fait au clic sur **Rechercher**.
+
+À l'installation, Chrome n'annonce donc que « Consulter votre historique de navigation » (`tabs`).
 
 Voir aussi la [politique de confidentialité](PRIVACY.md).
 

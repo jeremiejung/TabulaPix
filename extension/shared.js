@@ -169,6 +169,7 @@ const FOLDERS_DONE_KEY = "shippedFoldersDone"; // rangement proposé déjà appl
 const NEW_KEY = "newAgencies"; // { id: ouvertures restantes } : pastille « Nouveau »
 const NEW_OPENS = 5;
 const TAB_GROUPS_KEY = "tabGroups"; // { enabled, collapsed } : onglets regroupés par dossier (désactivé par défaut)
+const TAB_GROUPS_PERMISSION = { permissions: ["tabGroups"] }; // facultative : demandée en cochant l'option
 async function applyNewAgencyDefaults() {
   const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [CUSTOM_KEY]: [],
     [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}, [STORAGE_KEYS.order]: [], [FOLDERS_DONE_KEY]: false, [NEW_KEY]: {} });
