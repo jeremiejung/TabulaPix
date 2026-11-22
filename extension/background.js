@@ -229,7 +229,9 @@ const GROUP_COLORS = { blue: "blue", teal: "cyan", green: "green", amber: "yello
 const GROUP_IDS = "folderTabGroups"; // { "dossier:fenêtre": idGroupe } (session)
 async function groupTabs(byFolder) {
   const { [TAB_GROUPS_KEY]: pref = {} } = await chrome.storage.local.get(TAB_GROUPS_KEY);
-  if (!pref.enabled || !byFolder.size || !chrome.tabGroups) return;
+  if (!pref.enabled || !byFolder.size) return;
+  // Autorisation facultative, refusée ou retirée dans Chrome : pas de groupes.
+  if (!(await chrome.permissions.contains(TAB_GROUPS_PERMISSION).catch(() => false)) || !chrome.tabGroups) return;
   const { [GROUP_IDS]: known = {} } = await chrome.storage.session.get(GROUP_IDS);
   for (const { folder, tabs } of byFolder.values()) {
     const byWindow = new Map();

@@ -6,6 +6,11 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Fewer permissions on installation**: Chrome now only announces “Read your browsing history” (`tabs`, needed to reuse agency tabs).
+  - Bloomberg, Abacapress and Pixpalace are allowed on demand, like the other agencies whose search field is filled in (“to allow” badge and banner). Existing users keep Bloomberg and Abacapress; Pixpalace must be allowed again once, for your subdomain only.
+  - Tab groups (`tabGroups`) are requested only when you turn the option on, and given back when you turn it off. Contrary to what 3.6.0 said, Chrome did show a warning for them (“View and manage your tab groups”). If you already used the option, it keeps working.
+  - `clipboardWrite` is removed: the keywords for “paste” agencies are copied as soon as you click **Search**, which needs no permission.
+
 ## 3.6.5 — 21 November 2026 (Chrome Web Store)
 
 - **Signing in to an agency**: for agencies with a sign-in page (Sipa as shipped), a “Sign in” icon appears on hover in the list, next to the handle. It opens the sign-in page in the agency’s tab if it is open (and runs that tab’s last search again once you are signed in), otherwise in a new tab, which then becomes the agency’s tab. Any agency can be given a sign-in page in its pencil (Technical details › Sign-in page), or have it removed; it is kept in the configuration file (format 4).

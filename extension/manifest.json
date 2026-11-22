@@ -31,16 +31,12 @@
   },
   "permissions": [
     "storage",
-    "clipboardWrite",
     "scripting",
     "tabs",
-    "tabGroups",
     "sidePanel"
   ],
-  "host_permissions": [
-    "https://mercury.bloomberg.com/*",
-    "https://search.abacapress.com/*",
-    "https://*.pixpalace.com/*"
+  "optional_permissions": [
+    "tabGroups"
   ],
   "optional_host_permissions": [
     "https://*/*"

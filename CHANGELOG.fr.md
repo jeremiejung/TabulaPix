@@ -6,6 +6,11 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Moins d’autorisations à l’installation** : Chrome n’annonce plus que « Consulter votre historique de navigation » (`tabs`, nécessaire pour réutiliser les onglets des agences).
+  - Bloomberg, Abacapress et Pixpalace sont autorisées à la demande, comme les autres agences dont on remplit le champ de recherche (pastille et bandeau « à autoriser »). Les utilisateurs actuels gardent Bloomberg et Abacapress ; Pixpalace est à autoriser de nouveau, une fois, pour votre seul sous-domaine.
+  - Les groupes d’onglets (`tabGroups`) ne sont demandés qu’en activant l’option, et rendus en la désactivant. Contrairement à ce qu’indiquait la 3.6.0, Chrome affichait bien un avertissement (« Afficher et gérer vos groupes d’onglets »). Si vous utilisiez déjà l’option, elle continue de fonctionner.
+  - `clipboardWrite` est retiré : les mots-clés des agences « à coller » sont copiés dès le clic sur **Rechercher**, ce qui ne demande aucune autorisation.
+
 ## 3.6.5 — 21 novembre 2026 (Chrome Web Store)
 
 - **Se connecter à une agence** : pour les agences qui ont une page de connexion (Sipa, livrée ainsi), une icône « Se connecter » apparaît au survol dans la liste, à côté de la poignée. Elle ouvre la page de connexion dans l’onglet de l’agence s’il est ouvert (et relance la dernière recherche de cet onglet une fois connecté), sinon dans un nouvel onglet, qui devient celui de l’agence. Toute agence peut recevoir une page de connexion dans son crayon (Détails techniques › Page de connexion), ou la perdre ; elle est gardée dans le fichier de configuration (format 4).

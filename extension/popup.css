@@ -368,6 +368,7 @@ input[type=search]::-webkit-search-cancel-button:hover { opacity: .9; }
 .field label { font-weight: 500; }
 label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .saved { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--ok); }
+.saved.is-err { color: var(--err); }
 /* À régler : en tête des options, quand quelque chose attend l'utilisateur */
 .attention { margin: 0 0 6px; padding: 8px 10px 10px; border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius: var(--r-block); background: color-mix(in srgb, var(--warn) 12%, Canvas); }
 .attention[hidden] { display: none; }
