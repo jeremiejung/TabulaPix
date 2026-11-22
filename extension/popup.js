@@ -1838,6 +1838,40 @@ list.addEventListener("dragend", (e) => {
   updateFolderStates();
 });
 
+/* Défilement pendant un glisser : près du bas de la fenêtre, ou en remontant
+   vers l'en-tête (qui reste en haut et cache le début de la liste), la liste
+   défile d'elle-même, d'autant plus vite qu'on s'approche du bord, pour
+   atteindre un dossier ou une place hors de l'écran. Chrome ne le fait pas
+   de lui-même dans la popup. */
+const DRAG_EDGE = 48;      // hauteur (px) de la zone de défilement, sous l'en-tête et en bas
+const DRAG_MAX_SPEED = 16; // px par image, au bord
+let dragScroll = { y: null, seen: 0, frame: 0 };
+function dragScrollSpeed(y) {
+  const top = masthead.getBoundingClientRect().bottom;
+  if (y < top + DRAG_EDGE) return -DRAG_MAX_SPEED * Math.min(1, (top + DRAG_EDGE - y) / DRAG_EDGE);
+  if (y > innerHeight - DRAG_EDGE) return DRAG_MAX_SPEED * Math.min(1, (y - (innerHeight - DRAG_EDGE)) / DRAG_EDGE);
+  return 0;
+}
+function dragScrollStep() {
+  dragScroll.frame = 0;
+  // Plus d'événement depuis un moment (souris sortie de la fenêtre) : on s'arrête.
+  if (!dragged || dragScroll.y === null || performance.now() - dragScroll.seen > 500) return;
+  const speed = dragScrollSpeed(dragScroll.y);
+  if (!speed) return;
+  scrollBy(0, Math.round(speed));
+  dragScroll.frame = requestAnimationFrame(dragScrollStep);
+}
+document.addEventListener("dragover", (e) => {
+  if (!dragged) return;
+  dragScroll.y = e.clientY;
+  dragScroll.seen = performance.now();
+  if (!dragScroll.frame && dragScrollSpeed(e.clientY)) dragScroll.frame = requestAnimationFrame(dragScrollStep);
+});
+document.addEventListener("dragend", () => {
+  if (dragScroll.frame) cancelAnimationFrame(dragScroll.frame);
+  dragScroll = { y: null, seen: 0, frame: 0 };
+});
+
 // Cases et ordre sont lus dans la liste affichée.
 const boxes = () => Array.from(list.querySelectorAll("input.agency-box"));
 const checkedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);

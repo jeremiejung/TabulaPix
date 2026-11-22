@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- En faisant glisser une agence ou un dossier, la liste défile désormais d’elle-même pour atteindre une place hors de l’écran : près du bas de la fenêtre, ou vers le haut (sur l’en-tête qui reste en place), d’autant plus vite qu’on s’approche du bord. Vers le haut, la liste ne défilait plus du tout depuis que l’en-tête reste en haut (3.6.7), et dans la popup Chrome ne la faisait défiler dans aucun sens.
+
 ## 3.6.7 — 22 novembre 2026 (Chrome Web Store)
 
 - Le haut de la fenêtre (mots-clés, bouton **Lancer la recherche**, boutons Organiser et Options) reste visible quand la liste des agences défile ; un filet le sépare de la liste dès qu’elle passe dessous.

@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- Dragging an agency or a folder now scrolls the list by itself, to reach a place out of view: near the bottom of the window, or towards the top (over the header that stays in place), faster the closer you get to the edge. Upwards, the list did not scroll at all since the header stays at the top (3.6.7), and in the popup Chrome did not scroll it in either direction.
+
 ## 3.6.7 — 22 November 2026 (Chrome Web Store)
 
 - The top of the window (keywords, **Search** button, Organise and Settings buttons) stays visible while the list of agencies scrolls; a thin line separates it from the list once it scrolls underneath.
