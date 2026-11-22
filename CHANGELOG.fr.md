@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- Le haut de la fenêtre (mots-clés, bouton **Lancer la recherche**, boutons Organiser et Options) reste visible quand la liste des agences défile ; un filet le sépare de la liste dès qu’elle passe dessous.
+
 ## 3.6.6 — 22 novembre 2026 (Chrome Web Store)
 
 - **Moins d’autorisations à l’installation** : Chrome n’annonce plus que « Consulter votre historique de navigation » (`tabs`, nécessaire pour réutiliser les onglets des agences).

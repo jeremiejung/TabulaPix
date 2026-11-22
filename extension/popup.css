@@ -181,6 +181,13 @@ html.organizing #go > .go-paused { display: inline; }
 .go-count { font-weight: 400; }
 .go-count:not(:empty)::before { content: "· "; }
 #msg { margin: 6px 0 0; font-size: 12px; }
+/* En-tête de la recherche (marque, boutons, mots-clés, Rechercher) : reste en
+   haut quand la liste défile. Il couvre la marge du haut du corps de page ;
+   un filet apparaît dessous dès que la liste passe derrière. */
+.masthead { position: sticky; top: 0; z-index: 5; margin: -12px -12px 0; padding: 12px 12px 8px; background: Canvas; }
+.masthead.stuck { box-shadow: 0 1px 0 var(--line), 0 6px 10px -8px color-mix(in srgb, CanvasText 35%, transparent); }
+/* Ce qui reçoit le focus ou est mis en avant n'est pas caché sous l'en-tête. */
+html { scroll-padding-top: var(--masthead-h, 0px); }
 #msg:empty { display: none; }
 
 /* Vue Options */
