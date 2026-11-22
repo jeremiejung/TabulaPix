@@ -2,9 +2,13 @@
 
 *[English](CHANGELOG.md) · **Français***
 
-Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) sont signalées. Le numéro de version ne change qu'à un envoi au store (voir « Numéros de version » dans le [README](README.fr.md)).
+Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) sont signalées. Le numéro de version ne change qu'à un envoi au store (voir « Numéros de version » dans [DEVELOPMENT.fr.md](DEVELOPMENT.fr.md)).
 
 ## [Non publié]
+
+## 3.6.8 — 22 novembre 2026 (Chrome Web Store)
+
+- En faisant glisser une agence ou un dossier, la liste défile désormais d’elle-même pour atteindre une place hors de l’écran : près du bas de la fenêtre, ou vers le haut (sur l’en-tête qui reste en place), d’autant plus vite qu’on s’approche du bord. Vers le haut, la liste ne défilait plus du tout depuis que l’en-tête reste en haut (3.6.7), et dans la popup Chrome ne la faisait défiler dans aucun sens.
 
 ## 3.6.7 — 22 novembre 2026 (Chrome Web Store)
 
