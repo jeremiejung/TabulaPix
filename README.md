@@ -10,7 +10,7 @@ Chrome extension for photo desks, picture researchers and photo editors: type yo
 
 Everything is set up from the extension itself (**Organise** mode and **⚙** settings), without editing any file: agencies shown, order, folders, agencies added with automatic detection, editable addresses and field locations, language, Pixpalace subdomain. Ticked agencies and their order are remembered between uses.
 
-Chrome extension (Manifest V3) in plain HTML/JavaScript: no dependencies, no build step.
+Chrome extension (Manifest V3) in plain HTML/JavaScript: no dependencies, no build step. To work on the code: [`DEVELOPMENT.md`](DEVELOPMENT.md).
 
 ## Installation
 
@@ -44,7 +44,7 @@ Also works in Chromium-based browsers (Edge, Brave, Arc…) through their equiva
 
 If you installed with `git clone`: `git pull` in the repository folder, then **↻** in `chrome://extensions`.
 
-If you had edited `config.js`, note your changes before replacing the files, then copy them into the new `config.js`.
+If you had edited `config.js` (see [`DEVELOPMENT.md`](DEVELOPMENT.md)), note your changes before replacing the files, then copy them into the new `config.js`.
 
 ## Usage
 
@@ -109,72 +109,13 @@ The **⚙** button at the top shows the settings right in the popup; **← Back*
 - **Quick access**: shows the keyboard shortcut that opens TabulaPix (Alt + Shift + Y by default), with a link to change it, and reminds you that the column button keeps TabulaPix open beside the page.
 - **Tabs**: **Open tabs in groups, one per folder** (off by default) puts each folder's tabs in a Chrome tab group with the folder's name and colour (agencies outside folders stay ungrouped). Chrome asks for permission when you turn it on; turning it off gives the permission back. A later search reuses the folder's group if it is still open, even renamed. **Collapse the groups after the search** folds them.
 - **Backup and sharing**: to keep your configuration after a reinstall, or share it with colleagues.
-  - **Export** saves it to a `.json` file: agencies and their order, folders, names, addresses, field locations, sign-in pages, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches.
+  - **Export** saves it to a `.json` file: agencies and their order, folders, names, addresses, field locations, sign-in pages, ticked, hidden and deleted agencies, language, Pixpalace subdomain — never your searches. Its format is described in [`DEVELOPMENT.md`](DEVELOPMENT.md#configuration-file).
   - **Import…** loads such a file and **entirely replaces** your current configuration, after a confirmation showing what the file contains. Every agency is checked like an agency added by hand; invalid ones are ignored. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
   - Sites to allow: if the file contains agencies that fill in their site's search field, TabulaPix asks Chrome for those sites right away when it can; otherwise the banner, the “to allow” badges and **Needs attention** let you allow them at any time.
 - **Agencies removed from the list**: names the deleted built-in agencies; **Restore** brings them back (shown only when there are some).
 - **Factory settings**: **Restore factory settings** erases your settings, your added, edited or deleted agencies and the site permissions you granted, and goes back to the shipped configuration (after confirmation; export first if you want to keep yours).
 
 These settings stay in Chrome on your computer and are kept across updates.
-
-## Configuration file
-
-The file created by **Export** is plain JSON, readable and editable:
-
-```json
-{
-  "format": "tabulapix-config",
-  "formatVersion": 4,
-  "minReaderVersion": 1,
-  "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.6.7" },
-  "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
-  "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
-  "agencies": [
-    { "id": "reuters", "builtin": true, "name": "Reuters (points)", "folder": "f-wire", "checked": true, "hidden": false },
-    { "id": "custom-abc123", "builtin": false, "name": "Alamy", "url": "https://www.alamy.com/search.html?qt={q}", "checked": true, "hidden": false }
-  ],
-  "removedBuiltins": ["afp-forum"]
-}
-```
-
-- `agencies` is in list order. Built-in agencies only carry `name`, `url`, `payload`, `encode`, `fill` or `login` when they were edited (`login`: sign-in page, `false` when the shipped one was removed); added agencies always carry their address (and `fill` when they fill in a search field, `login` when they have a sign-in page).
-- **Compatibility between versions**: new versions only *add* optional fields, never change the meaning of an existing one (`formatVersion` goes up). So a newer TabulaPix reads older files (missing fields get their default value), and an older TabulaPix reads newer files, ignoring what it doesn't know yet (the import summary says so; built-in agencies it doesn't know are counted separately). Only an incompatible change, to be avoided, would raise `minReaderVersion`: an older TabulaPix then refuses the file and asks for an update.
-- **Folders** (`folders: [{ "id", "name", "color", "collapsed", "hidden" }]`, and a `folder` field on each agency) are exported and imported with the rest, including each folder's colour (`blue`, `teal`, `green`, `amber`, `orange`, `red`, `pink`, `violet`, `gray`) whether it is folded and whether it is hidden. A folder's checkbox is not stored: it is derived from its agencies.
-
-## Editing the built-in agencies (development)
-
-Everything is in **`extension/config.js`**. Each agency has a name and an address where the keyword is replaced by `{q}`:
-
-```js
-{
-  id: "getty-actu",
-  name: "Getty Actu",
-  url: "https://www.gettyimages.fr/search/2/image?family=editorial&phrase={q}"
-}
-```
-
-Optional fields:
-
-- `defaultChecked: false`: unticked on a first install. `defaultHidden: true`: hidden (to be shown with its eye in Organise mode), applied the first time the agency appears, including on an update (AFP (forum), Reuters (standard)).
-- `folder`: its folder, among those declared in `FOLDERS` (fixed `id`, French and English names, colour). The shipped folders are created on a first install (or for a user who has no folder yet); after that, folders belong to the user: an update never creates, renames or deletes one.
-- `login`: its sign-in page (the **Sign in** icon) and, with it, `loggedOutTitle`: the exact tab title when a search is shown without a session (Sipa: `Sipa Press`). TabulaPix then opens the sign-in page in that tab and runs the search again once the user is signed in.
-
-A new built-in agency goes into its folder if the user still has it (even renamed), otherwise outside any folder; for existing users it arrives unticked, at the end of the list, with a “New” badge for five openings (until it is ticked or moved). If a user had already added the same agency by hand (same address, parameters included apart from the keywords, or same site and same name), their own is kept and the built-in one is set aside like a deleted agency (**Restore** in the settings brings it back). An import keeps the file as it is.
-
-Tip for finding the address: run a search on the site with easy-to-spot words (e.g. `midterms texas democrats`), copy the URL of the results page and replace the words with `{q}`. Depending on the site, spaces appear as `%20` or `+`: replace the whole thing, separators included.
-
-Newsroom-specific values are not hard-coded: they go through an option, inserted in the address with `{opt:name}` (see `OPTIONS` at the bottom of `config.js`).
-
-Some sites (AFP news, Sipa, Rea, AgencesONline, Gamma-Rapho) “wrap” the search in the URL (hexadecimal, or gzip + base64). For them, the content is described in `payload` and the encoding steps in `encode` — see the comments at the top of `config.js`.
-
-For sites whose address cannot contain the search, the field to fill in and the button to click are given instead (`fill`), as CSS selectors. Such a site needs Chrome's permission, which the user grants on demand: a “to allow” badge appears when the agency is ticked. Don't add it to `host_permissions` in `extension/manifest.json`: Chrome would announce it on installation, and adding one disables the extension for existing users until they accept it.
-
-After any change: `chrome://extensions` → **↻** (reload) button on TabulaPix.
-
-## Icon
-
-A text cursor in a rounded frame with a white background (readable in dark mode), with a red magnifying glass at the bottom right. Sources in `extension/icons/`: `icon.svg` (32 to 128 px) and `icon-16.svg`, a simplified version drawn for 16 px. The PNGs `icon-16/32/48/128.png` are their actual-size exports. To change the icon, edit the SVGs and export them again at the same sizes, on a transparent background.
 
 ## Privacy
 
@@ -207,21 +148,9 @@ See also the [privacy policy](PRIVACY.md).
 
 Directions considered for future versions (sending an agency to a colleague by copy / paste, an encrypted vault for agency credentials) are listed in [`ROADMAP.md`](ROADMAP.md).
 
-## Version numbers
+## Development
 
-The version number (`version` in `extension/manifest.json`) **only changes when submitting to the Chrome Web Store**, once per submission, however many changes were merged in between:
-
-- **fix or improvement**: last digit (3.2.0 → 3.2.1);
-- **new feature**: middle digit (3.2.x → 3.3.0);
-- **major change**: first digit.
-
-The store refuses a number lower than or equal to the published version: there is no going back.
-
-The version history is kept in [`CHANGELOG.md`](CHANGELOG.md).
-
-## Chrome Web Store
-
-The listing materials (descriptions, permission justifications, review instructions) are in [`store/fiche-chrome-web-store.md`](store/fiche-chrome-web-store.md) (in French, with the English texts to paste), the screenshots and promotional images in [`store/images/`](store/images/), and the privacy policy in [`PRIVACY.md`](PRIVACY.md).
+Repository layout, editing the built-in agencies, configuration file format, icon, version numbers and releases: see [`DEVELOPMENT.md`](DEVELOPMENT.md). The version history is in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## License
 

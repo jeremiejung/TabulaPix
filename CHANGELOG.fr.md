@@ -2,7 +2,7 @@
 
 *[English](CHANGELOG.md) · **Français***
 
-Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) sont signalées. Le numéro de version ne change qu'à un envoi au store (voir « Numéros de version » dans le [README](README.fr.md)).
+Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) sont signalées. Le numéro de version ne change qu'à un envoi au store (voir « Numéros de version » dans [DEVELOPMENT.fr.md](DEVELOPMENT.fr.md)).
 
 ## [Non publié]
 

@@ -2,7 +2,7 @@
 
 ***English** · [Français](CHANGELOG.fr.md)*
 
-Versions published on the [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) are marked. The version number only changes when submitting to the store (see “Version numbers” in the [README](README.md)).
+Versions published on the [Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp) are marked. The version number only changes when submitting to the store (see “Version numbers” in [DEVELOPMENT.md](DEVELOPMENT.md)).
 
 ## [Unreleased]
 
