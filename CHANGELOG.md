@@ -6,6 +6,10 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.6.7 — 22 November 2026 (Chrome Web Store)
+
+- The top of the window (keywords, **Search** button, Organise and Settings buttons) stays visible while the list of agencies scrolls; a thin line separates it from the list once it scrolls underneath.
+
 ## 3.6.6 — 22 November 2026 (Chrome Web Store)
 
 - **Fewer permissions on installation**: Chrome now only announces “Read your browsing history” (`tabs`, needed to reuse agency tabs).

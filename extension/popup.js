@@ -6,6 +6,14 @@ const list = document.getElementById("list");
 const input = document.getElementById("q");
 const msg = document.getElementById("msg");
 
+// En-tête fixe : sa hauteur sert de marge de défilement (focus, éléments mis
+// en avant), et un filet le sépare de la liste dès qu'elle défile dessous.
+const masthead = document.getElementById("masthead");
+new ResizeObserver(() => document.documentElement.style.setProperty("--masthead-h", masthead.offsetHeight + "px")).observe(masthead);
+const markStuck = () => masthead.classList.toggle("stuck", scrollY > 0);
+addEventListener("scroll", markStuck, { passive: true });
+markStuck();
+
 // Une agence est « manuelle » si ni son URL ni « fill » ne transmettent les
 // mots-clés : on ouvre la page et on copie les mots-clés dans le presse-papiers.
 const isManual = (a) => !a.fill && !/\{(q|q:slug|payload)\}/.test(a.url);
