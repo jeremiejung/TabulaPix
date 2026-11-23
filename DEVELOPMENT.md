@@ -31,7 +31,7 @@ The file created by **Export** is plain JSON, readable and editable:
   "formatVersion": 4,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.6.8" },
+  "app": { "name": "TabulaPix", "version": "3.6.9" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [

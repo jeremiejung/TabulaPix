@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.9 — 23 novembre 2026 (Chrome Web Store)
+
 - Mode Organiser : les pastilles de couleur d’un dossier replié s’affichent désormais sous son titre quand on clique sur sa couleur, au lieu de rester cachées dans le dossier replié ; le dossier reste replié.
 
 ## 3.6.8 — 22 novembre 2026 (Chrome Web Store)

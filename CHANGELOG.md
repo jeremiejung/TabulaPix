@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.6.9 — 23 November 2026 (Chrome Web Store)
+
 - Organise mode: the colour dots of a folded folder now show under its title when you click its colour, instead of staying hidden inside the folded folder; the folder stays folded.
 
 ## 3.6.8 — 22 November 2026 (Chrome Web Store)
