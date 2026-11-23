@@ -6,6 +6,10 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.9 — 23 novembre 2026 (Chrome Web Store)
+
+- Mode Organiser : les pastilles de couleur d’un dossier replié s’affichent désormais sous son titre quand on clique sur sa couleur, au lieu de rester cachées dans le dossier replié ; le dossier reste replié.
+
 ## 3.6.8 — 22 novembre 2026 (Chrome Web Store)
 
 - En faisant glisser une agence ou un dossier, la liste défile désormais d’elle-même pour atteindre une place hors de l’écran : près du bas de la fenêtre, ou vers le haut (sur l’en-tête qui reste en place), d’autant plus vite qu’on s’approche du bord. Vers le haut, la liste ne défilait plus du tout depuis que l’en-tête reste en haut (3.6.7), et dans la popup Chrome ne la faisait défiler dans aucun sens.
