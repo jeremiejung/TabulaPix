@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- Aperçu de l’import : réimporter son propre export n’annonce plus « réglages remplacés par ceux du fichier » pour les agences fournies que vous aviez modifiées (ex. page de connexion ajoutée à Pixpalace) : les réglages étaient identiques, seulement enregistrés dans un autre ordre. L’import lui-même ne changeait rien.
+
 ## 3.6.11 — 24 novembre 2026 (Chrome Web Store)
 
 - **L’import montre ce qui va réellement changer.** En face de chaque élément, la confirmation compare désormais le fichier à votre configuration au lieu de décrire le fichier : juste après un export, le réimporter affiche « à ajouter : 0 · déjà présentes : 31 » et le bouton reste désactivé. En mode Remplacer, elle nomme les agences qui arrivent, celles qui sont retirées et celles dont les réglages (adresse, champ repéré…) seraient remplacés par ceux du fichier, et montre chaque réglage sous la forme « actuel → fichier ».
