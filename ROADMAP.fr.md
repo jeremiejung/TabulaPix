@@ -17,7 +17,6 @@ Pistes envisagées pour de futures versions, avec ce qui a déjà été décidé
 
 **Prolongements.**
 - Partager un **dossier entier** (ex. « People » et ses agences).
-- Import en mode **« ajouter »** plutôt que « remplacer » : récupérer les agences et dossiers d'un fichier sans perdre les siens.
 
 **Écarté.** La détection automatique des TabulaPix du même réseau : impossible sans serveur (une extension ne voit pas le réseau local), et contraire à la promesse « aucun serveur, aucune requête réseau ». Pour toute une rédaction, une configuration poussée par le service informatique (Chrome Entreprise) reste possible.
 

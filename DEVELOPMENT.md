@@ -28,11 +28,11 @@ The file created by **Export** is plain JSON, readable and editable:
 ```json
 {
   "format": "tabulapix-config",
-  "formatVersion": 4,
+  "formatVersion": 5,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
   "app": { "name": "TabulaPix", "version": "3.6.9" },
-  "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" } },
+  "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" }, "tabGroups": { "enabled": false, "collapsed": false } },
   "folders": [{ "id": "f-wire", "name": "Wire agencies", "color": "blue" }],
   "agencies": [
     { "id": "reuters", "builtin": true, "name": "Reuters (points)", "folder": "f-wire", "checked": true, "hidden": false },
@@ -43,6 +43,8 @@ The file created by **Export** is plain JSON, readable and editable:
 ```
 
 - `agencies` is in list order. Built-in agencies only carry `name`, `url`, `payload`, `encode`, `fill` or `login` when they were edited (`login`: sign-in page, `false` when the shipped one was removed); added agencies always carry their address (and `fill` when they fill in a search field, `login` when they have a sign-in page).
+- `settings.tabGroups` (format 5): the tab groups option, exported off when Chrome's permission is not granted. A file without it leaves the option as it is.
+- **Import choices** (what and how) are made in TabulaPix, not in the file: the format is the same whatever is imported later.
 - **Compatibility between versions**: new versions only *add* optional fields, never change the meaning of an existing one (`formatVersion` goes up). So a newer TabulaPix reads older files (missing fields get their default value), and an older TabulaPix reads newer files, ignoring what it doesn't know yet (the import summary says so; built-in agencies it doesn't know are counted separately). Only an incompatible change, to be avoided, would raise `minReaderVersion`: an older TabulaPix then refuses the file and asks for an update.
 - **Folders** (`folders: [{ "id", "name", "color", "collapsed", "hidden" }]`, and a `folder` field on each agency) are exported and imported with the rest, including each folder's colour (`blue`, `teal`, `green`, `amber`, `orange`, `red`, `pink`, `violet`, `gray`) whether it is folded and whether it is hidden. A folder's checkbox is not stored: it is derived from its agencies.
 
