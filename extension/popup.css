@@ -404,6 +404,16 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .import-part.is-off { cursor: default; }
 .import-part.is-off strong { color: var(--muted); font-weight: 600; }
 .import-part.is-off .only-replace { display: inline; font-style: italic; }
+/* Réglages un par un, sous « Réglages » */
+.import-subs { margin: 0 0 2px 22px; }
+.import-subs[hidden] { display: none; }
+.import-sub { display: flex; align-items: flex-start; gap: 7px; padding: 2px 0; font-size: 12px; line-height: 1.35; cursor: pointer; }
+.import-sub input { flex: none; margin: 1px 0 0; }
+.import-sub strong { font-weight: 600; }
+.import-sub .help { display: inline; margin: 0; }
+.import-sub .only-replace { display: none; }
+.import-sub.is-off { cursor: default; }
+.import-sub.is-off strong { color: var(--muted); }
 /* Ajouter ne retire rien : boîte neutre, sans l'alerte rouge du remplacement */
 .replace-box.adding { border-color: color-mix(in srgb, CanvasText 22%, transparent); background: color-mix(in srgb, CanvasText 4%, Canvas); }
 .replace-box.adding .replace-title { color: CanvasText; }
