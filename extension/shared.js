@@ -686,7 +686,10 @@ function importEffects(current, parsed, { mode, settings = IMPORT_SETTINGS }) {
     return (ov && ov.name) || (b ? b.name : id);
   };
   const idsOf = (st) => AGENCIES.filter((a) => !(st[REMOVED_KEY] || []).includes(a.id)).map((a) => a.id).concat((st[CUSTOM_KEY] || []).map((a) => a.id));
-  const same = (a, b) => JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
+  // Comparaison du contenu, pas de l'ordre des champs (Chrome les enregistre triés).
+  const canon = (v) => (Array.isArray(v) ? v.map(canon) : v && typeof v === "object"
+    ? Object.fromEntries(Object.keys(v).sort().filter((k) => v[k] !== undefined).map((k) => [k, canon(v[k])])) : v === undefined ? null : v);
+  const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
   const effects = {};
   for (const part of mode === "add" ? IMPORT_ADD_PARTS : IMPORT_PARTS) {
     const { storage: st, report } = mergeConfigImport(current, parsed, { mode, parts: [part], settings });
