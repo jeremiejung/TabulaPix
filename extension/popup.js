@@ -21,16 +21,16 @@ const isManual = (a) => !a.fill && !/\{(q|q:slug|payload)\}/.test(a.url);
 /* ---------- Langue ---------- */
 
 const langSelect = document.getElementById("langSelect");
-applyI18n(); // langue du navigateur tout de suite…
+applyI18n(); renderVersion(); // langue du navigateur tout de suite…
 const langReady = loadLang().then((choice) => { // …puis celle choisie dans les réglages
   langSelect.value = choice;
-  applyI18n();
+  applyI18n(); renderVersion();
 });
 
 langSelect.addEventListener("change", async () => {
   await chrome.storage.local.set({ [LANG_KEY]: langSelect.value });
   await loadLang();
-  applyI18n();
+  applyI18n(); renderVersion();
   // Textes construits par le code : on les refait dans la nouvelle langue.
   await renderRemoved();
   await renderAttention();
@@ -1162,69 +1162,112 @@ const importConfirm = $id("importConfirm");
 let pendingImport = null; // résultat de l'analyse du fichier, en attente de confirmation
 let importChoice = null;  // { mode, parts } choisis dans la boîte (gardés si on change de langue)
 const importMode = () => importConfirm.querySelector('input[name="importMode"]:checked').value;
-function importPartRows(s, add) {
-  // Ajouter ne reprend que les agences ajoutées (les agences fournies ne changent pas).
-  const agencies = add ? t("backup.part.agencies.add", s)
-    : [t("backup.part.agencies.detail", s), s.modified ? t("backup.part.modified", s) : "", s.removed ? t("backup.part.removed", s) : ""].filter(Boolean).join(" · ");
-  return [
-    { id: "agencies", label: t("backup.part.agencies"), detail: agencies },
-    { id: "selection", label: t("backup.part.selection"), detail: t("backup.part.selection.detail", s) },
-    { id: "folders", label: t("backup.part.folders"), detail: t("backup.part.folders.detail", s) },
-    { id: "settings", label: t("backup.part.settings"), detail: t("backup.part.settings.detail") }
-  ];
+// Effets de l'import, calculés d'après la configuration actuelle (importCurrent).
+let importCurrent = {};
+const fxNames = (list) => (list.length ? " (" + list.slice(0, 3).join(", ") + (list.length > 3 ? ", …" : "") + ")" : "");
+const fxJoin = (items) => items.filter(Boolean).join(" · ") || t("backup.fx.none");
+function settingValue(id, v) {
+  if (v === null || v === undefined) return t("backup.fx.absent");
+  if (id === "language") return t("backup.lang." + v);
+  if (id === "tabGroups") return t(v.enabled ? "backup.tg.on" : "backup.tg.off") + (v.enabled && v.collapsed ? t("backup.tg.collapsed") : "");
+  return v;
 }
-// Titre, texte, bouton et cases selon le mode et les parties cochées.
+const settingLabel = (id) => (id === "language" ? t("backup.set.language") : id === "tabGroups" ? t("backup.set.tabGroups") : t("backup.set." + id.slice(4)));
+// Texte de chaque partie et nombre de changements qu'elle apporte.
+function importPartFx(part, e, add, pick) {
+  if (add && part === "agencies") return { n: e.added.length, text: fxJoin([e.added.length ? t("backup.fx.toAdd", { n: e.added.length }) + fxNames(e.added) : t("backup.fx.toAdd", { n: 0 }), e.present ? t("backup.fx.present", { n: e.present }) : "", e.full ? t("backup.fx.full", { n: e.full }) : ""]) };
+  if (add) return { n: e.added + e.filed, text: fxJoin([t("backup.fx.toAdd", { n: e.added }), e.present ? t("backup.fx.presentF", { n: e.present }) : "", e.filed ? t("backup.fx.filed", { n: e.filed }) : ""]) };
+  if (part === "agencies") return { n: e.arrive.length + e.leave.length + e.edited, text: fxJoin([e.arrive.length ? t("backup.fx.arrive", { n: e.arrive.length }) + fxNames(e.arrive) : "", e.leave.length ? t("backup.fx.leave", { n: e.leave.length }) + fxNames(e.leave) : "", e.edited ? t("backup.fx.edited", { n: e.edited }) : ""]) };
+  if (part === "selection") return { n: e.changed, text: e.changed ? t("backup.fx.boxes", { n: e.changed }) : t("backup.fx.none") };
+  if (part === "folders") return { n: e.created + e.removed + e.edited + e.moved, text: fxJoin([e.created ? t("backup.fx.fCreated", { n: e.created }) : "", e.removed ? t("backup.fx.fRemoved", { n: e.removed }) : "", e.edited ? t("backup.fx.fEdited", { n: e.edited }) : "", e.moved ? t("backup.fx.moved", { n: e.moved }) : ""]) };
+  const changes = e.items.filter((x) => !x.same && pick.includes(x.id)).length;
+  return { n: changes, text: changes ? t("backup.fx.settings", { n: changes }) : t("backup.fx.none") };
+}
+// Titre, texte, bouton, cases et effets selon le mode et les parties cochées.
 function renderImportChoice() {
   const mode = importMode();
   const add = mode === "add";
   importConfirm.classList.toggle("adding", add);
   importConfirm.setAttribute("role", add ? "dialog" : "alertdialog");
   $id("importTitleText").textContent = t(add ? "backup.add.title" : "backup.replace.title");
+  const settingsOn = $id("importParts").querySelector('.import-part input[value="settings"]');
+  // Réglages choisis : cochés, et présents dans le fichier (un fichier ancien n'a pas les groupes d'onglets).
+  const F = pendingImport.storage;
+  const inFile = (id) => (id === "language" ? true : id === "tabGroups" ? Boolean(F[TAB_GROUPS_KEY]) : (F[OPTIONS_KEY] || {})[id.slice(4)] !== undefined);
+  const pick = [...$id("importSettings").querySelectorAll("input")].filter((b) => b.checked && inFile(b.value)).map((b) => b.value);
+  const fx = importEffects(importCurrent, pendingImport, { mode, settings: pick });
   const parts = [];
-  const details = Object.fromEntries(importPartRows(pendingImport.summary, add).map((r) => [r.id, r.detail]));
-  for (const box of importConfirm.querySelectorAll(".import-part input")) {
+  let changes = 0;
+  for (const box of $id("importParts").querySelectorAll(".import-part input")) {
     const usable = !add || IMPORT_ADD_PARTS.includes(box.value);
     // Partie sans objet en mode Ajouter : décochée à l'écran, son choix est retrouvé en revenant à Remplacer.
     if (!usable && !box.disabled) { box.dataset.wanted = String(box.checked); box.checked = false; }
     if (usable && box.disabled) box.checked = box.dataset.wanted !== "false";
     box.disabled = !usable;
-    box.closest(".import-part").classList.toggle("is-off", !usable);
-    box.closest(".import-part").querySelector(".detail").textContent = details[box.value];
-    if (usable && box.checked) parts.push(box.value);
+    const row = box.closest(".import-part");
+    row.classList.toggle("is-off", !usable);
+    const r = usable ? importPartFx(box.value, fx[box.value], add, pick) : { n: 0, text: "" };
+    row.querySelector(".detail").textContent = r.text;
+    row.classList.toggle("no-change", usable && !r.n);
+    const include = usable && box.checked && (box.value !== "settings" || pick.length);
+    if (include) { parts.push(box.value); changes += r.n; }
   }
-  importChoice = { mode, parts };
-  $id("importConfirmText").textContent = !parts.length ? t("backup.nothing") : t(add ? "backup.add.text" : "backup.replace.text");
+  // Réglages un par un (mode Remplacer, partie « Réglages » cochée).
+  const subs = $id("importSettings");
+  subs.hidden = add;
+  for (const b of subs.querySelectorAll("input")) {
+    const item = fx.settings ? fx.settings.items.find((x) => x.id === b.value) : null;
+    b.disabled = add || !settingsOn.checked || !inFile(b.value);
+    const row = b.closest(".import-sub");
+    row.classList.toggle("is-off", b.disabled);
+    row.querySelector(".detail").textContent = !item ? "" : !inFile(b.value) ? t("backup.fx.absent")
+      : item.same ? t("backup.fx.unchanged", { v: settingValue(item.id, item.from) })
+      : settingValue(item.id, item.from) + " → " + settingValue(item.id, item.to);
+  }
+  importChoice = { mode, parts, settings: pick };
+  const nothing = !parts.length ? t("backup.nothing") : !changes ? t(add ? "backup.add.nothing" : "backup.replace.nothing") : "";
+  $id("importConfirmText").textContent = nothing || t(add ? "backup.add.text" : "backup.replace.text");
   const ok = $id("importOk");
   ok.textContent = t(add ? "backup.add.ok" : "backup.replace.ok");
   ok.className = add ? "primary" : "danger";
-  ok.disabled = !parts.length;
+  ok.disabled = Boolean(nothing);
 }
-function showImportConfirm(result, { focus = true } = {}) {
+async function showImportConfirm(result, { focus = true } = {}) {
   pendingImport = result;
+  importCurrent = await chrome.storage.local.get(null);
+  if (pendingImport !== result) return; // un autre fichier choisi entre-temps
   const s = result.summary;
-  const previous = importChoice || { mode: "replace", parts: IMPORT_PARTS };
+  const previous = importChoice || { mode: "replace", parts: IMPORT_PARTS, settings: IMPORT_SETTINGS };
   for (const r of importConfirm.querySelectorAll('input[name="importMode"]')) r.checked = r.value === previous.mode;
-  $id("importParts").replaceChildren(...importPartRows(s).map((row) => {
-    const label = document.createElement("label");
-    label.className = "import-part";
+  const checkbox = (value, checked, onChange) => {
     const box = document.createElement("input");
     box.type = "checkbox";
-    box.value = row.id;
-    box.checked = previous.parts.includes(row.id) || (previous.mode === "add" && !IMPORT_ADD_PARTS.includes(row.id));
-    box.dataset.wanted = String(box.checked);
-    box.addEventListener("change", renderImportChoice);
+    box.value = value;
+    box.checked = checked;
+    box.dataset.wanted = String(checked);
+    box.addEventListener("change", onChange);
+    return box;
+  };
+  const row = (cls, box, label) => {
+    const el = document.createElement("label");
+    el.className = cls;
     const text = document.createElement("span");
     const name = document.createElement("strong");
-    name.textContent = row.label;
+    name.textContent = label;
     const detail = document.createElement("span");
     detail.className = "help detail";
     const off = document.createElement("span");
     off.className = "help only-replace";
     off.textContent = t("backup.part.replaceOnly");
     text.append(name, " ", detail, off);
-    label.append(box, text);
-    return label;
-  }));
+    el.append(box, text);
+    return el;
+  };
+  const labels = { agencies: t("backup.part.agencies"), selection: t("backup.part.selection"), folders: t("backup.part.folders"), settings: t("backup.part.settings") };
+  $id("importParts").replaceChildren(...IMPORT_PARTS.map((id) =>
+    row("import-part", checkbox(id, previous.parts.includes(id) || (previous.mode === "add" && !IMPORT_ADD_PARTS.includes(id)), renderImportChoice), labels[id])));
+  $id("importSettings").replaceChildren(...IMPORT_SETTINGS.map((id) =>
+    row("import-sub", checkbox(id, previous.settings.includes(id), renderImportChoice), settingLabel(id))));
   renderImportChoice();
   const notes = [s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
   $id("importNotes").textContent = notes;
@@ -1274,7 +1317,7 @@ $id("importOk").addEventListener("click", async () => {
     // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
     const r = merged.report, s = result.summary;
     const lines = r.mode === "add"
-      ? [t("backup.added", r), r.dupes ? t("backup.added.dupes", { n: r.dupes }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""]
+      ? [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""]
       : [t("backup.replaced", { parts: r.parts.map((p) => t("backup.part." + p).toLowerCase()).join(", ") })];
     lines.push(s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : "");
     backupMsg.textContent = t("backup.imported") + " " + lines.filter(Boolean).join(" ") + (toAllow ? "\n" + t("backup.needPerm") : "");
@@ -1306,7 +1349,7 @@ document.getElementById("factoryBtn").addEventListener("click", async () => {
 // Après un import : langue, réglages et listes refaits.
 async function reloadSettingsView() {
   langSelect.value = await loadLang();
-  applyI18n();
+  applyI18n(); renderVersion();
   cachedOptions = await loadOptions();
   renderOptionFields(cachedOptions);
   resetEditor();
@@ -2147,3 +2190,9 @@ chrome.storage.session.get([AGENCY_DRAFT_KEY, PICK_RESULT_KEY]).then((data) => {
   const d = data[AGENCY_DRAFT_KEY], r = data[PICK_RESULT_KEY];
   if (d && ((r && r.draftId === d.id) || d.review)) langReady.then(() => showEditor());
 });
+
+// Version en cours, dans le pied de page (avant le lien vers le code source).
+function renderVersion() {
+  const el = document.getElementById("appVersion");
+  if (el) el.textContent = t("footer.version", { v: chrome.runtime.getManifest().version });
+}

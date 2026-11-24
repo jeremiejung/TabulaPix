@@ -496,15 +496,19 @@ async function exportedTabGroups(pref) {
  *           (langue, options, groupes d'onglets) ;
  *   mode  : "replace" — chaque partie choisie remplace la sienne, le reste
  *           ne change pas ; "add" — seul ce qui manque est ajouté (agences
- *           ajoutées et dossiers), rien n'est retiré ni modifié.
+ *           ajoutées, agences fournies supprimées chez l'utilisateur, dossiers),
+ *           rien n'est retiré ni modifié ;
+ *   settings : réglages remplacés (IMPORT_SETTINGS), tous par défaut.
  * current : valeurs actuelles (chrome.storage.local) ; parsed : résultat de
  * parseConfigImport. Renvoie { storage (valeurs à écrire), hosts (sites à
  * autoriser), report }.
  */
 const IMPORT_PARTS = ["agencies", "selection", "folders", "settings"];
 const IMPORT_ADD_PARTS = ["agencies", "folders"]; // seules parties qui ont un sens en mode « ajouter »
+// Réglages qu'on peut remplacer un par un : langue, chaque option, groupes d'onglets.
+const IMPORT_SETTINGS = ["language", ...OPTIONS.map((o) => "opt:" + o.id), "tabGroups"];
 
-function mergeConfigImport(current, parsed, { mode, parts }) {
+function mergeConfigImport(current, parsed, { mode, parts, settings = IMPORT_SETTINGS }) {
   const F = parsed.storage;
   const want = new Set((parts || []).filter((p) => (mode === "add" ? IMPORT_ADD_PARTS : IMPORT_PARTS).includes(p)));
   const arr = (v) => (Array.isArray(v) ? v : []);
@@ -529,7 +533,7 @@ function mergeConfigImport(current, parsed, { mode, parts }) {
   for (const id of before) if (!order.includes(id)) order.push(id);
 
   const out = { [FOLDERS_DONE_KEY]: true };
-  const report = { mode, parts: [...want], agenciesAdded: 0, dupes: 0, full: 0, foldersAdded: 0, filed: 0 };
+  const report = { mode, parts: [...want], agenciesAdded: 0, restored: 0, present: 0, dupes: 0, full: 0, foldersAdded: 0, foldersPresent: 0, filed: 0, added: [] };
   let hosts = [];
   const fileKnows = new Set(arr(F[STORAGE_KEYS.order]));
   const fileChecked = new Set(arr(F[STORAGE_KEYS.checked]));
@@ -552,7 +556,8 @@ function mergeConfigImport(current, parsed, { mode, parts }) {
     if (want.has("folders")) {
       const ids = new Set(folders.map((f) => f.id));
       for (const f of fileFolders) {
-        if (folderMap.has(f.id) || folders.length >= MAX_FOLDERS) continue;
+        if (folderMap.has(f.id)) { report.foldersPresent++; continue; }
+        if (folders.length >= MAX_FOLDERS) continue;
         const id = ids.has(f.id) ? newFolderId() : f.id;
         ids.add(id);
         folders.push({ ...f, id });
@@ -572,8 +577,29 @@ function mergeConfigImport(current, parsed, { mode, parts }) {
       // Agences effectives de l'utilisateur, pour reconnaître celles qu'il a déjà.
       const mine = AGENCIES.filter((a) => !removed.includes(a.id)).map((a) => applyOverride(a, overrides[a.id], options)).concat(custom);
       const ids = new Set(before);
+      // Agences fournies que le fichier a et que l'utilisateur a supprimées : elles
+      // reviennent, avec l'état, le dossier et les réglages qu'elles ont dans le fichier.
+      const fileRemoved = new Set(arr(F[REMOVED_KEY]));
+      const fileOverrides = obj(F[OVERRIDES_KEY]);
+      for (const a of AGENCIES) {
+        if (!fileKnows.has(a.id) || fileRemoved.has(a.id)) continue;
+        if (!removed.includes(a.id)) { report.present++; continue; }
+        removed = removed.filter((id) => id !== a.id);
+        if (fileOverrides[a.id]) overrides = { ...overrides, [a.id]: fileOverrides[a.id] };
+        const effective = applyOverride(a, overrides[a.id], options);
+        mine.push(effective);
+        ids.add(a.id);
+        order.push(a.id);
+        if (fileChecked.has(a.id)) checked = checked.concat(a.id);
+        if (fileHidden.has(a.id)) hidden = hidden.concat(a.id);
+        const target = folderMap.get(fileFolderOf[a.id]);
+        if (target) folderOf[a.id] = target;
+        if (effective.fill) { const h = hostOf(effective.url, options); if (h) hosts.push(h); }
+        report.restored++;
+        report.added.push(effective.name);
+      }
       for (const f of arr(F[CUSTOM_KEY])) {
-        if (mine.some((m) => sameAgencySite(m, f, options))) { report.dupes++; continue; }
+        if (mine.some((m) => sameAgencySite(m, f, options))) { report.dupes++; report.present++; continue; }
         if (custom.length >= MAX_CUSTOM) { report.full++; continue; }
         let id = f.id;
         while (ids.has(id)) id = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -588,6 +614,7 @@ function mergeConfigImport(current, parsed, { mode, parts }) {
         if (target) folderOf[id] = target;
         if (agency.fill) { const h = hostOf(agency.url, {}); if (h) hosts.push(h); }
         report.agenciesAdded++;
+        report.added.push(agency.name);
       }
     }
   } else {
@@ -626,9 +653,15 @@ function mergeConfigImport(current, parsed, { mode, parts }) {
     }
 
     if (want.has("settings")) {
-      out[OPTIONS_KEY] = obj(F[OPTIONS_KEY]);
-      out[LANG_KEY] = F[LANG_KEY];
-      if (F[TAB_GROUPS_KEY]) out[TAB_GROUPS_KEY] = F[TAB_GROUPS_KEY]; // fichier plus ancien : option gardée
+      const pick = new Set(settings);
+      if (pick.has("language")) out[LANG_KEY] = F[LANG_KEY];
+      const opts = { ...options }, fileOpts = obj(F[OPTIONS_KEY]);
+      for (const o of OPTIONS) {
+        if (!pick.has("opt:" + o.id)) continue;
+        if (fileOpts[o.id] !== undefined) opts[o.id] = fileOpts[o.id]; else delete opts[o.id]; // absent du fichier : valeur par défaut
+      }
+      out[OPTIONS_KEY] = opts;
+      if (pick.has("tabGroups") && F[TAB_GROUPS_KEY]) out[TAB_GROUPS_KEY] = F[TAB_GROUPS_KEY]; // fichier plus ancien : option gardée
     }
     for (const id of Object.keys(folderOf)) if (!after.has(id)) delete folderOf[id];
   }
@@ -639,6 +672,63 @@ function mergeConfigImport(current, parsed, { mode, parts }) {
     [FOLDERS_KEY]: folders, [FOLDER_OF_KEY]: folderOf
   });
   return { storage: out, hosts: [...new Set(hosts)], report };
+}
+
+/* Effet de chaque partie, calculé avant l'import (même fusion, sans rien
+   écrire), pour afficher ce qui va réellement changer chez l'utilisateur. */
+function importEffects(current, parsed, { mode, settings = IMPORT_SETTINGS }) {
+  const base = mergeConfigImport(current, parsed, { mode: "replace", parts: [] }).storage; // configuration actuelle, mise en forme
+  const nameOf = (st, id) => {
+    const c = (st[CUSTOM_KEY] || []).find((a) => a.id === id);
+    if (c) return c.name;
+    const b = AGENCIES.find((a) => a.id === id);
+    const ov = (st[OVERRIDES_KEY] || {})[id];
+    return (ov && ov.name) || (b ? b.name : id);
+  };
+  const idsOf = (st) => AGENCIES.filter((a) => !(st[REMOVED_KEY] || []).includes(a.id)).map((a) => a.id).concat((st[CUSTOM_KEY] || []).map((a) => a.id));
+  const same = (a, b) => JSON.stringify(a === undefined ? null : a) === JSON.stringify(b === undefined ? null : b);
+  const effects = {};
+  for (const part of mode === "add" ? IMPORT_ADD_PARTS : IMPORT_PARTS) {
+    const { storage: st, report } = mergeConfigImport(current, parsed, { mode, parts: [part], settings });
+    const before = new Set(idsOf(base)), after = new Set(idsOf(st));
+    let e;
+    if (mode === "add") {
+      e = part === "agencies"
+        ? { added: report.added, present: report.present, full: report.full }
+        : { added: report.foldersAdded, present: report.foldersPresent, filed: report.filed };
+    } else if (part === "agencies") {
+      const ov0 = base[OVERRIDES_KEY] || {}, ov1 = st[OVERRIDES_KEY] || {};
+      e = {
+        arrive: [...after].filter((id) => !before.has(id)).map((id) => nameOf(st, id)),
+        leave: [...before].filter((id) => !after.has(id)).map((id) => nameOf(base, id)),
+        edited: [...after].filter((id) => before.has(id) && (AGENCIES.some((a) => a.id === id)
+          ? !same(ov0[id], ov1[id])
+          : !same((base[CUSTOM_KEY] || []).find((a) => a.id === id), (st[CUSTOM_KEY] || []).find((a) => a.id === id)))).length
+      };
+    } else if (part === "selection") {
+      const on = (st, key, id) => (st[key] || []).includes(id);
+      e = { changed: [...after].filter((id) => on(base, STORAGE_KEYS.checked, id) !== on(st, STORAGE_KEYS.checked, id) || on(base, HIDDEN_KEY, id) !== on(st, HIDDEN_KEY, id)).length };
+    } else if (part === "folders") {
+      const f0 = new Map(base[FOLDERS_KEY].map((f) => [f.id, f])), f1 = new Map(st[FOLDERS_KEY].map((f) => [f.id, f]));
+      e = {
+        created: [...f1.keys()].filter((id) => !f0.has(id)).length,
+        removed: [...f0.keys()].filter((id) => !f1.has(id)).length,
+        edited: [...f1.keys()].filter((id) => f0.has(id) && !same(f0.get(id), f1.get(id))).length,
+        moved: [...after].filter((id) => (base[FOLDER_OF_KEY][id] || "") !== (st[FOLDER_OF_KEY][id] || "")).length
+      };
+    } else {
+      // Réglages : valeur actuelle → valeur du fichier, pour chacun.
+      const fileOpts = parsed.storage[OPTIONS_KEY] || {}, mine = current[OPTIONS_KEY] || {};
+      const tg = (v) => (v && typeof v === "object" ? { enabled: v.enabled === true, collapsed: v.collapsed === true } : null);
+      e = { items: [
+        { id: "language", from: current[LANG_KEY] || "auto", to: parsed.storage[LANG_KEY] },
+        ...OPTIONS.map((o) => ({ id: "opt:" + o.id, from: mine[o.id] || o.default, to: fileOpts[o.id] || o.default })),
+        { id: "tabGroups", from: tg(current[TAB_GROUPS_KEY]) || { enabled: false, collapsed: false }, to: tg(parsed.storage[TAB_GROUPS_KEY]) }
+      ].map((x) => ({ ...x, same: x.to === null || same(x.from, x.to) })) };
+    }
+    effects[part] = e;
+  }
+  return effects;
 }
 
 // Autorisations de sites facultatives actuellement accordées (hors sites

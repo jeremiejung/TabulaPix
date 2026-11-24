@@ -6,6 +6,11 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Import shows what will actually change.** Next to each part, the confirmation now compares the file with your configuration instead of describing the file: right after an export, re-importing shows “to add: 0 · already there: 31” and the button stays disabled. In Replace mode it lists what arrives, is removed or changes, and each setting as “current → file”.
+- **Add mode brings back the built-in agencies you deleted** when the file still has them (with the file's tick, folder and settings for that agency).
+- **Settings one by one**: language, Pixpalace subdomain and tab groups can each be unticked when importing (all ticked by default).
+- The **version number** is shown at the bottom of the window, before the source code link.
+
 ## 3.6.10 — 24 November 2026 (Chrome Web Store)
 
 - **Choose what to import, and how.** Importing a configuration file no longer always replaces everything:
