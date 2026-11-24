@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.11 — 24 novembre 2026 (Chrome Web Store)
+
 - **L’import montre ce qui va réellement changer.** En face de chaque élément, la confirmation compare désormais le fichier à votre configuration au lieu de décrire le fichier : juste après un export, le réimporter affiche « à ajouter : 0 · déjà présentes : 31 » et le bouton reste désactivé. En mode Remplacer, elle nomme les agences qui arrivent, celles qui sont retirées et celles dont les réglages (adresse, champ repéré…) seraient remplacés par ceux du fichier, et montre chaque réglage sous la forme « actuel → fichier ».
 - **Le mode Ajouter rétablit les agences fournies que vous aviez supprimées** quand le fichier les a encore (avec la case, le dossier et les réglages qu’elles ont dans le fichier).
 - **Réglages un par un** : langue, sous-domaine Pixpalace et groupes d’onglets se décochent séparément à l’import (tous cochés par défaut).
