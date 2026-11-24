@@ -17,7 +17,6 @@ Directions considered for future versions, with what has already been decided. N
 
 **Extensions.**
 - Share a **whole folder** (e.g. “Celebrity” and its agencies).
-- Import in **“add”** mode rather than “replace”: get a file's agencies and folders without losing one's own.
 
 **Ruled out.** Automatic discovery of TabulaPix instances on the same network: impossible without a server (an extension can't see the local network), and against the “no server, no network request” promise. For a whole newsroom, a configuration pushed by IT (Chrome Enterprise) remains possible.
 

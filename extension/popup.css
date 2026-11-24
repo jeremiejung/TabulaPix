@@ -394,7 +394,20 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .replace-box p { margin: 0 0 6px; }
 .replace-title { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 750; color: color-mix(in srgb, var(--err) 75%, CanvasText); }
 .replace-title svg { flex: none; width: 17px; height: 17px; color: var(--err); }
-.replace-sum { margin: 0 0 8px; padding-left: 18px; font-size: 12px; line-height: 1.5; }
+/* Import : mode (ajouter / remplacer) et parties à importer */
+.import-mode, .import-parts { min-width: 0; margin: 0 0 8px; padding: 0; border: 0; }
+.import-parts legend { margin: 0 0 2px; padding: 0; font-size: 12px; font-weight: 700; }
+.import-mode label, .import-part { display: flex; align-items: flex-start; gap: 7px; padding: 3px 0; font-size: 12.5px; line-height: 1.35; cursor: pointer; }
+.import-mode input, .import-part input { flex: none; margin: 2px 0 0; }
+.import-mode .help, .import-part .help { display: inline; margin: 0; }
+.import-part .only-replace, .import-part.is-off > span > .help:not(.only-replace) { display: none; }
+.import-part.is-off { cursor: default; }
+.import-part.is-off strong { color: var(--muted); font-weight: 600; }
+.import-part.is-off .only-replace { display: inline; font-style: italic; }
+/* Ajouter ne retire rien : boîte neutre, sans l'alerte rouge du remplacement */
+.replace-box.adding { border-color: color-mix(in srgb, CanvasText 22%, transparent); background: color-mix(in srgb, CanvasText 4%, Canvas); }
+.replace-box.adding .replace-title { color: CanvasText; }
+.replace-box.adding .replace-title svg { display: none; }
 .replace-box .help:empty, .replace-box .help[hidden] { display: none; }
 .replace-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .replace-actions button { width: 100%; }

@@ -274,7 +274,7 @@ function sameAgencySite(builtin, custom, options) {
  * Format JSON versionné, pour sauvegarder la configuration hors de
  * l'extension ou la partager entre collègues :
  *   { format: "tabulapix-config", formatVersion, minReaderVersion,
- *     exportedAt, app, settings: { language, options },
+ *     exportedAt, app, settings: { language, options, tabGroups? },
  *     folders: [ { id, name, color?, collapsed?, hidden? } ], // dossiers d'agences
  *     agencies: [ … dans l'ordre de la liste … ],
  *     removedBuiltins: [ … agences fournies supprimées … ] }
@@ -297,7 +297,7 @@ function sameAgencySite(builtin, custom, options) {
  * agences (toutes cochées, aucune, ou certaines = à moitié coché).
  */
 const CONFIG_FORMAT = "tabulapix-config";
-const CONFIG_FORMAT_VERSION = 4; // version du format écrit par cette extension (2 : dossiers repliés ; 3 : dossiers masqués ; 4 : page de connexion)
+const CONFIG_FORMAT_VERSION = 5; // version du format écrit par cette extension (2 : dossiers repliés ; 3 : dossiers masqués ; 4 : page de connexion ; 5 : groupes d'onglets)
 const CONFIG_READER_VERSION = 1; // plus haut minReaderVersion que cette extension sait lire
 const CONFIG_MAX_BYTES = 1024 * 1024;
 const FOLDERS_KEY = "agencyFolders";     // [ { id, name, color?, collapsed?, hidden? } ]
@@ -331,7 +331,7 @@ async function buildConfigExport() {
   const data = await chrome.storage.local.get({
     [STORAGE_KEYS.checked]: null, [STORAGE_KEYS.order]: [], [CUSTOM_KEY]: [], [OVERRIDES_KEY]: {},
     [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [OPTIONS_KEY]: {}, [LANG_KEY]: "auto",
-    [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}
+    [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}, [TAB_GROUPS_KEY]: {}
   });
   const folders = cleanFolders(data[FOLDERS_KEY]);
   const folderIds = new Set(folders.map((f) => f.id));
@@ -369,7 +369,7 @@ async function buildConfigExport() {
     minReaderVersion: 1,
     exportedAt: new Date().toISOString(),
     app: { name: "TabulaPix", version: chrome.runtime.getManifest().version },
-    settings: { language: data[LANG_KEY], options: data[OPTIONS_KEY] || {} },
+    settings: { language: data[LANG_KEY], options: data[OPTIONS_KEY] || {}, tabGroups: await exportedTabGroups(data[TAB_GROUPS_KEY]) },
     folders,
     agencies,
     removedBuiltins: AGENCIES.filter((a) => removed.has(a.id)).map((a) => a.id)
@@ -401,6 +401,9 @@ function parseConfigImport(file) {
     if (v && new RegExp(o.pattern).test(v)) options[o.id] = v;
   }
   const lang = ["auto", ...LANGS].includes(settings.language) ? settings.language : "auto";
+  // Groupes d'onglets (format 5) : absent d'un fichier plus ancien.
+  const tg = settings.tabGroups && typeof settings.tabGroups === "object" ? settings.tabGroups : null;
+  const tabGroups = tg ? { enabled: tg.enabled === true, collapsed: tg.collapsed === true } : null;
 
   // Agences
   const builtinById = new Map(AGENCIES.map((a) => [a.id, a]));
@@ -467,12 +470,175 @@ function parseConfigImport(file) {
       [STORAGE_KEYS.checked]: checked, [STORAGE_KEYS.order]: order, [HIDDEN_KEY]: hidden,
       [REMOVED_KEY]: [...removed], [CUSTOM_KEY]: custom, [OVERRIDES_KEY]: overrides,
       [OPTIONS_KEY]: options, [LANG_KEY]: lang, [STORAGE_KEYS.seen]: [...seen],
-      [FOLDERS_KEY]: folders, [FOLDER_OF_KEY]: folderOf
+      [FOLDERS_KEY]: folders, [FOLDER_OF_KEY]: folderOf, ...(tabGroups ? { [TAB_GROUPS_KEY]: tabGroups } : {})
     },
     // Retirées « pour de vrai » : sans compter les doublons d'une agence ajoutée du fichier.
-    summary: { agencies: order.length, custom: custom.length, folders: folders.length, removed: AGENCIES.filter((a) => removed.has(a.id) && !custom.some((c) => sameAgencySite(a, c, options))).length, modified: Object.keys(overrides).length, checked: checked.length, skipped, unknown, newer },
+    summary: { agencies: order.length, custom: custom.length, folders: folders.length, removed: AGENCIES.filter((a) => removed.has(a.id) && !custom.some((c) => sameAgencySite(a, c, options))).length, modified: Object.keys(overrides).length, checked: checked.length, hidden: hidden.length, skipped, unknown, newer },
     hosts
   };
+}
+
+// Option « groupes d'onglets » telle qu'elle s'applique : sans l'autorisation
+// de Chrome, elle est sans effet, donc exportée désactivée.
+async function exportedTabGroups(pref) {
+  const p = pref && typeof pref === "object" ? pref : {};
+  let granted = false;
+  try { granted = await chrome.permissions.contains(TAB_GROUPS_PERMISSION); } catch (_) { /* rien */ }
+  return { enabled: p.enabled === true && granted, collapsed: p.collapsed === true };
+}
+
+/* ---------- Import choisi : quoi, et comment ---------- */
+/*
+ * L'utilisateur choisit ce qu'il importe (parts) et comment (mode) :
+ *   parts : agencies (agences ajoutées, modifications et suppressions des
+ *           agences fournies, ordre), selection (cases cochées et agences
+ *           masquées), folders (dossiers, couleurs, rangement), settings
+ *           (langue, options, groupes d'onglets) ;
+ *   mode  : "replace" — chaque partie choisie remplace la sienne, le reste
+ *           ne change pas ; "add" — seul ce qui manque est ajouté (agences
+ *           ajoutées et dossiers), rien n'est retiré ni modifié.
+ * current : valeurs actuelles (chrome.storage.local) ; parsed : résultat de
+ * parseConfigImport. Renvoie { storage (valeurs à écrire), hosts (sites à
+ * autoriser), report }.
+ */
+const IMPORT_PARTS = ["agencies", "selection", "folders", "settings"];
+const IMPORT_ADD_PARTS = ["agencies", "folders"]; // seules parties qui ont un sens en mode « ajouter »
+
+function mergeConfigImport(current, parsed, { mode, parts }) {
+  const F = parsed.storage;
+  const want = new Set((parts || []).filter((p) => (mode === "add" ? IMPORT_ADD_PARTS : IMPORT_PARTS).includes(p)));
+  const arr = (v) => (Array.isArray(v) ? v : []);
+  const obj = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+  const options = obj(current[OPTIONS_KEY]);
+
+  // État actuel
+  let custom = arr(current[CUSTOM_KEY]).map(cleanCustomAgency).filter(Boolean).map(({ custom: _c, ...a }) => a);
+  let overrides = obj(current[OVERRIDES_KEY]);
+  let removed = arr(current[REMOVED_KEY]);
+  let seen = arr(current[STORAGE_KEYS.seen]);
+  let checked = Array.isArray(current[STORAGE_KEYS.checked]) ? current[STORAGE_KEYS.checked]
+    : AGENCIES.filter((a) => a.defaultChecked !== false).map((a) => a.id); // jamais enregistré : cases livrées
+  let hidden = arr(current[HIDDEN_KEY]);
+  let folders = cleanFolders(current[FOLDERS_KEY]);
+  let folderOf = { ...obj(current[FOLDER_OF_KEY]) };
+  const idsOf = (rem, cus) => AGENCIES.filter((a) => !rem.includes(a.id)).map((a) => a.id).concat(cus.map((a) => a.id));
+  const before = new Set(idsOf(removed, custom));
+  // Ordre affiché : celui de l'utilisateur, puis les agences qu'il ne contient pas.
+  const stored = arr(current[STORAGE_KEYS.order]);
+  let order = stored.filter((id) => before.has(id));
+  for (const id of before) if (!order.includes(id)) order.push(id);
+
+  const out = { [FOLDERS_DONE_KEY]: true };
+  const report = { mode, parts: [...want], agenciesAdded: 0, dupes: 0, full: 0, foldersAdded: 0, filed: 0 };
+  let hosts = [];
+  const fileKnows = new Set(arr(F[STORAGE_KEYS.order]));
+  const fileChecked = new Set(arr(F[STORAGE_KEYS.checked]));
+  const fileHidden = new Set(arr(F[HIDDEN_KEY]));
+  const fileFolderOf = obj(F[FOLDER_OF_KEY]);
+  const fileFolders = cleanFolders(F[FOLDERS_KEY]);
+
+  // Dossier du fichier → dossier de l'utilisateur (même id, sinon même nom).
+  const norm = (s) => String(s).trim().toLowerCase();
+  const folderMap = new Map();
+  const matchFolders = () => {
+    for (const f of fileFolders) {
+      const mine = folders.find((x) => x.id === f.id) || folders.find((x) => norm(x.name) === norm(f.name));
+      if (mine) folderMap.set(f.id, mine.id);
+    }
+  };
+
+  if (mode === "add") {
+    matchFolders();
+    if (want.has("folders")) {
+      const ids = new Set(folders.map((f) => f.id));
+      for (const f of fileFolders) {
+        if (folderMap.has(f.id) || folders.length >= MAX_FOLDERS) continue;
+        const id = ids.has(f.id) ? newFolderId() : f.id;
+        ids.add(id);
+        folders.push({ ...f, id });
+        folderMap.set(f.id, id);
+        report.foldersAdded++;
+      }
+      // Vos agences hors dossier vont dans le dossier que leur donne le fichier ;
+      // celles déjà rangées restent où elles sont.
+      const folderIds = new Set(folders.map((f) => f.id));
+      for (const id of before) {
+        if (folderIds.has(folderOf[id])) continue;
+        const target = folderMap.get(fileFolderOf[id]);
+        if (target) { folderOf[id] = target; report.filed++; }
+      }
+    }
+    if (want.has("agencies")) {
+      // Agences effectives de l'utilisateur, pour reconnaître celles qu'il a déjà.
+      const mine = AGENCIES.filter((a) => !removed.includes(a.id)).map((a) => applyOverride(a, overrides[a.id], options)).concat(custom);
+      const ids = new Set(before);
+      for (const f of arr(F[CUSTOM_KEY])) {
+        if (mine.some((m) => sameAgencySite(m, f, options))) { report.dupes++; continue; }
+        if (custom.length >= MAX_CUSTOM) { report.full++; continue; }
+        let id = f.id;
+        while (ids.has(id)) id = "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        ids.add(id);
+        const agency = { ...f, id };
+        custom.push(agency);
+        mine.push(agency);
+        order.push(id);
+        if (fileChecked.has(f.id)) checked = checked.concat(id);
+        if (fileHidden.has(f.id)) hidden = hidden.concat(id);
+        const target = folderMap.get(fileFolderOf[f.id]);
+        if (target) folderOf[id] = target;
+        if (agency.fill) { const h = hostOf(agency.url, {}); if (h) hosts.push(h); }
+        report.agenciesAdded++;
+      }
+    }
+  } else {
+    if (want.has("agencies")) {
+      custom = arr(F[CUSTOM_KEY]);
+      overrides = obj(F[OVERRIDES_KEY]);
+      removed = arr(F[REMOVED_KEY]);
+      seen = [...new Set(seen.concat(arr(F[STORAGE_KEYS.seen])))]; // déjà vues ici ou là-bas : pas « nouvelles »
+      order = arr(F[STORAGE_KEYS.order]).slice();
+      out[NEW_KEY] = {}; // plus de pastille « Nouveau » sur une configuration remplacée
+      hosts = parsed.hosts.slice();
+    }
+    const after = new Set(idsOf(removed, custom));
+    for (const id of after) if (!order.includes(id)) order.push(id);
+    order = order.filter((id) => after.has(id));
+    const arrived = [...after].filter((id) => !before.has(id));
+    // Cases : celles du fichier pour les agences qu'il connaît (toutes si
+    // « sélection » est choisie, sinon seulement les agences qui arrivent).
+    const takeFromFile = new Set(want.has("selection") ? [...after].filter((id) => fileKnows.has(id)) : arrived);
+    const pick = (mineList, fileSet) => [...after].filter((id) => (takeFromFile.has(id) ? fileSet.has(id) : mineList.includes(id)));
+    checked = pick(checked, fileChecked);
+    hidden = pick(hidden, fileHidden);
+
+    if (want.has("folders")) {
+      const previous = folderOf;
+      folders = fileFolders;
+      const ids = new Set(folders.map((f) => f.id));
+      folderOf = {};
+      for (const id of after) {
+        if (fileKnows.has(id)) { if (ids.has(fileFolderOf[id])) folderOf[id] = fileFolderOf[id]; }
+        else if (ids.has(previous[id])) folderOf[id] = previous[id]; // agence que le fichier ne connaît pas : là où elle était
+      }
+    } else {
+      matchFolders();
+      for (const id of arrived) { const target = folderMap.get(fileFolderOf[id]); if (target) folderOf[id] = target; }
+    }
+
+    if (want.has("settings")) {
+      out[OPTIONS_KEY] = obj(F[OPTIONS_KEY]);
+      out[LANG_KEY] = F[LANG_KEY];
+      if (F[TAB_GROUPS_KEY]) out[TAB_GROUPS_KEY] = F[TAB_GROUPS_KEY]; // fichier plus ancien : option gardée
+    }
+    for (const id of Object.keys(folderOf)) if (!after.has(id)) delete folderOf[id];
+  }
+
+  Object.assign(out, {
+    [CUSTOM_KEY]: custom, [OVERRIDES_KEY]: overrides, [REMOVED_KEY]: removed, [STORAGE_KEYS.seen]: seen,
+    [STORAGE_KEYS.order]: order, [STORAGE_KEYS.checked]: [...new Set(checked)], [HIDDEN_KEY]: [...new Set(hidden)],
+    [FOLDERS_KEY]: folders, [FOLDER_OF_KEY]: folderOf
+  });
+  return { storage: out, hosts: [...new Set(hosts)], report };
 }
 
 // Autorisations de sites facultatives actuellement accordées (hors sites

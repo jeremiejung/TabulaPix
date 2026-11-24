@@ -1160,12 +1160,72 @@ importFile.addEventListener("change", async () => {
    bien visible, avec le détail de ce qui sera importé, dossiers compris. */
 const importConfirm = $id("importConfirm");
 let pendingImport = null; // résultat de l'analyse du fichier, en attente de confirmation
+let importChoice = null;  // { mode, parts } choisis dans la boîte (gardés si on change de langue)
+const importMode = () => importConfirm.querySelector('input[name="importMode"]:checked').value;
+function importPartRows(s, add) {
+  // Ajouter ne reprend que les agences ajoutées (les agences fournies ne changent pas).
+  const agencies = add ? t("backup.part.agencies.add", s)
+    : [t("backup.part.agencies.detail", s), s.modified ? t("backup.part.modified", s) : "", s.removed ? t("backup.part.removed", s) : ""].filter(Boolean).join(" · ");
+  return [
+    { id: "agencies", label: t("backup.part.agencies"), detail: agencies },
+    { id: "selection", label: t("backup.part.selection"), detail: t("backup.part.selection.detail", s) },
+    { id: "folders", label: t("backup.part.folders"), detail: t("backup.part.folders.detail", s) },
+    { id: "settings", label: t("backup.part.settings"), detail: t("backup.part.settings.detail") }
+  ];
+}
+// Titre, texte, bouton et cases selon le mode et les parties cochées.
+function renderImportChoice() {
+  const mode = importMode();
+  const add = mode === "add";
+  importConfirm.classList.toggle("adding", add);
+  importConfirm.setAttribute("role", add ? "dialog" : "alertdialog");
+  $id("importTitleText").textContent = t(add ? "backup.add.title" : "backup.replace.title");
+  const parts = [];
+  const details = Object.fromEntries(importPartRows(pendingImport.summary, add).map((r) => [r.id, r.detail]));
+  for (const box of importConfirm.querySelectorAll(".import-part input")) {
+    const usable = !add || IMPORT_ADD_PARTS.includes(box.value);
+    // Partie sans objet en mode Ajouter : décochée à l'écran, son choix est retrouvé en revenant à Remplacer.
+    if (!usable && !box.disabled) { box.dataset.wanted = String(box.checked); box.checked = false; }
+    if (usable && box.disabled) box.checked = box.dataset.wanted !== "false";
+    box.disabled = !usable;
+    box.closest(".import-part").classList.toggle("is-off", !usable);
+    box.closest(".import-part").querySelector(".detail").textContent = details[box.value];
+    if (usable && box.checked) parts.push(box.value);
+  }
+  importChoice = { mode, parts };
+  $id("importConfirmText").textContent = !parts.length ? t("backup.nothing") : t(add ? "backup.add.text" : "backup.replace.text");
+  const ok = $id("importOk");
+  ok.textContent = t(add ? "backup.add.ok" : "backup.replace.ok");
+  ok.className = add ? "primary" : "danger";
+  ok.disabled = !parts.length;
+}
 function showImportConfirm(result, { focus = true } = {}) {
   pendingImport = result;
   const s = result.summary;
-  const items = [t("backup.sum.agencies", s), t("backup.sum.folders", s), t("backup.sum.checked", s),
-    s.modified ? t("backup.sum.modified", s) : "", s.removed ? t("backup.sum.removed", s) : ""].filter(Boolean);
-  $id("importSummary").replaceChildren(...items.map((text) => { const li = document.createElement("li"); li.textContent = text; return li; }));
+  const previous = importChoice || { mode: "replace", parts: IMPORT_PARTS };
+  for (const r of importConfirm.querySelectorAll('input[name="importMode"]')) r.checked = r.value === previous.mode;
+  $id("importParts").replaceChildren(...importPartRows(s).map((row) => {
+    const label = document.createElement("label");
+    label.className = "import-part";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.value = row.id;
+    box.checked = previous.parts.includes(row.id) || (previous.mode === "add" && !IMPORT_ADD_PARTS.includes(row.id));
+    box.dataset.wanted = String(box.checked);
+    box.addEventListener("change", renderImportChoice);
+    const text = document.createElement("span");
+    const name = document.createElement("strong");
+    name.textContent = row.label;
+    const detail = document.createElement("span");
+    detail.className = "help detail";
+    const off = document.createElement("span");
+    off.className = "help only-replace";
+    off.textContent = t("backup.part.replaceOnly");
+    text.append(name, " ", detail, off);
+    label.append(box, text);
+    return label;
+  }));
+  renderImportChoice();
   const notes = [s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
   $id("importNotes").textContent = notes;
   $id("importNotes").hidden = !notes;
@@ -1174,8 +1234,10 @@ function showImportConfirm(result, { focus = true } = {}) {
   importConfirm.scrollIntoView({ block: "nearest" });
   $id("importCancel").focus(); // le choix sans risque d'abord
 }
+for (const r of importConfirm.querySelectorAll('input[name="importMode"]')) r.addEventListener("change", renderImportChoice);
 function hideImportConfirm() {
   pendingImport = null;
+  importChoice = null;
   importConfirm.hidden = true;
   importFile.value = ""; // le même fichier pourra être choisi à nouveau
 }
@@ -1187,20 +1249,19 @@ importConfirm.addEventListener("keydown", (e) => { // Échap : annule l'import (
   $id("importBtn").focus();
 });
 $id("importOk").addEventListener("click", async () => {
-  if (!pendingImport) return;
-  const result = pendingImport;
+  if (!pendingImport || !importChoice || !importChoice.parts.length) return;
+  const result = pendingImport, choice = importChoice;
   hideImportConfirm();
-  // Sites nécessaires demandés tout de suite : le clic sur « Remplacer » le
-  // permet. Sinon, la liste et les options proposent « Autoriser ».
-  const asked = result.hosts.length
-    ? chrome.permissions.request({ origins: result.hosts.map(originPattern) }).catch(() => false)
-    : Promise.resolve(true);
+  const current = await chrome.storage.local.get(null);
+  const merged = mergeConfigImport(current, result, choice);
+  // Autorisations demandées tout de suite, le clic le permet : sites des
+  // agences importées qui remplissent un champ, et groupes d'onglets si le
+  // fichier les active. Sinon, la liste et les options proposent « Autoriser ».
+  const wantGroups = Boolean(merged.storage[TAB_GROUPS_KEY] && merged.storage[TAB_GROUPS_KEY].enabled);
+  const request = { ...(merged.hosts.length ? { origins: merged.hosts.map(originPattern) } : {}), ...(wantGroups ? { permissions: ["tabGroups"] } : {}) };
+  const asked = Object.keys(request).length ? chrome.permissions.request(request).catch(() => false) : Promise.resolve(true);
 
-  // Remplace la configuration (la dernière recherche est gardée).
-  const { [QUERY_KEY]: lastQuery } = await chrome.storage.local.get(QUERY_KEY);
-  await chrome.storage.local.clear();
-  // [FOLDERS_DONE_KEY] : pas de rangement proposé, le fichier est respecté tel quel.
-  await chrome.storage.local.set({ ...result.storage, [FOLDERS_DONE_KEY]: true, ...(lastQuery ? { [QUERY_KEY]: lastQuery } : {}) });
+  await chrome.storage.local.set(merged.storage); // la dernière recherche et le reste sont gardés
   await chrome.storage.session.remove([AGENCY_DRAFT_KEY, PICK_RESULT_KEY, "fillDraft", "pickSession"]);
   await applyNewAgencyDefaults();
 
@@ -1211,10 +1272,12 @@ $id("importOk").addEventListener("click", async () => {
     const toAllow = await renderAttention(); // agences cochées dont le site reste à autoriser
     backupMsg.className = "status ok";
     // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
-    const s = result.summary;
-    const summary = [t("backup.summary", s), s.skipped ? t("backup.skipped", { n: s.skipped }) : "",
-      s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : ""].filter(Boolean).join(" ");
-    backupMsg.textContent = t("backup.imported") + " " + summary + (toAllow ? "\n" + t("backup.needPerm") : "");
+    const r = merged.report, s = result.summary;
+    const lines = r.mode === "add"
+      ? [t("backup.added", r), r.dupes ? t("backup.added.dupes", { n: r.dupes }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""]
+      : [t("backup.replaced", { parts: r.parts.map((p) => t("backup.part." + p).toLowerCase()).join(", ") })];
+    lines.push(s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : "");
+    backupMsg.textContent = t("backup.imported") + " " + lines.filter(Boolean).join(" ") + (toAllow ? "\n" + t("backup.needPerm") : "");
   };
   await report();
   asked.then(report); // une fois la demande de Chrome acceptée ou refusée

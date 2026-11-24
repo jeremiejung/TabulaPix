@@ -182,13 +182,21 @@
       <button type="button" id="importBtn" data-i18n="backup.import">Importer…</button>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" hidden>
-    <div id="importConfirm" class="replace-box" role="alertdialog" aria-labelledby="importConfirmTitle" aria-describedby="importConfirmText importSummary" hidden>
-      <p id="importConfirmTitle" class="replace-title"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.5l6 11H2z"/><path d="M8 6.5v3.2M8 11.6v.1"/></svg><span data-i18n="backup.replace.title">Remplacer votre configuration ?</span></p>
-      <p id="importConfirmText" data-i18n="backup.replace.text">Votre configuration actuelle sera entièrement remplacée par celle du fichier : agences, dossiers, cases cochées et options.</p>
-      <ul id="importSummary" class="replace-sum"></ul>
+    <div id="importConfirm" class="replace-box" role="alertdialog" aria-labelledby="importConfirmTitle" aria-describedby="importConfirmText" hidden>
+      <p id="importConfirmTitle" class="replace-title"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.5l6 11H2z"/><path d="M8 6.5v3.2M8 11.6v.1"/></svg><span id="importTitleText"></span></p>
+      <fieldset class="import-mode">
+        <legend class="sr-only" data-i18n="backup.mode">Comment importer</legend>
+        <label><input type="radio" name="importMode" value="add"> <span><strong data-i18n="backup.mode.add">Ajouter</strong> <span class="help" data-i18n="backup.mode.add.help">ce qui vous manque, sans rien retirer ni modifier</span></span></label>
+        <label><input type="radio" name="importMode" value="replace" checked> <span><strong data-i18n="backup.mode.replace">Remplacer</strong> <span class="help" data-i18n="backup.mode.replace.help">ce que vous cochez ci-dessous ; le reste ne change pas</span></span></label>
+      </fieldset>
+      <fieldset class="import-parts">
+        <legend data-i18n="backup.parts">À importer :</legend>
+        <div id="importParts"></div>
+      </fieldset>
+      <p id="importConfirmText"></p>
       <p id="importNotes" class="help"></p>
       <div class="replace-actions">
-        <button type="button" id="importOk" class="danger" data-i18n="backup.replace.ok">Remplacer ma configuration</button>
+        <button type="button" id="importOk" class="danger">Remplacer</button>
         <button type="button" id="importCancel" class="secondary" data-i18n="backup.replace.cancel">Annuler</button>
       </div>
     </div>
