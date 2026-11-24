@@ -703,7 +703,8 @@ function importEffects(current, parsed, { mode, settings = IMPORT_SETTINGS }) {
         leave: [...before].filter((id) => !after.has(id)).map((id) => nameOf(base, id)),
         edited: [...after].filter((id) => before.has(id) && (AGENCIES.some((a) => a.id === id)
           ? !same(ov0[id], ov1[id])
-          : !same((base[CUSTOM_KEY] || []).find((a) => a.id === id), (st[CUSTOM_KEY] || []).find((a) => a.id === id)))).length
+          : !same((base[CUSTOM_KEY] || []).find((a) => a.id === id), (st[CUSTOM_KEY] || []).find((a) => a.id === id))))
+          .map((id) => nameOf(base, id)) // nom actuel : c'est la version de l'utilisateur qui est remplacée
       };
     } else if (part === "selection") {
       const on = (st, key, id) => (st[key] || []).includes(id);
