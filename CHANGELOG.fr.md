@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.12 — 24 novembre 2026 (Chrome Web Store)
+
 - Aperçu de l’import : réimporter son propre export n’annonce plus « réglages remplacés par ceux du fichier » pour les agences fournies que vous aviez modifiées (ex. page de connexion ajoutée à Pixpalace) : les réglages étaient identiques, seulement enregistrés dans un autre ordre. L’import lui-même ne changeait rien.
 
 ## 3.6.11 — 24 novembre 2026 (Chrome Web Store)
