@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.6.10 — 24 November 2026 (Chrome Web Store)
+
 - **Choose what to import, and how.** Importing a configuration file no longer always replaces everything:
   - **what**: Agencies, Ticked boxes and hidden agencies, Folders (with their colours), Settings — each shown with what the file contains;
   - **how**: **Replace** (what you tick replaces yours, the rest doesn't change; all ticked = as before) or **Add** (only what you are missing: the file's added agencies you don't have yet, its folders, and a folder for your agencies outside any folder — nothing of yours is removed or changed).

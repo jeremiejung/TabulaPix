@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.10 — 24 novembre 2026 (Chrome Web Store)
+
 - **Choisir quoi importer, et comment.** Importer un fichier de configuration ne remplace plus forcément tout :
   - **quoi** : Agences, Cases cochées et agences masquées, Dossiers (avec leurs couleurs), Réglages — chacun avec ce que contient le fichier ;
   - **comment** : **Remplacer** (ce que vous cochez remplace le vôtre, le reste ne change pas ; tout coché = comme avant) ou **Ajouter** (seulement ce qui vous manque : les agences ajoutées du fichier que vous n’avez pas encore, ses dossiers, et un dossier pour vos agences qui n’en ont pas — rien de chez vous n’est retiré ni modifié).
