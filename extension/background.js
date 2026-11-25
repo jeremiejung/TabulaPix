@@ -247,11 +247,15 @@ async function groupTabs(byFolder) {
       }
       try {
         const isNew = groupId === null;
+        // Groupe déjà ouvert que l'utilisateur a replié : il le reste (relu avant
+        // d'y ajouter les onglets, au cas où Chrome le déplierait à ce moment-là).
+        let wasCollapsed = false;
+        if (!isNew) { try { wasCollapsed = (await chrome.tabGroups.get(groupId)).collapsed === true; } catch (_) { /* rien */ } }
         groupId = await chrome.tabs.group(isNew ? { tabIds, createProperties: { windowId } } : { tabIds, groupId });
         // Jamais replié s'il contient l'onglet affiché : Chrome le masquerait
         // et sauterait vers un autre onglet sous les yeux de l'utilisateur.
         const [active] = await chrome.tabs.query({ active: true, windowId });
-        const collapsed = Boolean(pref.collapsed) && !(active && active.groupId === groupId);
+        const collapsed = (Boolean(pref.collapsed) || wasCollapsed) && !(active && active.groupId === groupId);
         // Nom et couleur seulement à la création : un groupe renommé dans Chrome le reste.
         await chrome.tabGroups.update(groupId, isNew
           ? { title: folder.name, color: GROUP_COLORS[folder.color] || "grey", collapsed }

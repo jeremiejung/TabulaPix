@@ -6,6 +6,10 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.6.13 — 25 novembre 2026 (Chrome Web Store)
+
+- Groupes d’onglets : un groupe que vous avez replié dans Chrome reste replié aux recherches suivantes (ses onglets se chargent quand même). Avant, chaque recherche le redépliait. TabulaPix ne déplie plus jamais un groupe de lui-même ; « Replier les groupes après la recherche » les referme toujours tous.
+
 ## 3.6.12 — 24 novembre 2026 (Chrome Web Store)
 
 - Aperçu de l’import : réimporter son propre export n’annonce plus « réglages remplacés par ceux du fichier » pour les agences fournies que vous aviez modifiées (ex. page de connexion ajoutée à Pixpalace) : les réglages étaient identiques, seulement enregistrés dans un autre ordre. L’import lui-même ne changeait rien.
