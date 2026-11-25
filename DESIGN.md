@@ -102,7 +102,7 @@ components:
 
 ## Overview
 
-The page shows the extension itself. Its first viewport is the product's own interface: a TabulaPix popup (keywords, red "Lancer la recherche · 7 onglets" button, coloured folder rows) and, under it, a browser tab bar where one tab per agency opens after "Votre page". The visual language is the extension's and its Chrome Web Store images: light neutral ground, sentence-case headings, a short red rule under the main title, white cards with soft shadows, red reserved for the action. No décor that does not belong to the tool (no clock, references, places or wire codes). Light by default with a dark theme; no request beyond the page's own files.
+The page shows the extension itself. Its first viewport is the product's own interface: a TabulaPix popup (keywords, red "Lancer la recherche · 7 onglets" button, coloured folder rows) and, under it, a browser tab bar where one tab per agency opens after "Page en cours". The visual language is the extension's and its Chrome Web Store images: light neutral ground, sentence-case headings, a short red rule under the main title, white cards with soft shadows, red reserved for the action. No décor that does not belong to the tool (no clock, references, places or wire codes). Light by default with a dark theme; no request beyond the page's own files.
 
 ## Colors
 
@@ -148,7 +148,7 @@ Soft elevation only, never combined with a hairline border: `0 1px 2px` + `0 18p
 - **Header**: icon + "TabulaPix" (as in the popup), language link on the right.
 - **Install button**: red, 52px, download glyph (authored SVG), "Ajouter à Chrome" + "gratuit".
 - **Demo popup**: icon + name, keywords input, red search button with tab count, six tinted folder rows with the real counts and the extension's partly-ticked box (Archives unticked), all matching the screenshot; under it a caption saying it is the extension's window, to try. The demo button never disables: a new search restarts the opening and keeps focus (`aria-busy` while tabs open); an empty field puts the example back in the field.
-- **Browser strip**: "Votre page" tab (current, white) then one tab per agency: folder dot + the keywords as the title (the folder name is screen-reader text); one row on phones, the last tabs fading out of the frame; a line under it with the count and "Démonstration : rien n'est envoyé".
+- **Browser strip**: "Page en cours" / "Current page" tab (current, white) then one tab per agency: folder dot + the keywords as the title (the folder name is screen-reader text); one row on phones, the last tabs fading out of the frame; a line under it with the count and "Démonstration : rien n'est envoyé".
 - **Checks list**, **example share code** (dashed card), **closing call to action**, **footer** with version, links and signature.
 
 ## Do's and Don'ts

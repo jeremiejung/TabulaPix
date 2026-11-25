@@ -165,7 +165,7 @@ p strong { color: var(--ink); font-weight: 650; }
 }
 .tabbar .tab .dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--fc, var(--line-strong)); }
 .tabbar .tab .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.tabbar .tab.current { flex: 0 1 116px; background: var(--card); color: var(--ink); font-weight: 600; }
+.tabbar .tab.current { flex: 0 0 128px; background: var(--card); color: var(--ink); font-weight: 600; }
 .tabbar .tab.current img { width: 14px; height: 14px; flex: none; }
 .browser .page {
   display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px;
@@ -230,7 +230,7 @@ footer .sig { margin-left: auto; }
   /* Barre d'onglets : une seule rangée, comme dans le navigateur ; les derniers onglets sortent du cadre */
   .tabbar { -webkit-mask-image: linear-gradient(to right, #000 82%, transparent); mask-image: linear-gradient(to right, #000 82%, transparent); }
   .tabbar .tab { flex: 0 0 auto; width: 118px; padding: 0 10px; }
-  .tabbar .tab.current { flex: 0 0 auto; width: 122px; }
+  .tabbar .tab.current { flex: 0 0 auto; width: 130px; }
   /* Liens du pied de page : cibles de 44 px au doigt */
   footer nav { gap: 0 20px; }
   footer nav a { display: inline-block; padding: 11px 0; }
