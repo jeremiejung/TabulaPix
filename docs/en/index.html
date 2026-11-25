@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TabulaPix — One search, all your picture agencies</title>
+<meta name="description" content="Chrome extension for photo desks, picture researchers and photo editors: type your keywords once, TabulaPix opens each agency in its own tab, with your own accounts. Free, open source, no data collected.">
+<link rel="canonical" href="https://tabulapix.com/en/">
+<link rel="alternate" hreflang="fr" href="https://tabulapix.com/">
+<link rel="alternate" hreflang="en" href="https://tabulapix.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://tabulapix.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TabulaPix — One search, all your picture agencies">
+<meta property="og:description" content="Type your keywords once: TabulaPix opens each agency in its own tab, with your own accounts.">
+<meta property="og:url" content="https://tabulapix.com/en/">
+<meta property="og:image" content="https://tabulapix.com/assets/og-en.png">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f4f4f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121315" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="../assets/tabulapix.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/icon-128.png">
+<link rel="preload" href="../assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<!--
+THESIS: La page montre l'extension elle-même : sa popup, ses dossiers de couleur, et la barre d'onglets où une recherche ouvre un onglet par agence. Elle refuse le décor (horloge, références, lieux) qui ne dit rien de l'outil.
+OWN-WORLD: Le langage de la popup TabulaPix et des images du Store : fond clair neutre, titres en phrase (Archivo), trait rouge court, rouge réservé au bouton d'action ; dossiers teintés (bleu, vert, ambre, rose, violet) ; cartes blanches à ombre douce, sans filet.
+STORY: Le visiteur voit en quelques secondes qu'une recherche tapée une fois ouvre toutes ses agences, dans ses onglets, avec ses comptes ; il croit que rien ne quitte son ordinateur ; il clique « Ajouter à Chrome ».
+FIRST VIEWPORT: Nom et icône en haut à gauche, langue à droite ; titre en phrase sur trois lignes, trait rouge, chapeau, bouton rouge ; à droite la popup de démonstration ; dessous, la barre d'onglets qui se remplit.
+FORM: Page produit dans la langue de l'extension, demandée par l'utilisateur après la version « fil d'agence » ; tirage d'origine 26a21e47.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->
+<a class="skip" href="#contenu">Skip to content</a>
+
+<header class="wrap top">
+  <a class="brand" href="./"><img src="../assets/tabulapix.svg" alt="" width="28" height="28">TabulaPix</a>
+  <a class="lang" href="../" hreflang="fr" lang="fr">Français</a>
+</header>
+
+<main id="contenu">
+  <div class="wrap">
+    <section class="hero" aria-labelledby="titre">
+      <div>
+        <h1 id="titre">One search, all your picture agencies</h1>
+        <span class="rule" aria-hidden="true"></span>
+        <p class="lede">Type your keywords once: TabulaPix opens each agency in its own tab, results ready, with your own accounts.</p>
+        <p>For photo desks, picture researchers and photo editors who search the same words on ten sites all day long.</p>
+        <div class="actions">
+          <a class="install" href="https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp?hl=en">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9.5M6.2 8.8 10 12.5l3.8-3.7M4 14.5V17h12v-2.5"/></svg>
+            Add to Chrome <small>free</small>
+          </a>
+          <a class="secondary" href="https://github.com/jeremiejung/TabulaPix">See the source code</a>
+        </div>
+        <p class="fineprint">For Chrome on a computer. Open source, no data collected; a subscription to each agency is still required. On install, Chrome asks to “read your browsing history”: this is to reuse an agency tab that is already open.</p>
+      </div>
+
+      <figure class="demo">
+        <div class="popup" role="group" aria-label="Demonstration of the TabulaPix window">
+          <div class="head"><img src="../assets/tabulapix.svg" alt="" width="20" height="20">TabulaPix</div>
+          <form id="demo">
+            <label for="demo-q">Keywords</label>
+            <input id="demo-q" name="q" value="estonia border" autocomplete="off" spellcheck="false" maxlength="80">
+            <button type="submit">Search <span>· 7 tabs</span></button>
+          </form>
+          <ul class="folders" aria-label="Folders">
+            <li style="--fc: var(--c-blue)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>News<span class="count">3/7</span></li>
+            <li style="--fc: var(--c-green)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Documentary<span class="count">1/7</span></li>
+            <li style="--fc: var(--c-amber)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Aggregators<span class="count">1/2</span></li>
+            <li style="--fc: var(--c-pink)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Celebrity<span class="count">1/4</span></li>
+            <li style="--fc: var(--c-violet)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Stock<span class="count">1/5</span></li>
+            <li class="off" style="--fc: var(--c-gray)"><span class="box"></span>Archives<span class="count">0/2</span></li>
+          </ul>
+        </div>
+        <figcaption>The extension's window, to try: change the keywords, then search.</figcaption>
+      </figure>
+    </section>
+
+    <div class="browser" aria-label="What you get: one tab per agency">
+      <div class="tabbar" id="tabbar">
+        <span class="tab current"><img src="../assets/tabulapix.svg" alt="" width="14" height="14"><span class="t">Current page</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">News: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">News: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">News: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-green)"><span class="dot"></span><span class="sr">Documentary: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-amber)"><span class="dot"></span><span class="sr">Aggregators: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-pink)"><span class="dot"></span><span class="sr">Celebrity: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-violet)"><span class="dot"></span><span class="sr">Stock: </span><span class="t">estonia border</span></span>
+      </div>
+      <div class="page" aria-live="polite">
+        <span><b id="opened">7 tabs opened in the background</b>, one per agency, results ready. You stay on the page you were on.</span>
+        <span class="note">Demonstration: nothing is sent.</span>
+      </div>
+    </div>
+
+    <section class="block" aria-labelledby="comment">
+      <h2 id="comment">How it works</h2>
+      <ol class="steps">
+        <li><b>Tick your agencies</b><span>Nearly thirty agencies and picture libraries come ready, sorted into coloured folders: news, documentary, aggregators, celebrity, stock, archives. Keep the ones you subscribe to.</span></li>
+        <li><b>Type your keywords, once</b><span>In the extension's window: click its icon, or press <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd>. To chain searches, keep it open as a column on the right of the page.</span></li>
+        <li><b>Press Enter</b><span>One tab per agency opens in the background. An agency tab already open is reused instead of opening one more.</span></li>
+      </ol>
+    </section>
+
+    <section class="block split" aria-labelledby="rangees">
+      <div class="shot"><img src="../assets/popup-en.png" width="284" height="605" alt="The TabulaPix window: the keywords field, the “Search · 7 tabs” button, then the News folder open with its agencies, three ticked, and the Documentary, Aggregators, Celebrity, Stock and Archives folders collapsed." loading="lazy"></div>
+      <div>
+        <h2 id="rangees">Your agencies, sorted your way</h2>
+        <p>Rename, recolour and reorder your folders; hide the agencies you don't use.</p>
+        <p>Yours is missing? Paste the address of a results page: TabulaPix finds where the keywords go. If the site doesn't put them in the address, it locates its search field and fills it in for you.</p>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="partage">
+      <h2 id="partage">Share with a colleague</h2>
+      <p>Share an agency or a whole folder with a short code, to paste into Slack, Teams or an e-mail. Your colleague pastes it into TabulaPix: what they are missing is added, nothing of theirs is removed or changed.</p>
+      <p>The configuration also exports to a file; on import, TabulaPix shows what will change before applying it.</p>
+      <p class="code"><code>TabulaPix:1:H4sIAAAAAAAAA3WOwQrCMBBEf2Xp…</code><span>example share code</span></p>
+    </section>
+
+    <section class="block" aria-labelledby="confidentialite">
+      <h2 id="confidentialite">Nothing leaves your computer</h2>
+      <ul class="checks">
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>No server, no account.</b> TabulaPix runs entirely in your Chrome.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Nothing is sent elsewhere.</b> The extension only opens tabs, as if you typed the address yourself; its security settings forbid any other connection.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>No data collected.</b> Your settings stay in Chrome, on your computer. Only the last search is kept.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>A single permission announced on installation</b>: “Read your browsing history”, to reuse an agency's tab that is already open. The others are only requested if you tick an agency that needs one, and for that site only.</span></li>
+      </ul>
+      <p class="more"><a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Read the privacy policy</a></p>
+    </section>
+
+    <section class="close" aria-labelledby="fin">
+      <h2 id="fin">Try it on your next search</h2>
+      <div class="actions">
+        <a class="install" href="https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp?hl=en">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9.5M6.2 8.8 10 12.5l3.8-3.7M4 14.5V17h12v-2.5"/></svg>
+          Add to Chrome <small>free</small>
+        </a>
+        <a class="secondary" href="https://github.com/jeremiejung/TabulaPix/blob/main/CHANGELOG.md">What's new</a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>TabulaPix · version 3.7.0</span>
+    <nav aria-label="Links">
+      <a href="https://github.com/jeremiejung/TabulaPix">Source code</a>
+      <a href="https://github.com/jeremiejung/TabulaPix/blob/main/CHANGELOG.md">What's new</a>
+      <a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Privacy</a>
+      <a href="https://github.com/jeremiejung/TabulaPix/blob/main/LICENSE">MIT licence</a>
+      <a href="../" hreflang="fr" lang="fr">Français</a>
+    </nav>
+    <span class="sig">Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/">Jérémie</a>.</span>
+  </div>
+</footer>
+<script src="../assets/demo.js" defer></script>
+</body>
+</html>

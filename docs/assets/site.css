@@ -1,0 +1,242 @@
+/* tabulapix.com — la page parle comme l'extension : sa popup, ses dossiers
+   de couleur, son rouge. Police libre (SIL OFL) servie avec la page. */
+@font-face {
+  font-family: "Archivo";
+  src: url("fonts/archivo.woff2") format("woff2");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+
+:root {
+  --ground: #f4f4f2;
+  --card: #ffffff;
+  --ink: #141517;
+  --ink-2: #44474d;
+  --muted: #62666d;          /* 5.2:1 sur le fond */
+  --line: #dcdcd8;
+  --line-strong: #b9bab5;
+  --red: #d7141a;            /* rouge de l'icône et du bouton Rechercher */
+  --red-ink: #b80f15;
+  --red-hover: #b51016;
+  --on-red: #ffffff;
+  --tabbar: #e3e4e1;         /* barre d'onglets du navigateur */
+  --tab: #eeefec;
+  /* Couleurs des dossiers de l'extension */
+  --c-blue: #2f6fd0; --c-green: #2f8a4c; --c-amber: #b98900; --c-pink: #c43f86; --c-violet: #7b52c7; --c-gray: #7b8089;
+  --shadow-card: 0 1px 2px rgba(20, 21, 23, 0.06), 0 18px 40px -22px rgba(20, 21, 23, 0.35);
+  --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --gutter: clamp(16px, 4vw, 48px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #121315;
+    --card: #1c1d20;
+    --ink: #eeeff1;
+    --ink-2: #c5c8cd;
+    --muted: #9da1a8;
+    --line: #2e3034;
+    --line-strong: #484b51;
+    --red-ink: #ff5a5f;
+    --tabbar: #0b0c0d;
+    --tab: #232428;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 40px -22px rgba(0, 0, 0, 0.8);
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 1.0625rem/1.6 var(--sans);
+  caret-color: var(--red);
+  scrollbar-color: var(--line-strong) var(--ground);
+}
+::selection { background: var(--red); color: #fff; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
+a:hover { color: var(--red-ink); }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; border-radius: 3px; }
+img { max-width: 100%; height: auto; display: block; }
+.skip { position: absolute; left: -9999px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip:focus { left: var(--gutter); top: 8px; z-index: 10; background: var(--card); padding: 6px 10px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--gutter); }
+
+/* ---------- En-tête : comme celui de la popup ---------- */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 22px; padding-bottom: 22px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 750; font-size: 1.15rem; letter-spacing: -0.01em; text-decoration: none; color: var(--ink); }
+.brand img { width: 28px; height: 28px; }
+.lang { font-size: 0.92rem; font-weight: 600; color: var(--ink-2); text-decoration: none; padding: 6px 10px; border-radius: 8px; }
+.lang:hover { background: var(--card); color: var(--ink); }
+
+/* ---------- Titres ---------- */
+h1, h2 { font-family: var(--sans); font-weight: 720; letter-spacing: -0.022em; color: var(--ink); text-wrap: balance; }
+h1 { margin: 0; font-size: clamp(2.5rem, 5.4vw, 4.4rem); line-height: 1.03; }
+h2 { margin: 0 0 0.5em; font-size: clamp(1.75rem, 3.2vw, 2.6rem); line-height: 1.1; }
+/* Le trait rouge des images du Store */
+.rule { display: block; width: 56px; height: 5px; margin: 26px 0 24px; border-radius: 3px; background: var(--red); }
+p { max-width: 62ch; margin: 0 0 1em; color: var(--ink-2); }
+p strong { color: var(--ink); font-weight: 650; }
+.lede { font-size: clamp(1.15rem, 1.7vw, 1.32rem); line-height: 1.5; color: var(--ink-2); }
+
+/* ---------- Bouton d'installation ---------- */
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin: 30px 0 14px; }
+.install {
+  display: inline-flex; align-items: center; gap: 11px;
+  min-height: 52px; padding: 0 24px 0 20px;
+  font: 700 1.05rem/1 var(--sans);
+  color: var(--on-red); background: var(--red); text-decoration: none;
+  border-radius: 9px;
+  box-shadow: 0 1px 2px rgba(20, 21, 23, 0.2), 0 8px 18px -10px rgba(20, 21, 23, 0.45);
+  transition: background-color 0.18s ease, transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.install:hover { color: var(--on-red); background: var(--red-hover); transform: translateY(-1px); }
+.install:active { transform: translateY(0); }
+.install svg { width: 20px; height: 20px; flex: none; }
+.install small { font-weight: 500; font-size: 0.82rem; opacity: 0.9; }
+.secondary { font-weight: 600; color: var(--ink); }
+.fineprint { font-size: 0.86rem; color: var(--muted); max-width: 60ch; }
+
+/* ---------- Héros ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); gap: clamp(32px, 5vw, 72px); align-items: center; padding-top: clamp(8px, 2.5vw, 32px); }
+
+/* La popup de démonstration, dessinée comme celle de l'extension */
+.demo { margin: 0; width: 100%; max-width: 340px; justify-self: center; }
+.demo figcaption { margin-top: 10px; font-size: 0.86rem; line-height: 1.45; color: var(--muted); text-align: center; text-wrap: balance; }
+.popup {
+  width: 100%;
+  padding: 16px;
+  background: var(--card); border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  font-size: 0.86rem; line-height: 1.35;
+}
+.popup .head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 750; font-size: 1.02rem; }
+.popup .head img { width: 20px; height: 20px; }
+.popup form { display: grid; gap: 8px; }
+.popup label { position: absolute; left: -9999px; }
+.popup input {
+  width: 100%; height: 40px; padding: 0 11px;
+  font: 500 1rem/1 var(--sans); color: var(--ink);
+  background: var(--card); border: 1px solid var(--line-strong); border-radius: 8px;
+}
+.popup input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(215, 20, 26, 0.18); }
+.popup button {
+  height: 40px; padding: 0 12px;
+  font: 700 0.95rem/1 var(--sans); color: var(--on-red);
+  background: var(--red); border: 0; border-radius: 8px; cursor: pointer;
+}
+.popup button:hover { background: var(--red-hover); }
+.popup button span { font-weight: 500; }
+.folders { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 5px; }
+.folders li {
+  display: flex; align-items: center; gap: 9px;
+  min-height: 30px; padding: 0 10px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--fc) 18%, var(--card));
+  color: color-mix(in srgb, var(--fc) 55%, var(--ink));
+  font-size: 0.74rem; font-weight: 750; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.folders .box { width: 15px; height: 15px; flex: none; border-radius: 4px; background: var(--fc); display: grid; place-items: center; }
+.folders .box svg { width: 11px; height: 11px; color: #fff; } /* case « en partie cochée », comme dans la popup */
+.folders .off { background: color-mix(in srgb, var(--fc) 10%, var(--card)); }
+.folders .off .box { background: var(--card); border: 1.5px solid color-mix(in srgb, var(--fc) 70%, var(--card)); }
+.folders .count { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: var(--card); color: color-mix(in srgb, var(--fc) 60%, var(--ink)); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+
+/* La barre d'onglets : une recherche, un onglet par agence */
+.browser { margin-top: clamp(24px, 2.5vw, 34px); }
+.tabbar {
+  display: flex; align-items: flex-end; gap: 2px;
+  padding: 8px 10px 0; min-height: 50px;
+  background: var(--tabbar); border-radius: 12px 12px 0 0;
+  overflow: hidden;
+}
+.tabbar .tab {
+  position: relative; /* garde le texte pour lecteurs d'écran dans le cadre */
+  display: flex; align-items: center; gap: 8px;
+  flex: 1 1 0; min-width: 0; max-width: 200px; height: 38px; padding: 0 10px;
+  background: var(--tab); border-radius: 9px 9px 0 0;
+  font-size: 0.8rem; color: var(--ink-2);
+  white-space: nowrap;
+}
+.tabbar .tab .dot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--fc, var(--line-strong)); }
+.tabbar .tab .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.tabbar .tab.current { flex: 0 0 128px; background: var(--card); color: var(--ink); font-weight: 600; }
+.tabbar .tab.current img { width: 14px; height: 14px; flex: none; }
+.browser .page {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px;
+  padding: 16px 18px; background: var(--card); border-radius: 0 0 12px 12px;
+  box-shadow: var(--shadow-card);
+  font-size: 0.92rem; color: var(--ink-2);
+}
+.browser .page b { color: var(--ink); font-weight: 650; }
+.browser .note { color: var(--muted); font-size: 0.82rem; }
+/* Ouverture des onglets : chacun se déplie depuis la gauche, à la suite */
+.tab.opening { animation: open 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes open { from { opacity: 0; transform: translateY(10px); clip-path: inset(0 100% 0 0 round 9px 9px 0 0); } to { opacity: 1; transform: none; clip-path: inset(0 0 0 0 round 9px 9px 0 0); } }
+
+/* ---------- Sections ---------- */
+section.block { padding: clamp(64px, 9vw, 112px) 0 0; }
+.steps { list-style: none; margin: 34px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(22px, 3.5vw, 48px); counter-reset: step; }
+.steps li { counter-increment: step; }
+.steps li::before { content: counter(step); display: block; margin-bottom: 10px; font-weight: 800; font-size: 2.6rem; line-height: 1; color: var(--red-ink); font-variant-numeric: tabular-nums; }
+.steps b { display: block; margin-bottom: 6px; font-weight: 700; font-size: 1.15rem; color: var(--ink); }
+.steps span { color: var(--ink-2); }
+kbd { font: 600 0.82em/1 var(--sans); padding: 2px 6px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--card); color: var(--ink); }
+
+.split { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+.split > div:last-child { padding-top: clamp(0px, 4vw, 48px); }
+.shot { border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-card); background: var(--card); }
+
+.code {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin: 1.4em 0 0; padding: 14px 16px; max-width: 62ch;
+  background: var(--card); border: 1px dashed var(--line-strong); border-radius: 12px;
+}
+.code code { font: 500 0.88rem/1.5 var(--mono); color: var(--ink); word-break: break-all; }
+.code span { font-size: 0.8rem; color: var(--muted); }
+
+.checks { list-style: none; margin: 1.4em 0 0; padding: 0; max-width: 64ch; }
+.checks li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+.checks li:last-child { border-bottom: 0; }
+.checks svg { width: 20px; height: 20px; margin-top: 3px; color: var(--red-ink); }
+.checks b { color: var(--ink); font-weight: 650; }
+.more { margin-top: 1.2em; }
+
+.close { padding: clamp(72px, 10vw, 128px) 0 clamp(48px, 7vw, 88px); }
+.close h2 { font-size: clamp(2rem, 4.4vw, 3.4rem); max-width: 18ch; }
+
+/* ---------- Pied de page ---------- */
+footer { border-top: 1px solid var(--line); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: baseline; padding-top: 22px; padding-bottom: 40px; font-size: 0.86rem; color: var(--muted); }
+footer nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+footer a { color: var(--ink-2); }
+footer .sig { margin-left: auto; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .demo { justify-self: start; }
+  .demo figcaption { text-align: left; }
+  .steps { grid-template-columns: minmax(0, 1fr); }
+  .split { grid-template-columns: minmax(0, 1fr); }
+  .shot { max-width: 300px; }
+}
+@media (max-width: 560px) {
+  /* Barre d'onglets : une seule rangée, comme dans le navigateur ; les derniers onglets sortent du cadre */
+  .tabbar { -webkit-mask-image: linear-gradient(to right, #000 82%, transparent); mask-image: linear-gradient(to right, #000 82%, transparent); }
+  .tabbar .tab { flex: 0 0 auto; width: 118px; padding: 0 10px; }
+  .tabbar .tab.current { flex: 0 0 auto; width: 130px; }
+  /* Liens du pied de page : cibles de 44 px au doigt */
+  footer nav { gap: 0 20px; }
+  footer nav a { display: inline-block; padding: 11px 0; }
+  footer .sig { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab.opening { animation: none; }
+  .install { transition: none; }
+}
