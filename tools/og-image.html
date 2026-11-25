@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Image de partage</title>
+<link rel="stylesheet" href="../docs/assets/site.css">
+<style>
+  /* Gabarit de l'image de partage (1200 × 630), rendu par capture d'écran.
+     ?lang=en pour l'anglais. Hors de docs/ : il n'est pas publié. Rendu : voir DEVELOPMENT.md. */
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--ground); color-scheme: light; }
+  .og { display: grid; grid-template-columns: 1fr 330px; gap: 64px; align-items: center; height: 630px; padding: 0 84px; box-sizing: border-box; }
+  .brand { font-size: 1.6rem; gap: 14px; }
+  .brand img { width: 40px; height: 40px; }
+  h1 { margin-top: 44px; font-size: 4.1rem; }
+  .rule { margin: 28px 0 26px; }
+  .lede { font-size: 1.55rem; max-width: 30ch; margin: 0; }
+  .shot { align-self: start; margin-top: 70px; border-radius: 16px; }
+</style>
+</head>
+<body>
+<div class="og">
+  <div>
+    <span class="brand"><img src="../docs/assets/tabulapix.svg" alt="">TabulaPix</span>
+    <h1 id="t">Une recherche, toutes vos agences photo</h1>
+    <span class="rule"></span>
+    <p class="lede" id="l">Extension Chrome : tapez vos mots‑clés une fois, chaque agence s'ouvre dans son onglet.</p>
+  </div>
+  <div class="shot"><img id="i" src="../docs/assets/popup-fr.png" alt="" width="330"></div>
+</div>
+<script>
+  if (new URLSearchParams(location.search).get("lang") === "en") {
+    document.documentElement.lang = "en";
+    document.getElementById("t").textContent = "One search, all your picture agencies";
+    document.getElementById("l").textContent = "Chrome extension: type your keywords once, each agency opens in its own tab.";
+    document.getElementById("i").src = "../docs/assets/popup-en.png";
+  }
+</script>
+</body>
+</html>

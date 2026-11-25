@@ -17,7 +17,8 @@ TabulaPix est une extension Chrome (Manifest V3) en HTML/JavaScript simple : auc
 - `extension/i18n.js` : textes de l'interface en français et en anglais (mêmes clés dans les deux langues) ; `extension/_locales/` : nom et description affichés par Chrome.
 - `extension/icons/` : icônes (sources SVG et exports PNG).
 - `store/` : éléments de la fiche du Chrome Web Store.
-- `docs/` : le site [tabulapix.com](https://tabulapix.com), en HTML/CSS statique servi par GitHub Pages (français à `/`, anglais à `/en/`, polices hébergées avec le site, ni statistiques ni cookies). Son système visuel est décrit dans `DESIGN.md`, les faits produit dans `PRODUCT.md`.
+- `docs/` : le site [tabulapix.com](https://tabulapix.com), en HTML/CSS statique servi par GitHub Pages (français à `/`, anglais à `/en/`, polices hébergées avec le site, ni statistiques ni cookies). Son système visuel est décrit dans `DESIGN.md`, les faits produit dans `PRODUCT.md`. On y trouve aussi `robots.txt`, `sitemap.xml` (les deux pages, avec leurs équivalents dans l'autre langue) et `404.html`.
+- `tools/og-image.html` : gabarit des images d'aperçu de lien `docs/assets/og-fr.png` et `og-en.png` (1200 × 630). Il n'est pas publié. Pour les refaire, ouvrez-le dans Chrome en 1200 × 630 (ajoutez `?lang=en` pour l'anglais) et faites une capture d'écran, par exemple avec Playwright.
 - Documentation, en anglais et en français : `README`, `CHANGELOG` (toujours un titre **[Non publié]** en tête), `ROADMAP`, ce fichier ; politique de confidentialité dans `PRIVACY.md`.
 
 Pour essayer une modification : chargez le dossier `extension` avec **Charger l'extension non empaquetée** dans `chrome://extensions`, puis **↻** sur la carte TabulaPix après chaque modification.
@@ -104,7 +105,7 @@ Les éléments de la fiche (descriptions, justifications des autorisations, inst
 
 1. Choisissez le numéro (voir « Numéros de version ») et inscrivez-le dans `extension/manifest.json`.
 2. Dans `CHANGELOG.md` et `CHANGELOG.fr.md`, ajoutez le titre de la version (numéro, date, « Chrome Web Store ») sous **[Non publié]**, qui reste en tête, vide.
-3. Mettez à jour la version dans l'exemple de fichier de configuration (« Fichier de configuration » plus haut), le nom du paquet dans `store/fiche-chrome-web-store.md`, et la version affichée en pied de page de `docs/index.html` et `docs/en/index.html`.
+3. Mettez à jour la version dans l'exemple de fichier de configuration (« Fichier de configuration » plus haut), le nom du paquet dans `store/fiche-chrome-web-store.md`, et, dans `docs/index.html` et `docs/en/index.html`, la version affichée en pied de page et `softwareVersion` dans les données structurées (`application/ld+json`) à la fin du `<head>`.
 4. Fabriquez le paquet depuis le dossier `extension`, sans les sources SVG (15 fichiers) :
 
    ```bash
