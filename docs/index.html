@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TabulaPix — Une recherche, toutes vos agences photo</title>
+<meta name="description" content="Extension Chrome pour les services photo, iconographes et éditeurs photo : tapez vos mots-clés une fois, TabulaPix ouvre chaque agence dans son onglet, avec vos propres comptes. Gratuite, open source, aucune donnée collectée.">
+<link rel="canonical" href="https://tabulapix.com/">
+<link rel="alternate" hreflang="fr" href="https://tabulapix.com/">
+<link rel="alternate" hreflang="en" href="https://tabulapix.com/en/">
+<link rel="alternate" hreflang="x-default" href="https://tabulapix.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TabulaPix — Une recherche, toutes vos agences photo">
+<meta property="og:description" content="Tapez vos mots-clés une fois : TabulaPix ouvre chaque agence dans son onglet, avec vos propres comptes.">
+<meta property="og:url" content="https://tabulapix.com/">
+<meta property="og:image" content="https://tabulapix.com/assets/og-fr.png">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#101215">
+<link rel="icon" type="image/svg+xml" href="assets/tabulapix.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/icon-128.png">
+<link rel="preload" href="assets/fonts/archivo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/martian-mono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+<!--
+THESIS: La page est un fil d'agence : la recherche part une fois, en dépêche, et revient en une ligne par agence. Elle refuse le héros SaaS suivi de cartes de fonctionnalités.
+OWN-WORLD: Écran de fil d'une rédaction : fond gris-blanc froid, encre noire, filets fins, métadonnées en Martian Mono dans la marge, titres « slug » en Archivo étroit et capitales, bandeau terminal noir ; le rouge TabulaPix est réservé au FLASH, au bouton et aux confirmations.
+STORY: L'iconographe comprend qu'une frappe ouvre toutes ses agences avec ses comptes, croit que rien ne quitte son ordinateur, et clique « Ajouter à Chrome ».
+FIRST VIEWPORT: Bandeau noir avec horloge ; marge gauche FLASH, référence, date ; titre en capitales sur trois lignes ; chapeau daté ; bouton rouge sous le chapeau ; à droite, le terminal où les lignes s'impriment.
+FORM: Fil d'agence, rang 2 de la liste ; seed 26a21e47 (re-roll 1).
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+-->
+<a class="skip" href="#contenu">Aller au contenu</a>
+
+<header class="wirebar">
+  <a class="brand" href="./" aria-label="TabulaPix, accueil"><img src="assets/tabulapix.svg" alt="" width="22" height="22">TABULAPIX</a>
+  <span class="channel">FIL PHOTO · SERVICE GÉNÉRAL</span>
+  <span class="live" aria-hidden="true"><span id="clock">EN DIRECT</span></span>
+  <a class="lang" href="en/" hreflang="en" lang="en">EN</a>
+</header>
+
+<main id="contenu">
+
+  <article class="dispatch lead">
+    <dl class="meta">
+      <dt>Priorité</dt><dd><span class="prio flash">FLASH</span></dd>
+      <dt>Référence</dt><dd>TPX-001</dd>
+      <dt>Lieu</dt><dd>PARIS</dd>
+      <dt>Date</dt><dd data-today>2026</dd>
+    </dl>
+    <h1 class="slug">Une recherche, toutes vos agences <span class="hit">photo</span></h1>
+    <div class="body">
+      <div class="copy">
+        <p class="lede"><span class="dateline">Paris (TabulaPix) —</span> Tapez vos mots-clés une seule fois : TabulaPix ouvre chaque agence dans son onglet, résultats prêts, avec vos propres comptes.</p>
+        <p>Pour les services photo, les iconographes et les éditeurs photo qui cherchent toute la journée les mêmes mots sur dix sites.</p>
+        <div class="actions">
+          <a class="install" href="https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9.5M6.2 8.8 10 12.5l3.8-3.7M4 14.5V17h12v-2.5"/></svg>
+            Ajouter à Chrome <small>gratuit</small>
+          </a>
+          <a class="secondary" href="https://github.com/jeremiejung/TabulaPix">Voir le code source</a>
+        </div>
+        <p class="fineprint">Extension pour Chrome (et Edge, Brave, Arc…) · open source, licence MIT · aucune donnée collectée. Un abonnement à chaque agence reste nécessaire.</p>
+      </div>
+
+    </div>
+    <section class="terminal" aria-labelledby="demo-title">
+      <div class="head"><span><b id="demo-title">TABULAPIX</b> · ESSAI</span><span>DÉMONSTRATION</span></div>
+      <form id="demo">
+        <label for="demo-q">MOTS-CLÉS ›</label>
+        <input id="demo-q" name="q" value="estonie frontière" autocomplete="off" spellcheck="false" maxlength="80">
+        <button type="submit"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3.5v5H4.5M7 5.5 4.5 8.5 7 11.5"/></svg>LANCER</button>
+      </form>
+      <ol class="feed" id="feed" aria-live="polite">
+        <li><span class="t">14:32:07</span><span class="tab">1/7</span><span class="what"><q>estonie frontière</q> · Actualité</span><span class="ok">PRÊT</span></li>
+        <li><span class="t">14:32:07</span><span class="tab">2/7</span><span class="what"><q>estonie frontière</q> · Actualité</span><span class="ok">PRÊT</span></li>
+        <li><span class="t">14:32:08</span><span class="tab">3/7</span><span class="what"><q>estonie frontière</q> · Actualité</span><span class="ok">PRÊT</span></li>
+        <li><span class="t">14:32:08</span><span class="tab">4/7</span><span class="what"><q>estonie frontière</q> · Reportage</span><span class="ok">PRÊT</span></li>
+        <li><span class="t">14:32:09</span><span class="tab">5/7</span><span class="what"><q>estonie frontière</q> · Agrégateur</span><span class="ok">PRÊT</span></li>
+        <li><span class="t">14:32:09</span><span class="tab">6/7</span><span class="what"><q>estonie frontière</q> · People</span><span class="ok">PRÊT</span></li>
+        <li><span class="t">14:32:10</span><span class="tab">7/7</span><span class="what"><q>estonie frontière</q> · Stock</span><span class="ok">PRÊT</span></li>
+        <li class="total"><span class="t">14:32:10</span><span class="what">7 onglets ouverts en arrière-plan · vous restez sur votre page</span></li>
+      </ol>
+      <p class="note">Démonstration : rien n'est envoyé. L'extension, elle, ouvre de vrais onglets, sur vos agences, avec vos comptes.</p>
+    </section>
+  </article>
+
+  <article class="dispatch">
+    <dl class="meta">
+      <dt>Priorité</dt><dd><span class="prio">DÉPÊCHE</span></dd>
+      <dt>Référence</dt><dd>TPX-002</dd>
+      <dt>Rubrique</dt><dd>MODE D'EMPLOI</dd>
+    </dl>
+    <h2 class="slug">Trois gestes, dix agences</h2>
+    <div class="body">
+      <ol class="steps">
+        <li><span class="n">1/3</span><span><b>Cochez vos agences</b>Près de trente agences et banques d'images sont prêtes, rangées en dossiers de couleur : actualité, reportage, agrégateurs, people, stock, archives. Gardez celles de vos abonnements.</span></li>
+        <li><span class="n">2/3</span><span><b>Tapez vos mots-clés, une fois</b>Dans la popup (<kbd>Alt</kbd> + <kbd>Maj</kbd> + <kbd>Y</kbd>) ou dans la colonne qui reste ouverte à côté de la page, pour enchaîner les recherches.</span></li>
+        <li><span class="n">3/3</span><span><b>Appuyez sur Entrée</b>Un onglet par agence s'ouvre en arrière-plan, résultats prêts. Un onglet d'agence déjà ouvert est réutilisé au lieu d'en ouvrir un de plus.</span></li>
+      </ol>
+    </div>
+  </article>
+
+  <article class="dispatch">
+    <dl class="meta">
+      <dt>Priorité</dt><dd><span class="prio">PHOTO</span></dd>
+      <dt>Référence</dt><dd>TPX-003</dd>
+      <dt>Rubrique</dt><dd>L'OUTIL</dd>
+    </dl>
+    <h2 class="slug">Vos agences, rangées à votre façon</h2>
+    <div class="body">
+      <figure class="photo">
+        <div class="frame"><img src="assets/popup-fr.png" width="284" height="757" alt="La fenêtre de TabulaPix : le champ des mots-clés, le bouton « Lancer la recherche · 11 onglets », puis les agences cochées, rangées dans les dossiers Actualité, Reportage &amp; auteurs, Agrégateurs, People et Stock." loading="lazy"></div>
+        <figcaption>
+          <b>PHOTO</b> · TabulaPix dans Chrome : les mots-clés, le bouton qui annonce le nombre d'onglets, et les agences en dossiers de couleur. Capture d'écran de l'extension.
+          <p>Il manque la vôtre ? Collez l'adresse d'une page de résultats : TabulaPix trouve où se placent les mots-clés. Si le site ne les met pas dans l'adresse, il repère son champ de recherche et le remplit pour vous.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </article>
+
+  <article class="dispatch">
+    <dl class="meta">
+      <dt>Priorité</dt><dd><span class="prio">DÉPÊCHE</span></dd>
+      <dt>Référence</dt><dd>TPX-004</dd>
+      <dt>Rubrique</dt><dd>PARTAGE</dd>
+    </dl>
+    <h2 class="slug">D'un collègue à l'autre, par copier-coller</h2>
+    <div class="body">
+      <p>Partagez une agence ou tout un dossier avec un court code, à coller dans Slack, Teams ou un e-mail. Votre collègue le colle dans TabulaPix : ce qui lui manque est ajouté, rien de chez lui n'est retiré ni modifié.</p>
+      <p>Pour toute la rédaction, la configuration s'exporte aussi dans un fichier, et l'import montre ce qui va réellement changer avant de toucher à quoi que ce soit.</p>
+      <p class="code"><code>TabulaPix:1:H4sIAAAAAAAAA3WOwQrCMBBEf2Xp…</code><span>exemple de code de partage</span></p>
+    </div>
+  </article>
+
+  <article class="dispatch">
+    <dl class="meta">
+      <dt>Priorité</dt><dd><span class="prio">DÉPÊCHE</span></dd>
+      <dt>Référence</dt><dd>TPX-005</dd>
+      <dt>Rubrique</dt><dd>CONFIDENTIALITÉ</dd>
+    </dl>
+    <h2 class="slug">Rien ne quitte votre ordinateur</h2>
+    <div class="body">
+      <ul class="checks">
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Aucun serveur, aucun compte.</b> TabulaPix fonctionne entièrement dans votre Chrome.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Aucune requête réseau.</b> L'extension ouvre des onglets, comme si vous tapiez l'adresse vous-même ; sa politique de sécurité interdit toute autre connexion.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Aucune donnée collectée.</b> Vos réglages restent dans Chrome, sur votre ordinateur. Seule la dernière recherche est gardée.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Une seule autorisation annoncée à l'installation</b> : « Consulter votre historique de navigation », pour réutiliser l'onglet d'une agence déjà ouverte. Les autres sont demandées au cas par cas, site par site.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Cette page non plus.</b> Ni statistiques, ni cookies, ni police chargée ailleurs.</span></li>
+      </ul>
+      <p style="margin-top:1.2em"><a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Lire la politique de confidentialité</a></p>
+    </div>
+  </article>
+
+  <article class="dispatch end">
+    <dl class="meta">
+      <dt>Priorité</dt><dd><span class="prio flash">FLASH</span></dd>
+      <dt>Référence</dt><dd>TPX-006</dd>
+      <dt>Statut</dt><dd>FIN</dd>
+    </dl>
+    <h2 class="slug">Votre prochaine recherche, partout à la fois</h2>
+    <div class="body">
+      <div class="actions">
+        <a class="install" href="https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9.5M6.2 8.8 10 12.5l3.8-3.7M4 14.5V17h12v-2.5"/></svg>
+          Ajouter à Chrome <small>gratuit</small>
+        </a>
+        <a class="secondary" href="https://github.com/jeremiejung/TabulaPix/blob/main/CHANGELOG.fr.md">Les nouveautés</a>
+      </div>
+      <span class="endmark" aria-hidden="true">— FIN —</span>
+    </div>
+  </article>
+
+</main>
+
+<footer>
+  <div class="in">
+    <span>TabulaPix · version 3.7.0</span>
+    <nav aria-label="Liens">
+      <a href="https://github.com/jeremiejung/TabulaPix">Code source</a>
+      <a href="https://github.com/jeremiejung/TabulaPix/blob/main/CHANGELOG.fr.md">Nouveautés</a>
+      <a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Confidentialité</a>
+      <a href="https://github.com/jeremiejung/TabulaPix/blob/main/LICENSE">Licence MIT</a>
+      <a href="en/" hreflang="en" lang="en">English</a>
+    </nav>
+    <span class="sig">Made with ♡ and a bit of AI shame by <a href="https://www.jeremie.eu/">Jérémie</a>.</span>
+  </div>
+</footer>
+<script src="assets/wire.js" defer></script>
+</body>
+</html>

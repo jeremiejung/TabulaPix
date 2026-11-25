@@ -4,7 +4,7 @@
 
 **One search, all your picture agencies.**
 
-**➜ [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**
+**➜ [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** · website: [tabulapix.com](https://tabulapix.com/en/)
 
 Chrome extension for photo desks, picture researchers and photo editors: type your keywords once and search all your news picture agencies at the same time. TabulaPix opens one tab per agency with the results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored. Interface in English and French.
 
