@@ -533,7 +533,7 @@ function mergeConfigImport(current, parsed, { mode, parts, settings = IMPORT_SET
   for (const id of before) if (!order.includes(id)) order.push(id);
 
   const out = { [FOLDERS_DONE_KEY]: true };
-  const report = { mode, parts: [...want], agenciesAdded: 0, restored: 0, present: 0, dupes: 0, full: 0, foldersAdded: 0, foldersPresent: 0, filed: 0, added: [] };
+  const report = { mode, parts: [...want], agenciesAdded: 0, restored: 0, present: 0, dupes: 0, full: 0, foldersAdded: 0, foldersPresent: 0, filed: 0, added: [], taken: [] };
   let hosts = [];
   const fileKnows = new Set(arr(F[STORAGE_KEYS.order]));
   const fileChecked = new Set(arr(F[STORAGE_KEYS.checked]));
@@ -583,7 +583,17 @@ function mergeConfigImport(current, parsed, { mode, parts, settings = IMPORT_SET
       const fileOverrides = obj(F[OVERRIDES_KEY]);
       for (const a of AGENCIES) {
         if (!fileKnows.has(a.id) || fileRemoved.has(a.id)) continue;
-        if (!removed.includes(a.id)) { report.present++; continue; }
+        if (!removed.includes(a.id)) {
+          // Code de partage : les réglages d'une agence fournie que l'utilisateur
+          // n'a pas modifiée sont repris (c'est ce que le collègue voulait transmettre).
+          if (parsed.share && fileOverrides[a.id] && !overrides[a.id]) {
+            overrides = { ...overrides, [a.id]: fileOverrides[a.id] };
+            const effective = applyOverride(a, overrides[a.id], options);
+            if (effective.fill) { const h = hostOf(effective.url, options); if (h) hosts.push(h); }
+            report.taken.push(effective.name);
+          } else report.present++;
+          continue;
+        }
         removed = removed.filter((id) => id !== a.id);
         if (fileOverrides[a.id]) overrides = { ...overrides, [a.id]: fileOverrides[a.id] };
         const effective = applyOverride(a, overrides[a.id], options);
@@ -697,7 +707,7 @@ function importEffects(current, parsed, { mode, settings = IMPORT_SETTINGS }) {
     let e;
     if (mode === "add") {
       e = part === "agencies"
-        ? { added: report.added, present: report.present, full: report.full }
+        ? { added: report.added, taken: report.taken, present: report.present, full: report.full }
         : { added: report.foldersAdded, present: report.foldersPresent, filed: report.filed };
     } else if (part === "agencies") {
       const ov0 = base[OVERRIDES_KEY] || {}, ov1 = st[OVERRIDES_KEY] || {};
@@ -733,6 +743,86 @@ function importEffects(current, parsed, { mode, settings = IMPORT_SETTINGS }) {
     effects[part] = e;
   }
   return effects;
+}
+
+/* ---------- Codes de partage (copier / coller) ---------- */
+/*
+ * Une agence ou un dossier envoyé à un collègue par la messagerie de la
+ * rédaction, sous forme d'un court texte : « TabulaPix:1:… ». C'est un petit
+ * fichier de configuration (même format, mêmes vérifications à l'arrivée),
+ * compressé (gzip) puis encodé en base64 « URL » (lettres, chiffres, - et _).
+ * Il ne contient que l'agence ou le dossier et ses agences : jamais les
+ * réglages, les autres agences ni les recherches. Aucune requête réseau.
+ */
+const SHARE_PREFIX = "TabulaPix";
+const SHARE_VERSION = 1; // version du code ; une version plus récente est refusée poliment
+// Le code peut arriver entouré de texte (message Slack…) : il s'arrête au
+// premier caractère qui n'est pas du base64 « URL » (espace, ponctuation…).
+const SHARE_RE = /TabulaPix:(\d+):([A-Za-z0-9_-]{8,})/;
+
+// Agence qui vaut la peine d'être partagée : ajoutée, ou fournie modifiée
+// (une agence fournie telle quelle, le collègue l'a déjà).
+const isShareable = (a) => Boolean(a && (a.custom || a.modified));
+
+async function gzipBytes(bytes) {
+  return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("gzip"))).arrayBuffer());
+}
+// Décompression bornée : un code piégé ne peut pas gonfler au-delà de CONFIG_MAX_BYTES.
+async function gunzipBytes(bytes) {
+  const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip")).getReader();
+  const parts = [];
+  let size = 0;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    size += value.length;
+    if (size > CONFIG_MAX_BYTES) { reader.cancel().catch(() => {}); throw new Error("too big"); }
+    parts.push(value);
+  }
+  const out = new Uint8Array(size);
+  let at = 0;
+  for (const p of parts) { out.set(p, at); at += p.length; }
+  return out;
+}
+const toB64url = (bytes) => { let s = ""; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); };
+const fromB64url = (s) => { const t = s.replace(/-/g, "+").replace(/_/g, "/"); const bin = atob(t + "===".slice((t.length + 3) % 4)); return Uint8Array.from(bin, (c) => c.charCodeAt(0)); };
+
+// Code d'une ou plusieurs agences (agencyIds), ou d'un dossier et de ses agences
+// visibles (folderId). Renvoie { code, agencies, name } ou null (rien à partager).
+async function buildShareCode({ agencyIds, folderId }) {
+  const cfg = await buildConfigExport();
+  let folders = [], agencies;
+  if (folderId) {
+    const f = cfg.folders.find((x) => x.id === folderId);
+    if (!f) return null;
+    folders = [{ id: f.id, name: f.name, ...(f.color ? { color: f.color } : {}) }];
+    agencies = cfg.agencies.filter((a) => a.folder === folderId && !a.hidden);
+  } else {
+    const ids = new Set(agencyIds || []);
+    agencies = cfg.agencies.filter((a) => ids.has(a.id)).map(({ folder: _f, ...a }) => a);
+  }
+  if (!agencies.length) return null; // dossier vide : rien à partager
+  // À l'arrivée, les agences partagées sont cochées (comme une agence ajoutée à la main).
+  agencies = agencies.map((a) => ({ ...a, checked: true, hidden: false }));
+  const mini = { format: CONFIG_FORMAT, formatVersion: CONFIG_FORMAT_VERSION, minReaderVersion: 1, share: true, folders, agencies, removedBuiltins: [] };
+  const code = `${SHARE_PREFIX}:${SHARE_VERSION}:${toB64url(await gzipBytes(new TextEncoder().encode(JSON.stringify(mini))))}`;
+  return { code, agencies: agencies.length, name: folderId ? folders[0].name : agencies[0].name };
+}
+
+// Texte collé → résultat de parseConfigImport, { error }, ou null (pas un code).
+async function parseShareCode(text) {
+  const m = String(text || "").match(SHARE_RE);
+  if (!m) return null;
+  if (Number(m[1]) > SHARE_VERSION) return { error: "share.err.newer" };
+  if (m[2].length > CONFIG_MAX_BYTES) return { error: "share.err.broken" }; // compressé, il serait bien plus court
+  let file;
+  try {
+    const bytes = await gunzipBytes(fromB64url(m[2]));
+    file = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  } catch (_) { return { error: "share.err.broken" }; }
+  if (!file || file.share !== true) return { error: "share.err.broken" };
+  const result = parseConfigImport(file);
+  return result.error ? { error: result.error === "backup.err.newer" ? "share.err.newer" : "share.err.broken" } : { ...result, share: true };
 }
 
 // Autorisations de sites facultatives actuellement accordées (hors sites

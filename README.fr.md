@@ -71,14 +71,22 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 
 Le bouton **Organiser** en haut (icône liste) passe en mode **Organiser**, où l'on range, renomme, masque, modifie et supprime agences et dossiers, directement dans la liste. **Échap** ou **Terminé** pour en sortir ; la recherche est en pause pendant ce temps.
 
-- **Ordre et dossiers** : comme hors de ce mode, et une agence se glisse aussi par son nom : faites-la glisser par son nom ou sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
+- **Ordre et dossiers** : comme hors de ce mode : faites glisser une agence par sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
 - **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, masquez-le avec son **œil** (le dossier et ses agences disparaissent de la liste et ne sont jamais cherchés ; leurs cases cochées sont gardées pour quand vous le réaffichez), supprimez-le avec la corbeille (ses agences sont conservées, hors dossier ; **Annuler** pendant quelques secondes), créez-en un en bas de la liste. Un dossier dont toutes les agences sont masquées n'apparaît pas non plus en usage courant ; les dossiers masqués n'apparaissent, grisés, qu'en mode Organiser.
-- **Agences**, sur chaque ligne (de droite à gauche, contre la poignée : œil, crayon, corbeille) :
+- **Agences** : renommez une agence directement dans son nom (souligné en pointillé), comme un dossier : **Entrée** ou sortie du champ enregistre, **Échap** annule ; pour une agence fournie, **Rétablir l'original** dans son crayon redonne le nom livré. Puis, sur chaque ligne (de droite à gauche, contre la poignée : œil, crayon, partager, corbeille) :
   - **œil** : masque l'agence (elle disparaît de la liste, sa place est conservée) ou la réaffiche ; les agences masquées n'apparaissent, grisées, qu'en mode Organiser.
     - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte avec son œil. **AFP (forum)** est aussi masquée par défaut.
   - **crayon** : modifie l'agence (voir plus bas) ;
+  - **partager** (agences ajoutées et agences fournies modifiées seulement) : copie un code à envoyer à un collègue (voir « Partager une agence ou un dossier » plus bas) ;
   - **corbeille** : supprime n'importe quelle agence, y compris celles fournies, tout de suite ; une ligne **Annuler** prend sa place quelques secondes (les agences fournies supprimées se récupèrent aussi plus tard dans ⚙ avec **Restaurer**).
 - **+ Ajouter une agence**, en bas de la liste, ouvre l'écran d'ajout (**← Retour** revient à la liste).
+
+### Partager une agence ou un dossier
+
+Pour envoyer une agence ou tout un dossier à un collègue, sans compte ni serveur : c'est la messagerie de la rédaction (Slack, Teams, e-mail) qui sert de transport.
+
+- **Partager** : en mode Organiser, l'icône **partager** d'une agence (ou, dans son crayon, le bouton **Partager**), ou celle du titre d'un dossier. TabulaPix copie un court code (`TabulaPix:1:…`) qui contient l'agence, ou le dossier (nom, couleur) et ses agences affichées : adresse, modèle, champ repéré, page de connexion — jamais vos cases cochées, vos réglages ni vos recherches. Les agences fournies ne sont partagées que si vous les avez modifiées (sinon votre collègue les a déjà) ; dans un dossier, elles sont simplement citées, pour y être rangées.
+- **Recevoir** : collez le code dans **+ Ajouter une agence** (premier champ) ou dans **⚙ › Sauvegarde et partage › Coller un code de partage**. La boîte d'import s'ouvre en mode **Ajouter**, avec ce qui sera réellement ajouté : ce qui vous manque arrive coché, un dossier du même nom est réutilisé ; ce que vous avez déjà ne change pas (une agence fournie que vous n'avez pas modifiée prend les réglages de votre collègue). Chaque agence est vérifiée comme une agence ajoutée à la main ; si elle remplit un champ, Chrome demande l'autorisation pour son site.
 
 ### Ajouter une agence
 
@@ -150,7 +158,7 @@ Voir aussi la [politique de confidentialité](PRIVACY.md).
 
 ## Idées
 
-Les pistes envisagées pour de futures versions (envoyer une agence à un collègue par copier / coller, coffre chiffré des identifiants d'agence) sont listées dans [`ROADMAP.fr.md`](ROADMAP.fr.md).
+Les pistes envisagées pour de futures versions (coffre chiffré des identifiants d'agence) sont listées dans [`ROADMAP.fr.md`](ROADMAP.fr.md).
 
 ## Développement
 

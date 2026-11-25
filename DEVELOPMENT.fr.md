@@ -31,7 +31,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
   "formatVersion": 5,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.6.13" },
+  "app": { "name": "TabulaPix", "version": "3.7.0" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" }, "tabGroups": { "enabled": false, "collapsed": false } },
   "folders": [{ "id": "f-wire", "name": "Agences filaires", "color": "blue" }],
   "agencies": [
@@ -44,6 +44,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
 
 - `agencies` suit l'ordre de la liste. Les agences fournies ne portent `name`, `url`, `payload`, `encode`, `fill` ou `login` que si elles ont été modifiées (`login` : page de connexion, `false` si celle livrée a été retirée) ; les agences ajoutées portent toujours leur adresse (et `fill` quand elles remplissent un champ de recherche, `login` quand elles ont une page de connexion).
 - `settings.tabGroups` (format 5) : l'option des groupes d'onglets, exportée désactivée quand l'autorisation de Chrome n'est pas accordée. Un fichier qui ne l'a pas laisse l'option telle quelle.
+- **Codes de partage** (`TabulaPix:1:…`, `buildShareCode` / `parseShareCode` dans `shared.js`) : un petit fichier de configuration du même format avec `"share": true`, qui ne contient que les agences partagées (cochées, jamais masquées) et, pour un dossier, le dossier lui-même ; compressé en gzip, puis en base64 « URL ». À l'arrivée, il passe par `parseConfigImport` comme un fichier (décompression limitée à 1 Mo) et il est toujours fusionné en mode **Ajouter** ; une agence fournie que le destinataire n'a pas modifiée prend les réglages du code. Un code dont le numéro dépasse `SHARE_VERSION` est refusé, avec un message demandant une mise à jour.
 - Les **choix d'import** (quoi et comment) se font dans TabulaPix, pas dans le fichier : le format est le même quoi qu'on importe ensuite.
 - **Compatibilité entre versions** : une nouvelle version ne fait qu'*ajouter* des champs facultatifs, jamais changer le sens d'un champ existant (`formatVersion` augmente). Une version plus récente de TabulaPix lit donc les anciens fichiers (les champs absents prennent leur valeur par défaut), et une version plus ancienne lit les fichiers plus récents en ignorant ce qu'elle ne connaît pas encore (le récapitulatif d'import le signale ; les agences fournies qu'elle ne connaît pas sont comptées à part). Seul un changement incompatible, à éviter, augmenterait `minReaderVersion` : une version plus ancienne refuse alors le fichier et demande une mise à jour.
 - **Dossiers** (`folders: [{ "id", "name", "color", "collapsed", "hidden" }]`, et un champ `folder` sur chaque agence) : exportés et importés avec le reste, y compris la couleur de chaque dossier (`blue`, `teal`, `green`, `amber`, `orange`, `red`, `pink`, `violet`, `gray`) son état replié et s'il est masqué. La case d'un dossier n'est pas enregistrée : elle se déduit de ses agences.

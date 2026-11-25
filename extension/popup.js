@@ -438,7 +438,7 @@ const ed = {
   pickBtn: $id("pickBtn"), backToUrl: $id("backToUrl"), advanced: $id("advanced"),
   techUrl: $id("techUrl"), techFill: $id("techFill"), payload: $id("newPayload"), encode: $id("newEncode"),
   tryBtn: $id("tryBtn"), submit: $id("agencySubmit"), reset: $id("resetAgency"), cancel: $id("cancelEdit"),
-  folder: $id("newFolder"), login: $id("newLogin"), loginErr: $id("loginErr"),
+  folder: $id("newFolder"), login: $id("newLogin"), loginErr: $id("loginErr"), share: $id("shareAgency"),
   form: addForm
 };
 
@@ -667,6 +667,7 @@ function resetEditor() {
   ed.title.textContent = t("ed.addTitle");
   ed.name.disabled = false;
   ed.reset.hidden = true;
+  ed.share.hidden = true;
   ed.advanced.open = false;
   ed.advanced.hidden = false;
   ed.submit.textContent = t("ed.add");
@@ -687,6 +688,7 @@ function startEdit(a) {
   ed.encode.value = (a.encode || []).join(", ");
   ed.login.value = a.login || "";
   ed.reset.hidden = !a.modified;
+  ed.share.hidden = !isShareable(a); // version enregistrée de l'agence
   ed.submit.textContent = t("ed.saveEdit");
   setMode(draft.mode);
   showStep2("");
@@ -710,6 +712,7 @@ async function restoreDraft() {
   ed.login.value = saved.login || "";
   ed.submit.textContent = saved.editing ? t("ed.saveEdit") : t("ed.add");
   ed.reset.hidden = !(saved.builtin && ORIGINAL_BY_ID.has(saved.id) && saved.editing);
+  ed.share.hidden = !(saved.editing && isShareable(AGENCY_BY_ID.get(saved.id)));
   fillFolderSelect();
   ed.folder.value = saved.folder || "";
   layoutEditor(Boolean(saved.editing));
@@ -849,6 +852,8 @@ ed.cancel.addEventListener("click", () => {
   if (draft && !draft.editing) { resetEditor(); ed.detUrl.focus(); }
   else leaveEditor();
 });
+
+ed.share.addEventListener("click", () => { addMsg.className = "status ok"; copyShareCode({ agencyIds: [draft.id] }, addMsg); });
 
 ed.reset.addEventListener("click", async () => {
   const id = draft.id;
@@ -1175,7 +1180,7 @@ function settingValue(id, v) {
 const settingLabel = (id) => (id === "language" ? t("backup.set.language") : id === "tabGroups" ? t("backup.set.tabGroups") : t("backup.set." + id.slice(4)));
 // Texte de chaque partie et nombre de changements qu'elle apporte.
 function importPartFx(part, e, add, pick) {
-  if (add && part === "agencies") return { n: e.added.length, text: fxJoin([e.added.length ? t("backup.fx.toAdd", { n: e.added.length }) + fxNames(e.added) : t("backup.fx.toAdd", { n: 0 }), e.present ? t("backup.fx.present", { n: e.present }) : "", e.full ? t("backup.fx.full", { n: e.full }) : ""]) };
+  if (add && part === "agencies") return { n: e.added.length + e.taken.length, text: fxJoin([e.added.length || !e.taken.length ? t("backup.fx.toAdd", { n: e.added.length }) + fxNames(e.added) : "", e.taken.length ? t("backup.fx.taken", { n: e.taken.length }) + fxNames(e.taken) : "", e.present ? t("backup.fx.present", { n: e.present }) : "", e.full ? t("backup.fx.full", { n: e.full }) : ""]) };
   if (add) return { n: e.added + e.filed, text: fxJoin([t("backup.fx.toAdd", { n: e.added }), e.present ? t("backup.fx.presentF", { n: e.present }) : "", e.filed ? t("backup.fx.filed", { n: e.filed }) : ""]) };
   if (part === "agencies") return { n: e.arrive.length + e.leave.length + e.edited.length, text: fxJoin([e.arrive.length ? t("backup.fx.arrive", { n: e.arrive.length }) + fxNames(e.arrive) : "", e.edited.length ? t("backup.fx.edited", { n: e.edited.length }) + fxNames(e.edited) : "", e.leave.length ? t("backup.fx.leave", { n: e.leave.length }) + fxNames(e.leave) : ""]) };
   if (part === "selection") return { n: e.changed, text: e.changed ? t("backup.fx.boxes", { n: e.changed }) : t("backup.fx.none") };
@@ -1189,7 +1194,7 @@ function renderImportChoice() {
   const add = mode === "add";
   importConfirm.classList.toggle("adding", add);
   importConfirm.setAttribute("role", add ? "dialog" : "alertdialog");
-  $id("importTitleText").textContent = t(add ? "backup.add.title" : "backup.replace.title");
+  $id("importTitleText").textContent = pendingImport.share ? t("share.add.title") : t(add ? "backup.add.title" : "backup.replace.title");
   const settingsOn = $id("importParts").querySelector('.import-part input[value="settings"]');
   // Réglages choisis : cochés, et présents dans le fichier (un fichier ancien n'a pas les groupes d'onglets).
   const F = pendingImport.storage;
@@ -1206,6 +1211,9 @@ function renderImportChoice() {
     box.disabled = !usable;
     const row = box.closest(".import-part");
     row.classList.toggle("is-off", !usable);
+    // Code d'une agence seule : pas de ligne « Dossiers ».
+    row.hidden = Boolean(pendingImport.share && box.value === "folders" && !(F[FOLDERS_KEY] || []).length);
+    if (row.hidden) continue;
     const r = usable ? importPartFx(box.value, fx[box.value], add, pick) : { n: 0, text: "" };
     row.querySelector(".detail").textContent = r.text;
     row.classList.toggle("no-change", usable && !r.n);
@@ -1226,7 +1234,7 @@ function renderImportChoice() {
   }
   importChoice = { mode, parts, settings: pick };
   const nothing = !parts.length ? t("backup.nothing") : !changes ? t(add ? "backup.add.nothing" : "backup.replace.nothing") : "";
-  $id("importConfirmText").textContent = nothing || t(add ? "backup.add.text" : "backup.replace.text");
+  $id("importConfirmText").textContent = nothing || t(pendingImport.share ? "share.add.text" : add ? "backup.add.text" : "backup.replace.text");
   const ok = $id("importOk");
   ok.textContent = t(add ? "backup.add.ok" : "backup.replace.ok");
   ok.className = add ? "primary" : "danger";
@@ -1237,7 +1245,10 @@ async function showImportConfirm(result, { focus = true } = {}) {
   importCurrent = await chrome.storage.local.get(null);
   if (pendingImport !== result) return; // un autre fichier choisi entre-temps
   const s = result.summary;
-  const previous = importChoice || { mode: "replace", parts: IMPORT_PARTS, settings: IMPORT_SETTINGS };
+  // Code de partage : toujours « Ajouter » (rien n'est retiré ni modifié chez l'utilisateur).
+  const previous = result.share ? { mode: "add", parts: IMPORT_ADD_PARTS, settings: IMPORT_SETTINGS }
+    : importChoice || { mode: "replace", parts: IMPORT_PARTS, settings: IMPORT_SETTINGS };
+  importConfirm.classList.toggle("share-mode", Boolean(result.share));
   for (const r of importConfirm.querySelectorAll('input[name="importMode"]')) r.checked = r.value === previous.mode;
   const checkbox = (value, checked, onChange) => {
     const box = document.createElement("input");
@@ -1278,22 +1289,50 @@ async function showImportConfirm(result, { focus = true } = {}) {
   $id("importCancel").focus(); // le choix sans risque d'abord
 }
 for (const r of importConfirm.querySelectorAll('input[name="importMode"]')) r.addEventListener("change", renderImportChoice);
+// La boîte vit dans les options ; pour un code collé dans l'éditeur, elle y est déplacée le temps du choix.
+const importHome = { parent: importConfirm.parentElement, next: importConfirm.nextSibling };
+let importOrigin = "settings"; // "settings" | "editor"
 function hideImportConfirm() {
   pendingImport = null;
   importChoice = null;
   importConfirm.hidden = true;
+  importConfirm.classList.remove("share-mode");
   importFile.value = ""; // le même fichier pourra être choisi à nouveau
+  importHome.parent.insertBefore(importConfirm, importHome.next);
+  importOrigin = "settings";
 }
-$id("importCancel").addEventListener("click", () => { hideImportConfirm(); $id("importBtn").focus(); });
+const importReturnFocus = () => (importOrigin === "editor" ? ed.detUrl : pendingImport && pendingImport.share ? $id("shareCodeInput") : $id("importBtn"));
+$id("importCancel").addEventListener("click", () => { const back = importReturnFocus(); hideImportConfirm(); back.focus(); });
 importConfirm.addEventListener("keydown", (e) => { // Échap : annule l'import (sans quitter les options)
   if (e.key !== "Escape") return;
   e.preventDefault();
+  const back = importReturnFocus();
   hideImportConfirm();
-  $id("importBtn").focus();
+  back.focus();
 });
+
+/* Code de partage collé : dans « + Ajouter une agence » (champ de la page de
+   résultats) ou dans les options. La boîte d'import s'ouvre sous le champ. */
+async function checkShareCode(field, origin) {
+  if (!/TabulaPix:\d+:/.test(field.value)) return false;
+  const msgEl = origin === "editor" ? ed.detectMsg : backupMsg;
+  if (origin === "editor" && draft && draft.editing) { msgEl.className = "status err"; msgEl.textContent = t("share.err.editing"); return true; }
+  const result = await parseShareCode(field.value);
+  if (!result) return false;
+  if (result.error) { msgEl.className = "status err"; msgEl.textContent = t(result.error); return true; }
+  msgEl.textContent = "";
+  field.value = "";
+  hideImportConfirm(); // une boîte précédente laissée ouverte
+  importOrigin = origin;
+  field.closest(".field").after(importConfirm);
+  await showImportConfirm(result);
+  return true;
+}
+ed.detUrl.addEventListener("input", () => checkShareCode(ed.detUrl, "editor"));
+$id("shareCodeInput").addEventListener("input", () => checkShareCode($id("shareCodeInput"), "settings"));
 $id("importOk").addEventListener("click", async () => {
   if (!pendingImport || !importChoice || !importChoice.parts.length) return;
-  const result = pendingImport, choice = importChoice;
+  const result = pendingImport, choice = importChoice, origin = importOrigin;
   hideImportConfirm();
   const current = await chrome.storage.local.get(null);
   const merged = mergeConfigImport(current, result, choice);
@@ -1310,6 +1349,15 @@ $id("importOk").addEventListener("click", async () => {
 
   // Autorisations : on retire celles qui ne servent plus, on liste celles à accorder.
   await releaseUnusedOrigins();
+  // Code collé dans l'éditeur : retour à la liste, où les agences arrivées apparaissent.
+  if (origin === "editor") {
+    await leaveEditor();
+    const r = merged.report;
+    msg.classList.remove("err");
+    msg.textContent = [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "", r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""].filter(Boolean).join(" ");
+    flashEl(msg);
+    return;
+  }
   await reloadSettingsView();
   const report = async () => {
     const toAllow = await renderAttention(); // agences cochées dont le site reste à autoriser
@@ -1317,7 +1365,7 @@ $id("importOk").addEventListener("click", async () => {
     // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
     const r = merged.report, s = result.summary;
     const lines = r.mode === "add"
-      ? [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""]
+      ? [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "", r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""]
       : [t("backup.replaced", { parts: r.parts.map((p) => t("backup.part." + p).toLowerCase()).join(", ") })];
     lines.push(s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : "");
     backupMsg.textContent = t("backup.imported") + " " + lines.filter(Boolean).join(" ") + (toAllow ? "\n" + t("backup.needPerm") : "");
@@ -1442,6 +1490,7 @@ const ICONS = {
   pencil: '<path d="M10.5 2.8l2.7 2.7L6 12.7l-3.3.6.6-3.3z"/><path d="M9 4.3l2.7 2.7"/>',
   eye: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>',
   login: '<path d="M9.5 2.5h3.5v11H9.5"/><path d="M2.5 8h7.5M7 5l3 3-3 3"/>',
+  share: '<path d="M8 2.5v8M5 5.5l3-3 3 3"/><path d="M3.5 8.5v4.5h9V8.5"/>',
   eyeOff: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><path d="M2.5 13.5l11-11"/>',
 };
 function icon(name) {
@@ -1498,10 +1547,32 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     e.preventDefault();
     moveAgency(li, e.key === "ArrowUp");
   });
-  const name = document.createElement("span");
-  name.className = "name";
+  let name;
+  if (organizing) {
+    // Mode Organiser : le nom se modifie sur place, comme celui d'un dossier.
+    name = document.createElement("input");
+    name.className = "aname-input";
+    name.dataset.key = "an:" + a.id;
+    name.value = a.name;
+    name.maxLength = 40;
+    name.autocomplete = "off";
+    name.spellcheck = false;
+    name.title = a.name;
+    name.setAttribute("aria-label", t("ag.rename", { name: a.name }));
+    name.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); name.blur(); }
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); name.value = a.name; name.blur(); }
+    });
+    // Sélectionner du texte dans le champ ne doit pas faire glisser la ligne.
+    name.addEventListener("focus", () => { li.draggable = false; });
+    name.addEventListener("blur", () => { li.draggable = true; });
+    name.addEventListener("change", () => renameAgency(a, name));
+  } else {
+    name = document.createElement("span");
+    name.className = "name";
+    name.textContent = a.name;
+  }
   name.dir = "auto"; // noms en arabe, hébreu… dans le bon sens
-  name.textContent = a.name;
   label.append(box, name);
   if (!organizing && newAgencies.has(a.id)) {
     const pill = document.createElement("span");
@@ -1526,7 +1597,9 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     del.classList.add("fdel");
     // L'œil en dernier, contre la poignée : quand crayon et corbeille apparaissent
     // au survol (popup étroite), ils s'ajoutent à sa gauche et l'œil ne bouge pas.
-    li.append(del, edit, eye, grip(t("main.handle")));
+    // Partager : seulement les agences ajoutées ou fournies modifiées.
+    const share = isShareable(a) ? toolButton("share", t("share.agency", { name: a.name }), () => copyShareCode({ agencyIds: [a.id] }, msg)) : null;
+    li.append(del, ...(share ? [share] : []), edit, eye, grip(t("main.handle")));
     li.draggable = true; // on la glisse aussi par son nom
     label.title = t("main.handle");
   } else {
@@ -1571,6 +1644,51 @@ function eyeButton(hidden, title, onClick, key) {
   next.classList.add("ico-next");
   b.append(next);
   return b;
+}
+
+// Renommage sur place (mode Organiser). Agence fournie : nom enregistré comme
+// une modification (« Rétablir l'original » le défait) ; agence ajoutée : son nom.
+async function renameAgency(a, input) {
+  const n = input.value.trim();
+  if (n === a.name) { input.value = a.name; return; }
+  if (!n || n.length > 40) {
+    input.value = a.name;
+    input.setCustomValidity(t("ed.err.name"));
+    input.reportValidity();
+    input.addEventListener("input", () => input.setCustomValidity(""), { once: true });
+    return;
+  }
+  if (a.custom) {
+    const { [CUSTOM_KEY]: list = [] } = await chrome.storage.local.get(CUSTOM_KEY);
+    await chrome.storage.local.set({ [CUSTOM_KEY]: list.map((c) => (c && c.id === a.id ? { ...c, name: n } : c)) });
+    return;
+  }
+  const original = ORIGINAL_BY_ID.get(a.id);
+  if (!original) return;
+  const { [OVERRIDES_KEY]: overrides = {} } = await chrome.storage.local.get(OVERRIDES_KEY);
+  const ov = overrides[a.id] ? { ...overrides[a.id] }
+    : { url: original.url, ...(original.payload !== undefined ? { payload: original.payload, encode: original.encode } : {}) };
+  if (n === original.name) delete ov.name; else ov.name = n;
+  // Plus rien de différent de l'original : la modification disparaît.
+  const plain = ov.url === original.url && (ov.payload || "") === (original.payload || "")
+    && (ov.encode || []).join() === (original.encode || []).join() && ov.fill === undefined && ov.login === undefined && ov.name === undefined;
+  if (plain) delete overrides[a.id]; else overrides[a.id] = ov;
+  await chrome.storage.local.set({ [OVERRIDES_KEY]: overrides });
+}
+
+// Partage : le code est copié, à coller dans la messagerie de la rédaction.
+async function copyShareCode(what, msgEl) {
+  let share = null;
+  try { share = await buildShareCode(what); } catch (_) { /* rien */ }
+  msgEl.classList.remove("err");
+  if (!share) { msgEl.textContent = t("share.nothing"); return; }
+  try {
+    await navigator.clipboard.writeText(share.code);
+    msgEl.textContent = t(what.folderId ? "share.copied.folder" : "share.copied", { name: share.name, n: share.agencies });
+  } catch (_) {
+    msgEl.textContent = t("share.copyFailed");
+  }
+  flashEl(msgEl);
 }
 
 function toolButton(name, title, onClick) {
@@ -1734,7 +1852,9 @@ function folderHead(f, color, group) {
   if (organizing) {
     const c = folderControls(f, color, msg);
     c.nameInput.title = f.name;
-    head.append(toggle, label, c.swatch, c.nameInput, count, c.del, c.eye, grip(t("folder.handle"))); // l'œil reste en place au survol
+    const share = toolButton("share", t("share.folder", { name: f.name }), () => copyShareCode({ folderId: f.id }, msg));
+    share.classList.add("fshare");
+    head.append(toggle, label, c.swatch, c.nameInput, count, c.del, share, c.eye, grip(t("folder.handle"))); // l'œil reste en place au survol
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");
@@ -1883,6 +2003,7 @@ async function setCollapsed(group, collapsed, persist = true) {
 let dragged = null, origin = null, dropHead = null;
 const clearDropHead = () => { if (dropHead) dropHead.classList.remove("drop-target"); dropHead = null; };
 list.addEventListener("dragstart", (e) => {
+  if (e.target.closest && e.target.closest(".aname-input")) return; // texte glissé depuis le champ du nom
   const g = e.target.closest && (e.target.closest(".grip") || (organizing && e.target.closest("li.agency")));
   if (!g) return;
   const head = g.closest(".group-head");

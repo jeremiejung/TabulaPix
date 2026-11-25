@@ -134,6 +134,12 @@ html:not(.organizing) #list li.agency:is(:hover, :has(:focus-visible)) > .login-
 .fname-input { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; padding: 0 4px; border: 1px solid transparent; border-bottom: 1px dashed color-mix(in srgb, var(--fc) 55%, transparent); border-radius: var(--r-control) var(--r-control) 0 0; background: none; color: color-mix(in srgb, var(--fc) 50%, CanvasText); font: 750 12px system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; text-overflow: ellipsis; }
 .fname-input:focus { text-transform: none; letter-spacing: 0; font-size: 13px; border-radius: var(--r-control); }
 .fname-input:hover { border-color: color-mix(in srgb, var(--fc) 40%, transparent); }
+/* Nom d'agence modifiable sur place (mode Organiser), sur le modèle du nom de dossier */
+.aname-input { flex: 1; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 4px; border: 1px solid transparent; border-bottom: 1px dashed color-mix(in srgb, CanvasText 30%, transparent); border-radius: var(--r-control) var(--r-control) 0 0; background: none; color: inherit; font: inherit; text-overflow: ellipsis; }
+.aname-input:hover { border-color: color-mix(in srgb, CanvasText 25%, transparent); }
+html.organizing #list li.agency .aname-input { cursor: text; }
+.aname-input:focus { background: Canvas; border-color: var(--focus); border-radius: var(--r-control); outline: none; }
+#list li.is-hidden .aname-input { color: var(--muted); font-style: italic; }
 .fname-input:focus { background: Canvas; border-color: var(--fc); outline: none; }
 .swatch { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: var(--r-control); background: none; cursor: pointer; }
 .swatch::before { content: ""; width: 13px; height: 13px; border-radius: 50%; background: var(--fc); box-shadow: 0 0 0 2px Canvas; }
@@ -332,9 +338,11 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
 @container list (max-width: 330px) {
   html.organizing #list li.agency .tool:not([aria-pressed="true"]) { display: none; }
   html.organizing #list li.agency:is(:hover, :focus-within) .tool { display: inline-flex; }
-  html.organizing .group-head .fdel, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
+  html.organizing .group-head .fdel, html.organizing .group-head .fshare, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
   html.organizing .group-head .count { display: none; } /* place au nom ; le compteur reste en mode normal */
-  html.organizing .group-head:is(:hover, :focus-within) :is(.fdel, .fhide) { display: inline-flex; }
+  html.organizing .group-head:is(:hover, :focus-within) :is(.fdel, .fshare, .fhide) { display: inline-flex; }
+  /* Nom en cours de modification : toute la largeur pour lui */
+  html.organizing #list li.agency:has(.aname-input:focus) .tool:not([aria-pressed="true"]) { display: none; }
 }
 
 /* Avertissements de la détection : icône dessinée + texte */
@@ -418,6 +426,9 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .replace-box.adding { border-color: color-mix(in srgb, CanvasText 22%, transparent); background: color-mix(in srgb, CanvasText 4%, Canvas); }
 .replace-box.adding .replace-title { color: CanvasText; }
 .replace-box.adding .replace-title svg { display: none; }
+/* Code de partage : toujours « Ajouter », le choix du mode et les parties sans objet sont retirés */
+.replace-box.share-mode .import-mode, .replace-box.share-mode .import-part.is-off { display: none; }
+.share-paste { margin-top: 10px; }
 .replace-box .help:empty, .replace-box .help[hidden] { display: none; }
 .replace-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .replace-actions button { width: 100%; }

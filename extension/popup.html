@@ -51,7 +51,7 @@
       <p class="help" data-i18n="ed.step1.help">Faites une recherche sur le site de l'agence, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés.</p>
       <div class="field">
         <label for="detUrl" data-i18n="ed.detUrl">Page de résultats</label>
-        <input id="detUrl" autocomplete="off" spellcheck="false" placeholder="https://…">
+        <input id="detUrl" autocomplete="off" spellcheck="false" placeholder="https://… (ou un code de partage)" data-i18n-placeholder="ed.detUrl.placeholder">
       </div>
       <div class="field">
         <label for="detQ" data-i18n="ed.detQ">Mots-clés cherchés</label>
@@ -129,6 +129,7 @@
         <button type="submit" id="agencySubmit" class="primary" disabled>Ajouter l'agence</button>
       </div>
       <div class="bar">
+        <button type="button" id="shareAgency" hidden data-i18n="share.button" data-i18n-title="share.button.title">Partager</button>
         <button type="button" id="resetAgency" hidden data-i18n="ed.reset">Rétablir l'original</button>
         <button type="button" id="cancelEdit" data-i18n="ed.cancel">Annuler</button>
       </div>
@@ -180,6 +181,11 @@
     <div class="bar">
       <button type="button" id="exportBtn" data-i18n="backup.export">Exporter</button>
       <button type="button" id="importBtn" data-i18n="backup.import">Importer…</button>
+    </div>
+    <div class="field share-paste">
+      <label for="shareCodeInput" data-i18n="share.paste.label">Coller un code de partage</label>
+      <input id="shareCodeInput" autocomplete="off" spellcheck="false" placeholder="TabulaPix:1:…" aria-describedby="shareCodeHelp">
+      <p class="help" id="shareCodeHelp" data-i18n="share.paste.help">Code reçu d'un collègue : son agence ou son dossier est ajouté, sans rien changer chez vous.</p>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" hidden>
     <div id="importConfirm" class="replace-box" role="alertdialog" aria-labelledby="importConfirmTitle" aria-describedby="importConfirmText" hidden>
