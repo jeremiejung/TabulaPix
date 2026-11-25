@@ -1,7 +1,6 @@
 Archivo — Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
-Martian Mono — Copyright 2021 The Martian Mono Project Authors (https://github.com/evilmartians/mono)
 
-Both fonts are licensed under the SIL Open Font License, Version 1.1:
+This font is licensed under the SIL Open Font License, Version 1.1:
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

@@ -1,151 +1,161 @@
 ---
 name: tabulapix.com
-description: Website of the TabulaPix extension, built as a picture-desk wire screen. Scope: docs/ (the extension's own interface is documented by its code in extension/).
+description: Website of the TabulaPix extension. It speaks the extension's own visual language (its popup, coloured folders and red action). Scope: docs/ (the extension's interface is documented by its code in extension/).
 colors:
-  ground: "#f4f5f6"
-  sheet: "#ffffff"
-  ink: "#101215"
-  ink-2: "#3a3f47"
-  meta: "#59606b"
-  rule: "#c8ccd2"
+  ground: "#f4f4f2"
+  card: "#ffffff"
+  ink: "#141517"
+  ink-2: "#44474d"
+  muted: "#62666d"
+  line: "#dcdcd8"
+  line-strong: "#b9bab5"
   red: "#d7141a"
   red-ink: "#b80f15"
   red-hover: "#b51016"
-  term: "#101215"
-  term-ink: "#e9ebee"
-  term-meta: "#9aa1ab"
-  dark-ground: "#0d0f12"
-  dark-sheet: "#15181c"
-  dark-ink: "#eceef1"
-  dark-meta: "#9199a4"
-  dark-rule: "#2c3138"
+  tabbar: "#e3e4e1"
+  tab: "#eeefec"
+  folder-blue: "#2f6fd0"
+  folder-green: "#2f8a4c"
+  folder-amber: "#b98900"
+  folder-pink: "#c43f86"
+  folder-violet: "#7b52c7"
+  dark-ground: "#121315"
+  dark-card: "#1c1d20"
+  dark-ink: "#eeeff1"
+  dark-ink-2: "#c5c8cd"
+  dark-muted: "#9da1a8"
+  dark-line: "#2e3034"
+  dark-line-strong: "#484b51"
   dark-red-ink: "#ff5a5f"
+  dark-tabbar: "#0b0c0d"
+  dark-tab: "#232428"
 typography:
-  slug:
+  display:
     fontFamily: Archivo
-    fontWeight: 800
-    fontSize: clamp(2rem, 4.4vw, 3.4rem)
-    lineHeight: 0.95
-    letterSpacing: -0.005em
-  slug-lead:
+    fontWeight: 720
+    fontSize: clamp(2.5rem, 5.4vw, 4.4rem)
+    lineHeight: 1.03
+    letterSpacing: -0.022em
+  headline:
     fontFamily: Archivo
-    fontWeight: 800
-    fontSize: clamp(2.6rem, 5.4vw, 5.1rem)
-    lineHeight: 0.9
-    letterSpacing: -0.01em
+    fontWeight: 720
+    fontSize: clamp(1.75rem, 3.2vw, 2.6rem)
+    lineHeight: 1.1
+    letterSpacing: -0.022em
+  lede:
+    fontFamily: Archivo
+    fontWeight: 400
+    fontSize: clamp(1.15rem, 1.7vw, 1.32rem)
+    lineHeight: 1.5
   body:
     fontFamily: Archivo
     fontWeight: 400
     fontSize: 1.0625rem
     lineHeight: 1.6
-  lede:
+  folder-label:
     fontFamily: Archivo
-    fontWeight: 400
-    fontSize: clamp(1.12rem, 1.6vw, 1.3rem)
-    lineHeight: 1.55
-  wire:
-    fontFamily: Martian Mono
-    fontWeight: 400
+    fontWeight: 750
     fontSize: 0.74rem
-    lineHeight: 1.6
+    letterSpacing: 0.06em
+  code:
+    fontFamily: ui-monospace
+    fontWeight: 500
+    fontSize: 0.88rem
 rounded:
-  tag: 2px
-  control: 4px
-  button: 6px
-  panel: 6px
-  photo: 10px
+  control: 8px
+  button: 9px
+  folder: 9px
+  strip: 12px
+  card: 14px
+  pill: 999px
 spacing:
   gutter: clamp(16px, 4vw, 48px)
-  meta-column: 11.5rem
-  dispatch-top: clamp(40px, 7vw, 88px)
-  dispatch-bottom: clamp(36px, 5vw, 64px)
+  page: 1120px
+  section: clamp(64px, 9vw, 112px)
 components:
   button-install:
     backgroundColor: "{colors.red}"
     textColor: "#ffffff"
-    typography: "{typography.body}"
     rounded: "{rounded.button}"
     height: 52px
-    padding: 0 22px 0 18px
+    padding: 0 24px 0 20px
   button-install-hover:
     backgroundColor: "{colors.red-hover}"
-  tag-priority:
+  popup:
+    backgroundColor: "{colors.card}"
+    rounded: "{rounded.card}"
+    padding: 16px
+  folder-row:
+    rounded: "{rounded.folder}"
+    typography: "{typography.folder-label}"
+    height: 34px
+  tab:
+    backgroundColor: "{colors.tab}"
+    textColor: "{colors.ink-2}"
+    height: 38px
+  tab-current:
+    backgroundColor: "{colors.card}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.tag}"
-    padding: 3px 7px 2px
-  tag-flash:
-    backgroundColor: "{colors.red}"
-    textColor: "#ffffff"
-    rounded: "{rounded.tag}"
-  terminal:
-    backgroundColor: "{colors.sheet}"
-    rounded: "{rounded.panel}"
-  wirebar:
-    backgroundColor: "{colors.term}"
-    textColor: "{colors.term-ink}"
 ---
 
 # Design System: tabulapix.com
 
 ## Overview
 
-The page is a news-agency wire screen. Each section is a dispatch: a priority tag, a reference and a dateline in the left margin, an uppercase condensed slug as the title, then wire-style copy. The opening dispatch is a FLASH with a working demonstration terminal: the visitor's keywords go out once and come back as one line per agency tab. Restrained palette on a cool newsroom-screen ground; TabulaPix red is reserved for priority, action and confirmation. Light by default (bright newsroom), with a night-shift dark theme. No network requests beyond the page's own files: fonts are self-hosted, no analytics, no cookies.
+The page shows the extension itself. Its first viewport is the product's own interface: a TabulaPix popup (keywords, red "Lancer la recherche · 7 onglets" button, coloured folder rows) and, under it, a browser tab bar where one tab per agency opens after "Votre page". The visual language is the extension's and its Chrome Web Store images: light neutral ground, sentence-case headings, a short red rule under the main title, white cards with soft shadows, red reserved for the action. No décor that does not belong to the tool (no clock, references, places or wire codes). Light by default with a dark theme; no request beyond the page's own files.
 
 ## Colors
 
 ### Primary
-- **red** `#d7141a`: the extension's icon and Search-button red. Fills the install button and the FLASH tag only.
-- **red-ink** `#b80f15` (dark: `#ff5a5f`): red as text — the slug's highlighted word, step numbers, READY marks, check icons.
+- **red** `#d7141a`: the extension's icon and Search-button red. Fills the install button, the popup's search button and the title rule.
+- **red-ink** `#b80f15` (dark `#ff5a5f`): red as text or line — step numerals, check icons.
+
+### Secondary
+- **Folder colours**, copied from the extension: blue `#2f6fd0` (News), green `#2f8a4c` (Documentary), amber `#b98900` (Aggregators), pink `#c43f86` (Celebrity), violet `#7b52c7` (Stock). Folder rows are tinted at 18% on the card; the same colour marks the matching tab's dot.
 
 ### Neutral
-- **ground** `#f4f5f6` (dark `#0d0f12`): cool newsroom-screen field; never cream.
-- **sheet** `#ffffff` (dark `#15181c`): raised surfaces (terminal, photo frame, code sample).
-- **ink** `#101215`, **ink-2** `#3a3f47`: headings and body.
-- **meta** `#59606b`: wire metadata (≥5.8:1 on ground).
-- **rule** `#c8ccd2`: hairlines between dispatches, steps and feed lines.
-- **term** `#101215`: the black wire bar and terminal head, with term-ink / term-meta text.
+- **ground** `#f4f4f2`, **card** `#ffffff`, **ink** `#141517`, **ink-2** `#44474d`, **muted** `#62666d` (5.6:1), **line** `#dcdcd8`, **line-strong** `#b9bab5`; **tabbar** / **tab** for the browser strip. Dark equivalents in the frontmatter.
 
 ### Named Rules
-- **Red means priority or action.** Never decorative fills, never body text.
-- **Hairlines, not boxes.** Dispatches are separated by 1px rules; only the terminal, the photo and the code sample sit on a sheet.
+- **Red means action.** Buttons and the title rule; never a background field.
+- **Colour means folder.** The five folder hues appear only where a folder or its tab is shown.
 
 ## Typography
 
-Two self-hosted OFL variable faces (`docs/assets/fonts/`): **Archivo** (wdth 62–125, wght 100–900) for slugs and copy; **Martian Mono** (wdth 75–112.5) for wire data only — metadata, datelines, the terminal, the share-code sample, the footer.
+One self-hosted OFL variable face, **Archivo** (`docs/assets/fonts/`), for everything; the platform monospace only for the example share code.
 
 ### Hierarchy
-- **Lead slug**: Archivo 800, `font-stretch: 72%`, uppercase, `clamp(2.6rem, 5.4vw, 5.1rem)`, line-height 0.9, max 12ch.
-- **Slug**: same voice at `clamp(2rem, 4.4vw, 3.4rem)`, balanced.
-- **Lede**: Archivo 400, `clamp(1.12rem, 1.6vw, 1.3rem)`, opened by a mono uppercase dateline ("PARIS (TABULAPIX) —").
-- **Body**: Archivo 400, 1.0625rem / 1.6, measure ≤64ch.
-- **Wire**: Martian Mono 400 at `font-stretch: 87.5%`, 0.68–0.82rem, tabular numerals.
-
-### Named Rules
-- **Mono is data.** Martian Mono only where the wire itself would print: references, times, labels, codes.
+- **Display** (h1): 720, `clamp(2.5rem, 5.4vw, 4.4rem)`, line-height 1.03, sentence case.
+- **Headline** (h2): 720, `clamp(1.75rem, 3.2vw, 2.6rem)`.
+- **Lede**: 400, `clamp(1.15rem, 1.7vw, 1.32rem)`.
+- **Body**: 400, 1.0625rem / 1.6, measure ≤62ch.
+- **Folder label**: 750, 0.74rem, uppercase, tracked 0.06em — as in the popup.
+- **Step numerals**: 800, 2.6rem, red-ink.
 
 ## Layout
 
-- Dispatch grid: an 11.5rem metadata margin + content (`grid-template-areas: "meta slug" "meta body"`). The lead adds a third column for the terminal at title height; below 1080px the terminal drops under the copy; below 720px the metadata moves under the slug as one line.
-- Page max width 1240px, gutter `clamp(16px, 4vw, 48px)`, dispatch padding `clamp(40px, 7vw, 88px)` top.
-- Numbered steps use wire numbering (1/3, 2/3, 3/3) because the order is the instruction.
+- Page width 1120px, gutter `clamp(16px, 4vw, 48px)`, sections spaced `clamp(64px, 9vw, 112px)`.
+- Hero: copy column + popup column (stacked below 860px); the browser strip spans the full width under the hero, inside the first viewport on desktop.
+- Steps in three columns (one column below 860px), numbered because the order is the instruction; no card containers.
+- "Rangées" section: real popup screenshot + text side by side.
 
 ## Elevation & Depth
 
-Flat by default. Two soft, offset shadows only: the terminal (`0 22px 44px -30px`) and the install button (`0 10px 24px -14px` red-tinted). The photo frame carries a long soft drop (`0 30px 60px -40px`).
+Soft elevation only, never combined with a hairline border: `0 1px 2px` + `0 18px 40px -22px` for the popup, the browser strip and the screenshot; a lighter `0 8px 18px -10px` neutral shadow under the install button.
 
 ## Components
 
-- **Wire bar**: sticky black bar — icon, TABULAPIX, channel name, pulsing red live dot with local date and time, language switch (FR / EN).
-- **Priority tag**: outlined mono tag (DÉPÊCHE / PHOTO); FLASH is the filled red variant.
-- **Install button**: red, 52px tall, download glyph (authored SVG), "Ajouter à Chrome" + mono "gratuit".
-- **Terminal**: black head, prompt form (MOTS-CLÉS › input + LANCER), feed of lines `time · n/7 · « keywords » · folder · PRÊT`, a total line, and a note saying nothing is sent.
-- **Steps**, **checks** (authored check SVG), **share-code sample** (dashed sheet), **photo with wire caption** (PHOTO · …).
+- **Header**: icon + "TabulaPix" (as in the popup), language link on the right.
+- **Install button**: red, 52px, download glyph (authored SVG), "Ajouter à Chrome" + "gratuit".
+- **Demo popup**: icon + name, keywords input, red search button with tab count, five tinted folder rows with checked box and count pill.
+- **Browser strip**: "Votre page" tab (current, white) then one tab per agency: folder dot + "Folder · keywords"; a line under it with the count and "Démonstration : rien n'est envoyé".
+- **Checks list**, **example share code** (dashed card), **closing call to action**, **footer** with version, links and signature.
 
 ## Do's and Don'ts
 
 - Do keep every claim factual (PRODUCT.md): no testimonials, user counts or newsroom names; agency names stay out of the text.
-- Do label demonstrations: the terminal says it sends nothing; the share code says it is an example.
+- Do label demonstrations: the strip says nothing is sent; the share code says it is an example.
 - Do keep the page dependency-free: no external fonts, scripts, analytics or cookies.
-- Don't put a label above a slug: metadata lives in the margin (or under the slug on mobile).
-- Don't use the red as a background beyond the install button and the FLASH tag.
-- Motion: one authored moment — the teleprinter print of the feed lines (clip-path, 0.42s, ease-out), replayed on submit; off under `prefers-reduced-motion`. The live dot pulses; nothing else animates.
+- Don't add décor that the extension doesn't have (clocks, datelines, codes, terminal bars).
+- Don't put a label above a heading.
+- Motion: one authored moment — the tabs open one after another (clip-path + rise, 0.5s ease-out, 150ms apart) when the strip comes into view and on every new search; off under `prefers-reduced-motion`.
