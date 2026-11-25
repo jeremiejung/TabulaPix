@@ -6,6 +6,10 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.6.13 — 25 November 2026 (Chrome Web Store)
+
+- Tab groups: a group you collapsed in Chrome now stays collapsed on the next searches (its tabs still load). Before, every search unfolded it again. TabulaPix never unfolds a group by itself any more; “Collapse the groups after the search” still folds them all.
+
 ## 3.6.12 — 24 November 2026 (Chrome Web Store)
 
 - Import preview: re-importing your own export no longer announces “settings replaced by the file’s” for the built-in agencies you had edited (e.g. a sign-in page added to Pixpalace): the settings were the same, only stored in a different order. Nothing was actually changed by the import.

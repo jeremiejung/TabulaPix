@@ -31,7 +31,7 @@ Le fichier créé par **Exporter** est du JSON lisible et modifiable :
   "formatVersion": 5,
   "minReaderVersion": 1,
   "exportedAt": "2026-11-06T10:00:00.000Z",
-  "app": { "name": "TabulaPix", "version": "3.6.12" },
+  "app": { "name": "TabulaPix", "version": "3.6.13" },
   "settings": { "language": "auto", "options": { "pixpalaceSubdomain": "www" }, "tabGroups": { "enabled": false, "collapsed": false } },
   "folders": [{ "id": "f-wire", "name": "Agences filaires", "color": "blue" }],
   "agencies": [
