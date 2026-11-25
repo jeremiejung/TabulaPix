@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.7.0 — 25 novembre 2026 (Chrome Web Store)
+
 - **Partager une agence ou un dossier par copier / coller.** En mode Organiser, une icône **partager** sur les agences ajoutées, les agences fournies modifiées et les titres de dossier (et un bouton **Partager** dans le crayon d’une agence) copie un court code (`TabulaPix:1:…`) à coller dans Slack, Teams ou un e-mail. Votre collègue le colle dans **+ Ajouter une agence** ou dans **⚙ › Sauvegarde et partage** : la boîte d’import s’ouvre en mode Ajouter, avec ce qui sera réellement ajouté (arrivé coché, dans le dossier partagé). Jamais vos cases cochées, réglages ni recherches ; aucun réseau, c’est la messagerie de la rédaction qui sert de transport. Une agence fournie que le destinataire n’a pas modifiée prend les réglages partagés (ex. une page de connexion).
 - **Renommer une agence directement dans la liste** (mode Organiser), comme un dossier. Dans ce mode, une agence se glisse désormais par sa poignée seulement, pour qu’un clic sur son nom permette de le taper.
 

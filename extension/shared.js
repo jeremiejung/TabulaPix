@@ -756,8 +756,9 @@ function importEffects(current, parsed, { mode, settings = IMPORT_SETTINGS }) {
  */
 const SHARE_PREFIX = "TabulaPix";
 const SHARE_VERSION = 1; // version du code ; une version plus récente est refusée poliment
-// Le code peut arriver coupé en lignes ou entouré de texte (message Slack…).
-const SHARE_RE = /TabulaPix:(\d+):([A-Za-z0-9_\-\s]{8,})/;
+// Le code peut arriver entouré de texte (message Slack…) : il s'arrête au
+// premier caractère qui n'est pas du base64 « URL » (espace, ponctuation…).
+const SHARE_RE = /TabulaPix:(\d+):([A-Za-z0-9_-]{8,})/;
 
 // Agence qui vaut la peine d'être partagée : ajoutée, ou fournie modifiée
 // (une agence fournie telle quelle, le collègue l'a déjà).
@@ -813,9 +814,10 @@ async function parseShareCode(text) {
   const m = String(text || "").match(SHARE_RE);
   if (!m) return null;
   if (Number(m[1]) > SHARE_VERSION) return { error: "share.err.newer" };
+  if (m[2].length > CONFIG_MAX_BYTES) return { error: "share.err.broken" }; // compressé, il serait bien plus court
   let file;
   try {
-    const bytes = await gunzipBytes(fromB64url(m[2].replace(/\s+/g, "")));
+    const bytes = await gunzipBytes(fromB64url(m[2]));
     file = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   } catch (_) { return { error: "share.err.broken" }; }
   if (!file || file.share !== true) return { error: "share.err.broken" };

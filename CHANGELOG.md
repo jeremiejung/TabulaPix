@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.7.0 — 25 November 2026 (Chrome Web Store)
+
 - **Share an agency or a folder by copy / paste.** In Organise mode, a **share** icon on added agencies, edited built-in agencies and folder titles (and a **Share** button in an agency's pencil) copies a short code (`TabulaPix:1:…`) to paste into Slack, Teams or an e-mail. Your colleague pastes it into **+ Add an agency** or into **⚙ › Backup and sharing**: the import box opens in Add mode with what will actually be added (arriving ticked, in the shared folder). Never your ticks, settings or searches; no network, the newsroom's messaging carries it. A built-in agency the receiver hasn't edited takes the shared settings (e.g. a sign-in page).
 - **Rename an agency right in the list** (Organise mode), like a folder. In this mode an agency is now dragged by its handle only, so that clicking its name lets you type.
 
