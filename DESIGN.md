@@ -156,6 +156,7 @@ Soft elevation only, never combined with a hairline border: `0 1px 2px` + `0 18p
 - Do say near the install button that it is for Chrome on a computer and which permission Chrome shows at install.
 - Do keep every claim factual (PRODUCT.md): no testimonials, user counts or newsroom names; agency names stay out of the text.
 - Do label demonstrations: the strip says nothing is sent; the share code says it is an example.
+- Do keep working notes out of the published HTML: no design-direction or tool comments in `docs/` (anyone can read the page source); design intent lives in this file.
 - Do keep the page dependency-free: no external fonts, scripts, analytics or cookies.
 - Don't add décor that the extension doesn't have (clocks, datelines, codes, terminal bars).
 - Don't put a label above a heading.
