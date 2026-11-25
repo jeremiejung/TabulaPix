@@ -17,7 +17,8 @@ TabulaPix is a Chrome extension (Manifest V3) in plain HTML/JavaScript: no depen
 - `extension/i18n.js`: interface texts in French and English (same keys in both languages); `extension/_locales/`: name and description shown by Chrome.
 - `extension/icons/`: icons (SVG sources and PNG exports).
 - `store/`: Chrome Web Store listing materials.
-- `docs/`: the website [tabulapix.com](https://tabulapix.com), plain static HTML/CSS served by GitHub Pages (French at `/`, English at `/en/`, self-hosted fonts, no analytics or cookies). Its design system is in `DESIGN.md`, product facts in `PRODUCT.md`.
+- `docs/`: the website [tabulapix.com](https://tabulapix.com), plain static HTML/CSS served by GitHub Pages (French at `/`, English at `/en/`, self-hosted fonts, no analytics or cookies). Its design system is in `DESIGN.md`, product facts in `PRODUCT.md`. Also there: `robots.txt`, `sitemap.xml` (both pages, with their language alternates) and `404.html`.
+- `tools/og-image.html`: template of the link-preview images `docs/assets/og-fr.png` and `og-en.png` (1200 × 630). Not published. To regenerate them, open it in Chrome at 1200 × 630 (add `?lang=en` for English) and take a screenshot, for instance with Playwright.
 - Documentation, in English and French: `README`, `CHANGELOG` (an **[Unreleased]** heading always at the top), `ROADMAP`, this file; privacy policy in `PRIVACY.md`.
 
 To try a change: load the `extension` folder with **Load unpacked** in `chrome://extensions`, then **↻** on the TabulaPix card after each change.
@@ -104,7 +105,7 @@ The listing materials (descriptions, permission justifications, review instructi
 
 1. Choose the number (see “Version numbers”) and set it in `extension/manifest.json`.
 2. In `CHANGELOG.md` and `CHANGELOG.fr.md`, add the version heading (number, date, “Chrome Web Store”) under **[Unreleased]**, which stays at the top, empty.
-3. Update the version in the configuration file example (“Configuration file” above), the package name in `store/fiche-chrome-web-store.md`, and the version shown in the footer of `docs/index.html` and `docs/en/index.html`.
+3. Update the version in the configuration file example (“Configuration file” above), the package name in `store/fiche-chrome-web-store.md`, and, in `docs/index.html` and `docs/en/index.html`, the version shown in the footer and `softwareVersion` in the structured data (`application/ld+json`) at the end of `<head>`.
 4. Build the package from the `extension` folder, without the SVG sources (15 files):
 
    ```bash
