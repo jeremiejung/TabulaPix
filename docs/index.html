@@ -55,40 +55,44 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           </a>
           <a class="secondary" href="https://github.com/jeremiejung/TabulaPix">Voir le code source</a>
         </div>
-        <p class="fineprint">Pour Chrome (et Edge, Brave, Arc…). Open source, aucune donnée collectée. Un abonnement à chaque agence reste nécessaire.</p>
+        <p class="fineprint">Pour Chrome sur ordinateur. Open source, aucune donnée collectée ; un abonnement à chaque agence reste nécessaire. À l'installation, Chrome demande à « consulter votre historique de navigation » : c'est pour réutiliser l'onglet d'une agence déjà ouvert.</p>
       </div>
 
-      <div class="popup" role="group" aria-label="Démonstration de la fenêtre TabulaPix">
-        <div class="head"><img src="assets/tabulapix.svg" alt="" width="20" height="20">TabulaPix</div>
-        <form id="demo">
-          <label for="demo-q">Mots-clés</label>
-          <input id="demo-q" name="q" value="estonie frontière" autocomplete="off" spellcheck="false" maxlength="80">
-          <button type="submit">Lancer la recherche <span>· 7 onglets</span></button>
-        </form>
-        <ul class="folders" aria-label="Dossiers cochés">
-          <li style="--fc: var(--c-blue)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Actualité<span class="count">3/3</span></li>
-          <li style="--fc: var(--c-green)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Reportage<span class="count">1/1</span></li>
-          <li style="--fc: var(--c-amber)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Agrégateurs<span class="count">1/1</span></li>
-          <li style="--fc: var(--c-pink)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>People<span class="count">1/1</span></li>
-          <li style="--fc: var(--c-violet)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Stock<span class="count">1/1</span></li>
-        </ul>
-      </div>
+      <figure class="demo">
+        <div class="popup" role="group" aria-label="Démonstration de la fenêtre TabulaPix">
+          <div class="head"><img src="assets/tabulapix.svg" alt="" width="20" height="20">TabulaPix</div>
+          <form id="demo">
+            <label for="demo-q">Mots-clés</label>
+            <input id="demo-q" name="q" value="estonie frontière" autocomplete="off" spellcheck="false" maxlength="80">
+            <button type="submit">Lancer la recherche <span>· 7 onglets</span></button>
+          </form>
+          <ul class="folders" aria-label="Dossiers">
+            <li style="--fc: var(--c-blue)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Actualité<span class="count">3/7</span></li>
+            <li style="--fc: var(--c-green)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Reportage &amp; auteurs<span class="count">1/7</span></li>
+            <li style="--fc: var(--c-amber)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Agrégateurs<span class="count">1/2</span></li>
+            <li style="--fc: var(--c-pink)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>People<span class="count">1/4</span></li>
+            <li style="--fc: var(--c-violet)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Stock<span class="count">1/5</span></li>
+            <li class="off" style="--fc: var(--c-gray)"><span class="box"></span>Archives<span class="count">0/2</span></li>
+          </ul>
+        </div>
+        <figcaption>La fenêtre de l'extension, à essayer : changez les mots-clés, puis lancez la recherche.</figcaption>
+      </figure>
     </section>
 
     <div class="browser" aria-label="Ce que vous obtenez : un onglet par agence">
       <div class="tabbar" id="tabbar">
         <span class="tab current"><img src="assets/tabulapix.svg" alt="" width="14" height="14"><span class="t">Votre page</span></span>
-        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="t">Actualité · estonie frontière</span></span>
-        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="t">Actualité · estonie frontière</span></span>
-        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="t">Actualité · estonie frontière</span></span>
-        <span class="tab" style="--fc: var(--c-green)"><span class="dot"></span><span class="t">Reportage · estonie frontière</span></span>
-        <span class="tab" style="--fc: var(--c-amber)"><span class="dot"></span><span class="t">Agrégateurs · estonie frontière</span></span>
-        <span class="tab" style="--fc: var(--c-pink)"><span class="dot"></span><span class="t">People · estonie frontière</span></span>
-        <span class="tab" style="--fc: var(--c-violet)"><span class="dot"></span><span class="t">Stock · estonie frontière</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">Actualité : </span><span class="t">estonie frontière</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">Actualité : </span><span class="t">estonie frontière</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">Actualité : </span><span class="t">estonie frontière</span></span>
+        <span class="tab" style="--fc: var(--c-green)"><span class="dot"></span><span class="sr">Reportage &amp; auteurs : </span><span class="t">estonie frontière</span></span>
+        <span class="tab" style="--fc: var(--c-amber)"><span class="dot"></span><span class="sr">Agrégateurs : </span><span class="t">estonie frontière</span></span>
+        <span class="tab" style="--fc: var(--c-pink)"><span class="dot"></span><span class="sr">People : </span><span class="t">estonie frontière</span></span>
+        <span class="tab" style="--fc: var(--c-violet)"><span class="dot"></span><span class="sr">Stock : </span><span class="t">estonie frontière</span></span>
       </div>
       <div class="page" aria-live="polite">
         <span><b id="opened">7 onglets ouverts en arrière-plan</b>, un par agence, résultats prêts. Vous restez sur votre page.</span>
-        <span class="note">Démonstration : rien n'est envoyé. Changez les mots-clés et relancez.</span>
+        <span class="note">Démonstration : rien n'est envoyé.</span>
       </div>
     </div>
 
@@ -102,7 +106,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     </section>
 
     <section class="block split" aria-labelledby="rangees">
-      <div class="shot"><img src="assets/popup-fr.png" width="284" height="757" alt="La fenêtre de TabulaPix : le champ des mots-clés, le bouton « Lancer la recherche · 11 onglets », puis les agences cochées, rangées dans les dossiers Actualité, Reportage &amp; auteurs, Agrégateurs, People et Stock." loading="lazy"></div>
+      <div class="shot"><img src="assets/popup-fr.png" width="284" height="605" alt="La fenêtre de TabulaPix : le champ des mots-clés, le bouton « Lancer la recherche · 7 onglets », puis le dossier Actualité déplié avec ses agences, trois cochées, et les dossiers Reportage &amp; auteurs, Agrégateurs, People, Stock et Archives repliés." loading="lazy"></div>
       <div>
         <h2 id="rangees">Vos agences, rangées à votre façon</h2>
         <p>Renommez, recolorez, réordonnez vos dossiers ; masquez les agences que vous n'utilisez pas.</p>
@@ -125,7 +129,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Aucune donnée collectée.</b> Vos réglages restent dans Chrome, sur votre ordinateur. Seule la dernière recherche est gardée.</span></li>
         <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Une seule autorisation annoncée à l'installation</b> : « Consulter votre historique de navigation », pour réutiliser l'onglet d'une agence déjà ouverte. Les autres sont demandées au cas par cas, site par site.</span></li>
       </ul>
-      <p style="margin-top:1.2em"><a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Lire la politique de confidentialité</a></p>
+      <p class="more"><a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Lire la politique de confidentialité</a></p>
     </section>
 
     <section class="close" aria-labelledby="fin">

@@ -88,7 +88,7 @@ components:
   folder-row:
     rounded: "{rounded.folder}"
     typography: "{typography.folder-label}"
-    height: 34px
+    height: 30px
   tab:
     backgroundColor: "{colors.tab}"
     textColor: "{colors.ink-2}"
@@ -111,10 +111,10 @@ The page shows the extension itself. Its first viewport is the product's own int
 - **red-ink** `#b80f15` (dark `#ff5a5f`): red as text or line — step numerals, check icons.
 
 ### Secondary
-- **Folder colours**, copied from the extension: blue `#2f6fd0` (News), green `#2f8a4c` (Documentary), amber `#b98900` (Aggregators), pink `#c43f86` (Celebrity), violet `#7b52c7` (Stock). Folder rows are tinted at 18% on the card; the same colour marks the matching tab's dot.
+- **Folder colours**, copied from the extension: blue `#2f6fd0` (News), green `#2f8a4c` (Documentary), amber `#b98900` (Aggregators), pink `#c43f86` (Celebrity), violet `#7b52c7` (Stock), gray `#7b8089` (Archives, shown unticked). Folder rows are tinted at 18% on the card; the same colour marks the matching tab's dot.
 
 ### Neutral
-- **ground** `#f4f4f2`, **card** `#ffffff`, **ink** `#141517`, **ink-2** `#44474d`, **muted** `#62666d` (5.6:1), **line** `#dcdcd8`, **line-strong** `#b9bab5`; **tabbar** / **tab** for the browser strip. Dark equivalents in the frontmatter.
+- **ground** `#f4f4f2`, **card** `#ffffff`, **ink** `#141517`, **ink-2** `#44474d`, **muted** `#62666d` (5.2:1), **line** `#dcdcd8`, **line-strong** `#b9bab5`; **tabbar** / **tab** for the browser strip. Dark equivalents in the frontmatter.
 
 ### Named Rules
 - **Red means action.** Buttons and the title rule; never a background field.
@@ -137,7 +137,7 @@ One self-hosted OFL variable face, **Archivo** (`docs/assets/fonts/`), for every
 - Page width 1120px, gutter `clamp(16px, 4vw, 48px)`, sections spaced `clamp(64px, 9vw, 112px)`.
 - Hero: copy column + popup column (stacked below 860px); the browser strip spans the full width under the hero, inside the first viewport on desktop.
 - Steps in three columns (one column below 860px), numbered because the order is the instruction; no card containers.
-- "Rangées" section: real popup screenshot + text side by side.
+- "Rangées" section: real popup screenshot (same ticked agencies as the demo: 7 tabs, News open, other folders collapsed) + text aligned to its top.
 
 ## Elevation & Depth
 
@@ -147,12 +147,13 @@ Soft elevation only, never combined with a hairline border: `0 1px 2px` + `0 18p
 
 - **Header**: icon + "TabulaPix" (as in the popup), language link on the right.
 - **Install button**: red, 52px, download glyph (authored SVG), "Ajouter à Chrome" + "gratuit".
-- **Demo popup**: icon + name, keywords input, red search button with tab count, five tinted folder rows with checked box and count pill.
-- **Browser strip**: "Votre page" tab (current, white) then one tab per agency: folder dot + "Folder · keywords"; a line under it with the count and "Démonstration : rien n'est envoyé".
+- **Demo popup**: icon + name, keywords input, red search button with tab count, six tinted folder rows with the real counts and the extension's partly-ticked box (Archives unticked), all matching the screenshot; under it a caption saying it is the extension's window, to try. The demo button never disables: a new search restarts the opening and keeps focus (`aria-busy` while tabs open); an empty field puts the example back in the field.
+- **Browser strip**: "Votre page" tab (current, white) then one tab per agency: folder dot + the keywords as the title (the folder name is screen-reader text); one row on phones, the last tabs fading out of the frame; a line under it with the count and "Démonstration : rien n'est envoyé".
 - **Checks list**, **example share code** (dashed card), **closing call to action**, **footer** with version, links and signature.
 
 ## Do's and Don'ts
 
+- Do say near the install button that it is for Chrome on a computer and which permission Chrome shows at install.
 - Do keep every claim factual (PRODUCT.md): no testimonials, user counts or newsroom names; agency names stay out of the text.
 - Do label demonstrations: the strip says nothing is sent; the share code says it is an example.
 - Do keep the page dependency-free: no external fonts, scripts, analytics or cookies.

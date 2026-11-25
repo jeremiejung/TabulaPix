@@ -55,40 +55,44 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           </a>
           <a class="secondary" href="https://github.com/jeremiejung/TabulaPix">See the source code</a>
         </div>
-        <p class="fineprint">For Chrome (and Edge, Brave, Arc…). Open source, no data collected. A subscription to each agency is still required.</p>
+        <p class="fineprint">For Chrome on a computer. Open source, no data collected; a subscription to each agency is still required. On install, Chrome asks to “read your browsing history”: this is to reuse an agency tab that is already open.</p>
       </div>
 
-      <div class="popup" role="group" aria-label="Demonstration of the TabulaPix window">
-        <div class="head"><img src="../assets/tabulapix.svg" alt="" width="20" height="20">TabulaPix</div>
-        <form id="demo">
-          <label for="demo-q">Keywords</label>
-          <input id="demo-q" name="q" value="estonia border" autocomplete="off" spellcheck="false" maxlength="80">
-          <button type="submit">Search <span>· 7 tabs</span></button>
-        </form>
-        <ul class="folders" aria-label="Ticked folders">
-          <li style="--fc: var(--c-blue)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>News<span class="count">3/3</span></li>
-          <li style="--fc: var(--c-green)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Documentary<span class="count">1/1</span></li>
-          <li style="--fc: var(--c-amber)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Aggregators<span class="count">1/1</span></li>
-          <li style="--fc: var(--c-pink)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Celebrity<span class="count">1/1</span></li>
-          <li style="--fc: var(--c-violet)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.5 9.5 3.5"/></svg></span>Stock<span class="count">1/1</span></li>
-        </ul>
-      </div>
+      <figure class="demo">
+        <div class="popup" role="group" aria-label="Demonstration of the TabulaPix window">
+          <div class="head"><img src="../assets/tabulapix.svg" alt="" width="20" height="20">TabulaPix</div>
+          <form id="demo">
+            <label for="demo-q">Keywords</label>
+            <input id="demo-q" name="q" value="estonia border" autocomplete="off" spellcheck="false" maxlength="80">
+            <button type="submit">Search <span>· 7 tabs</span></button>
+          </form>
+          <ul class="folders" aria-label="Folders">
+            <li style="--fc: var(--c-blue)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>News<span class="count">3/7</span></li>
+            <li style="--fc: var(--c-green)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Documentary<span class="count">1/7</span></li>
+            <li style="--fc: var(--c-amber)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Aggregators<span class="count">1/2</span></li>
+            <li style="--fc: var(--c-pink)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Celebrity<span class="count">1/4</span></li>
+            <li style="--fc: var(--c-violet)"><span class="box"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6"/></svg></span>Stock<span class="count">1/5</span></li>
+            <li class="off" style="--fc: var(--c-gray)"><span class="box"></span>Archives<span class="count">0/2</span></li>
+          </ul>
+        </div>
+        <figcaption>The extension's window, to try: change the keywords, then search.</figcaption>
+      </figure>
     </section>
 
     <div class="browser" aria-label="What you get: one tab per agency">
       <div class="tabbar" id="tabbar">
         <span class="tab current"><img src="../assets/tabulapix.svg" alt="" width="14" height="14"><span class="t">Your page</span></span>
-        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="t">News · estonia border</span></span>
-        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="t">News · estonia border</span></span>
-        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="t">News · estonia border</span></span>
-        <span class="tab" style="--fc: var(--c-green)"><span class="dot"></span><span class="t">Documentary · estonia border</span></span>
-        <span class="tab" style="--fc: var(--c-amber)"><span class="dot"></span><span class="t">Aggregators · estonia border</span></span>
-        <span class="tab" style="--fc: var(--c-pink)"><span class="dot"></span><span class="t">Celebrity · estonia border</span></span>
-        <span class="tab" style="--fc: var(--c-violet)"><span class="dot"></span><span class="t">Stock · estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">News: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">News: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-blue)"><span class="dot"></span><span class="sr">News: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-green)"><span class="dot"></span><span class="sr">Documentary: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-amber)"><span class="dot"></span><span class="sr">Aggregators: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-pink)"><span class="dot"></span><span class="sr">Celebrity: </span><span class="t">estonia border</span></span>
+        <span class="tab" style="--fc: var(--c-violet)"><span class="dot"></span><span class="sr">Stock: </span><span class="t">estonia border</span></span>
       </div>
       <div class="page" aria-live="polite">
         <span><b id="opened">7 tabs opened in the background</b>, one per agency, results ready. You stay on your page.</span>
-        <span class="note">Demonstration: nothing is sent. Change the keywords and search again.</span>
+        <span class="note">Demonstration: nothing is sent.</span>
       </div>
     </div>
 
@@ -102,7 +106,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     </section>
 
     <section class="block split" aria-labelledby="rangees">
-      <div class="shot"><img src="../assets/popup-en.png" width="284" height="757" alt="The TabulaPix window: the keywords field, the “Search · 11 tabs” button, then the ticked agencies, sorted into the News, Documentary, Aggregators, Celebrity and Stock folders." loading="lazy"></div>
+      <div class="shot"><img src="../assets/popup-en.png" width="284" height="605" alt="The TabulaPix window: the keywords field, the “Search · 7 tabs” button, then the News folder open with its agencies, three ticked, and the Documentary, Aggregators, Celebrity, Stock and Archives folders collapsed." loading="lazy"></div>
       <div>
         <h2 id="rangees">Your agencies, sorted your way</h2>
         <p>Rename, recolour and reorder your folders; hide the agencies you don't use.</p>
@@ -125,7 +129,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>No data collected.</b> Your settings stay in Chrome, on your computer. Only the last search is kept.</span></li>
         <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>A single permission announced on installation</b>: “Read your browsing history”, to reuse an agency's tab that is already open. The others are requested case by case, one site at a time.</span></li>
       </ul>
-      <p style="margin-top:1.2em"><a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Read the privacy policy</a></p>
+      <p class="more"><a href="https://github.com/jeremiejung/TabulaPix/blob/main/PRIVACY.md">Read the privacy policy</a></p>
     </section>
 
     <section class="close" aria-labelledby="fin">

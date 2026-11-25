@@ -6,12 +6,14 @@
   var T = {
     fr: {
       empty: "estonie frontière",
+      sep: " : ",
       opened: function (n) { return n + " onglets ouverts en arrière-plan"; },
       // Un onglet par agence cochée, à la couleur de son dossier (comme dans la popup)
-      tabs: [["Actualité", "--c-blue"], ["Actualité", "--c-blue"], ["Actualité", "--c-blue"], ["Reportage", "--c-green"], ["Agrégateurs", "--c-amber"], ["People", "--c-pink"], ["Stock", "--c-violet"]]
+      tabs: [["Actualité", "--c-blue"], ["Actualité", "--c-blue"], ["Actualité", "--c-blue"], ["Reportage & auteurs", "--c-green"], ["Agrégateurs", "--c-amber"], ["People", "--c-pink"], ["Stock", "--c-violet"]]
     },
     en: {
       empty: "estonia border",
+      sep: ": ",
       opened: function (n) { return n + " tabs opened in the background"; },
       tabs: [["News", "--c-blue"], ["News", "--c-blue"], ["News", "--c-blue"], ["Documentary", "--c-green"], ["Aggregators", "--c-amber"], ["Celebrity", "--c-pink"], ["Stock", "--c-violet"]]
     }
@@ -23,19 +25,24 @@
   var status = document.getElementById("opened");
   if (!form || !bar) return;
   var input = form.querySelector("input");
-  var button = form.querySelector("button");
   var timers = [];
 
+  // Le titre de l'onglet est la recherche, comme dans le navigateur ;
+  // le dossier se lit à la couleur de la pastille (et en toutes lettres pour les lecteurs d'écran).
   function tab(words, folder, color, animate) {
     var el = document.createElement("span");
     el.className = "tab" + (animate ? " opening" : "");
     el.style.setProperty("--fc", "var(" + color + ")");
     var dot = document.createElement("span");
     dot.className = "dot";
+    var sr = document.createElement("span");
+    sr.className = "sr";
+    sr.textContent = folder + T.sep;
     var t = document.createElement("span");
     t.className = "t";
-    t.textContent = folder + " · " + words; // le dossier d'abord : il reste lisible quand le titre est coupé
+    t.textContent = words;
     el.appendChild(dot);
+    el.appendChild(sr);
     el.appendChild(t);
     return el;
   }
@@ -43,18 +50,20 @@
   function open(words, animate) {
     for (var i = 0; i < timers.length; i++) clearTimeout(timers[i]);
     timers = [];
-    var q = (words || "").replace(/\s+/g, " ").trim().slice(0, 80) || T.empty;
+    var q = (words || "").replace(/\s+/g, " ").trim().slice(0, 80);
+    if (!q) { q = T.empty; input.value = q; } // champ vide : on remet l'exemple, visiblement
     var keep = bar.querySelector(".current");
     bar.textContent = "";
     bar.appendChild(keep);
     var tabs = T.tabs.map(function (x) { return tab(q, x[0], x[1], animate); });
     if (!animate) { tabs.forEach(function (el) { bar.appendChild(el); }); status.textContent = T.opened(tabs.length); return; }
-    button.disabled = true;
+    // Le bouton reste actif (et garde le focus) : relancer recommence simplement l'ouverture.
+    form.setAttribute("aria-busy", "true");
     status.textContent = "…";
     tabs.forEach(function (el, i) {
       timers.push(setTimeout(function () {
         bar.appendChild(el);
-        if (i === tabs.length - 1) { status.textContent = T.opened(tabs.length); button.disabled = false; }
+        if (i === tabs.length - 1) { status.textContent = T.opened(tabs.length); form.removeAttribute("aria-busy"); }
       }, 120 + i * 150));
     });
   }
