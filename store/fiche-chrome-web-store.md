@@ -28,7 +28,7 @@ La même recherche sur dix agences ? Tapez vos mots-clés une seule fois : Tabul
 • Quelques agences de presse et banques d'images prêtes à l'emploi
 • Ajoutez les autres en quelques clics
 • Rangez-les dans des dossiers
-• Sauvegardez votre configuration et partagez-la
+• Sauvegardez votre configuration, partagez une agence ou un dossier avec un collègue par simple copier-coller
 • En français et en anglais
 
 Rien ne quitte votre ordinateur : pas de compte, pas de serveur, aucune donnée collectée.
@@ -48,7 +48,7 @@ The same search on ten agencies? Type your keywords once: TabulaPix opens each a
 • A few news picture agencies and stock libraries ready to use
 • Add the others in a few clicks
 • Sort them into folders
-• Back up your configuration and share it
+• Back up your configuration, share an agency or a folder with a colleague by simple copy and paste
 • In English and French
 
 Nothing leaves your computer: no account, no server, no data collected.
