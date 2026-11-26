@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.7.4 — 26 November 2026 (Chrome Web Store)
+
 - **Organise mode: after clicking the eye**, the bin, pencil and share icons no longer stay on screen once the mouse has left (with the keyboard, they stay while focus is on the row).
 - **A hidden agency keeps its tick**, greyed out, instead of looking unticked then ticked again: its tick never changed and takes effect again when the agency is shown. Ticking another box in Organise mode no longer clears the tick of hidden agencies.
 

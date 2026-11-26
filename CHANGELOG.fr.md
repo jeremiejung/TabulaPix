@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.7.4 — 26 novembre 2026 (Chrome Web Store)
+
 - **Mode Organiser : après un clic sur l'œil**, la corbeille, le crayon et l'icône partager ne restent plus affichés une fois la souris partie (au clavier, ils restent là tant que le focus est sur la ligne).
 - **Une agence masquée garde sa case cochée**, grisée, au lieu de paraître décochée puis recochée : sa coche n'a jamais changé, elle reprend effet quand l'agence est réaffichée. Cocher une autre case en mode Organiser n'efface plus la coche des agences masquées.
 
