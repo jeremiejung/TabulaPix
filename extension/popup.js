@@ -1251,6 +1251,34 @@ function renderImportChoice() {
   ok.textContent = t(add ? "backup.add.ok" : "backup.replace.ok");
   ok.className = add ? "primary" : "danger";
   ok.disabled = Boolean(nothing);
+  ok.hidden = false;
+  $id("importCancel").textContent = t("backup.replace.cancel");
+  if (pendingImport.share) renderShareView(fx, Boolean(nothing));
+}
+// Code de partage : ce qu'il contient et ce qui va se passer, en phrases avec les noms ;
+// rien à choisir. Rien à ajouter : un seul bouton pour revenir, sans bouton grisé.
+function renderShareView(fx, nothing) {
+  const info = pendingImport.shareInfo || { folder: null, agencies: [] };
+  const n = info.agencies.length;
+  $id("importTitleText").textContent = t("share.view.title");
+  const has = info.folder ? t(n === 1 ? "share.has.folder.one" : "share.has.folder.many", { name: info.folder, n })
+    : n === 1 ? t("share.has.one", { name: info.agencies[0] }) : t("share.has.many", { n });
+  // Tous les noms (un code en contient peu) ; au-delà de 12, la fin est résumée.
+  const names = info.agencies.length > 12 ? info.agencies.slice(0, 12).concat("…") : info.agencies;
+  $id("importConfirmText").textContent = has + (info.folder || n > 1 ? t("share.list", { names: names.join(", ") }) : "") + ".";
+  const a = fx.agencies || { added: [], taken: [], present: 0, full: 0 };
+  const f = fx.folders || { added: 0, present: 0, filed: 0 };
+  const will = nothing ? [t("share.add.nothing")] : [
+    a.added.length ? t("share.will.add", { n: a.added.length }) + fxNames(a.added) + "." : "",
+    f.added && info.folder ? t("share.will.folder", { name: info.folder }) : "",
+    f.filed ? t("share.will.filed", { n: f.filed }) : "",
+    a.taken.length ? t("backup.added.taken", { n: a.taken.length }) + fxNames(a.taken) + "." : "",
+    a.present ? t("share.will.present", { n: a.present }) : "",
+    a.full ? t("backup.added.full", { n: a.full, max: MAX_CUSTOM }) : "",
+  ];
+  $id("shareEffects").textContent = will.filter(Boolean).join(" ");
+  $id("importOk").hidden = nothing;
+  $id("importCancel").textContent = t(!nothing ? "backup.replace.cancel" : importOrigin === "editor" ? "share.backToList" : "share.close");
 }
 async function showImportConfirm(result, { focus = true } = {}) {
   pendingImport = result;
@@ -1298,7 +1326,8 @@ async function showImportConfirm(result, { focus = true } = {}) {
   importConfirm.hidden = false;
   if (!focus) return; // simple retraduction (changement de langue)
   importConfirm.scrollIntoView({ block: "nearest" });
-  $id("importCancel").focus(); // le choix sans risque d'abord
+  // Le choix sans risque d'abord : « Ajouter » pour un code (rien n'est retiré), sinon Annuler.
+  (result.share && !$id("importOk").hidden ? $id("importOk") : $id("importCancel")).focus();
 }
 for (const r of importConfirm.querySelectorAll('input[name="importMode"]')) r.addEventListener("change", renderImportChoice);
 // La boîte vit dans les options ; pour un code collé dans l'éditeur, elle y est déplacée le temps du choix.
@@ -1309,15 +1338,22 @@ function hideImportConfirm() {
   importChoice = null;
   importConfirm.hidden = true;
   importConfirm.classList.remove("share-mode");
+  if (editorView.classList.contains("share-code")) { editorView.classList.remove("share-code"); ed.title.textContent = t("ed.addTitle"); }
   importFile.value = ""; // le même fichier pourra être choisi à nouveau
   importHome.parent.insertBefore(importConfirm, importHome.next);
   importOrigin = "settings";
 }
 const importReturnFocus = () => (importOrigin === "editor" ? ed.detUrl : pendingImport && pendingImport.share ? $id("shareCodeInput") : $id("importBtn"));
-$id("importCancel").addEventListener("click", () => { const back = importReturnFocus(); hideImportConfirm(); back.focus(); });
+// Code collé dans l'écran d'ajout : on vient de la liste, on y retourne.
+const leavingShareScreen = () => importOrigin === "editor" && pendingImport && pendingImport.share;
+$id("importCancel").addEventListener("click", () => {
+  if (leavingShareScreen()) { hideImportConfirm(); leaveEditor(); return; }
+  const back = importReturnFocus(); hideImportConfirm(); back.focus();
+});
 importConfirm.addEventListener("keydown", (e) => { // Échap : annule l'import (sans quitter les options)
   if (e.key !== "Escape") return;
   e.preventDefault();
+  if (leavingShareScreen()) { e.stopPropagation(); hideImportConfirm(); leaveEditor(); return; }
   const back = importReturnFocus();
   hideImportConfirm();
   back.focus();
@@ -1336,6 +1372,7 @@ async function checkShareCode(field, origin) {
   hideImportConfirm(); // une boîte précédente laissée ouverte
   importOrigin = origin;
   field.closest(".field").after(importConfirm);
+  if (origin === "editor") { editorView.classList.add("share-code"); ed.title.textContent = t("share.view.title"); }
   await showImportConfirm(result);
   return true;
 }

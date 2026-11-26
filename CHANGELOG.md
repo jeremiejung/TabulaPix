@@ -6,6 +6,10 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.7.3 — 26 November 2026 (Chrome Web Store)
+
+- **Share code: a clear screen.** A pasted code opens a “Share code” screen that no longer shows the add-agency form (address, keywords, **Detect**). It says what the code contains, with names (“Folder “Celebrity” and its 4 agencies: …”), then what will happen (“To add, ticked: 1 (Bestimage). The folder “Celebrity” will be created.”), without checkboxes or counters. **Add** or **Cancel**; if you already have everything, a single **Back to the list** button instead of a greyed-out **Add**. Importing a file doesn't change.
+
 ## 3.7.2 — 26 November 2026 (Chrome Web Store)
 
 - **Side panel: a discreet line confirms the search** (“8 searches started.”), with the agencies skipped because they still need permission (“To allow, not searched: 1 (Abacapress).”). It clears as soon as you type the next search. The popup closes as before.

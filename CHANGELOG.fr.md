@@ -6,6 +6,10 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.7.3 — 26 novembre 2026 (Chrome Web Store)
+
+- **Code de partage : un écran clair.** Un code collé ouvre un écran « Code de partage » qui ne montre plus le formulaire d'ajout d'agence (adresse, mots-clés, **Détecter**). Il dit ce que contient le code, avec les noms (« Dossier « People » et ses 4 agences : … »), puis ce qui va se passer (« À ajouter, cochées : 1 (Bestimage). Le dossier « People » sera créé. »), sans cases à cocher ni compteurs. **Ajouter** ou **Annuler** ; si vous avez déjà tout, un seul bouton **Retour à la liste** au lieu d'un **Ajouter** grisé. L'import d'un fichier ne change pas.
+
 ## 3.7.2 — 26 novembre 2026 (Chrome Web Store)
 
 - **Colonne : une ligne discrète confirme la recherche** (« 8 recherches lancées. »), avec les agences sautées parce qu'elles sont encore à autoriser (« À autoriser, non cherchées : 1 (Abacapress). »). Elle s'efface dès qu'on tape la recherche suivante. La popup, elle, se ferme comme avant.
