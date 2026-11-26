@@ -1647,26 +1647,11 @@ async function openLogin(a) {
   if (res && res.ok && isPopup) window.close();
 }
 
-// Œil (masquer / réafficher) : au survol ou au focus, il montre l'état qu'on
-// obtiendra en cliquant (œil barré pour masquer, œil ouvert pour réafficher).
-// Juste après un clic, la liste est reconstruite sous la souris : le nouvel œil
-// garde alors l'icône du nouvel état (sinon il remontrerait l'ancienne) jusqu'à
-// ce que la souris le quitte ou que le focus parte.
-let eyeJustToggled = null;
+// Œil (masquer / réafficher). Il montre l'état (ouvert : affiché, barré : masqué) ; l'action est dans l'infobulle.
 function eyeButton(hidden, title, onClick, key) {
-  const b = toolButton(hidden ? "eyeOff" : "eye", title, () => { eyeJustToggled = key; onClick(); });
+  const b = toolButton(hidden ? "eyeOff" : "eye", title, onClick);
   b.dataset.key = key;
   b.classList.add("eye-toggle");
-  if (key === eyeJustToggled) {
-    b.classList.add("settled");
-    const release = () => { b.classList.remove("settled"); eyeJustToggled = null; };
-    b.addEventListener("mouseleave", release, { once: true });
-    b.addEventListener("blur", release, { once: true });
-  }
-  b.firstChild.classList.add("ico-now");
-  const next = icon(hidden ? "eye" : "eyeOff");
-  next.classList.add("ico-next");
-  b.append(next);
   return b;
 }
 

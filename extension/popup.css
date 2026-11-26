@@ -335,19 +335,17 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
   .flash, .group-head.flash { animation: none; }
 }
 
-/* Mode Organiser en largeur étroite (popup) : le nom passe d'abord. Les
-   outils d'une ligne n'apparaissent qu'au survol ou au focus de cette ligne ;
-   l'œil barré d'une agence masquée reste visible (c'est un état). En
-   colonne large, tout reste affiché. */
+/* Mode Organiser, popup comme colonne : le nom passe d'abord. Les outils d'une
+   ligne n'apparaissent qu'au survol ou au focus de cette ligne (et restent
+   atteignables au clavier : le focus dans la ligne les affiche) ; l'œil barré
+   d'une agence ou d'un dossier masqué reste visible, c'est un état. */
+html.organizing #list li.agency .tool:not([aria-pressed="true"]) { display: none; }
+html.organizing #list li.agency:is(:hover, :focus-within) .tool { display: inline-flex; }
+html.organizing .group-head .fdel, html.organizing .group-head .fshare, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
+html.organizing .group-head:is(:hover, :focus-within) :is(.fdel, .fshare, .fhide) { display: inline-flex; }
 #list { container: list / inline-size; }
 @container list (max-width: 330px) {
-  html.organizing #list li.agency .tool:not([aria-pressed="true"]) { display: none; }
-  html.organizing #list li.agency:is(:hover, :focus-within) .tool { display: inline-flex; }
-  html.organizing .group-head .fdel, html.organizing .group-head .fshare, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
   html.organizing .group-head .count { display: none; } /* place au nom ; le compteur reste en mode normal */
-  html.organizing .group-head:is(:hover, :focus-within) :is(.fdel, .fshare, .fhide) { display: inline-flex; }
-  /* Les outils restent affichés pendant qu'on modifie le nom : masqués, ils
-     sortiraient de l'ordre de tabulation (crayon, corbeille, œil inatteignables au clavier). */
 }
 
 /* Avertissements de la détection : icône dessinée + texte */
@@ -439,9 +437,4 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .replace-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .replace-actions button { width: 100%; }
 
-/* Œil : l'icône de l'état suivant apparaît au survol / au focus clavier */
-.eye-toggle .ico-next { display: none; }
-.eye-toggle:is(:hover, :focus-visible) .ico-now { display: none; }
-.eye-toggle:is(:hover, :focus-visible) .ico-next { display: inline; }
-.eye-toggle.settled .ico-now { display: inline; } /* juste après le clic : le nouvel état, pas l'aperçu */
-.eye-toggle.settled .ico-next { display: none; }
+/* Œil : il montre toujours l'état (ouvert : affiché, barré : masqué) ; l'action est dans son infobulle. */
