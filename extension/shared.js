@@ -840,7 +840,13 @@ async function parseShareCode(text) {
   } catch (_) { return { error: "share.err.broken" }; }
   if (!file || file.share !== true) return { error: "share.err.broken" };
   const result = parseConfigImport(file);
-  return result.error ? { error: result.error === "backup.err.newer" ? "share.err.newer" : "share.err.broken" } : { ...result, share: true };
+  if (result.error) return { error: result.error === "backup.err.newer" ? "share.err.newer" : "share.err.broken" };
+  // Ce que contient le code, pour le dire avec les noms (texte affiché tel quel, jamais interprété).
+  const shareInfo = {
+    folder: Array.isArray(file.folders) && file.folders[0] ? String(file.folders[0].name || "").slice(0, 60) : null,
+    agencies: file.agencies.map((a) => String((a && a.name) || "").slice(0, 60)).filter(Boolean).slice(0, 200),
+  };
+  return { ...result, share: true, shareInfo };
 }
 
 // Autorisations de sites facultatives actuellement accordées (hors sites

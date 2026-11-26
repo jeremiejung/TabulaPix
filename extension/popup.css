@@ -432,7 +432,12 @@ label.with-status { display: flex; align-items: baseline; gap: 8px; }
 .replace-box.adding .replace-title { color: CanvasText; }
 .replace-box.adding .replace-title svg { display: none; }
 /* Code de partage : toujours « Ajouter », le choix du mode et les parties sans objet sont retirés */
-.replace-box.share-mode .import-mode, .replace-box.share-mode .import-part.is-off { display: none; }
+.replace-box.share-mode .import-mode, .replace-box.share-mode .import-parts { display: none; } /* un code : tout ce qui manque est ajouté, rien à choisir */
+.replace-box:not(.share-mode) .share-only { display: none; }
+#shareEffects { margin: 0; }
+/* Code collé dans l'écran d'ajout : l'écran ne montre plus que le code (le formulaire d'ajout est sans objet) */
+#editorView.share-code #step1 > :not(#importConfirm), #editorView.share-code > :not(header):not(#step1) { display: none; }
+#editorView.share-code .replace-title { display: none; } /* le titre de l'écran suffit */
 .share-paste { margin-top: 10px; }
 .replace-box .help:empty, .replace-box .help[hidden] { display: none; }
 .replace-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
