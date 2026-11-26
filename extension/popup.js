@@ -134,7 +134,7 @@ async function deleteAgency(a) {
 /* ---------- Suppression annulable ---------- */
 /* La ligne supprimée laisse place, au même endroit, à « X supprimée —
    Annuler » pendant quelques secondes (annoncé aux lecteurs d'écran). */
-const UNDO_MS = 6000;
+const UNDO_MS = 15000; // le temps de remarquer une suppression par mégarde
 const UNDO_KEYS = ["customAgencies", "checkedAgencies", "agencyOrder", "hiddenAgencies", "agencyFolderOf", "agencyFolders", "removedAgencies", "agencyOverrides"];
 let undo = null; // { label, snapshot, place, restored, timer }
 function offerUndo(label, snapshot, place, restored) {
@@ -1171,6 +1171,18 @@ const importMode = () => importConfirm.querySelector('input[name="importMode"]:c
 let importCurrent = {};
 const fxNames = (list) => (list.length ? " (" + list.slice(0, 3).join(", ") + (list.length > 3 ? ", …" : "") + ")" : "");
 const fxJoin = (items) => items.filter(Boolean).join(" · ") || t("backup.fx.none");
+// Bilan d'un ajout (fichier ou code), en phrases avec les noms ; rien à zéro.
+function addedLines(r) {
+  const lines = [
+    r.added.length ? t("backup.done.agencies", { n: r.added.length }) + fxNames(r.added) + "." : "",
+    r.foldersAdded ? t("backup.done.folders", { n: r.foldersAdded }) + fxNames(r.folderNames || []) + "." : "",
+    r.filed ? t("backup.done.filed", { n: r.filed }) : "",
+    r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "",
+    r.present ? t("backup.added.dupes", { n: r.present }) : "",
+    r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : "",
+  ].filter(Boolean);
+  return lines.length ? lines : [t("backup.done.nothing")];
+}
 function settingValue(id, v) {
   if (v === null || v === undefined) return t("backup.fx.absent");
   if (id === "language") return t("backup.lang." + v);
@@ -1233,7 +1245,7 @@ function renderImportChoice() {
       : settingValue(item.id, item.from) + " → " + settingValue(item.id, item.to);
   }
   importChoice = { mode, parts, settings: pick };
-  const nothing = !parts.length ? t("backup.nothing") : !changes ? t(add ? "backup.add.nothing" : "backup.replace.nothing") : "";
+  const nothing = !parts.length ? t("backup.nothing") : !changes ? t(pendingImport.share ? "share.add.nothing" : add ? "backup.add.nothing" : "backup.replace.nothing") : "";
   $id("importConfirmText").textContent = nothing || t(pendingImport.share ? "share.add.text" : add ? "backup.add.text" : "backup.replace.text");
   const ok = $id("importOk");
   ok.textContent = t(add ? "backup.add.ok" : "backup.replace.ok");
@@ -1247,7 +1259,7 @@ async function showImportConfirm(result, { focus = true } = {}) {
   const s = result.summary;
   // Code de partage : toujours « Ajouter » (rien n'est retiré ni modifié chez l'utilisateur).
   const previous = result.share ? { mode: "add", parts: IMPORT_ADD_PARTS, settings: IMPORT_SETTINGS }
-    : importChoice || { mode: "replace", parts: IMPORT_PARTS, settings: IMPORT_SETTINGS };
+    : importChoice || { mode: "add", parts: IMPORT_ADD_PARTS, settings: IMPORT_SETTINGS }; // le mode sans risque d'abord
   importConfirm.classList.toggle("share-mode", Boolean(result.share));
   for (const r of importConfirm.querySelectorAll('input[name="importMode"]')) r.checked = r.value === previous.mode;
   const checkbox = (value, checked, onChange) => {
@@ -1317,8 +1329,7 @@ async function checkShareCode(field, origin) {
   if (!/TabulaPix:\d+:/.test(field.value)) return false;
   const msgEl = origin === "editor" ? ed.detectMsg : backupMsg;
   if (origin === "editor" && draft && draft.editing) { msgEl.className = "status err"; msgEl.textContent = t("share.err.editing"); return true; }
-  const result = await parseShareCode(field.value);
-  if (!result) return false;
+  const result = (await parseShareCode(field.value)) || { error: "share.err.broken" }; // trop court ou tronqué
   if (result.error) { msgEl.className = "status err"; msgEl.textContent = t(result.error); return true; }
   msgEl.textContent = "";
   field.value = "";
@@ -1329,6 +1340,17 @@ async function checkShareCode(field, origin) {
   return true;
 }
 ed.detUrl.addEventListener("input", () => checkShareCode(ed.detUrl, "editor"));
+// Code de partage collé dans les mots-clés : on le passe à « + Ajouter une agence ».
+input.addEventListener("input", async () => {
+  if (organizing || !/TabulaPix:\d+:/.test(input.value)) return;
+  const code = input.value;
+  input.value = "";
+  await chrome.storage.session.remove(AGENCY_DRAFT_KEY);
+  await showEditor();
+  ed.detUrl.value = code;
+  ed.detUrl.focus();
+  checkShareCode(ed.detUrl, "editor");
+});
 $id("shareCodeInput").addEventListener("input", () => checkShareCode($id("shareCodeInput"), "settings"));
 $id("importOk").addEventListener("click", async () => {
   if (!pendingImport || !importChoice || !importChoice.parts.length) return;
@@ -1354,7 +1376,7 @@ $id("importOk").addEventListener("click", async () => {
     await leaveEditor();
     const r = merged.report;
     msg.classList.remove("err");
-    msg.textContent = [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "", r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""].filter(Boolean).join(" ");
+    msg.textContent = addedLines(merged.report).join(" ");
     flashEl(msg);
     return;
   }
@@ -1365,7 +1387,7 @@ $id("importOk").addEventListener("click", async () => {
     // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
     const r = merged.report, s = result.summary;
     const lines = r.mode === "add"
-      ? [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "", r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""]
+      ? addedLines(r)
       : [t("backup.replaced", { parts: r.parts.map((p) => t("backup.part." + p).toLowerCase()).join(", ") })];
     lines.push(s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : "");
     backupMsg.textContent = t("backup.imported") + " " + lines.filter(Boolean).join(" ") + (toAllow ? "\n" + t("backup.needPerm") : "");
@@ -1595,11 +1617,13 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     const edit = toolButton("pencil", t("opt.edit", { name: a.name }), () => showEditor(a));
     const del = toolButton("trash", t("opt.delete", { name: a.name }), () => deleteAgency(a));
     del.classList.add("fdel");
-    // L'œil en dernier, contre la poignée : quand crayon et corbeille apparaissent
-    // au survol (popup étroite), ils s'ajoutent à sa gauche et l'œil ne bouge pas.
+    // Même ordre que sur un dossier : partager, crayon, corbeille, œil. La corbeille
+    // n'est plus collée au nom ; l'œil reste en dernier, contre la poignée : quand les
+    // autres outils apparaissent au survol (popup étroite), ils s'ajoutent à sa gauche
+    // et l'œil ne bouge pas, agence masquée ou non.
     // Partager : seulement les agences ajoutées ou fournies modifiées.
     const share = isShareable(a) ? toolButton("share", t("share.agency", { name: a.name }), () => copyShareCode({ agencyIds: [a.id] }, msg)) : null;
-    li.append(del, ...(share ? [share] : []), edit, eye, grip(t("main.handle")));
+    li.append(...(share ? [share] : []), edit, del, eye, grip(t("main.handle")));
     li.draggable = true; // on la glisse aussi par son nom
     label.title = t("main.handle");
   } else {
@@ -1736,7 +1760,10 @@ function renderPermBanner(missing) {
   const names = [...missing.values()].flat().map((a) => a.name);
   permBanner.hidden = !names.length;
   document.getElementById("permText").dir = "auto";
-  document.getElementById("permText").textContent = names.length === 1
+  const text = document.getElementById("permText");
+  text.textContent = names.length === 1 ? t("perm.short.one", { names: names[0] }) : t("perm.short.many", { n: names.length });
+  // La phrase complète (et les noms) en infobulle ; les pastilles « à autoriser » montrent lesquelles.
+  text.title = names.length === 1
     ? t("perm.banner.one", { names: names[0] })
     : t("perm.banner.many", { n: names.length, names: names.join(", ") });
 }
@@ -1854,7 +1881,7 @@ function folderHead(f, color, group) {
     c.nameInput.title = f.name;
     const share = toolButton("share", t("share.folder", { name: f.name }), () => copyShareCode({ folderId: f.id }, msg));
     share.classList.add("fshare");
-    head.append(toggle, label, c.swatch, c.nameInput, count, c.del, share, c.eye, grip(t("folder.handle"))); // l'œil reste en place au survol
+    head.append(toggle, label, c.swatch, c.nameInput, count, share, c.del, c.eye, grip(t("folder.handle"))); // même ordre que les agences ; l'œil reste en place au survol
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");
@@ -1924,7 +1951,9 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     li.textContent = t(organizing ? "main.empty.organize" : "main.empty");
     list.append(li);
   }
+  // « + Ajouter une agence » aussi hors Organiser : c'est là qu'on colle le code d'un collègue.
   if (organizing) list.append(newFolderRow(), addAgencyRow());
+  else list.append(addAgencyRow());
   updateFolderStates();
 }
 
@@ -2184,8 +2213,9 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   if (sweeping || organizing) return;
   const q = input.value.trim();
   const ids = checkedIds();
+  msg.classList.remove("err");
   if (!q) return input.focus();
-  if (!ids.length) { msg.textContent = t("main.noAgency"); return; }
+  if (!ids.length) { msg.classList.add("err"); msg.textContent = t("main.noAgency"); return; }
 
   const selected = ids.map((id) => AGENCY_BY_ID.get(id)); // dans l'ordre affiché
   // Agences « à coller » : copie tout de suite, pendant le clic (aucune
@@ -2196,6 +2226,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     const options = await loadOptions();
     urls = await Promise.all(selected.map((a) => buildUrl(a, q, options)));
   } catch (err) {
+    msg.classList.add("err");
     msg.textContent = t("main.configError", { error: err.message });
     return;
   }
@@ -2212,7 +2243,7 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   });
   sweeping = true;
   try { await chrome.runtime.sendMessage({ type: "sweep", jobs, q }); }
-  catch (_) { msg.textContent = t("main.bgError"); return; } // ex. extension en cours de rechargement
+  catch (_) { msg.classList.add("err"); msg.textContent = t("main.bgError"); return; } // ex. extension en cours de rechargement
   finally { setTimeout(() => { sweeping = false; }, 800); }
   if (isPopup) {
     window.close(); // on reste sur l'onglet en cours
