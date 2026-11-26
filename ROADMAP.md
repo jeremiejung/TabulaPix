@@ -34,4 +34,3 @@ Directions considered for future versions, with what has already been decided. N
 Found during the interface critique (November 2026), too broad for a fix release.
 
 - **Saved selections.** Sets of agencies or folders per beat (e.g. “News only”, “Celebrity + Aggregators”), recalled in one click instead of re-ticking.
-- **Confirmation after a search in the side panel.** The popup closes; the side panel stays open without a word. Lead: a discreet “11 tabs opened” line, with the names of skipped agencies if any.

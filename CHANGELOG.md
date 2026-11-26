@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Side panel: a discreet line confirms the search** (“8 searches started.”), with the agencies skipped because they still need permission (“To allow, not searched: 1 (Abacapress).”). It clears as soon as you type the next search. The popup closes as before.
+
 - **Calmer Organise mode in the side panel.** As in the popup, a row's tools (share, pencil, bin, eye) only appear on hover or keyboard focus of that row, instead of on every row; the crossed-out eye of a hidden agency or folder stays visible. The eye now always shows the state (open: shown, crossed out: hidden) and no longer changes icon on hover; its tooltip says what a click does.
 
 - **No permission request on first launch any more.** Abacapress, Bloomberg and Pixpalace, which fill in their site's search field and so need a Chrome permission, are no longer ticked on installation: the first screen leads straight to searching. The permission is asked when you tick one of them. Nothing changes for current users: their ticks stay as they are.

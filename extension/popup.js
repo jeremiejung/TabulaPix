@@ -1341,6 +1341,8 @@ async function checkShareCode(field, origin) {
 }
 ed.detUrl.addEventListener("input", () => checkShareCode(ed.detUrl, "editor"));
 // Code de partage collé dans les mots-clés : on le passe à « + Ajouter une agence ».
+// La confirmation de la recherche précédente s'efface dès qu'on tape la suivante.
+input.addEventListener("input", () => { if (msg.dataset.kind === "sweep") { msg.textContent = ""; delete msg.dataset.kind; } });
 input.addEventListener("input", async () => {
   if (organizing || !/TabulaPix:\d+:/.test(input.value)) return;
   const code = input.value;
@@ -2244,7 +2246,12 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     window.close(); // on reste sur l'onglet en cours
   } else {
     input.select(); // panneau : prêt pour la recherche suivante
-    msg.textContent = "";
+    // La colonne reste ouverte : une ligne discrète dit ce qui est parti, et ce qui a été sauté.
+    const skipped = checkedIds().filter((id) => blockedIds.has(id)).map((id) => AGENCY_BY_ID.get(id)?.name).filter(Boolean);
+    msg.classList.remove("err");
+    msg.dataset.kind = "sweep";
+    msg.textContent = [t(ids.length === 1 ? "main.started.one" : "main.started.many", { n: ids.length }),
+      skipped.length ? t("main.skipped", { n: skipped.length }) + fxNames(skipped) + "." : ""].filter(Boolean).join(" ");
   }
 });
 

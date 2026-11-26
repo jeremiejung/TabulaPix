@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Colonne : une ligne discrète confirme la recherche** (« 8 recherches lancées. »), avec les agences sautées parce qu'elles sont encore à autoriser (« À autoriser, non cherchées : 1 (Abacapress). »). Elle s'efface dès qu'on tape la recherche suivante. La popup, elle, se ferme comme avant.
+
 - **Mode Organiser plus calme dans la colonne.** Comme dans la popup, les outils d'une ligne (partager, crayon, corbeille, œil) n'apparaissent qu'au survol ou au focus clavier de cette ligne, au lieu d'être affichés sur toutes les lignes ; l'œil barré d'une agence ou d'un dossier masqué reste visible. L'œil montre désormais toujours l'état (ouvert : affichée, barré : masquée) et ne change plus d'icône au survol ; son infobulle dit ce que fait le clic.
 
 - **Plus de demande d'autorisation au premier lancement.** Abacapress, Bloomberg et Pixpalace, qui remplissent le champ de recherche de leur site et demandent donc une autorisation de Chrome, ne sont plus cochées à l'installation : le premier écran mène directement à la recherche. L'autorisation est demandée quand on coche l'une d'elles. Rien ne change pour les utilisateurs actuels : leurs cases restent telles quelles.

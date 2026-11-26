@@ -34,4 +34,3 @@ Pistes envisagées pour de futures versions, avec ce qui a déjà été décidé
 Relevées lors de la critique de l'interface (novembre 2026), trop larges pour une version de correctifs.
 
 - **Sélections enregistrées.** Des « jeux » d'agences ou de dossiers par sujet (ex. « Actu seulement », « People + Agrégateurs »), à rappeler en un clic au lieu de recocher.
-- **Confirmation après une recherche dans la colonne.** La popup se ferme ; la colonne reste ouverte sans rien dire. Piste : une ligne discrète « 11 onglets ouverts », et le nom des agences sautées s'il y en a.
