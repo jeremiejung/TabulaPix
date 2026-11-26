@@ -52,7 +52,9 @@ html.panel #pin { display: none; }
 .icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 28px; height: 28px; padding: 0 6px; box-sizing: border-box; border: 1px solid var(--line); border-radius: var(--r-control); background: Canvas; color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 .icon-btn:hover { background: color-mix(in srgb, CanvasText 7%, Canvas); }
 .icon-btn.bare { border-color: transparent; background: none; min-width: 24px; height: 24px; padding: 0; }
-#organize .done { display: none; }
+#organize .done, .icon-btn .lbl { display: none; }
+html.panel #organize:not([aria-pressed="true"]) .lbl, html.panel #settings .lbl { display: inline; }
+html.panel #organize, html.panel #settings { padding: 0 9px 0 7px; }
 #organize[aria-pressed="true"] { background: CanvasText; color: Canvas; border-color: CanvasText; padding: 0 9px 0 7px; }
 #organize[aria-pressed="true"] .done { display: inline; }
 
@@ -105,7 +107,7 @@ html:not(.organizing) #list.drag-on .root > .items:empty + .empty { display: blo
 /* Sites à autoriser */
 .perm-banner { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 7px 8px 7px 10px; border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); border-radius: var(--r-block); background: color-mix(in srgb, var(--warn) 14%, Canvas); }
 .perm-banner[hidden] { display: none; }
-.perm-banner p { flex: 1; margin: 0; font-size: 12px; }
+.perm-banner p { flex: 1; min-width: 0; margin: 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .perm-banner button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: var(--r-control); background: CanvasText; color: Canvas; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 .perm-pill { flex: none; margin-left: auto; padding: 1px 7px; border: 1px solid color-mix(in srgb, var(--warn) 60%, transparent); border-radius: var(--r-pill); background: color-mix(in srgb, var(--warn) 16%, Canvas); color: inherit; font: 600 12px system-ui, sans-serif; cursor: pointer; }
 /* « Nouveau » : discrète, dans la couleur du dossier (neutre hors dossier). */
@@ -139,6 +141,7 @@ html:not(.organizing) #list li.agency:is(:hover, :has(:focus-visible)) > .login-
 .aname-input:hover { border-color: color-mix(in srgb, CanvasText 25%, transparent); }
 html.organizing #list li.agency .aname-input { cursor: text; }
 .aname-input:focus { background: Canvas; border-color: var(--focus); border-radius: var(--r-control); outline: none; }
+.aname-input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 #list li.is-hidden .aname-input { color: var(--muted); font-style: italic; }
 .fname-input:focus { background: Canvas; border-color: var(--fc); outline: none; }
 .swatch { display: grid; place-items: center; flex: none; width: 24px; height: 24px; padding: 0; border: 0; border-radius: var(--r-control); background: none; cursor: pointer; }
@@ -189,6 +192,7 @@ html.organizing #go > .go-paused { display: inline; }
 .go-count { font-weight: 400; }
 .go-count:not(:empty)::before { content: "· "; }
 #msg { margin: 6px 0 0; font-size: 12px; }
+#msg.err { color: var(--err); }
 /* En-tête de la recherche (marque, boutons, mots-clés, Rechercher) : reste en
    haut quand la liste défile. Il couvre la marge du haut du corps de page ;
    un filet apparaît dessous dès que la liste passe derrière. */
@@ -309,6 +313,7 @@ code { font-size: 12px; }
 #authorizeBtn { margin-top: 4px; }
 .danger { min-height: 30px; padding: 0 14px; font: 600 13px system-ui, sans-serif; color: var(--err); background: none; border: 1px solid var(--err); border-radius: var(--r-control); cursor: pointer; }
 .danger:hover { color: Canvas; background: var(--err); }
+.danger:disabled { color: var(--muted); border-color: var(--line); background: none; cursor: default; } /* rien à remplacer : il ne doit pas avoir l'air actif */
 
 /* Colonne latérale : le pied de page reste collé en bas de la fenêtre. */
 html.panel body { min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; }

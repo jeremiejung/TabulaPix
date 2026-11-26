@@ -6,6 +6,13 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Recevoir un code de partage plus facilement.** **+ Ajouter une agence** est désormais aussi en bas de la liste hors du mode Organiser (c'est là que le message de partage envoie votre collègue), et un code collé dans le champ des mots-clés ouvre directement l'écran d'ajout. Un code incomplet ou abîmé est signalé au lieu d'être ignoré.
+- **Mode Organiser : la corbeille n'est plus collée au nom.** Les outils sont dans le même ordre sur les agences et les dossiers : partager, crayon, œil, puis corbeille. La ligne **Annuler** reste quinze secondes au lieu de six, et l'infobulle de la corbeille d'un dossier précise que ses agences restent.
+- **Import d'un fichier : « Ajouter » est choisi par défaut**, le mode qui ne retire ni ne modifie rien. Quand il n'y a rien à remplacer, le bouton **Remplacer** apparaît bien désactivé.
+- **Bandeau d'autorisation sur une ligne** (« 3 agences sont à autoriser. » + **Autoriser**) ; la liste des agences est dans l'infobulle et sur les pastilles « à autoriser ».
+- **Colonne : « Organiser » et « Options » écrits en toutes lettres** à côté de leur icône (la popup garde les icônes seules).
+- « Cochez au moins une agence. » et les autres erreurs de la recherche s'affichent en rouge ; le nom d'une agence en cours de modification a un anneau de focus visible au clavier.
+
 ## 3.7.0 — 25 novembre 2026 (Chrome Web Store)
 
 - **Partager une agence ou un dossier par copier / coller.** En mode Organiser, une icône **partager** sur les agences ajoutées, les agences fournies modifiées et les titres de dossier (et un bouton **Partager** dans le crayon d’une agence) copie un court code (`TabulaPix:1:…`) à coller dans Slack, Teams ou un e-mail. Votre collègue le colle dans **+ Ajouter une agence** ou dans **⚙ › Sauvegarde et partage** : la boîte d’import s’ouvre en mode Ajouter, avec ce qui sera réellement ajouté (arrivé coché, dans le dossier partagé). Jamais vos cases cochées, réglages ni recherches ; aucun réseau, c’est la messagerie de la rédaction qui sert de transport. Une agence fournie que le destinataire n’a pas modifiée prend les réglages partagés (ex. une page de connexion).

@@ -6,6 +6,13 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Receiving a share code is easier.** **+ Add an agency** is now also at the bottom of the list outside Organise mode (where the share message sends your colleague), and a code pasted into the keywords field opens the add screen directly. An incomplete or damaged code is reported instead of ignored.
+- **Organise mode: the bin no longer sits next to the name.** Tools are in the same order on agencies and folders: share, pencil, eye, then bin. The **Undo** line stays fifteen seconds instead of six, and a folder's bin tooltip says its agencies are kept.
+- **File import: “Add” is selected by default**, the mode that removes and changes nothing. When there is nothing to replace, the **Replace** button looks disabled.
+- **Permission banner on one line** (“3 agencies need your permission.” + **Allow**); the list of agencies is in its tooltip and on the “to allow” pills.
+- **Side panel: “Organise” and “Settings” spelled out** next to their icon (the popup keeps icons only).
+- “Tick at least one agency.” and the other search errors show in red; an agency name being edited has a visible keyboard focus ring.
+
 ## 3.7.0 — 25 November 2026 (Chrome Web Store)
 
 - **Share an agency or a folder by copy / paste.** In Organise mode, a **share** icon on added agencies, edited built-in agencies and folder titles (and a **Share** button in an agency's pencil) copies a short code (`TabulaPix:1:…`) to paste into Slack, Teams or an e-mail. Your colleague pastes it into **+ Add an agency** or into **⚙ › Backup and sharing**: the import box opens in Add mode with what will actually be added (arriving ticked, in the shared folder). Never your ticks, settings or searches; no network, the newsroom's messaging carries it. A built-in agency the receiver hasn't edited takes the shared settings (e.g. a sign-in page).
