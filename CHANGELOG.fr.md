@@ -7,7 +7,7 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 ## [Non publié]
 
 - **Recevoir un code de partage plus facilement.** **+ Ajouter une agence** est désormais aussi en bas de la liste hors du mode Organiser (c'est là que le message de partage envoie votre collègue), et un code collé dans le champ des mots-clés ouvre directement l'écran d'ajout. Un code incomplet ou abîmé est signalé au lieu d'être ignoré.
-- **Mode Organiser : la corbeille n'est plus collée au nom.** Les outils sont dans le même ordre sur les agences et les dossiers : partager, crayon, œil, puis corbeille. La ligne **Annuler** reste quinze secondes au lieu de six, et l'infobulle de la corbeille d'un dossier précise que ses agences restent.
+- **Mode Organiser : la corbeille n'est plus collée au nom.** Les outils sont dans le même ordre sur les agences et les dossiers : partager, crayon, corbeille, puis l'œil, qui reste à sa place contre la poignée. La ligne **Annuler** reste quinze secondes au lieu de six, et l'infobulle de la corbeille d'un dossier précise que ses agences restent.
 - **Import d'un fichier : « Ajouter » est choisi par défaut**, le mode qui ne retire ni ne modifie rien. Quand il n'y a rien à remplacer, le bouton **Remplacer** apparaît bien désactivé.
 - **Bandeau d'autorisation sur une ligne** (« 3 agences sont à autoriser. » + **Autoriser**) ; la liste des agences est dans l'infobulle et sur les pastilles « à autoriser ».
 - **Colonne : « Organiser » et « Options » écrits en toutes lettres** à côté de leur icône (la popup garde les icônes seules).

@@ -1605,11 +1605,13 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     const edit = toolButton("pencil", t("opt.edit", { name: a.name }), () => showEditor(a));
     const del = toolButton("trash", t("opt.delete", { name: a.name }), () => deleteAgency(a));
     del.classList.add("fdel");
-    // Même ordre que sur un dossier : partager, crayon, œil, puis la corbeille,
-    // loin du nom et pas en dernier (on ne la clique pas en visant l'œil ou la poignée).
+    // Même ordre que sur un dossier : partager, crayon, corbeille, œil. La corbeille
+    // n'est plus collée au nom ; l'œil reste en dernier, contre la poignée : quand les
+    // autres outils apparaissent au survol (popup étroite), ils s'ajoutent à sa gauche
+    // et l'œil ne bouge pas, agence masquée ou non.
     // Partager : seulement les agences ajoutées ou fournies modifiées.
     const share = isShareable(a) ? toolButton("share", t("share.agency", { name: a.name }), () => copyShareCode({ agencyIds: [a.id] }, msg)) : null;
-    li.append(...(share ? [share] : []), edit, eye, del, grip(t("main.handle")));
+    li.append(...(share ? [share] : []), edit, del, eye, grip(t("main.handle")));
     li.draggable = true; // on la glisse aussi par son nom
     label.title = t("main.handle");
   } else {
@@ -1867,7 +1869,7 @@ function folderHead(f, color, group) {
     c.nameInput.title = f.name;
     const share = toolButton("share", t("share.folder", { name: f.name }), () => copyShareCode({ folderId: f.id }, msg));
     share.classList.add("fshare");
-    head.append(toggle, label, c.swatch, c.nameInput, count, share, c.eye, c.del, grip(t("folder.handle"))); // même ordre que les agences
+    head.append(toggle, label, c.swatch, c.nameInput, count, share, c.del, c.eye, grip(t("folder.handle"))); // même ordre que les agences ; l'œil reste en place au survol
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");

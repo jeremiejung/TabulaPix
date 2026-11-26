@@ -7,7 +7,7 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 ## [Unreleased]
 
 - **Receiving a share code is easier.** **+ Add an agency** is now also at the bottom of the list outside Organise mode (where the share message sends your colleague), and a code pasted into the keywords field opens the add screen directly. An incomplete or damaged code is reported instead of ignored.
-- **Organise mode: the bin no longer sits next to the name.** Tools are in the same order on agencies and folders: share, pencil, eye, then bin. The **Undo** line stays fifteen seconds instead of six, and a folder's bin tooltip says its agencies are kept.
+- **Organise mode: the bin no longer sits next to the name.** Tools are in the same order on agencies and folders: share, pencil, bin, then the eye, which stays in place next to the handle. The **Undo** line stays fifteen seconds instead of six, and a folder's bin tooltip says its agencies are kept.
 - **File import: “Add” is selected by default**, the mode that removes and changes nothing. When there is nothing to replace, the **Replace** button looks disabled.
 - **Permission banner on one line** (“3 agencies need your permission.” + **Allow**); the list of agencies is in its tooltip and on the “to allow” pills.
 - **Side panel: “Organise” and “Settings” spelled out** next to their icon (the popup keeps icons only).
