@@ -82,7 +82,7 @@ li .hint { margin-left: auto; padding: 1px 7px; font-size: 12px; color: var(--mu
 .group:not(.collapsed) > .group-head { border-radius: var(--r-block) var(--r-block) 4px 4px; }
 .group-head label { flex: none; min-width: 26px; display: flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 1px; cursor: pointer; }
 .group-head.foldable { cursor: pointer; }
-.group-head .folder-name { flex: 1; min-width: 0; margin-left: 2px; }
+.group-head .folder-name { flex: 1; min-width: 0; margin-left: 2px; white-space: normal; line-height: 1.25; padding: 3px 0; } /* un nom long passe à la ligne au lieu d'être coupé */
 .folder-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; color: color-mix(in srgb, var(--fc) 50%, CanvasText); }
 .count { margin-left: auto; padding: 2px 7px; border-radius: var(--r-pill); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; color: var(--muted); background: color-mix(in srgb, Canvas 75%, transparent); }
 .count.some { color: color-mix(in srgb, var(--fc) 60%, CanvasText); background: Canvas; }
@@ -346,8 +346,8 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
   html.organizing .group-head .fdel, html.organizing .group-head .fshare, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
   html.organizing .group-head .count { display: none; } /* place au nom ; le compteur reste en mode normal */
   html.organizing .group-head:is(:hover, :focus-within) :is(.fdel, .fshare, .fhide) { display: inline-flex; }
-  /* Nom en cours de modification : toute la largeur pour lui */
-  html.organizing #list li.agency:has(.aname-input:focus) .tool:not([aria-pressed="true"]) { display: none; }
+  /* Les outils restent affichés pendant qu'on modifie le nom : masqués, ils
+     sortiraient de l'ordre de tabulation (crayon, corbeille, œil inatteignables au clavier). */
 }
 
 /* Avertissements de la détection : icône dessinée + texte */
@@ -382,7 +382,8 @@ input[type=search]::-webkit-search-cancel-button:hover { opacity: .9; }
 
 /* Ligne « supprimée — Annuler », à la place de ce qui vient d'être supprimé */
 .undo-row { display: flex; align-items: center; gap: 8px; min-height: 30px; margin: 2px 0; padding: 0 10px; font-size: 12px; color: var(--muted); border: 1px dashed color-mix(in srgb, CanvasText 30%, transparent); border-radius: var(--r-control); }
-.undo-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.undo-row { padding-top: 4px; padding-bottom: 4px; }
+.undo-row span { flex: 1; min-width: 0; overflow-wrap: anywhere; } /* sur deux lignes plutôt que de couper « supprimée » */
 .undo-row .link { color: CanvasText; font-weight: 600; }
 
 /* Options : titres de section nettement au-dessus des libellés de champ */

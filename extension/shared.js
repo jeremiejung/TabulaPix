@@ -533,7 +533,7 @@ function mergeConfigImport(current, parsed, { mode, parts, settings = IMPORT_SET
   for (const id of before) if (!order.includes(id)) order.push(id);
 
   const out = { [FOLDERS_DONE_KEY]: true };
-  const report = { mode, parts: [...want], agenciesAdded: 0, restored: 0, present: 0, dupes: 0, full: 0, foldersAdded: 0, foldersPresent: 0, filed: 0, added: [], taken: [] };
+  const report = { mode, parts: [...want], agenciesAdded: 0, restored: 0, present: 0, dupes: 0, full: 0, foldersAdded: 0, foldersPresent: 0, filed: 0, added: [], taken: [], folderNames: [] };
   let hosts = [];
   const fileKnows = new Set(arr(F[STORAGE_KEYS.order]));
   const fileChecked = new Set(arr(F[STORAGE_KEYS.checked]));
@@ -563,6 +563,7 @@ function mergeConfigImport(current, parsed, { mode, parts, settings = IMPORT_SET
         folders.push({ ...f, id });
         folderMap.set(f.id, id);
         report.foldersAdded++;
+        report.folderNames.push(f.name);
       }
       // Vos agences hors dossier vont dans le dossier que leur donne le fichier ;
       // celles déjà rangées restent où elles sont.

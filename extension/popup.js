@@ -1171,6 +1171,18 @@ const importMode = () => importConfirm.querySelector('input[name="importMode"]:c
 let importCurrent = {};
 const fxNames = (list) => (list.length ? " (" + list.slice(0, 3).join(", ") + (list.length > 3 ? ", …" : "") + ")" : "");
 const fxJoin = (items) => items.filter(Boolean).join(" · ") || t("backup.fx.none");
+// Bilan d'un ajout (fichier ou code), en phrases avec les noms ; rien à zéro.
+function addedLines(r) {
+  const lines = [
+    r.added.length ? t("backup.done.agencies", { n: r.added.length }) + fxNames(r.added) + "." : "",
+    r.foldersAdded ? t("backup.done.folders", { n: r.foldersAdded }) + fxNames(r.folderNames || []) + "." : "",
+    r.filed ? t("backup.done.filed", { n: r.filed }) : "",
+    r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "",
+    r.present ? t("backup.added.dupes", { n: r.present }) : "",
+    r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : "",
+  ].filter(Boolean);
+  return lines.length ? lines : [t("backup.done.nothing")];
+}
 function settingValue(id, v) {
   if (v === null || v === undefined) return t("backup.fx.absent");
   if (id === "language") return t("backup.lang." + v);
@@ -1233,7 +1245,7 @@ function renderImportChoice() {
       : settingValue(item.id, item.from) + " → " + settingValue(item.id, item.to);
   }
   importChoice = { mode, parts, settings: pick };
-  const nothing = !parts.length ? t("backup.nothing") : !changes ? t(add ? "backup.add.nothing" : "backup.replace.nothing") : "";
+  const nothing = !parts.length ? t("backup.nothing") : !changes ? t(pendingImport.share ? "share.add.nothing" : add ? "backup.add.nothing" : "backup.replace.nothing") : "";
   $id("importConfirmText").textContent = nothing || t(pendingImport.share ? "share.add.text" : add ? "backup.add.text" : "backup.replace.text");
   const ok = $id("importOk");
   ok.textContent = t(add ? "backup.add.ok" : "backup.replace.ok");
@@ -1364,7 +1376,7 @@ $id("importOk").addEventListener("click", async () => {
     await leaveEditor();
     const r = merged.report;
     msg.classList.remove("err");
-    msg.textContent = [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "", r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""].filter(Boolean).join(" ");
+    msg.textContent = addedLines(merged.report).join(" ");
     flashEl(msg);
     return;
   }
@@ -1375,7 +1387,7 @@ $id("importOk").addEventListener("click", async () => {
     // Résumé écrit après l'import : dans la langue du fichier importé, s'il en change.
     const r = merged.report, s = result.summary;
     const lines = r.mode === "add"
-      ? [t("backup.added", { ...r, agencies: r.agenciesAdded + r.restored }), r.taken.length ? t("backup.added.taken", { n: r.taken.length }) + fxNames(r.taken) + "." : "", r.present ? t("backup.added.dupes", { n: r.present }) : "", r.full ? t("backup.added.full", { n: r.full, max: MAX_CUSTOM }) : ""]
+      ? addedLines(r)
       : [t("backup.replaced", { parts: r.parts.map((p) => t("backup.part." + p).toLowerCase()).join(", ") })];
     lines.push(s.skipped ? t("backup.skipped", { n: s.skipped }) : "", s.unknown ? t("backup.unknown", { n: s.unknown }) : "", s.newer ? t("backup.newer") : "");
     backupMsg.textContent = t("backup.imported") + " " + lines.filter(Boolean).join(" ") + (toAllow ? "\n" + t("backup.needPerm") : "");

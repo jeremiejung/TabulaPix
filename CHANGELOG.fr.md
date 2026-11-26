@@ -13,6 +13,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 - **Import d'un fichier : « Ajouter » est choisi par défaut**, le mode qui ne retire ni ne modifie rien. Quand il n'y a rien à remplacer, le bouton **Remplacer** apparaît bien désactivé.
 - **Bandeau d'autorisation sur une ligne** (« 3 agences sont à autoriser. » + **Autoriser**) ; la liste des agences est dans l'infobulle et sur les pastilles « à autoriser ».
 - **Colonne : « Organiser » et « Options » écrits en toutes lettres** à côté de leur icône (la popup garde les icônes seules).
+- **Clavier, mode Organiser dans la popup :** le crayon, la corbeille et l'œil d'une agence sont de nouveau atteignables avec Tab (ils disparaissaient pendant que le nom avait le focus, depuis la 3.7.0).
+- **Bilan d'un ajout en phrases**, avec les noms et sans compteurs à zéro (ex. « Dossiers ajoutés : 1 (People). ») ; pour un code de partage, la boîte parle de « ce code » et non plus de « ce fichier ».
+- Les noms de dossier longs passent à la ligne au lieu d'être coupés, et la ligne d'annulation garde « supprimée » en entier.
 - « Cochez au moins une agence. » et les autres erreurs de la recherche s'affichent en rouge ; le nom d'une agence en cours de modification a un anneau de focus visible au clavier.
 
 ## 3.7.0 — 25 novembre 2026 (Chrome Web Store)
