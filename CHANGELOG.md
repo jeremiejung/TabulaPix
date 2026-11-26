@@ -6,6 +6,11 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.7.4 — 26 November 2026 (Chrome Web Store)
+
+- **Organise mode: after clicking the eye**, the bin, pencil and share icons no longer stay on screen once the mouse has left (with the keyboard, they stay while focus is on the row).
+- **A hidden agency keeps its tick**, greyed out, instead of looking unticked then ticked again: its tick never changed and takes effect again when the agency is shown. Ticking another box in Organise mode no longer clears the tick of hidden agencies.
+
 ## 3.7.3 — 26 November 2026 (Chrome Web Store)
 
 - **Share code: a clear screen.** A pasted code opens a “Share code” screen that no longer shows the add-agency form (address, keywords, **Detect**). It says what the code contains, with names (“Folder “Celebrity” and its 4 agencies: …”), then what will happen (“To add, ticked: 1 (Bestimage). The folder “Celebrity” will be created.”), without checkboxes or counters. **Add** or **Cancel**; if you already have everything, a single **Back to the list** button instead of a greyed-out **Add**. Importing a file doesn't change.
