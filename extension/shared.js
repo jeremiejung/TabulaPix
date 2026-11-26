@@ -203,6 +203,12 @@ async function applyNewAgencyDefaults() {
     }
   }
   const update = { [SEEN_KEY]: AGENCIES.map((a) => a.id), [HIDDEN_KEY]: [...hidden], [REMOVED_KEY]: [...removed] };
+  // Première installation : les cases par défaut sont enregistrées tout de suite,
+  // sinon la reprise ci-dessus (« jamais changé ses cases ») s'appliquerait à
+  // l'ouverture suivante et recocherait les agences d'avant.
+  if (!seen.size && !Array.isArray(prior[STORAGE_KEYS.checked])) {
+    update[STORAGE_KEYS.checked] = AGENCIES.filter((a) => a.defaultChecked !== false).map((a) => a.id);
+  }
   // Chez un utilisateur existant, les nouvelles agences vont en fin de liste,
   // regroupées (et non intercalées entre les siennes, qui gardent leur place).
   const stored = Array.isArray(data[STORAGE_KEYS.order]) ? data[STORAGE_KEYS.order] : [];
