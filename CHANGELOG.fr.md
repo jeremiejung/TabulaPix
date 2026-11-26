@@ -6,6 +6,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Mode Organiser : après un clic sur l'œil**, la corbeille, le crayon et l'icône partager ne restent plus affichés une fois la souris partie (au clavier, ils restent là tant que le focus est sur la ligne).
+- **Une agence masquée garde sa case cochée**, grisée, au lieu de paraître décochée puis recochée : sa coche n'a jamais changé, elle reprend effet quand l'agence est réaffichée. Cocher une autre case en mode Organiser n'efface plus la coche des agences masquées.
+
 ## 3.7.3 — 26 novembre 2026 (Chrome Web Store)
 
 - **Code de partage : un écran clair.** Un code collé ouvre un écran « Code de partage » qui ne montre plus le formulaire d'ajout d'agence (adresse, mots-clés, **Détecter**). Il dit ce que contient le code, avec les noms (« Dossier « People » et ses 4 agences : … »), puis ce qui va se passer (« À ajouter, cochées : 1 (Bestimage). Le dossier « People » sera créé. »), sans cases à cocher ni compteurs. **Ajouter** ou **Annuler** ; si vous avez déjà tout, un seul bouton **Retour à la liste** au lieu d'un **Ajouter** grisé. L'import d'un fichier ne change pas.

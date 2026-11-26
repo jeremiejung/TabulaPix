@@ -935,12 +935,33 @@ settingsForm.addEventListener("submit", (e) => e.preventDefault()); // Entrée :
 
 // Après reconstruction d'une liste : remet le focus sur le même élément.
 const focusKey = () => document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : undefined;
+// Dernière interaction au clavier (et non à la souris) : sert à rendre le focus
+// à un outil de ligne, qui n'est affiché qu'au survol ou au focus clavier.
+let keyboardNav = false;
+const TOOL_ROW = "li.agency, .group-head";
+// Ligne parcourue au clavier : ses outils restent affichés tant que le focus y est
+// (le navigateur retire le focus avant de le déplacer : sans cette marque, Tab
+// sauterait les outils). Un clic de souris ne la pose pas.
+document.addEventListener("keydown", () => {
+  keyboardNav = true;
+  document.activeElement?.closest?.(TOOL_ROW)?.classList.add("kbd-tools");
+}, true);
+document.addEventListener("pointerdown", () => { keyboardNav = false; }, true);
+document.addEventListener("focusin", (e) => { if (keyboardNav) e.target.closest?.(TOOL_ROW)?.classList.add("kbd-tools"); });
+document.addEventListener("focusout", (e) => {
+  const row = e.target.closest?.(TOOL_ROW);
+  if (row && !row.contains(e.relatedTarget)) row.classList.remove("kbd-tools");
+});
 function restoreFocus(container, key) {
   if (!key) return;
   const el = container.querySelector(`[data-key="${CSS.escape(key)}"]`);
   if (!el) return;
   const palette = el.closest(".palette");
   if (palette) { palette.hidden = false; palette.parentElement.querySelector(".swatch")?.setAttribute("aria-expanded", "true"); }
+  // Au clavier, les outils de la ligne sont affichés le temps de leur rendre le
+  // focus (un bouton non affiché ne peut pas le recevoir) ; ensuite le focus
+  // clavier suffit à les garder. Après un clic, rien : ils partent avec la souris.
+  if (keyboardNav) el.closest(TOOL_ROW)?.classList.add("kbd-tools");
   el.focus();
 }
 
@@ -1598,8 +1619,10 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
   if (!isHidden) box.setAttribute("aria-describedby", "organizeKbd"); // consigne clavier lue au focus
   box.value = a.id;
   box.dataset.key = "a:" + a.id;
-  box.checked = !isHidden && checked.includes(a.id);
-  box.disabled = isHidden || inHiddenFolder; // dossier masqué : coche gardée, mais inactive
+  // Masquée (ou dans un dossier masqué) : la coche est gardée et montrée, mais inactive ;
+  // elle reprend effet quand l'agence est réaffichée.
+  box.checked = checked.includes(a.id);
+  box.disabled = isHidden || inHiddenFolder;
   if (isHidden) li.classList.add("is-hidden");
   box.addEventListener("change", save);
   box.addEventListener("keydown", (e) => {
@@ -2160,7 +2183,10 @@ document.addEventListener("dragend", () => {
 
 // Cases et ordre sont lus dans la liste affichée.
 const boxes = () => Array.from(list.querySelectorAll("input.agency-box"));
-const checkedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);
+// Cochées et actives (celles qu'une recherche ouvrira) ; une agence masquée garde sa
+// coche, visible mais inactive : elle compte pour l'enregistrement, pas pour la recherche.
+const checkedIds = () => boxes().filter((b) => b.checked && !b.disabled).map((b) => b.value);
+const savedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);
 // Agences cochées dont le site attend l'autorisation de Chrome (pastille « à autoriser ») :
 // la recherche ne leur ouvre pas d'onglet, qui resterait sans mots-clés.
 let blockedIds = new Set();
@@ -2170,7 +2196,7 @@ function save() {
   msg.textContent = "";
   for (const id of checkedIds()) clearNew(id); // cochée : plus besoin de la signaler
   updateFolderStates();
-  chrome.storage.local.set({ [STORAGE_KEY]: [...new Set(checkedIds().concat(keptChecked))] });
+  chrome.storage.local.set({ [STORAGE_KEY]: [...new Set(savedIds().concat(keptChecked))] });
   updatePermUI();
 }
 

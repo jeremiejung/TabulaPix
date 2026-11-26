@@ -337,13 +337,15 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
 }
 
 /* Mode Organiser, popup comme colonne : le nom passe d'abord. Les outils d'une
-   ligne n'apparaissent qu'au survol ou au focus de cette ligne (et restent
-   atteignables au clavier : le focus dans la ligne les affiche) ; l'œil barré
-   d'une agence ou d'un dossier masqué reste visible, c'est un état. */
+   ligne n'apparaissent qu'au survol ou au focus clavier de cette ligne (après un
+   clic de souris, ils disparaissent dès que la souris s'en va, même si le bouton
+   cliqué garde le focus) ; l'œil barré d'une agence ou d'un dossier masqué reste
+   visible, c'est un état. .kbd-tools : ligne parcourue au clavier (posée par
+   popup.js, retirée quand le focus quitte la ligne). */
 html.organizing #list li.agency .tool:not([aria-pressed="true"]) { display: none; }
-html.organizing #list li.agency:is(:hover, :focus-within) .tool { display: inline-flex; }
+html.organizing #list li.agency:is(:hover, .kbd-tools) .tool { display: inline-flex; }
 html.organizing .group-head .fdel, html.organizing .group-head .fshare, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
-html.organizing .group-head:is(:hover, :focus-within) :is(.fdel, .fshare, .fhide) { display: inline-flex; }
+html.organizing .group-head:is(:hover, .kbd-tools) :is(.fdel, .fshare, .fhide) { display: inline-flex; }
 #list { container: list / inline-size; }
 @container list (max-width: 330px) {
   html.organizing .group-head .count { display: none; } /* place au nom ; le compteur reste en mode normal */
