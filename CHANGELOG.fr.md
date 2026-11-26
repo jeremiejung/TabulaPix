@@ -6,6 +6,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Plus de demande d'autorisation au premier lancement.** Abacapress, Bloomberg et Pixpalace, qui remplissent le champ de recherche de leur site et demandent donc une autorisation de Chrome, ne sont plus cochées à l'installation : le premier écran mène directement à la recherche. L'autorisation est demandée quand on coche l'une d'elles. Rien ne change pour les utilisateurs actuels : leurs cases restent telles quelles.
+- **Une agence pas encore autorisée n'ouvre plus d'onglet vide.** Tant que son site attend l'autorisation (pastille « à autoriser »), la recherche la saute et le bouton ne la compte pas ; si seules des agences à autoriser sont cochées, un message le dit.
+
 ## 3.7.1 — 26 novembre 2026 (Chrome Web Store)
 
 - **Recevoir un code de partage plus facilement.** **+ Ajouter une agence** est désormais aussi en bas de la liste hors du mode Organiser (c'est là que le message de partage envoie votre collègue), et un code collé dans le champ des mots-clés ouvre directement l'écran d'ajout. Un code incomplet ou abîmé est signalé au lieu d'être ignoré.

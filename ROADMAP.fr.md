@@ -33,7 +33,6 @@ Pistes envisagées pour de futures versions, avec ce qui a déjà été décidé
 
 Relevées lors de la critique de l'interface (novembre 2026), trop larges pour une version de correctifs.
 
-- **Première recherche avant les autorisations.** Aujourd'hui, le premier écran demande d'autoriser des sites avant toute recherche. Piste : ne pas cocher par défaut les agences qui en ont besoin, ou lancer la première recherche avec les autres puis proposer « 3 agences sautées : les autoriser ? ».
 - **Mode Organiser allégé dans la colonne.** Les outils (crayon, corbeille, œil) y sont affichés sur chaque ligne en permanence. Piste : les montrer au survol ou au focus, comme dans la popup, en gardant visible l'œil d'une agence masquée (c'est un état), et un seul sens pour l'icône œil.
 - **Sélections enregistrées.** Des « jeux » d'agences ou de dossiers par sujet (ex. « Actu seulement », « People + Agrégateurs »), à rappeler en un clic au lieu de recocher.
 - **Confirmation après une recherche dans la colonne.** La popup se ferme ; la colonne reste ouverte sans rien dire. Piste : une ligne discrète « 11 onglets ouverts », et le nom des agences sautées s'il y en a.

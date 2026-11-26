@@ -1757,6 +1757,8 @@ let pendingOrigins = [];
 const permBanner = document.getElementById("permBanner");
 function renderPermBanner(missing) {
   pendingOrigins = [...missing.keys()];
+  blockedIds = new Set([...missing.values()].flat().map((a) => a.id));
+  updateGoCount();
   const names = [...missing.values()].flat().map((a) => a.name);
   permBanner.hidden = !names.length;
   document.getElementById("permText").dir = "auto";
@@ -2015,7 +2017,11 @@ function updateFolderStates() {
       count.classList.toggle("some", on > 0);
     }
   }
-  const n = checkedIds().length;
+  updateGoCount();
+}
+// Le bouton compte les onglets qui s'ouvriront : pas les agences encore à autoriser.
+function updateGoCount() {
+  const n = readyIds().length;
   goCount.textContent = n ? (n === 1 ? t("main.tabs.one") : t("main.tabs.many", { n })) : "";
 }
 const goCount = document.getElementById("goCount");
@@ -2131,6 +2137,10 @@ document.addEventListener("dragend", () => {
 // Cases et ordre sont lus dans la liste affichée.
 const boxes = () => Array.from(list.querySelectorAll("input.agency-box"));
 const checkedIds = () => boxes().filter((b) => b.checked).map((b) => b.value);
+// Agences cochées dont le site attend l'autorisation de Chrome (pastille « à autoriser ») :
+// la recherche ne leur ouvre pas d'onglet, qui resterait sans mots-clés.
+let blockedIds = new Set();
+const readyIds = () => checkedIds().filter((id) => !blockedIds.has(id));
 
 function save() {
   msg.textContent = "";
@@ -2212,10 +2222,10 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   if (sweeping || organizing) return;
   const q = input.value.trim();
-  const ids = checkedIds();
+  const ids = readyIds();
   msg.classList.remove("err");
   if (!q) return input.focus();
-  if (!ids.length) { msg.classList.add("err"); msg.textContent = t("main.noAgency"); return; }
+  if (!ids.length) { msg.classList.add("err"); msg.textContent = t(checkedIds().length ? "main.allBlocked" : "main.noAgency"); return; }
 
   const selected = ids.map((id) => AGENCY_BY_ID.get(id)); // dans l'ordre affiché
   // Agences « à coller » : copie tout de suite, pendant le clic (aucune

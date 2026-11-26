@@ -121,6 +121,7 @@ const AGENCIES = [
     id: "abacapress",
     name: "Abacapress",
     folder: "tp-actu",
+    defaultChecked: false, // autorisation de site : demandée quand on la coche
     url: "https://search.abacapress.com/recherche",
     fill: {
       input: "#fullTextInput",
@@ -146,6 +147,7 @@ const AGENCIES = [
     id: "bloomberg",
     name: "Bloomberg",
     folder: "tp-actu",
+    defaultChecked: false, // autorisation de site : demandée quand on la coche
     url: "https://mercury.bloomberg.com/search",
     fill: {
       input: "form.searchbar input.react-autosuggest__input",
@@ -225,6 +227,7 @@ const AGENCIES = [
     id: "pixpalace",
     name: "Pixpalace",
     folder: "tp-agregateurs",
+    defaultChecked: false, // autorisation de site : demandée quand on la coche
     url: "https://{opt:pixpalaceSubdomain}.pixpalace.com/home",
     fill: {
       input: "#search-field",

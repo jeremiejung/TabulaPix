@@ -170,7 +170,18 @@ const NEW_KEY = "newAgencies"; // { id: ouvertures restantes } : pastille « Nou
 const NEW_OPENS = 5;
 const TAB_GROUPS_KEY = "tabGroups"; // { enabled, collapsed } : onglets regroupés par dossier (désactivé par défaut)
 const TAB_GROUPS_PERMISSION = { permissions: ["tabGroups"] }; // facultative : demandée en cochant l'option
+// Cochées par défaut jusqu'à la 3.7.1, décochées ensuite (autorisation de site).
+const PREVIOUSLY_DEFAULT_CHECKED = ["abacapress", "bloomberg", "pixpalace"];
 async function applyNewAgencyDefaults() {
+  // Utilisateur existant qui n'a jamais changé ses cases : rien n'est enregistré
+  // et la liste suit les cases par défaut. On enregistre celles d'avant, pour
+  // qu'un changement des valeurs par défaut ne décoche rien chez lui.
+  const prior = await chrome.storage.local.get([STORAGE_KEYS.checked, SEEN_KEY]);
+  if (Array.isArray(prior[SEEN_KEY]) && prior[SEEN_KEY].length && !Array.isArray(prior[STORAGE_KEYS.checked])) {
+    const seenIds = new Set(prior[SEEN_KEY]);
+    const before = AGENCIES.filter((a) => seenIds.has(a.id) && (a.defaultChecked !== false || PREVIOUSLY_DEFAULT_CHECKED.includes(a.id)));
+    await chrome.storage.local.set({ [STORAGE_KEYS.checked]: before.map((a) => a.id) });
+  }
   const data = await chrome.storage.local.get({ [SEEN_KEY]: [], [HIDDEN_KEY]: [], [REMOVED_KEY]: [], [CUSTOM_KEY]: [],
     [FOLDERS_KEY]: [], [FOLDER_OF_KEY]: {}, [STORAGE_KEYS.order]: [], [FOLDERS_DONE_KEY]: false, [NEW_KEY]: {} });
   const seen = new Set(Array.isArray(data[SEEN_KEY]) ? data[SEEN_KEY] : []);
