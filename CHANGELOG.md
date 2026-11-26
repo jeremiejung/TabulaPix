@@ -6,6 +6,13 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.7.2 — 26 November 2026 (Chrome Web Store)
+
+- **Side panel: a discreet line confirms the search** (“8 searches started.”), with the agencies skipped because they still need permission (“To allow, not searched: 1 (Abacapress).”). It clears as soon as you type the next search. The popup closes as before.
+- **Calmer Organise mode in the side panel.** As in the popup, a row's tools (share, pencil, bin, eye) only appear on hover or keyboard focus of that row, instead of on every row; the crossed-out eye of a hidden agency or folder stays visible. The eye now always shows the state (open: shown, crossed out: hidden) and no longer changes icon on hover; its tooltip says what a click does.
+- **No permission request on first launch any more.** Abacapress, Bloomberg and Pixpalace, which fill in their site's search field and so need a Chrome permission, are no longer ticked on installation: the first screen leads straight to searching. The permission is asked when you tick one of them. Nothing changes for current users: their ticks stay as they are.
+- **An agency not yet allowed no longer opens an empty tab.** While its site awaits permission (“to allow” pill), a search skips it and the button doesn't count it; if only agencies to allow are ticked, a message says so.
+
 ## 3.7.1 — 26 November 2026 (Chrome Web Store)
 
 - **Receiving a share code is easier.** **+ Add an agency** is now also at the bottom of the list outside Organise mode (where the share message sends your colleague), and a code pasted into the keywords field opens the add screen directly. An incomplete or damaged code is reported instead of ignored.
