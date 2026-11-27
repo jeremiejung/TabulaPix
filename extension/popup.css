@@ -199,6 +199,9 @@ html.organizing #go > .go-paused { display: inline; }
 .go-count:not(:empty)::before { content: "· "; }
 #msg { margin: 6px 0 0; font-size: 12px; }
 #msg.err { color: var(--err); }
+.tg-offer { margin: 6px 0 0; font-size: 12px; color: var(--muted); } /* proposition des groupes d'onglets, discrète */
+.tg-offer[hidden] { display: none; }
+.tg-actions { white-space: nowrap; } /* « Activer · Non merci » ne se séparent pas */
 #msg[data-kind="sweep"] { color: var(--muted); } /* confirmation discrète d'une recherche dans la colonne */
 /* En-tête de la recherche (marque, boutons, mots-clés, Rechercher) : reste en
    haut quand la liste défile. Il couvre la marge du haut du corps de page ;

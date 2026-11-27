@@ -170,6 +170,7 @@ const NEW_KEY = "newAgencies"; // { id: ouvertures restantes } : pastille « Nou
 const NEW_OPENS = 5;
 const TAB_GROUPS_KEY = "tabGroups"; // { enabled, collapsed } : onglets regroupés par dossier (désactivé par défaut)
 const TAB_GROUPS_PERMISSION = { permissions: ["tabGroups"] }; // facultative : demandée en cochant l'option
+const TG_OFFER_KEY = "tabGroupsOffer"; // proposition des groupes d'onglets : { shown, pending } ou "done"
 // Cochées par défaut jusqu'à la 3.7.1, décochées ensuite (autorisation de site).
 const PREVIOUSLY_DEFAULT_CHECKED = ["abacapress", "bloomberg", "pixpalace"];
 async function applyNewAgencyDefaults() {

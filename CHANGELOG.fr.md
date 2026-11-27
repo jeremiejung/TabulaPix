@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Groupes d'onglets proposés au bon moment.** Après une recherche qui ouvre des onglets de plusieurs dossiers, une ligne discrète propose « Ranger les onglets en groupes, un par dossier ? **Activer** · **Non merci** » (dans la popup, à l'ouverture suivante). **Activer** demande l'autorisation à Chrome et coche l'option ; la proposition s'arrête après trois fois, **Non merci** ou un réglage dans ⚙ › Onglets. L'option n'est pas cochée d'office : l'autorisation qu'elle demande ne peut l'être qu'au clic, et la rendre obligatoire ajouterait un avertissement à l'installation et désactiverait l'extension chez les utilisateurs actuels jusqu'à leur accord.
+
 ## 3.7.5 — 27 novembre 2026 (Chrome Web Store)
 
 - **Envoyer une agence ou un dossier : un avion en papier, hors du mode Organiser.** L'icône de partage devient un avion en papier (infobulle « Envoyer ») ; elle apparaît au survol dans la liste habituelle, sur le titre des dossiers et sur les agences ajoutées ou modifiées, et n'est plus dans le mode Organiser (qui garde crayon, corbeille et œil).
