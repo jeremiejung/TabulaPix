@@ -6,13 +6,12 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
-- Textes de l'interface en rédaction épicène (« une ou un collègue », « après la connexion »), sans point médian.
-
-- **Page de connexion d'une agence : sortie des « Détails techniques ».** Le champ (facultatif) est maintenant sous l'adresse de recherche, avec une aide qui dit à quoi il sert. Il était aussi inaccessible pour une agence dont le champ de recherche restait à repérer.
+## 3.7.5 — 27 novembre 2026 (Chrome Web Store)
 
 - **Envoyer une agence ou un dossier : un avion en papier, hors du mode Organiser.** L'icône de partage devient un avion en papier (infobulle « Envoyer ») ; elle apparaît au survol dans la liste habituelle, sur le titre des dossiers et sur les agences ajoutées ou modifiées, et n'est plus dans le mode Organiser (qui garde crayon, corbeille et œil).
 - **Mode Organiser : plus de pointillés sous les noms.** Un nom modifiable a l'air d'un texte normal ; un cadre de champ apparaît au survol, et le champ s'ouvre au clic.
-
+- **Page de connexion d'une agence : sortie des « Détails techniques ».** Le champ (facultatif) est maintenant sous l'adresse de recherche, avec une aide qui dit à quoi il sert. Il était aussi inaccessible pour une agence dont le champ de recherche restait à repérer.
+- Textes de l'interface en rédaction épicène (« une ou un collègue », « après la connexion »), sans point médian.
 - Message après une restauration d'agences plus court (« ✓ 2 agences restaurées. »).
 
 ## 3.7.4 — 26 novembre 2026 (Chrome Web Store)
