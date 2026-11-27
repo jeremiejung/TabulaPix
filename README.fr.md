@@ -6,7 +6,7 @@
 
 **[Installer depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** · site : [tabulapix.com](https://tabulapix.com)
 
-Extension Chrome pour les services photo, iconographes et éditeurs photo : tapez vos mots-clés une fois et cherchez sur toutes vos agences photo en même temps. TabulaPix ouvre un onglet par agence, résultats prêts, avec vos propres comptes. Aucun scraping, aucune clé d'API, aucun mot de passe enregistré. Interface en français et en anglais.
+Extension Chrome pour les services photo, les iconographes, les éditrices et éditeurs photo : tapez vos mots-clés une fois et cherchez sur toutes vos agences photo en même temps. TabulaPix ouvre un onglet par agence, résultats prêts, avec vos propres comptes. Aucun scraping, aucune clé d'API, aucun mot de passe enregistré. Interface en français et en anglais.
 
 Tout se règle depuis l'extension (mode **Organiser** et options **⚙**), sans modifier de fichier : agences affichées, ordre, dossiers, agences ajoutées avec détection automatique, adresses et repérages modifiables, langue, sous-domaine Pixpalace. Les agences cochées et leur ordre sont mémorisés d'une utilisation à l'autre.
 
@@ -63,7 +63,7 @@ Pour certaines agences (Bloomberg, Abacapress, Pixpalace, Hans Lucas, Magnum, My
 
 Si une agence ajoutée plus tard n'a ni adresse avec `{q}` ni remplissage automatique, elle est marquée **« coller »** : la page s'ouvre et vos mots-clés sont copiés dans le presse-papiers, il suffit de faire **Ctrl+V** (ou **Cmd+V**) dans le champ de recherche.
 
-Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude : l'extension ne fait qu'ouvrir des onglets. Pour les agences qui ont une page de connexion (Sipa, livrée ainsi), le survol de l'agence montre aussi une icône **Se connecter**, à côté de la poignée : elle ouvre la page de connexion dans l'onglet de l'agence (ou un nouveau), et la dernière recherche de cet onglet est relancée une fois connecté. Sipa affiche une page noire quand une recherche arrive sans session : TabulaPix la reconnaît au titre de l'onglet, ouvre la page de connexion à sa place et relance la recherche après la connexion.
+Vos sessions sur les sites des agences doivent être ouvertes dans Chrome, comme d'habitude : l'extension ne fait qu'ouvrir des onglets. Pour les agences qui ont une page de connexion (Sipa, livrée ainsi), le survol de l'agence montre aussi une icône **Se connecter**, à côté de la poignée : elle ouvre la page de connexion dans l'onglet de l'agence (ou un nouveau), et la dernière recherche de cet onglet est relancée après la connexion. Sipa affiche une page noire quand une recherche arrive sans session : TabulaPix la reconnaît au titre de l'onglet, ouvre la page de connexion à sa place et relance la recherche après la connexion.
 
 ## Mode Organiser
 
@@ -80,7 +80,7 @@ Le bouton **Organiser** en haut (icône liste ; écrit en toutes lettres dans la
 
 ### Partager une agence ou un dossier
 
-Pour envoyer une agence ou tout un dossier à un collègue, sans compte ni serveur : c'est la messagerie de la rédaction (Slack, Teams, e-mail) qui sert de transport.
+Pour envoyer une agence ou tout un dossier à vos collègues, sans compte ni serveur : c'est la messagerie de la rédaction (Slack, Teams, e-mail) qui sert de transport.
 
 - **Envoyer** : hors du mode Organiser, au survol d'une agence ajoutée ou modifiée, ou du titre d'un dossier, l'icône en forme d'avion en papier (ou, dans le crayon d'une agence, le bouton **Partager**). TabulaPix copie un court code (`TabulaPix:1:…`) qui contient l'agence, ou le dossier (nom, couleur) et ses agences affichées : adresse, modèle, champ repéré, page de connexion — jamais vos cases cochées, vos réglages ni vos recherches. Les agences fournies ne sont partagées que si vous les avez modifiées (sinon votre collègue les a déjà) ; dans un dossier, elles sont simplement citées, pour y être rangées.
 - **Recevoir** : collez le code dans **+ Ajouter une agence** (premier champ), dans le champ des mots-clés (l'écran **Code de partage** s'ouvre alors tout seul) ou dans **⚙ › Sauvegarde et partage › Coller un code de partage**. TabulaPix dit ce que contient le code (ex. « Dossier « People » et ses 4 agences : … ») et ce qui va se passer, avec les noms, sans rien à choisir : **Ajouter** ou **Annuler**, ou un seul bouton **Retour à la liste** si vous avez déjà tout. En détail : ce qui vous manque arrive coché, un dossier du même nom est réutilisé ; ce que vous avez déjà ne change pas (une agence fournie que vous n'avez pas modifiée prend les réglages de votre collègue). Chaque agence est vérifiée comme une agence ajoutée à la main ; si elle remplit un champ, Chrome demande l'autorisation pour son site.

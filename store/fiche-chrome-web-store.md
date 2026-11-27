@@ -83,7 +83,7 @@ Les examinateurs lisent l'anglais : les textes anglais sont recommandés (traduc
 TabulaPix lets photo editors run the same keyword search on several news picture agency websites at once, opening one tab per agency with the results, using the user's own accounts.
 ```
 
-> TabulaPix permet aux éditeurs photo de lancer la même recherche par mots-clés sur plusieurs sites d'agences photo à la fois, en ouvrant un onglet par agence avec les résultats, avec leurs propres comptes.
+> TabulaPix permet aux éditrices et éditeurs photo de lancer la même recherche par mots-clés sur plusieurs sites d'agences photo à la fois, en ouvrant un onglet par agence avec les résultats, avec leurs propres comptes.
 
 ### Justification des autorisations
 
