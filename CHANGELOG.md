@@ -6,6 +6,9 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Send an agency or a folder: a paper plane, outside Organise mode.** The share icon becomes a paper plane (tooltip “Send”); it appears on hover in the usual list, on folder titles and on added or edited agencies, and is no longer in Organise mode (which keeps pencil, bin and eye).
+- **Organise mode: no more dashes under names.** An editable name looks like plain text; a field frame appears on hover, and the field opens on click.
+
 - Shorter message after restoring agencies (“✓ 2 agencies restored.”).
 
 ## 3.7.4 — 26 November 2026 (Chrome Web Store)

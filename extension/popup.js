@@ -1572,7 +1572,7 @@ const ICONS = {
   pencil: '<path d="M10.5 2.8l2.7 2.7L6 12.7l-3.3.6.6-3.3z"/><path d="M9 4.3l2.7 2.7"/>',
   eye: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/>',
   login: '<path d="M9.5 2.5h3.5v11H9.5"/><path d="M2.5 8h7.5M7 5l3 3-3 3"/>',
-  share: '<path d="M8 2.5v8M5 5.5l3-3 3 3"/><path d="M3.5 8.5v4.5h9V8.5"/>',
+  share: '<path d="M14.2 1.8 1.8 6.9l5 2.3 2.3 5z"/><path d="M14.2 1.8 6.8 9.2"/>', // avion en papier : envoyer
   eyeOff: '<path d="M1.5 8s2.4-4.5 6.5-4.5S14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z"/><path d="M2.5 13.5l11-11"/>',
 };
 function icon(name) {
@@ -1679,17 +1679,21 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
     const edit = toolButton("pencil", t("opt.edit", { name: a.name }), () => showEditor(a));
     const del = toolButton("trash", t("opt.delete", { name: a.name }), () => deleteAgency(a));
     del.classList.add("fdel");
-    // Même ordre que sur un dossier : partager, crayon, corbeille, œil. La corbeille
-    // n'est plus collée au nom ; l'œil reste en dernier, contre la poignée : quand les
-    // autres outils apparaissent au survol (popup étroite), ils s'ajoutent à sa gauche
-    // et l'œil ne bouge pas, agence masquée ou non.
-    // Partager : seulement les agences ajoutées ou fournies modifiées.
-    const share = isShareable(a) ? toolButton("share", t("share.agency", { name: a.name }), () => copyShareCode({ agencyIds: [a.id] }, msg)) : null;
-    li.append(...(share ? [share] : []), edit, del, eye, grip(t("main.handle")));
+    // Même ordre que sur un dossier : crayon, corbeille, œil. La corbeille n'est pas
+    // collée au nom ; l'œil reste en dernier, contre la poignée : quand les autres
+    // outils apparaissent au survol, ils s'ajoutent à sa gauche et l'œil ne bouge pas.
+    // (Envoyer est hors de ce mode : c'est un geste d'usage, pas de rangement.)
+    li.append(edit, del, eye, grip(t("main.handle")));
     li.draggable = true; // on la glisse aussi par son nom
     label.title = t("main.handle");
   } else {
     // Hors Organiser : poignée affichée au survol, on réordonne sans changer de mode.
+    // Envoyer (avion) : au survol aussi, pour les agences ajoutées ou fournies modifiées.
+    if (isShareable(a)) {
+      const share = toolButton("share", t("share.agency", { name: a.name }), () => copyShareCode({ agencyIds: [a.id] }, msg));
+      share.classList.add("row-share");
+      li.append(share);
+    }
     // Agence avec une page de connexion : l'icône « Se connecter » à côté.
     if (a.login && !isHidden) {
       const login = toolButton("login", t("ag.login", { name: a.name }), () => openLogin(a));
@@ -1928,9 +1932,7 @@ function folderHead(f, color, group) {
   if (organizing) {
     const c = folderControls(f, color, msg);
     c.nameInput.title = f.name;
-    const share = toolButton("share", t("share.folder", { name: f.name }), () => copyShareCode({ folderId: f.id }, msg));
-    share.classList.add("fshare");
-    head.append(toggle, label, c.swatch, c.nameInput, count, share, c.del, c.eye, grip(t("folder.handle"))); // même ordre que les agences ; l'œil reste en place au survol
+    head.append(toggle, label, c.swatch, c.nameInput, count, c.del, c.eye, grip(t("folder.handle"))); // même ordre que les agences ; l'œil reste en place au survol
     group.append(head, c.palette);
   } else {
     const name = document.createElement("span");
@@ -1945,7 +1947,9 @@ function folderHead(f, color, group) {
       if (e.target.closest("label, input, button, .grip")) return;
       setCollapsed(group, !group.classList.contains("collapsed"), true);
     });
-    head.append(toggle, label, name, count, grip(t("folder.handle")));
+    const share = toolButton("share", t("share.folder", { name: f.name }), () => copyShareCode({ folderId: f.id }, msg));
+    share.classList.add("row-share");
+    head.append(toggle, label, name, count, share, grip(t("folder.handle")));
     group.append(head);
   }
   return head;
@@ -1984,7 +1988,7 @@ function render(agencies, checked, folders, folderOf, hidden = new Set(), missin
     for (const a of g.items) {
       const li = agencyItem(a, checked, hidden.has(a.id), Boolean(g.folder && g.folder.hidden));
       const origin = [...missing].find(([, names]) => names.includes(a))?.[0];
-      if (origin && !organizing) li.insertBefore(permPill(origin), li.querySelector(".grip")); // avant la poignée
+      if (origin && !organizing) li.insertBefore(permPill(origin), li.querySelector(".row-share, .login-tool, .grip")); // avant les icônes
       ul.append(li);
     }
     const empty = document.createElement("p");
@@ -2214,7 +2218,7 @@ async function updatePermUI() {
   for (const [origin, agencies] of missing) {
     for (const a of agencies) {
       const li = list.querySelector(`li.agency[data-id="${CSS.escape(a.id)}"]`);
-      if (li) li.insertBefore(permPill(origin), li.querySelector(".grip"));
+      if (li) li.insertBefore(permPill(origin), li.querySelector(".row-share, .login-tool, .grip"));
     }
   }
 }

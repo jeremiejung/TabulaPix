@@ -126,6 +126,12 @@ html:not(.organizing) #list .group-head:is(:hover, :has(:focus-visible)) > .grip
 /* « Se connecter » : comme la poignée, au survol ou au clavier */
 html:not(.organizing) #list .login-tool { opacity: 0; transition: opacity .12s; }
 html:not(.organizing) #list li.agency:is(:hover, :has(:focus-visible)) > .login-tool { opacity: 1; }
+/* Envoyer (avion), hors Organiser : au survol, comme la poignée (transparent, il reste atteignable au clavier) */
+html:not(.organizing) #list .row-share { opacity: 0; transition: opacity .12s; }
+html:not(.organizing) #list :is(li.agency, .group-head):is(:hover, :has(:focus-visible)) > .row-share { opacity: 1; }
+#list .row-share { flex: none; color: var(--muted); }
+#list .row-share:hover { color: CanvasText; background: var(--line); }
+.group-head .count + .row-share, .row-share + .grip, .row-share + .login-tool { margin-left: 0; }
 .group-head .count + .grip, .perm-pill + .grip { margin-left: 0; }
 #list li.agency:hover { background: color-mix(in srgb, CanvasText 5%, transparent); }
 .dragging { opacity: .4; }
@@ -133,12 +139,12 @@ html:not(.organizing) #list li.agency:is(:hover, :has(:focus-visible)) > .login-
 /* Nom du dossier en mode Organiser : même apparence qu'en mode normal
    (majuscules, graisse, couleur), souligné en pointillé pour montrer qu'il se
    modifie ; en cours de saisie, la vraie casse s'affiche. */
-.fname-input { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; padding: 0 4px; border: 1px solid transparent; border-bottom: 1px dashed color-mix(in srgb, var(--fc) 55%, transparent); border-radius: var(--r-control) var(--r-control) 0 0; background: none; color: color-mix(in srgb, var(--fc) 50%, CanvasText); font: 750 12px system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; text-overflow: ellipsis; }
+.fname-input { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; padding: 0 4px; border: 1px solid transparent; border-radius: var(--r-control); background: none; color: color-mix(in srgb, var(--fc) 50%, CanvasText); font: 750 12px system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; text-overflow: ellipsis; }
 .fname-input:focus { text-transform: none; letter-spacing: 0; font-size: 13px; border-radius: var(--r-control); }
-.fname-input:hover { border-color: color-mix(in srgb, var(--fc) 40%, transparent); }
+.fname-input:hover { border-color: color-mix(in srgb, var(--fc) 45%, transparent); background: color-mix(in srgb, Canvas 55%, transparent); cursor: text; }
 /* Nom d'agence modifiable sur place (mode Organiser), sur le modèle du nom de dossier */
-.aname-input { flex: 1; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 4px; border: 1px solid transparent; border-bottom: 1px dashed color-mix(in srgb, CanvasText 30%, transparent); border-radius: var(--r-control) var(--r-control) 0 0; background: none; color: inherit; font: inherit; text-overflow: ellipsis; }
-.aname-input:hover { border-color: color-mix(in srgb, CanvasText 25%, transparent); }
+.aname-input { flex: 1; min-width: 0; height: 24px; box-sizing: border-box; margin: 0; padding: 0 4px; border: 1px solid transparent; border-radius: var(--r-control); background: none; color: inherit; font: inherit; text-overflow: ellipsis; }
+.aname-input:hover { border-color: color-mix(in srgb, CanvasText 28%, transparent); background: color-mix(in srgb, Canvas 60%, transparent); }
 html.organizing #list li.agency .aname-input { cursor: text; }
 .aname-input:focus { background: Canvas; border-color: var(--focus); border-radius: var(--r-control); outline: none; }
 .aname-input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
@@ -344,8 +350,8 @@ html.panel .credit { margin-top: auto; padding-top: 12px; }
    popup.js, retirée quand le focus quitte la ligne). */
 html.organizing #list li.agency .tool:not([aria-pressed="true"]) { display: none; }
 html.organizing #list li.agency:is(:hover, .kbd-tools) .tool { display: inline-flex; }
-html.organizing .group-head .fdel, html.organizing .group-head .fshare, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
-html.organizing .group-head:is(:hover, .kbd-tools) :is(.fdel, .fshare, .fhide) { display: inline-flex; }
+html.organizing .group-head .fdel, html.organizing .group-head .fhide:not([aria-pressed="true"]) { display: none; }
+html.organizing .group-head:is(:hover, .kbd-tools) :is(.fdel, .fhide) { display: inline-flex; }
 #list { container: list / inline-size; }
 @container list (max-width: 330px) {
   html.organizing .group-head .count { display: none; } /* place au nom ; le compteur reste en mode normal */
