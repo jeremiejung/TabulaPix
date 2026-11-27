@@ -559,7 +559,7 @@ function validate() {
   const loginError = ed.login.value.trim() && !cleanLogin(ed.login.value) ? t("spec.login") : "";
   const showLogin = Boolean(loginError && touched.has("login"));
   ed.loginErr.textContent = showLogin ? loginError : "";
-  if (showLogin) { ed.login.setAttribute("aria-invalid", "true"); ed.advanced.open = true; } else ed.login.removeAttribute("aria-invalid");
+  if (showLogin) ed.login.setAttribute("aria-invalid", "true"); else ed.login.removeAttribute("aria-invalid");
   if (!error && loginError) error = loginError;
   if (!error && draft.mode === "fill" && !(draft.fill && draft.fill.input)) error = t("ed.err.pickNeeded");
   ed.submit.disabled = Boolean(error);

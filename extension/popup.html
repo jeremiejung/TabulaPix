@@ -94,6 +94,14 @@
         <button type="button" id="backToUrl" class="link" data-i18n="ed.backToUrl">Utiliser plutôt une adresse de recherche</button>
       </div>
 
+      <!-- Page de connexion : une adresse que l'utilisateur connaît, pas un détail technique -->
+      <div class="field">
+        <label for="newLogin" data-i18n="ed.login">Page de connexion (facultatif)</label>
+        <input id="newLogin" type="url" autocomplete="off" spellcheck="false" placeholder="https://…/login" aria-describedby="loginHelp loginErr">
+        <p class="help" id="loginHelp" data-i18n="ed.login.help">Ouverte par l'icône « Se connecter », au survol de l'agence dans la liste.</p>
+        <p class="status err field-err" id="loginErr"></p>
+      </div>
+
       <details id="advanced">
         <summary data-i18n="ed.tech">Détails techniques</summary>
         <div id="techUrl">
@@ -110,12 +118,6 @@
           </div>
         </div>
         <p class="help" id="techFill" hidden></p>
-        <div class="field">
-          <label for="newLogin" data-i18n="ed.login">Page de connexion (facultatif)</label>
-          <input id="newLogin" type="url" autocomplete="off" spellcheck="false" placeholder="https://…/login" aria-describedby="loginHelp loginErr">
-          <p class="help" id="loginHelp" data-i18n="ed.login.help">Ouverte par l'icône « Se connecter », au survol de l'agence dans la liste.</p>
-          <p class="status err field-err" id="loginErr"></p>
-        </div>
       </details>
 
       <!-- Modification : re-détection, repliée (le formulaire ci-dessus est la saisie à la main) -->

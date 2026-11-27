@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **An agency's sign-in page: out of “Technical details”.** The (optional) field now sits under the search address, with help saying what it is for. It was also out of reach for an agency whose search field was still to be located.
+
 - **Send an agency or a folder: a paper plane, outside Organise mode.** The share icon becomes a paper plane (tooltip “Send”); it appears on hover in the usual list, on folder titles and on added or edited agencies, and is no longer in Organise mode (which keeps pencil, bin and eye).
 - **Organise mode: no more dashes under names.** An editable name looks like plain text; a field frame appears on hover, and the field opens on click.
 
