@@ -4,7 +4,7 @@
 
 **Une recherche, toutes vos agences photo.**
 
-**➜ [Installer depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** · site : [tabulapix.com](https://tabulapix.com)
+**[Installer depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** · site : [tabulapix.com](https://tabulapix.com)
 
 Extension Chrome pour les services photo, iconographes et éditeurs photo : tapez vos mots-clés une fois et cherchez sur toutes vos agences photo en même temps. TabulaPix ouvre un onglet par agence, résultats prêts, avec vos propres comptes. Aucun scraping, aucune clé d'API, aucun mot de passe enregistré. Interface en français et en anglais.
 
@@ -14,7 +14,7 @@ Extension Chrome (Manifest V3) en HTML/JavaScript simple : aucune dépendance, a
 
 ## Installation
 
-**Le plus simple : [installer TabulaPix depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**, puis épingler l'extension (icône puzzle 🧩 → épingle à côté de **TabulaPix**). Les mises à jour arrivent ensuite automatiquement.
+[Installez TabulaPix depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp), puis épinglez l'extension (icône puzzle 🧩 → épingle à côté de **TabulaPix**). Les mises à jour arrivent ensuite automatiquement.
 
 > Si vous utilisiez jusqu'ici la version chargée depuis un dossier, Chrome considère la version du store comme une autre extension : vos réglages ne sont pas repris d'eux-mêmes. Dans l'ancienne version, **⚙ › Exporter** ; installez la version du store et **⚙ › Importer…** ce fichier ; puis supprimez l'ancienne version dans `chrome://extensions` pour ne pas avoir TabulaPix en double.
 
@@ -26,8 +26,6 @@ Extension Chrome (Manifest V3) en HTML/JavaScript simple : aucune dépendance, a
 4. Cliquez sur **Charger l'extension non empaquetée** et choisissez le dossier `extension` du dépôt.
 5. Épinglez l'extension : icône puzzle 🧩 dans la barre d'outils → épingle à côté de **TabulaPix**.
 6. Réglez vos **options** (bouton ⚙ de la popup) : notamment le sous-domaine de votre espace Pixpalace (voir « Options » ci-dessous).
-
-Fonctionne aussi dans les navigateurs basés sur Chromium (Edge, Brave, Arc…) via leur page d'extensions équivalente.
 
 > **Ne déplacez pas, ne renommez pas et ne supprimez pas le dossier après l'installation.** Chrome lit l'extension directement dans ce dossier : s'il change de place, l'extension ne se charge plus (elle est désactivée, avec une erreur dans `chrome://extensions`).
 > Choisissez donc un emplacement durable avant d'installer (par exemple `Documents/TabulaPix`), pas le dossier Téléchargements ni le Bureau.
@@ -72,8 +70,8 @@ Vous devez être connecté à vos comptes agences dans Chrome, comme d'habitude 
 Le bouton **Organiser** en haut (icône liste ; écrit en toutes lettres dans la colonne, comme **Options**) passe en mode **Organiser**, où l'on range, renomme, masque, modifie et supprime agences et dossiers, directement dans la liste. **Échap** ou **Terminé** pour en sortir ; la recherche est en pause pendant ce temps. Les outils d'une ligne (partager, crayon, corbeille, œil) apparaissent au survol ou quand la ligne a le focus clavier ; l'œil barré d'une agence ou d'un dossier masqué reste toujours visible.
 
 - **Ordre et dossiers** : comme hors de ce mode : faites glisser une agence par sa poignée (à droite) entre deux agences, ou sur le titre d'un dossier (surligné) pour l'y ranger ; faites glisser un dossier par sa poignée pour le déplacer. Un glisser annulé avec Échap ne change rien. Au clavier, **Alt + ↑ / ↓** sur la case d'une agence la déplace (et la fait passer dans le dossier voisin au bord), sur la case d'un dossier déplace le dossier.
-- **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, masquez-le avec son **œil** (le dossier et ses agences disparaissent de la liste et ne sont jamais cherchés ; leurs cases cochées sont gardées pour quand vous le réaffichez), supprimez-le avec la corbeille (ses agences sont conservées, hors dossier ; **Annuler** pendant quelques secondes), créez-en un en bas de la liste. Un dossier dont toutes les agences sont masquées n'apparaît pas non plus en usage courant ; les dossiers masqués n'apparaissent, grisés, qu'en mode Organiser.
-- **Agences** : renommez une agence directement dans son nom (souligné en pointillé), comme un dossier : **Entrée** ou sortie du champ enregistre, **Échap** annule ; pour une agence fournie, **Rétablir l'original** dans son crayon redonne le nom livré. Puis, sur chaque ligne (de droite à gauche, contre la poignée : œil, crayon, partager, corbeille) :
+- **Dossiers** : renommez un dossier directement dans son titre, changez sa couleur avec sa pastille, masquez-le avec son **œil** (le dossier et ses agences disparaissent de la liste et ne sont jamais cherchés ; leurs cases cochées sont gardées pour quand vous le réaffichez), supprimez-le avec la corbeille (ses agences sont conservées, hors dossier ; **Annuler** pendant quinze secondes), créez-en un en bas de la liste. Un dossier dont toutes les agences sont masquées n'apparaît pas non plus en usage courant ; les dossiers masqués n'apparaissent, grisés, qu'en mode Organiser.
+- **Agences** : renommez une agence directement dans son nom (souligné en pointillé), comme un dossier : **Entrée** ou sortie du champ enregistre, **Échap** annule ; pour une agence fournie, **Rétablir l'original** dans son crayon redonne le nom livré. Puis, sur chaque ligne (de gauche à droite, avant la poignée : partager, crayon, corbeille, œil) :
   - **œil** : masque l'agence (elle disparaît de la liste, sa place est conservée) ou la réaffiche ; il montre l'état (ouvert : affichée, barré : masquée), son infobulle dit ce que fait le clic ; les agences masquées n'apparaissent, grisées, qu'en mode Organiser.
     - **Reuters** existe en deux versions, selon votre contrat : **Reuters (points)** pour les comptes au crédit de points (affiche le solde), visible par défaut, et **Reuters (standard)** pour les comptes sans points (téléchargement libre), masquée par défaut : affichez celle qui correspond à votre compte avec son œil. **AFP (forum)** est aussi masquée par défaut.
   - **crayon** : modifie l'agence (voir plus bas) ;
@@ -86,7 +84,7 @@ Le bouton **Organiser** en haut (icône liste ; écrit en toutes lettres dans la
 Pour envoyer une agence ou tout un dossier à un collègue, sans compte ni serveur : c'est la messagerie de la rédaction (Slack, Teams, e-mail) qui sert de transport.
 
 - **Partager** : en mode Organiser, l'icône **partager** d'une agence (ou, dans son crayon, le bouton **Partager**), ou celle du titre d'un dossier. TabulaPix copie un court code (`TabulaPix:1:…`) qui contient l'agence, ou le dossier (nom, couleur) et ses agences affichées : adresse, modèle, champ repéré, page de connexion — jamais vos cases cochées, vos réglages ni vos recherches. Les agences fournies ne sont partagées que si vous les avez modifiées (sinon votre collègue les a déjà) ; dans un dossier, elles sont simplement citées, pour y être rangées.
-- **Recevoir** : collez le code dans **+ Ajouter une agence** (premier champ), dans le champ des mots-clés (l'écran **Code de partage** s'ouvre alors tout seul) ou dans **⚙ › Sauvegarde et partage › Coller un code de partage**. TabulaPix dit ce que contient le code (ex. « Dossier « People » et ses 4 agences : … ») et ce qui va se passer, avec les noms, sans rien à choisir : **Ajouter** ou **Annuler**, ou un seul bouton **Retour à la liste** si vous avez déjà tout. Ce qui sera réellement ajouté : ce qui vous manque arrive coché, un dossier du même nom est réutilisé ; ce que vous avez déjà ne change pas (une agence fournie que vous n'avez pas modifiée prend les réglages de votre collègue). Chaque agence est vérifiée comme une agence ajoutée à la main ; si elle remplit un champ, Chrome demande l'autorisation pour son site.
+- **Recevoir** : collez le code dans **+ Ajouter une agence** (premier champ), dans le champ des mots-clés (l'écran **Code de partage** s'ouvre alors tout seul) ou dans **⚙ › Sauvegarde et partage › Coller un code de partage**. TabulaPix dit ce que contient le code (ex. « Dossier « People » et ses 4 agences : … ») et ce qui va se passer, avec les noms, sans rien à choisir : **Ajouter** ou **Annuler**, ou un seul bouton **Retour à la liste** si vous avez déjà tout. En détail : ce qui vous manque arrive coché, un dossier du même nom est réutilisé ; ce que vous avez déjà ne change pas (une agence fournie que vous n'avez pas modifiée prend les réglages de votre collègue). Chaque agence est vérifiée comme une agence ajoutée à la main ; si elle remplit un champ, Chrome demande l'autorisation pour son site.
 
 ### Ajouter une agence
 
@@ -119,7 +117,7 @@ Le bouton **⚙** en haut affiche les réglages directement dans la popup ; **�
 - **Sauvegarde et partage** : pour retrouver votre configuration après une réinstallation, ou la partager entre collègues.
   - **Exporter** l'enregistre dans un fichier `.json` : agences et leur ordre, dossiers, noms, adresses, repérages, pages de connexion, agences cochées, masquées et supprimées, langue, sous-domaine Pixpalace, groupes d'onglets — jamais vos recherches. Son format est décrit dans [`DEVELOPMENT.fr.md`](DEVELOPMENT.fr.md#fichier-de-configuration).
   - **Importer…** charge un tel fichier. Avant toute modification, vous choisissez :
-    - **quoi** importer : **Agences** (agences ajoutées, agences fournies modifiées ou supprimées, ordre), **Cases cochées et agences masquées**, **Dossiers** (avec leurs couleurs et le rangement des agences), **Réglages** (langue, sous-domaine Pixpalace et groupes d'onglets, chacun décochable). En face de chacun, TabulaPix indique ce qui va **réellement changer** chez vous (ex. « à ajouter : 2 (Magnum, Myop) · déjà présentes : 29 », « Langue : anglais → français ») ; si rien ne changerait, le bouton reste désactivé ;
+    - **quoi** importer : **Agences** (agences ajoutées, agences fournies modifiées ou supprimées, ordre), **Cases cochées et agences masquées**, **Dossiers** (avec leurs couleurs et le rangement des agences), **Réglages** (langue, sous-domaine Pixpalace et groupes d'onglets, chacun décochable). En face de chacun, TabulaPix indique ce qui va changer chez vous (ex. « à ajouter : 2 (Magnum, Myop) · déjà présentes : 29 », « Langue : anglais → français ») ; si rien ne changerait, le bouton reste désactivé ;
     - **comment** : **Remplacer** — ce que vous cochez remplace le vôtre, le reste de votre configuration ne change pas (avec **Agences** coché, vos agences prennent les réglages du fichier — adresse, champ repéré… — et celles que vous aviez modifiées sont nommées avant de confirmer) (tout coché : le fichier remplace entièrement votre configuration, par exemple après une réinstallation) ; ou **Ajouter** — seul ce qui vous manque est ajouté, rien de chez vous n'est retiré ni modifié : les agences ajoutées du fichier que vous n'avez pas encore (celles que vous avez déjà, même adresse ou même site et même nom, restent telles quelles), les agences fournies que vous avez supprimées et que le fichier a encore, ses dossiers que vous n'avez pas (même nom), et vos agences hors dossier vont dans le dossier que leur donne le fichier. Idéal pour récupérer les agences d'un collègue. **Ajouter** est choisi par défaut.
 
     Chaque agence est vérifiée comme une agence ajoutée à la main ; les invalides sont ignorées. Depuis la popup, Importer ouvre TabulaPix dans un onglet (Chrome ferme la popup à l'ouverture du sélecteur de fichier).
@@ -158,7 +156,7 @@ Voir aussi la [politique de confidentialité](PRIVACY.md).
 
 ## Idées
 
-Les pistes envisagées pour de futures versions (coffre chiffré des identifiants d'agence) sont listées dans [`ROADMAP.fr.md`](ROADMAP.fr.md).
+Les pistes envisagées pour de futures versions (sélections enregistrées, coffre chiffré des identifiants d'agence) sont listées dans [`ROADMAP.fr.md`](ROADMAP.fr.md).
 
 ## Développement
 
