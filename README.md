@@ -4,7 +4,7 @@
 
 **One search, all your picture agencies.**
 
-**➜ [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** · website: [tabulapix.com](https://tabulapix.com/en/)
+**[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** · website: [tabulapix.com](https://tabulapix.com/en/)
 
 Chrome extension for photo desks, picture researchers and photo editors: type your keywords once and search all your news picture agencies at the same time. TabulaPix opens one tab per agency with the results ready, using your own logged-in accounts. No scraping, no API keys, no passwords stored. Interface in English and French.
 
@@ -14,7 +14,7 @@ Chrome extension (Manifest V3) in plain HTML/JavaScript: no dependencies, no bui
 
 ## Installation
 
-**The easiest way: [install TabulaPix from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)**, then pin the extension (puzzle icon 🧩 → pin next to **TabulaPix**). Updates then arrive automatically.
+[Install TabulaPix from the Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp), then pin the extension (puzzle icon 🧩 → pin next to **TabulaPix**). Updates then arrive automatically.
 
 > If you have been using the version loaded from a folder, Chrome treats the store version as a different extension: your settings are not carried over automatically. In the old version, **⚙ › Export**; install the store version and **⚙ › Import…** that file; then remove the old version in `chrome://extensions` so that you don't have TabulaPix twice.
 
@@ -26,8 +26,6 @@ Chrome extension (Manifest V3) in plain HTML/JavaScript: no dependencies, no bui
 4. Click **Load unpacked** and choose the repository's `extension` folder.
 5. Pin the extension: puzzle icon 🧩 in the toolbar → pin next to **TabulaPix**.
 6. Adjust your **settings** (⚙ button in the popup), in particular the subdomain of your Pixpalace space (see “Settings” below).
-
-Also works in Chromium-based browsers (Edge, Brave, Arc…) through their equivalent extensions page.
 
 > **Do not move, rename or delete the folder after installing.** Chrome reads the extension directly from that folder: if it moves, the extension no longer loads (it is disabled, with an error in `chrome://extensions`).
 > So choose a lasting location before installing (for example `Documents/TabulaPix`), not the Downloads folder or the Desktop.
@@ -69,15 +67,14 @@ You need to be logged in to your agency accounts in Chrome, as usual: the extens
 
 ## Organise mode
 
-The **Organise** button at the top (list icon; spelled out in the side panel, like **Settings**) switches to **Organise** mode, where agencies and folders are arranged, renamed, hidden, edited and deleted, right in the list. **Esc** or **Done** leaves it; searching is paused meanwhile. A row's tools (share, pencil, bin, eye) appear on hover or when the row has keyboard focus; the crossed-out eye of a hidden agency or folder always stays visible.
+The **Organise** button at the top (list icon; spelled out in the side panel, like **Settings**) switches to **Organise** mode, where agencies and folders are arranged, renamed, hidden, edited and deleted, right in the list. **Esc** or **Done** leaves it; searching is paused meanwhile. A row's tools (pencil, bin, eye) appear on hover or when the row has keyboard focus; the crossed-out eye of a hidden agency or folder always stays visible.
 
 - **Order and folders**: as outside this mode: drag an agency by its handle (on the right) between two agencies, or onto a folder's title (highlighted) to put it there; drag a folder by its handle to reorder folders. A drag cancelled with Esc changes nothing. With the keyboard, **Alt + ↑ / ↓** on an agency's checkbox moves it (and into the next folder at the edge), on a folder's checkbox moves the folder.
-- **Folders**: rename a folder right in its title, change its colour with its dot, hide it with its **eye** (the folder and its agencies disappear from the list and are never searched; their ticks are kept for when you show it again), delete it with the bin (its agencies are kept, outside any folder; **Undo** for a few seconds), create one at the bottom of the list. A folder whose agencies are all hidden doesn't show in normal use either; hidden folders appear greyed out in Organise mode only.
-- **Agencies**: rename an agency right in its name (dashed underline), like a folder: **Enter** or leaving the field saves, **Esc** cancels; for a built-in agency, **Restore the original** in its pencil brings back the shipped name. Then, on each line (from right to left, next to the handle: eye, pencil, share, bin):
+- **Folders**: rename a folder right in its title, change its colour with its dot, hide it with its **eye** (the folder and its agencies disappear from the list and are never searched; their ticks are kept for when you show it again), delete it with the bin (its agencies are kept, outside any folder; **Undo** for fifteen seconds), create one at the bottom of the list. A folder whose agencies are all hidden doesn't show in normal use either; hidden folders appear greyed out in Organise mode only.
+- **Agencies**: rename an agency right in its name (a field frame appears on hover), like a folder: **Enter** or leaving the field saves, **Esc** cancels; for a built-in agency, **Restore the original** in its pencil brings back the shipped name. Then, on each line (from left to right, before the handle: pencil, bin, eye):
   - **eye**: hides the agency (it disappears from the list, its place is kept) or shows it again; it shows the state (open: shown, crossed out: hidden), its tooltip says what a click does; hidden agencies appear greyed out in Organise mode only.
     - **Reuters** comes in two versions, depending on your contract: **Reuters (points)** for credit-based accounts (shows your points balance), shown by default, and **Reuters (standard)** for accounts without points (free download), hidden by default: show the one that matches your account with its eye. **AFP (forum)** is also hidden by default.
   - **pencil**: edits the agency (see below);
-  - **share** (added agencies and edited built-in agencies only): copies a code to send to a colleague (see “Sharing an agency or a folder” below);
   - **bin**: deletes any agency, built-in ones included, at once; an **Undo** line takes its place for fifteen seconds (deleted built-in agencies can also be brought back later in ⚙ with **Restore**).
 - **+ Add an agency**, at the bottom of the list (also outside Organise mode), opens the add screen (**← Back** returns to the list).
 
@@ -85,8 +82,8 @@ The **Organise** button at the top (list icon; spelled out in the side panel, li
 
 To send an agency or a whole folder to a colleague, with no account and no server: the newsroom's messaging (Slack, Teams, e-mail) carries it.
 
-- **Share**: in Organise mode, the **share** icon of an agency (or its pencil, **Share** button), or of a folder's title. TabulaPix copies a short code (`TabulaPix:1:…`) holding the agency, or the folder (name, colour) and its agencies shown: address, template, located field, sign-in page — never your ticks, settings or searches. Built-in agencies are only shared when you edited them (otherwise your colleague already has them); in a folder, they are just listed, to be filed there.
-- **Receive**: paste the code into **+ Add an agency** (first field), into the keywords field (the **Share code** screen then opens by itself) or into **⚙ › Backup and sharing › Paste a share code**. TabulaPix says what the code contains (e.g. “Folder “Celebrity” and its 4 agencies: …”) and what will happen, with names, with nothing to choose: **Add** or **Cancel**, or a single **Back to the list** button if you already have everything. What will actually be added: what you are missing arrives ticked, a folder of the same name is reused; what you already have stays as it is (a built-in agency you haven't edited takes your colleague's settings). Every agency is checked like one added by hand; if it fills in a field, Chrome asks for permission for its site.
+- **Send**: outside Organise mode, hovering an added or edited agency, or a folder's title, shows a paper-plane icon (or, in an agency's pencil, the **Share** button). TabulaPix copies a short code (`TabulaPix:1:…`) holding the agency, or the folder (name, colour) and its agencies shown: address, template, located field, sign-in page — never your ticks, settings or searches. Built-in agencies are only shared when you edited them (otherwise your colleague already has them); in a folder, they are just listed, to be filed there.
+- **Receive**: paste the code into **+ Add an agency** (first field), into the keywords field (the **Share code** screen then opens by itself) or into **⚙ › Backup and sharing › Paste a share code**. TabulaPix says what the code contains (e.g. “Folder “Celebrity” and its 4 agencies: …”) and what will happen, with names, with nothing to choose: **Add** or **Cancel**, or a single **Back to the list** button if you already have everything. In detail: what you are missing arrives ticked, a folder of the same name is reused; what you already have stays as it is (a built-in agency you haven't edited takes your colleague's settings). Every agency is checked like one added by hand; if it fills in a field, Chrome asks for permission for its site.
 
 ### Adding an agency
 
@@ -104,7 +101,7 @@ In three steps:
 
 ### Editing an agency
 
-- **Edit an agency** (its pencil): the same screen, straight at the form (name, folder, address), with **Save**. If the site has changed, **Detect the address again from the site** (folded, at the bottom) runs the detection again from a results page; for an added agency that fills in a field, its located field is kept if the keywords still aren't in the address. Every agency can be renamed, built-in ones included; for built-in agencies, **Restore the original** goes back to the shipped name and settings. **Technical details › Sign-in page** (optional) sets the page opened by the **Sign in** icon; empty it to remove the icon.
+- **Edit an agency** (its pencil): the same screen, straight at the form (name, folder, address), with **Save**. If the site has changed, **Detect the address again from the site** (folded, at the bottom) runs the detection again from a results page; for an added agency that fills in a field, its located field is kept if the keywords still aren't in the address. Every agency can be renamed, built-in ones included; for built-in agencies, **Restore the original** goes back to the shipped name and settings. **Sign-in page** (optional, under the search address) sets the page opened by the **Sign in** icon; empty it to remove the icon.
   - **Built-in agencies that fill in a search field** (Bloomberg, Abacapress, Pixpalace, Magnum…): if one of them changes its page and the search no longer starts, open its pencil then **Locate again** to show it the field and button again (Bloomberg's specific delay is kept). Like any agency, they can also be detected again, switched to a search address (**Use a search address instead**) or moved to another site (the field is then located again there, with Chrome's permission for that site); **Restore the original** brings back the shipped behaviour.
 
 ## Settings
@@ -119,8 +116,8 @@ The **⚙** button at the top shows the settings right in the popup; **← Back*
 - **Backup and sharing**: to keep your configuration after a reinstall, or share it with colleagues.
   - **Export** saves it to a `.json` file: agencies and their order, folders, names, addresses, field locations, sign-in pages, ticked, hidden and deleted agencies, language, Pixpalace subdomain, tab groups — never your searches. Its format is described in [`DEVELOPMENT.md`](DEVELOPMENT.md#configuration-file).
   - **Import…** loads such a file. Before anything changes, you choose:
-    - **what** to import: **Agencies** (added agencies, edited or deleted built-in agencies, order), **Ticked boxes and hidden agencies**, **Folders** (with their colours and which agency goes where), **Settings** (language, Pixpalace subdomain and tab groups, each of which can be unticked). Next to each one, TabulaPix shows what it will **actually change** in your configuration (e.g. “to add: 2 (Magnum, Myop) · already there: 29”, “Language: English → French”); when nothing would change, the button stays disabled;
-    - **how**: **Replace** — what you tick replaces yours, the rest of your configuration doesn't change (with **Agencies** ticked, your agencies take the file's settings — address, located field… — and those you changed are named before you confirm) (everything ticked: the file entirely replaces your configuration, e.g. after a reinstall); or **Add** — only what you are missing is added, nothing of yours is removed or changed: the file's added agencies you don't have yet (those you already have, same address or same site and name, are kept as they are), the built-in agencies you deleted and the file still has, its folders you don't have (same name), and your agencies outside any folder go into the folder the file gives them. Ideal for getting a colleague's agencies. **Add** is selected by default.
+    - **what** to import: **Agencies** (added agencies, edited or deleted built-in agencies, order), **Ticked boxes and hidden agencies**, **Folders** (with their colours and which agency goes where), **Settings** (language, Pixpalace subdomain and tab groups, each of which can be unticked). Next to each one, TabulaPix shows what it will change in your configuration (e.g. “to add: 2 (Magnum, Myop) · already there: 29”, “Language: English → French”); when nothing would change, the button stays disabled;
+    - **how**: **Replace** — what you tick replaces yours, the rest of your configuration doesn't change (with **Agencies** ticked, your agencies take the file's settings — address, located field… — and those you changed are named before you confirm) (everything ticked: the file entirely replaces your configuration, e.g. after a reinstall); or **Add** — only what you are missing is added, nothing of yours is removed or changed: the file's added agencies you don't have yet (those you already have, same address or same site and name, are kept as they are), the built-in agencies you deleted and the file still has, its folders you don't have (same name), and your agencies outside any folder go into the folder the file gives them. Handy for getting a colleague's agencies. **Add** is selected by default.
 
     Every agency is checked like an agency added by hand; invalid ones are ignored. From the popup, Import opens TabulaPix in a tab (Chrome closes the popup when a file picker opens).
   - Sites to allow: if the file contains agencies that fill in their site's search field, TabulaPix asks Chrome for those sites right away when it can; otherwise the banner, the “to allow” badges and **Needs attention** let you allow them at any time.
@@ -132,7 +129,7 @@ These settings stay in Chrome on your computer and are kept across updates.
 ## Privacy
 
 - No data collection, no passwords, no account.
-- No network calls: the extension only opens tabs (its security policy actually forbids any request: `connect-src 'none'`).
+- No network calls: the extension only opens tabs (its security policy forbids any request: `connect-src 'none'`).
 - The only data stored: ticked agencies, their order, folders, hidden, edited or added agencies (with their sign-in page), the last search and your settings, stored locally in Chrome (`chrome.storage.local`), never transmitted. Only the last search is kept (no history); it disappears when the extension is uninstalled.
 - For the browser session only (`chrome.storage.session`, erased when Chrome closes): which tabs belong to which agency, and the search to run again after signing in.
 - Permissions requested:
@@ -158,7 +155,7 @@ See also the [privacy policy](PRIVACY.md).
 
 ## Ideas
 
-Directions considered for future versions (an encrypted vault for agency credentials) are listed in [`ROADMAP.md`](ROADMAP.md).
+Directions considered for future versions (saved selections, an encrypted vault for agency credentials) are listed in [`ROADMAP.md`](ROADMAP.md).
 
 ## Development
 

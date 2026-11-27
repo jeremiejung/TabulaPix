@@ -35,10 +35,10 @@
   "@type": "SoftwareApplication",
   "name": "TabulaPix",
   "url": "https://tabulapix.com/",
-  "description": "Extension Chrome pour iconographes, services photo et éditeurs photo : une recherche tapée une fois ouvre chaque agence photo dans son onglet, avec vos propres comptes.",
+  "description": "Extension Chrome pour iconographes, services photo, éditrices et éditeurs photo : une recherche tapée une fois ouvre chaque agence photo dans son onglet, avec vos propres comptes.",
   "applicationCategory": "BrowserApplication",
   "operatingSystem": "Chrome",
-  "softwareVersion": "3.7.4",
+  "softwareVersion": "3.7.5",
   "inLanguage": [
     "fr",
     "en"
@@ -77,7 +77,7 @@
         <h1 id="titre">Une recherche, toutes vos agences photo</h1>
         <span class="rule" aria-hidden="true"></span>
         <p class="lede">Tapez vos mots-clés une seule fois : TabulaPix ouvre chaque agence dans son onglet, résultats prêts, avec vos propres comptes.</p>
-        <p>Pour les services photo, les iconographes et les éditeurs photo qui cherchent toute la journée les mêmes mots sur dix sites.</p>
+        <p>Pour les services photo, les iconographes, les éditrices et éditeurs photo qui cherchent toute la journée les mêmes mots sur dix sites.</p>
         <div class="actions">
           <a class="install" href="https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9.5M6.2 8.8 10 12.5l3.8-3.7M4 14.5V17h12v-2.5"/></svg>
@@ -121,7 +121,7 @@
         <span class="tab" style="--fc: var(--c-violet)"><span class="dot"></span><span class="sr">Stock : </span><span class="t">estonie frontière</span></span>
       </div>
       <div class="page" aria-live="polite">
-        <span><b id="opened">7 onglets ouverts en arrière-plan</b>, un par agence, résultats prêts. Vous restez sur la page où vous étiez.</span>
+        <span><b id="opened">7 onglets ouverts en arrière-plan</b>, un par agence. Vous restez sur la page où vous étiez.</span>
         <span class="note">Démonstration : rien n'est envoyé.</span>
       </div>
     </div>
@@ -138,14 +138,14 @@
     <section class="block split" aria-labelledby="rangees">
       <div class="shot"><img src="assets/popup-fr.png" width="284" height="605" alt="La fenêtre de TabulaPix : le champ des mots-clés, le bouton « Lancer la recherche · 7 onglets », puis le dossier Actualité déplié avec ses agences, trois cochées, et les dossiers Reportage &amp; auteurs, Agrégateurs, People, Stock et Archives repliés." loading="lazy"></div>
       <div>
-        <h2 id="rangees">Vos agences, rangées à votre façon</h2>
+        <h2 id="rangees">Vos agences, en dossiers</h2>
         <p>Renommez, recolorez, réordonnez vos dossiers ; masquez les agences que vous n'utilisez pas.</p>
-        <p>Il manque la vôtre ? Collez l'adresse d'une page de résultats : TabulaPix trouve où se placent les mots-clés. Si le site ne les met pas dans l'adresse, il repère son champ de recherche et le remplit pour vous.</p>
+        <p>Pour ajouter une agence, collez l'adresse d'une de ses pages de résultats : TabulaPix trouve où se placent les mots-clés. Si le site ne les met pas dans l'adresse, il repère son champ de recherche et le remplit pour vous.</p>
       </div>
     </section>
 
     <section class="block" aria-labelledby="partage">
-      <h2 id="partage">Partager avec un collègue</h2>
+      <h2 id="partage">Partager entre collègues</h2>
       <p>Partagez une agence ou tout un dossier avec un court code, à coller dans Slack, Teams ou un e-mail. Votre collègue le colle dans TabulaPix : ce qui lui manque est ajouté, rien de chez lui n'est retiré ni modifié.</p>
       <p>La configuration s'exporte aussi dans un fichier ; à l'import, TabulaPix indique ce qui va changer avant de l'appliquer.</p>
       <p class="code"><code>TabulaPix:1:H4sIAAAAAAAAA3WOwQrCMBBEf2Xp…</code><span>exemple de code de partage</span></p>
@@ -154,8 +154,7 @@
     <section class="block" aria-labelledby="confidentialite">
       <h2 id="confidentialite">Rien ne quitte votre ordinateur</h2>
       <ul class="checks">
-        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Aucun serveur, aucun compte.</b> TabulaPix fonctionne entièrement dans votre Chrome.</span></li>
-        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Rien n'est envoyé ailleurs.</b> L'extension se contente d'ouvrir des onglets, comme si vous tapiez l'adresse vous-même ; ses réglages de sécurité lui interdisent toute autre connexion.</span></li>
+        <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Ni serveur ni compte.</b> TabulaPix fonctionne entièrement dans votre Chrome et ne fait qu'ouvrir des onglets, comme si vous tapiez l'adresse vous-même ; ses réglages de sécurité lui interdisent toute autre connexion.</span></li>
         <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Aucune donnée collectée.</b> Vos réglages restent dans Chrome, sur votre ordinateur. Seule la dernière recherche est gardée.</span></li>
         <li><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5 8 14.5 16 6"/></svg><span><b>Une seule autorisation annoncée à l'installation</b> : « Consulter votre historique de navigation », pour réutiliser l'onglet d'une agence déjà ouverte. Les autres ne sont demandées que si vous cochez une agence qui en a besoin, et pour ce seul site.</span></li>
       </ul>
@@ -163,7 +162,7 @@
     </section>
 
     <section class="close" aria-labelledby="fin">
-      <h2 id="fin">Essayez-le sur votre prochaine recherche</h2>
+      <h2 id="fin">Installer TabulaPix</h2>
       <div class="actions">
         <a class="install" href="https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9.5M6.2 8.8 10 12.5l3.8-3.7M4 14.5V17h12v-2.5"/></svg>
@@ -177,7 +176,7 @@
 
 <footer>
   <div class="wrap">
-    <span>TabulaPix · version 3.7.4</span>
+    <span>TabulaPix · version 3.7.5</span>
     <nav aria-label="Liens">
       <a href="https://github.com/jeremiejung/TabulaPix">Code source</a>
       <a href="https://github.com/jeremiejung/TabulaPix/blob/main/CHANGELOG.fr.md">Nouveautés</a>

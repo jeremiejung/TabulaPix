@@ -2,7 +2,7 @@
 
 Tout ce qu'il faut pour remplir le tableau de bord du Chrome Web Store (https://chrome.google.com/webstore/devconsole), dans l'ordre des onglets. Chaque texte est dans un bloc à copier-coller.
 
-Paquet à envoyer : `TabulaPix-3.7.4.zip` (ou plus récent).
+Paquet à envoyer : `TabulaPix-3.7.5.zip` (ou plus récent).
 
 ---
 
@@ -21,19 +21,18 @@ Lus automatiquement dans le paquet (fichiers `_locales`) :
 ### Description détaillée — français
 
 ```text
-TabulaPix — une recherche, toutes vos agences photo.
+Une recherche, toutes vos agences photo.
 
-La même recherche sur dix agences ? Tapez vos mots-clés une seule fois : TabulaPix ouvre chaque agence dans son onglet, avec vos propres comptes.
+Tapez vos mots-clés une fois : TabulaPix ouvre chaque agence dans son onglet, avec vos propres comptes.
 
-• Quelques agences de presse et banques d'images prêtes à l'emploi
-• Ajoutez les autres en quelques clics
-• Rangez-les dans des dossiers
-• Sauvegardez votre configuration, partagez une agence ou un dossier avec un collègue par simple copier-coller
-• En français et en anglais
+• Près de trente agences de presse et banques d'images déjà réglées, rangées en dossiers
+• Une autre agence s'ajoute en collant l'adresse d'une de ses pages de résultats
+• La configuration s'exporte dans un fichier ; une agence ou un dossier se partage avec un code à coller
+• Interface en français et en anglais
 
-Rien ne quitte votre ordinateur : pas de compte, pas de serveur, aucune donnée collectée.
+Pas de compte ni de serveur, aucune donnée collectée : les réglages restent dans Chrome.
 
-Outil indépendant, gratuit et open source (licence MIT). Un abonnement à chaque agence reste nécessaire pour voir ses contenus.
+Gratuit et open source (licence MIT). Un abonnement à chaque agence reste nécessaire pour voir ses contenus.
 
 Code source : https://github.com/jeremiejung/TabulaPix
 ```
@@ -41,19 +40,18 @@ Code source : https://github.com/jeremiejung/TabulaPix
 ### Description détaillée — anglais
 
 ```text
-TabulaPix — one search, all your picture agencies.
+One search, all your picture agencies.
 
-The same search on ten agencies? Type your keywords once: TabulaPix opens each agency in its own tab, with your own accounts.
+Type your keywords once: TabulaPix opens each agency in its own tab, with your own accounts.
 
-• A few news picture agencies and stock libraries ready to use
-• Add the others in a few clicks
-• Sort them into folders
-• Back up your configuration, share an agency or a folder with a colleague by simple copy and paste
-• In English and French
+• Nearly thirty news picture agencies and stock libraries already set up, sorted into folders
+• Another agency is added by pasting the address of one of its results pages
+• The configuration exports to a file; an agency or a folder is shared with a code to paste
+• Interface in English and French
 
-Nothing leaves your computer: no account, no server, no data collected.
+No account or server, no data collected: settings stay in Chrome.
 
-Independent, free and open-source tool (MIT licence). A subscription to each agency is still required to see its content.
+Free and open source (MIT licence). A subscription to each agency is still required to see its content.
 
 Source code: https://github.com/jeremiejung/TabulaPix
 ```
@@ -70,7 +68,7 @@ Source code: https://github.com/jeremiejung/TabulaPix
 | Captures d'écran (1280 × 800) | `store/images/capture-1-fr.png` à `capture-4-fr.png` (recherche, dossiers, ajout d'agence, repérage du champ) — versions `-en` pour la fiche anglaise |
 | Petite image promotionnelle (440 × 280) | `store/images/tuile-440x280-fr.png` — `-en` pour la fiche anglaise |
 | Image promotionnelle en haut de la page (1 400 × 560) | `store/images/banniere-1400x560-fr.png` — `-en` pour la fiche anglaise |
-| Site web officiel | https://github.com/jeremiejung/TabulaPix |
+| Site web officiel | https://tabulapix.com |
 | URL d'assistance | https://github.com/jeremiejung/TabulaPix/issues |
 
 ---
@@ -85,7 +83,7 @@ Les examinateurs lisent l'anglais : les textes anglais sont recommandés (traduc
 TabulaPix lets photo editors run the same keyword search on several news picture agency websites at once, opening one tab per agency with the results, using the user's own accounts.
 ```
 
-> TabulaPix permet aux éditeurs photo de lancer la même recherche par mots-clés sur plusieurs sites d'agences photo à la fois, en ouvrant un onglet par agence avec les résultats, avec leurs propres comptes.
+> TabulaPix permet aux éditrices et éditeurs photo de lancer la même recherche par mots-clés sur plusieurs sites d'agences photo à la fois, en ouvrant un onglet par agence avec les résultats, avec leurs propres comptes.
 
 ### Justification des autorisations
 

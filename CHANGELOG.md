@@ -6,6 +6,13 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+## 3.7.5 — 27 November 2026 (Chrome Web Store)
+
+- **Send an agency or a folder: a paper plane, outside Organise mode.** The share icon becomes a paper plane (tooltip “Send”); it appears on hover in the usual list, on folder titles and on added or edited agencies, and is no longer in Organise mode (which keeps pencil, bin and eye).
+- **Organise mode: no more dashes under names.** An editable name looks like plain text; a field frame appears on hover, and the field opens on click.
+- **An agency's sign-in page: out of “Technical details”.** The (optional) field now sits under the search address, with help saying what it is for. It was also out of reach for an agency whose search field was still to be located.
+- Shorter message after restoring agencies (“✓ 2 agencies restored.”).
+
 ## 3.7.4 — 26 November 2026 (Chrome Web Store)
 
 - **Organise mode: after clicking the eye**, the bin, pencil and share icons no longer stay on screen once the mouse has left (with the keyboard, they stay while focus is on the row).
@@ -13,18 +20,18 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## 3.7.3 — 26 November 2026 (Chrome Web Store)
 
-- **Share code: a clear screen.** A pasted code opens a “Share code” screen that no longer shows the add-agency form (address, keywords, **Detect**). It says what the code contains, with names (“Folder “Celebrity” and its 4 agencies: …”), then what will happen (“To add, ticked: 1 (Bestimage). The folder “Celebrity” will be created.”), without checkboxes or counters. **Add** or **Cancel**; if you already have everything, a single **Back to the list** button instead of a greyed-out **Add**. Importing a file doesn't change.
+- **Share code: a screen of its own.** A pasted code opens a “Share code” screen that no longer shows the add-agency form (address, keywords, **Detect**). It says what the code contains, with names (“Folder “Celebrity” and its 4 agencies: …”), then what will happen (“To add, ticked: 1 (Bestimage). The folder “Celebrity” will be created.”), without checkboxes or counters. **Add** or **Cancel**; if you already have everything, a single **Back to the list** button instead of a greyed-out **Add**. Importing a file doesn't change.
 
 ## 3.7.2 — 26 November 2026 (Chrome Web Store)
 
 - **Side panel: a discreet line confirms the search** (“8 searches started.”), with the agencies skipped because they still need permission (“To allow, not searched: 1 (Abacapress).”). It clears as soon as you type the next search. The popup closes as before.
-- **Calmer Organise mode in the side panel.** As in the popup, a row's tools (share, pencil, bin, eye) only appear on hover or keyboard focus of that row, instead of on every row; the crossed-out eye of a hidden agency or folder stays visible. The eye now always shows the state (open: shown, crossed out: hidden) and no longer changes icon on hover; its tooltip says what a click does.
+- **Organise mode in the side panel: tools on hover.** As in the popup, a row's tools (share, pencil, bin, eye) only appear on hover or keyboard focus of that row, instead of on every row; the crossed-out eye of a hidden agency or folder stays visible. The eye now always shows the state (open: shown, crossed out: hidden) and no longer changes icon on hover; its tooltip says what a click does.
 - **No permission request on first launch any more.** Abacapress, Bloomberg and Pixpalace, which fill in their site's search field and so need a Chrome permission, are no longer ticked on installation: the first screen leads straight to searching. The permission is asked when you tick one of them. Nothing changes for current users: their ticks stay as they are.
 - **An agency not yet allowed no longer opens an empty tab.** While its site awaits permission (“to allow” pill), a search skips it and the button doesn't count it; if only agencies to allow are ticked, a message says so.
 
 ## 3.7.1 — 26 November 2026 (Chrome Web Store)
 
-- **Receiving a share code is easier.** **+ Add an agency** is now also at the bottom of the list outside Organise mode (where the share message sends your colleague), and a code pasted into the keywords field opens the add screen directly. An incomplete or damaged code is reported instead of ignored.
+- **Where to paste a share code.** **+ Add an agency** is now also at the bottom of the list outside Organise mode (where the share message sends your colleague), and a code pasted into the keywords field opens the add screen directly. An incomplete or damaged code is reported instead of ignored.
 - **Organise mode: the bin no longer sits next to the name.** Tools are in the same order on agencies and folders: share, pencil, bin, then the eye, which stays in place next to the handle. The **Undo** line stays fifteen seconds instead of six, and a folder's bin tooltip says its agencies are kept.
 - **File import: “Add” is selected by default**, the mode that removes and changes nothing. When there is nothing to replace, the **Replace** button looks disabled.
 - **Permission banner on one line** (“3 agencies to allow.” + **Allow**); the list of agencies is in its tooltip and on the “to allow” pills.
@@ -49,7 +56,7 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## 3.6.11 — 24 November 2026 (Chrome Web Store)
 
-- **Import shows what will actually change.** Next to each part, the confirmation now compares the file with your configuration instead of describing the file: right after an export, re-importing shows “to add: 0 · already there: 31” and the button stays disabled. In Replace mode it names the agencies that arrive, those that are removed and those whose settings (address, located field…) would be replaced by the file's, and shows each setting as “current → file”.
+- **Import shows what will change.** Next to each part, the confirmation now compares the file with your configuration instead of describing the file: right after an export, re-importing shows “to add: 0 · already there: 31” and the button stays disabled. In Replace mode it names the agencies that arrive, those that are removed and those whose settings (address, located field…) would be replaced by the file's, and shows each setting as “current → file”.
 - **Add mode brings back the built-in agencies you deleted** when the file still has them (with the file's tick, folder and settings for that agency).
 - **Settings one by one**: language, Pixpalace subdomain and tab groups can each be unticked when importing (all ticked by default).
 - The **version number** is shown at the bottom of the window, before the source code link.

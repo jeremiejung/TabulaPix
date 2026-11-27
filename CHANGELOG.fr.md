@@ -6,6 +6,14 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.7.5 — 27 novembre 2026 (Chrome Web Store)
+
+- **Envoyer une agence ou un dossier : un avion en papier, hors du mode Organiser.** L'icône de partage devient un avion en papier (infobulle « Envoyer ») ; elle apparaît au survol dans la liste habituelle, sur le titre des dossiers et sur les agences ajoutées ou modifiées, et n'est plus dans le mode Organiser (qui garde crayon, corbeille et œil).
+- **Mode Organiser : plus de pointillés sous les noms.** Un nom modifiable a l'air d'un texte normal ; un cadre de champ apparaît au survol, et le champ s'ouvre au clic.
+- **Page de connexion d'une agence : sortie des « Détails techniques ».** Le champ (facultatif) est maintenant sous l'adresse de recherche, avec une aide qui dit à quoi il sert. Il était aussi inaccessible pour une agence dont le champ de recherche restait à repérer.
+- Textes de l'interface en rédaction épicène (« une ou un collègue », « après la connexion »), sans point médian.
+- Message après une restauration d'agences plus court (« ✓ 2 agences restaurées. »).
+
 ## 3.7.4 — 26 novembre 2026 (Chrome Web Store)
 
 - **Mode Organiser : après un clic sur l'œil**, la corbeille, le crayon et l'icône partager ne restent plus affichés une fois la souris partie (au clavier, ils restent là tant que le focus est sur la ligne).
@@ -13,18 +21,18 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## 3.7.3 — 26 novembre 2026 (Chrome Web Store)
 
-- **Code de partage : un écran clair.** Un code collé ouvre un écran « Code de partage » qui ne montre plus le formulaire d'ajout d'agence (adresse, mots-clés, **Détecter**). Il dit ce que contient le code, avec les noms (« Dossier « People » et ses 4 agences : … »), puis ce qui va se passer (« À ajouter, cochées : 1 (Bestimage). Le dossier « People » sera créé. »), sans cases à cocher ni compteurs. **Ajouter** ou **Annuler** ; si vous avez déjà tout, un seul bouton **Retour à la liste** au lieu d'un **Ajouter** grisé. L'import d'un fichier ne change pas.
+- **Code de partage : un écran à part.** Un code collé ouvre un écran « Code de partage » qui ne montre plus le formulaire d'ajout d'agence (adresse, mots-clés, **Détecter**). Il dit ce que contient le code, avec les noms (« Dossier « People » et ses 4 agences : … »), puis ce qui va se passer (« À ajouter, cochées : 1 (Bestimage). Le dossier « People » sera créé. »), sans cases à cocher ni compteurs. **Ajouter** ou **Annuler** ; si vous avez déjà tout, un seul bouton **Retour à la liste** au lieu d'un **Ajouter** grisé. L'import d'un fichier ne change pas.
 
 ## 3.7.2 — 26 novembre 2026 (Chrome Web Store)
 
 - **Colonne : une ligne discrète confirme la recherche** (« 8 recherches lancées. »), avec les agences sautées parce qu'elles sont encore à autoriser (« À autoriser, non cherchées : 1 (Abacapress). »). Elle s'efface dès qu'on tape la recherche suivante. La popup, elle, se ferme comme avant.
-- **Mode Organiser plus calme dans la colonne.** Comme dans la popup, les outils d'une ligne (partager, crayon, corbeille, œil) n'apparaissent qu'au survol ou au focus clavier de cette ligne, au lieu d'être affichés sur toutes les lignes ; l'œil barré d'une agence ou d'un dossier masqué reste visible. L'œil montre désormais toujours l'état (ouvert : affichée, barré : masquée) et ne change plus d'icône au survol ; son infobulle dit ce que fait le clic.
+- **Mode Organiser dans la colonne : outils au survol.** Comme dans la popup, les outils d'une ligne (partager, crayon, corbeille, œil) n'apparaissent qu'au survol ou au focus clavier de cette ligne, au lieu d'être affichés sur toutes les lignes ; l'œil barré d'une agence ou d'un dossier masqué reste visible. L'œil montre désormais toujours l'état (ouvert : affichée, barré : masquée) et ne change plus d'icône au survol ; son infobulle dit ce que fait le clic.
 - **Plus de demande d'autorisation au premier lancement.** Abacapress, Bloomberg et Pixpalace, qui remplissent le champ de recherche de leur site et demandent donc une autorisation de Chrome, ne sont plus cochées à l'installation : le premier écran mène directement à la recherche. L'autorisation est demandée quand on coche l'une d'elles. Rien ne change pour les utilisateurs actuels : leurs cases restent telles quelles.
 - **Une agence pas encore autorisée n'ouvre plus d'onglet vide.** Tant que son site attend l'autorisation (pastille « à autoriser »), la recherche la saute et le bouton ne la compte pas ; si seules des agences à autoriser sont cochées, un message le dit.
 
 ## 3.7.1 — 26 novembre 2026 (Chrome Web Store)
 
-- **Recevoir un code de partage plus facilement.** **+ Ajouter une agence** est désormais aussi en bas de la liste hors du mode Organiser (c'est là que le message de partage envoie votre collègue), et un code collé dans le champ des mots-clés ouvre directement l'écran d'ajout. Un code incomplet ou abîmé est signalé au lieu d'être ignoré.
+- **Où coller un code de partage.** **+ Ajouter une agence** est désormais aussi en bas de la liste hors du mode Organiser (c'est là que le message de partage envoie votre collègue), et un code collé dans le champ des mots-clés ouvre directement l'écran d'ajout. Un code incomplet ou abîmé est signalé au lieu d'être ignoré.
 - **Mode Organiser : la corbeille n'est plus collée au nom.** Les outils sont dans le même ordre sur les agences et les dossiers : partager, crayon, corbeille, puis l'œil, qui reste à sa place contre la poignée. La ligne **Annuler** reste quinze secondes au lieu de six, et l'infobulle de la corbeille d'un dossier précise que ses agences restent.
 - **Import d'un fichier : « Ajouter » est choisi par défaut**, le mode qui ne retire ni ne modifie rien. Quand il n'y a rien à remplacer, le bouton **Remplacer** apparaît bien désactivé.
 - **Bandeau d'autorisation sur une ligne** (« 3 agences sont à autoriser. » + **Autoriser**) ; la liste des agences est dans l'infobulle et sur les pastilles « à autoriser ».
@@ -49,7 +57,7 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## 3.6.11 — 24 novembre 2026 (Chrome Web Store)
 
-- **L’import montre ce qui va réellement changer.** En face de chaque élément, la confirmation compare désormais le fichier à votre configuration au lieu de décrire le fichier : juste après un export, le réimporter affiche « à ajouter : 0 · déjà présentes : 31 » et le bouton reste désactivé. En mode Remplacer, elle nomme les agences qui arrivent, celles qui sont retirées et celles dont les réglages (adresse, champ repéré…) seraient remplacés par ceux du fichier, et montre chaque réglage sous la forme « actuel → fichier ».
+- **L’import montre ce qui va changer.** En face de chaque élément, la confirmation compare désormais le fichier à votre configuration au lieu de décrire le fichier : juste après un export, le réimporter affiche « à ajouter : 0 · déjà présentes : 31 » et le bouton reste désactivé. En mode Remplacer, elle nomme les agences qui arrivent, celles qui sont retirées et celles dont les réglages (adresse, champ repéré…) seraient remplacés par ceux du fichier, et montre chaque réglage sous la forme « actuel → fichier ».
 - **Le mode Ajouter rétablit les agences fournies que vous aviez supprimées** quand le fichier les a encore (avec la case, le dossier et les réglages qu’elles ont dans le fichier).
 - **Réglages un par un** : langue, sous-domaine Pixpalace et groupes d’onglets se décochent séparément à l’import (tous cochés par défaut).
 - Le **numéro de version** s’affiche en bas de la fenêtre, avant le lien vers le code source.
