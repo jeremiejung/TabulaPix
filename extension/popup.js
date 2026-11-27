@@ -1411,17 +1411,21 @@ input.addEventListener("input", () => {
    déroulant et partent en se repliant (sans effet si le système réduit les animations). */
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 function unfold(el) {
+  // Un repli encore en cours est annulé : sa fin ne doit pas cacher la ligne qui revient.
+  if (el._foldEnd) { el.removeEventListener("animationend", el._foldEnd); el._foldEnd = null; }
   el.classList.remove("folding");
   el.classList.remove("unfold");
   void el.offsetWidth; // relance l'animation
   el.classList.add("unfold");
 }
 function fold(el, done) {
-  const finish = () => { el.classList.remove("folding", "unfold"); done(); };
+  if (el._foldEnd) { el.removeEventListener("animationend", el._foldEnd); el._foldEnd = null; }
+  const finish = () => { el._foldEnd = null; el.classList.remove("folding", "unfold"); done(); };
   if (reduceMotion.matches || el.hidden || !el.textContent) return finish();
   el.classList.remove("unfold");
   el.classList.add("folding");
-  el.addEventListener("animationend", finish, { once: true });
+  el._foldEnd = (e) => { if (e.animationName === "fold") { el.removeEventListener("animationend", el._foldEnd); finish(); } };
+  el.addEventListener("animationend", el._foldEnd);
 }
 let sweepMsgTimer = null;
 function clearSweepMsg() {

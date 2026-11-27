@@ -6,9 +6,10 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
-- Side panel: the “8 searches started.” line unfolds when it appears and folds away by itself after 15 seconds (or as soon as you type the next search); the tab groups offer unfolds the same way. No effect when the system asks for reduced motion.
+## 3.7.6 — 27 November 2026 (Chrome Web Store)
 
 - **Tab groups offered at the right time.** After a search that opens tabs from several folders, a discreet line offers “Group the tabs by folder? **Turn on** · **No thanks**” (in the popup, at the next opening). **Turn on** asks Chrome for the permission and ticks the option; the offer stops after three times, **No thanks** or a setting in ⚙ › Tabs. The option is not ticked by default: its permission can only be asked on a click, and making it mandatory would add a warning at installation and disable the extension for current users until they accept.
+- Side panel: the “8 searches started.” line unfolds when it appears and folds away by itself after 15 seconds (or as soon as you type the next search); the tab groups offer unfolds the same way. No effect when the system asks for reduced motion.
 
 ## 3.7.5 — 27 November 2026 (Chrome Web Store)
 
