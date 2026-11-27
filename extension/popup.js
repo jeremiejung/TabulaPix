@@ -1402,9 +1402,38 @@ ed.detUrl.addEventListener("input", () => checkShareCode(ed.detUrl, "editor"));
 // Code de partage collé dans les mots-clés : on le passe à « + Ajouter une agence ».
 // La confirmation de la recherche précédente s'efface dès qu'on tape la suivante.
 input.addEventListener("input", () => {
-  if (msg.dataset.kind === "sweep") { msg.textContent = ""; delete msg.dataset.kind; }
-  tgOffer.hidden = true;
+  clearSweepMsg();
+  hideTabGroupsOffer();
 });
+
+/* ---------- Lignes qui se déroulent ----------
+   La confirmation de recherche et la proposition des groupes arrivent en se
+   déroulant et partent en se repliant (sans effet si le système réduit les animations). */
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+function unfold(el) {
+  el.classList.remove("folding");
+  el.classList.remove("unfold");
+  void el.offsetWidth; // relance l'animation
+  el.classList.add("unfold");
+}
+function fold(el, done) {
+  const finish = () => { el.classList.remove("folding", "unfold"); done(); };
+  if (reduceMotion.matches || el.hidden || !el.textContent) return finish();
+  el.classList.remove("unfold");
+  el.classList.add("folding");
+  el.addEventListener("animationend", finish, { once: true });
+}
+let sweepMsgTimer = null;
+function clearSweepMsg() {
+  clearTimeout(sweepMsgTimer);
+  if (msg.dataset.kind !== "sweep") return;
+  delete msg.dataset.kind;
+  fold(msg, () => { if (!msg.dataset.kind) msg.textContent = ""; });
+}
+function hideTabGroupsOffer() {
+  if (tgOffer.hidden) return;
+  fold(tgOffer, () => { tgOffer.hidden = true; });
+}
 
 /* ---------- Proposition des groupes d'onglets ----------
    L'option demande une autorisation facultative de Chrome, qui ne peut être
@@ -1434,6 +1463,7 @@ async function showTabGroupsOffer() {
   const s = await tabGroupsOfferState();
   await markTabGroupsOffer({ shown: (s.shown || 0) + 1, pending: false });
   tgOffer.hidden = false;
+  unfold(tgOffer);
 }
 async function showPendingTabGroupsOffer() {
   const s = await tabGroupsOfferState();
@@ -1446,6 +1476,7 @@ document.getElementById("tgYes").addEventListener("click", async () => {
   const { [TAB_GROUPS_KEY]: pref = {} } = await chrome.storage.local.get(TAB_GROUPS_KEY);
   await chrome.storage.local.set({ [TAB_GROUPS_KEY]: { enabled: true, collapsed: Boolean(pref.collapsed) }, [TG_OFFER_KEY]: "done" });
   tgOffer.hidden = true;
+  clearTimeout(sweepMsgTimer);
   delete msg.dataset.kind;
   if (await asked) { msg.classList.remove("err"); msg.textContent = t("tg.on"); return; }
   await chrome.storage.local.set({ [TAB_GROUPS_KEY]: { enabled: false, collapsed: Boolean(pref.collapsed) } });
@@ -1454,7 +1485,7 @@ document.getElementById("tgYes").addEventListener("click", async () => {
 });
 document.getElementById("tgNo").addEventListener("click", async () => {
   await chrome.storage.local.set({ [TG_OFFER_KEY]: "done" });
-  tgOffer.hidden = true;
+  hideTabGroupsOffer();
   input.focus();
 });
 input.addEventListener("input", async () => {
@@ -2375,9 +2406,12 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     // La colonne reste ouverte : une ligne discrète dit ce qui est parti, et ce qui a été sauté.
     const skipped = checkedIds().filter((id) => blockedIds.has(id)).map((id) => AGENCY_BY_ID.get(id)?.name).filter(Boolean);
     msg.classList.remove("err");
+    clearTimeout(sweepMsgTimer);
     msg.dataset.kind = "sweep";
     msg.textContent = [t(ids.length === 1 ? "main.started.one" : "main.started.many", { n: ids.length }),
       skipped.length ? t("main.skipped", { n: skipped.length }) + fxNames(skipped) + "." : ""].filter(Boolean).join(" ");
+    unfold(msg);
+    sweepMsgTimer = setTimeout(clearSweepMsg, 15000); // elle se replie d'elle-même
     if (severalFolders) showTabGroupsOffer();
   }
 });
