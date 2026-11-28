@@ -333,6 +333,7 @@ function showTabGroupsStatus(text, error = false) {
   setTimeout(() => { if (saved.textContent === text) saved.textContent = ""; }, 2500);
 }
 tabGroupsOn.addEventListener("change", async () => {
+  chrome.storage.local.set({ [TG_OFFER_KEY]: "done" }); // réglé à la main : plus de proposition
   if (!tabGroupsOn.checked) {
     await saveTabGroups();
     chrome.permissions.remove(TAB_GROUPS_PERMISSION).catch(() => {});
@@ -1400,7 +1401,97 @@ async function checkShareCode(field, origin) {
 ed.detUrl.addEventListener("input", () => checkShareCode(ed.detUrl, "editor"));
 // Code de partage collé dans les mots-clés : on le passe à « + Ajouter une agence ».
 // La confirmation de la recherche précédente s'efface dès qu'on tape la suivante.
-input.addEventListener("input", () => { if (msg.dataset.kind === "sweep") { msg.textContent = ""; delete msg.dataset.kind; } });
+input.addEventListener("input", () => {
+  clearSweepMsg();
+  hideTabGroupsOffer();
+});
+
+/* ---------- Lignes qui se déroulent ----------
+   La confirmation de recherche et la proposition des groupes arrivent en se
+   déroulant et partent en se repliant (sans effet si le système réduit les animations). */
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+function unfold(el) {
+  // Un repli encore en cours est annulé : sa fin ne doit pas cacher la ligne qui revient.
+  if (el._foldEnd) { el.removeEventListener("animationend", el._foldEnd); el._foldEnd = null; }
+  el.classList.remove("folding");
+  el.classList.remove("unfold");
+  void el.offsetWidth; // relance l'animation
+  el.classList.add("unfold");
+}
+function fold(el, done) {
+  if (el._foldEnd) { el.removeEventListener("animationend", el._foldEnd); el._foldEnd = null; }
+  const finish = () => { el._foldEnd = null; el.classList.remove("folding", "unfold"); done(); };
+  if (reduceMotion.matches || el.hidden || !el.textContent) return finish();
+  el.classList.remove("unfold");
+  el.classList.add("folding");
+  el._foldEnd = (e) => { if (e.animationName === "fold") { el.removeEventListener("animationend", el._foldEnd); finish(); } };
+  el.addEventListener("animationend", el._foldEnd);
+}
+let sweepMsgTimer = null;
+function clearSweepMsg() {
+  clearTimeout(sweepMsgTimer);
+  if (msg.dataset.kind !== "sweep") return;
+  delete msg.dataset.kind;
+  fold(msg, () => { if (!msg.dataset.kind) msg.textContent = ""; });
+}
+function hideTabGroupsOffer() {
+  if (tgOffer.hidden) return;
+  fold(tgOffer, () => { tgOffer.hidden = true; });
+}
+
+/* ---------- Proposition des groupes d'onglets ----------
+   L'option demande une autorisation facultative de Chrome, qui ne peut être
+   demandée qu'au clic : elle n'est donc pas cochée d'office. Après une recherche
+   qui ouvre des onglets de plusieurs dossiers, une ligne la propose (trois fois
+   au plus) ; « Non merci », ou un réglage dans les options, la fait taire. */
+const TG_OFFER_MAX = 3;
+const tgOffer = document.getElementById("tgOffer");
+async function tabGroupsActive() {
+  const { [TAB_GROUPS_KEY]: pref = {} } = await chrome.storage.local.get(TAB_GROUPS_KEY);
+  return Boolean(pref.enabled) && (await chrome.permissions.contains(TAB_GROUPS_PERMISSION).catch(() => false));
+}
+async function tabGroupsOfferState() {
+  const { [TG_OFFER_KEY]: s } = await chrome.storage.local.get(TG_OFFER_KEY);
+  return s === "done" ? "done" : s && typeof s === "object" ? s : { shown: 0 };
+}
+async function tabGroupsOfferAllowed() {
+  const s = await tabGroupsOfferState();
+  return s !== "done" && (s.shown || 0) < TG_OFFER_MAX && !(await tabGroupsActive());
+}
+async function markTabGroupsOffer(change) {
+  const s = await tabGroupsOfferState();
+  if (s !== "done") await chrome.storage.local.set({ [TG_OFFER_KEY]: { shown: s.shown || 0, pending: false, ...change } });
+}
+async function showTabGroupsOffer() {
+  if (!(await tabGroupsOfferAllowed())) return;
+  const s = await tabGroupsOfferState();
+  await markTabGroupsOffer({ shown: (s.shown || 0) + 1, pending: false });
+  tgOffer.hidden = false;
+  unfold(tgOffer);
+}
+async function showPendingTabGroupsOffer() {
+  const s = await tabGroupsOfferState();
+  if (s !== "done" && s.pending) await showTabGroupsOffer();
+}
+document.getElementById("tgYes").addEventListener("click", async () => {
+  // La demande part directement du clic ; l'option est enregistrée tout de suite
+  // (si la popup se ferme pendant la demande, rien n'est perdu).
+  const asked = chrome.permissions.request(TAB_GROUPS_PERMISSION).catch(() => false);
+  const { [TAB_GROUPS_KEY]: pref = {} } = await chrome.storage.local.get(TAB_GROUPS_KEY);
+  await chrome.storage.local.set({ [TAB_GROUPS_KEY]: { enabled: true, collapsed: Boolean(pref.collapsed) }, [TG_OFFER_KEY]: "done" });
+  tgOffer.hidden = true;
+  clearTimeout(sweepMsgTimer);
+  delete msg.dataset.kind;
+  if (await asked) { msg.classList.remove("err"); msg.textContent = t("tg.on"); return; }
+  await chrome.storage.local.set({ [TAB_GROUPS_KEY]: { enabled: false, collapsed: Boolean(pref.collapsed) } });
+  msg.classList.add("err");
+  msg.textContent = t("tabs.refused");
+});
+document.getElementById("tgNo").addEventListener("click", async () => {
+  await chrome.storage.local.set({ [TG_OFFER_KEY]: "done" });
+  hideTabGroupsOffer();
+  input.focus();
+});
 input.addEventListener("input", async () => {
   if (organizing || !/TabulaPix:\d+:/.test(input.value)) return;
   const code = input.value;
@@ -2305,20 +2396,27 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     if (idx >= 0) job.folder = { id: currentFolders[idx].id, name: currentFolders[idx].name, color: folderColor(currentFolders[idx], idx) };
     return job;
   });
+  const severalFolders = new Set(jobs.map((j) => j.folder && j.folder.id).filter(Boolean)).size >= 2;
   sweeping = true;
   try { await chrome.runtime.sendMessage({ type: "sweep", jobs, q }); }
   catch (_) { msg.classList.add("err"); msg.textContent = t("main.bgError"); return; } // ex. extension en cours de rechargement
   finally { setTimeout(() => { sweeping = false; }, 800); }
   if (isPopup) {
+    // La popup se ferme : la proposition des groupes attendra la prochaine ouverture.
+    if (severalFolders && (await tabGroupsOfferAllowed())) await markTabGroupsOffer({ pending: true });
     window.close(); // on reste sur l'onglet en cours
   } else {
     input.select(); // panneau : prêt pour la recherche suivante
     // La colonne reste ouverte : une ligne discrète dit ce qui est parti, et ce qui a été sauté.
     const skipped = checkedIds().filter((id) => blockedIds.has(id)).map((id) => AGENCY_BY_ID.get(id)?.name).filter(Boolean);
     msg.classList.remove("err");
+    clearTimeout(sweepMsgTimer);
     msg.dataset.kind = "sweep";
     msg.textContent = [t(ids.length === 1 ? "main.started.one" : "main.started.many", { n: ids.length }),
       skipped.length ? t("main.skipped", { n: skipped.length }) + fxNames(skipped) + "." : ""].filter(Boolean).join(" ");
+    unfold(msg);
+    sweepMsgTimer = setTimeout(clearSweepMsg, 15000); // elle se replie d'elle-même
+    if (severalFolders) showTabGroupsOffer();
   }
 });
 
@@ -2379,6 +2477,7 @@ function clearNew(id) {
 }
 
 langReady.then(applyNewAgencyDefaults).then(loadNewAgencies).then(refreshList).then((data) => {
+  showPendingTabGroupsOffer(); // proposée après une recherche faite depuis la popup
   // Derniers mots-clés, sélectionnés : on tape pour les remplacer.
   if (data[QUERY_KEY] && !input.value) { input.value = data[QUERY_KEY]; input.select(); }
   // Popup fermée pendant le délai d'annulation d'une suppression : les
