@@ -6,6 +6,9 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Import d'un code ou d'un fichier : plus de fenêtre de Chrome d'emblée.** Les agences qui remplissent un champ arrivent cochées, avec la pastille « à autoriser » et le bandeau **Autoriser**, comme toute agence à autoriser ; la recherche les saute en attendant. (Seule l'option des groupes d'onglets d'un fichier est encore demandée tout de suite.)
+- **Compteur des dossiers plus près du bord.** L'avion d'envoi ne prend plus de place au repos : le compteur se décale seulement quand l'avion apparaît au survol, comme les outils en mode Organiser.
+
 ## 3.7.6 — 27 novembre 2026 (Chrome Web Store)
 
 - **Groupes d'onglets proposés au bon moment.** Après une recherche qui ouvre des onglets de plusieurs dossiers, une ligne discrète propose « Regrouper les onglets par dossier ? **Activer** · **Non merci** » (dans la popup, à l'ouverture suivante). **Activer** demande l'autorisation à Chrome et coche l'option ; la proposition s'arrête après trois fois, **Non merci** ou un réglage dans ⚙ › Onglets. L'option n'est pas cochée d'office : l'autorisation qu'elle demande ne peut l'être qu'au clic, et la rendre obligatoire ajouterait un avertissement à l'installation et désactiverait l'extension chez les utilisateurs actuels jusqu'à leur accord.

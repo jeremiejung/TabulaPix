@@ -6,6 +6,9 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Importing a code or a file: no Chrome window right away.** Agencies that fill in a field arrive ticked, with the “to allow” badge and the **Allow** banner, like any agency to allow; searches skip them until then. (Only a file's tab groups option is still requested at once.)
+- **Folder counter closer to the edge.** The send icon takes no space at rest: the counter only moves aside when the plane appears on hover, like the tools in Organise mode.
+
 ## 3.7.6 — 27 November 2026 (Chrome Web Store)
 
 - **Tab groups offered at the right time.** After a search that opens tabs from several folders, a discreet line offers “Group the tabs by folder? **Turn on** · **No thanks**” (in the popup, at the next opening). **Turn on** asks Chrome for the permission and ticks the option; the offer stops after three times, **No thanks** or a setting in ⚙ › Tabs. The option is not ticked by default: its permission can only be asked on a click, and making it mandatory would add a warning at installation and disable the extension for current users until they accept.

@@ -126,9 +126,9 @@ html:not(.organizing) #list .group-head:is(:hover, :has(:focus-visible)) > .grip
 /* « Se connecter » : comme la poignée, au survol ou au clavier */
 html:not(.organizing) #list .login-tool { opacity: 0; transition: opacity .12s; }
 html:not(.organizing) #list li.agency:is(:hover, :has(:focus-visible)) > .login-tool { opacity: 1; }
-/* Envoyer (avion), hors Organiser : au survol, comme la poignée (transparent, il reste atteignable au clavier) */
-html:not(.organizing) #list .row-share { opacity: 0; transition: opacity .12s; }
-html:not(.organizing) #list :is(li.agency, .group-head):is(:hover, :has(:focus-visible)) > .row-share { opacity: 1; }
+/* Envoyer (avion), hors Organiser : au survol ou sur une ligne parcourue au clavier (.kbd-tools), comme en mode Organiser */
+html:not(.organizing) #list .row-share { display: none; } /* au repos, il ne prend pas de place : le compteur reste près du bord */
+html:not(.organizing) #list :is(li.agency, .group-head):is(:hover, .kbd-tools) > .row-share { display: inline-flex; }
 #list .row-share { flex: none; color: var(--muted); }
 #list .row-share:hover { color: CanvasText; background: var(--line); }
 .group-head .count + .row-share, .row-share + .grip, .row-share + .login-tool { margin-left: 0; }

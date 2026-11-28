@@ -1509,11 +1509,12 @@ $id("importOk").addEventListener("click", async () => {
   hideImportConfirm();
   const current = await chrome.storage.local.get(null);
   const merged = mergeConfigImport(current, result, choice);
-  // Autorisations demandées tout de suite, le clic le permet : sites des
-  // agences importées qui remplissent un champ, et groupes d'onglets si le
-  // fichier les active. Sinon, la liste et les options proposent « Autoriser ».
+  // Sites des agences importées qui remplissent un champ : pas de fenêtre de Chrome
+  // d'emblée. Elles arrivent cochées, avec la pastille et le bandeau « Autoriser »,
+  // comme toute agence à autoriser (la recherche les saute en attendant).
+  // Seuls les groupes d'onglets, si le fichier les active, sont demandés tout de suite.
   const wantGroups = Boolean(merged.storage[TAB_GROUPS_KEY] && merged.storage[TAB_GROUPS_KEY].enabled);
-  const request = { ...(merged.hosts.length ? { origins: merged.hosts.map(originPattern) } : {}), ...(wantGroups ? { permissions: ["tabGroups"] } : {}) };
+  const request = wantGroups ? { permissions: ["tabGroups"] } : {};
   const asked = Object.keys(request).length ? chrome.permissions.request(request).catch(() => false) : Promise.resolve(true);
 
   await chrome.storage.local.set(merged.storage); // la dernière recherche et le reste sont gardés
