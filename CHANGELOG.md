@@ -6,15 +6,14 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
-- **Side panel: a status line that no longer moves the list.** The confirmation (“8 tabs opened.”) and the tab groups offer share a line of reserved height; the offer takes the confirmation's place when it fades, after 15 seconds. Skipped agencies are named more briefly (“To allow: Abacapress.”).
-- **The search field says “Keywords… or share code”**, for whoever receives a code.
-- **Folders: the send icon appears to the left of the counter**, which no longer moves on hover.
-- Small fixes: screen readers no longer repeat the “Alt + ↑ / ↓” keyboard hint on every checkbox (announced once); the search field's hint stays readable in Organise mode; no dashed rule under an agency's title when editing; the manual-entry instruction is no longer green; “4 agencies are already yours, unchanged.” on the share-code screen.
-
-- **Where to paste a share code, clearer.** The copy message now says to paste it into the TabulaPix keywords field (always visible, always empty). The “+ Add an agency” screen says it too (“Paste it into “Results page”, even if it is already filled in”), and a code pasted into “Keywords searched” is recognised.
+## 3.7.7 — 28 November 2026 (Chrome Web Store)
 
 - **Importing a code or a file: no Chrome window right away.** Agencies that fill in a field arrive ticked, with the “to allow” badge and the **Allow** banner, like any agency to allow; searches skip them until then. (Only a file's tab groups option is still requested at once.)
-- **Folder counter closer to the edge.** The send icon takes no space at rest: the counter only moves aside when the plane appears on hover, like the tools in Organise mode.
+- **Where to paste a share code, clearer.** The copy message now says to paste it into the TabulaPix keywords field (always visible, always empty). The “+ Add an agency” screen says it too (“Paste it into “Results page”, even if it is already filled in”), and a code pasted into “Keywords searched” is recognised.
+- **Side panel: a status line that no longer moves the list.** The confirmation (“8 tabs opened.”) and the tab groups offer share a line of reserved height; the offer takes the confirmation's place when it fades, after 15 seconds. Skipped agencies are named more briefly (“To allow: Abacapress.”).
+- **The search field says “Keywords… or share code”**, for whoever receives a code.
+- **Folders: the counter stays near the edge and no longer moves.** The send icon takes no space at rest and appears, on hover, to the left of the counter.
+- Small fixes: screen readers no longer repeat the “Alt + ↑ / ↓” keyboard hint on every checkbox (announced once); the search field's hint stays readable in Organise mode; no dashed rule under an agency's title when editing; the manual-entry instruction is no longer green; “4 agencies are already yours, unchanged.” on the share-code screen.
 
 ## 3.7.6 — 27 November 2026 (Chrome Web Store)
 

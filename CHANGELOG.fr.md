@@ -6,15 +6,14 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
-- **Colonne : une ligne d'état qui ne fait plus bouger la liste.** La confirmation (« 8 onglets ouverts. ») et la proposition des groupes d'onglets partagent une ligne de hauteur réservée ; la proposition vient à la place de la confirmation quand celle-ci s'efface, après 15 secondes. Les agences sautées sont nommées plus court (« À autoriser : Abacapress. »).
-- **Le champ de recherche indique « Mots-clés… ou code de partage »**, pour la personne qui reçoit un code.
-- **Dossiers : l'avion d'envoi apparaît à gauche du compteur**, qui ne bouge plus au survol.
-- Petites corrections : la consigne clavier « Alt + ↑ / ↓ » n'est plus relue par les lecteurs d'écran sur chaque case (annoncée une fois) ; la consigne du champ de recherche reste lisible en mode Organiser ; plus de filet pointillé sous le titre d'une agence en modification ; la consigne de la saisie manuelle n'est plus en vert ; « 4 agences sont déjà chez vous, inchangées. » sur l'écran du code de partage.
-
-- **Où coller un code de partage, plus clair.** Le message de copie dit maintenant de le coller dans le champ des mots-clés de TabulaPix (toujours visible, toujours vide). L'écran « + Ajouter une agence » l'indique aussi (« Collez-le dans « Page de résultats », même si elle est déjà remplie »), et un code collé dans « Mots-clés cherchés » est reconnu.
+## 3.7.7 — 28 novembre 2026 (Chrome Web Store)
 
 - **Import d'un code ou d'un fichier : plus de fenêtre de Chrome d'emblée.** Les agences qui remplissent un champ arrivent cochées, avec la pastille « à autoriser » et le bandeau **Autoriser**, comme toute agence à autoriser ; la recherche les saute en attendant. (Seule l'option des groupes d'onglets d'un fichier est encore demandée tout de suite.)
-- **Compteur des dossiers plus près du bord.** L'avion d'envoi ne prend plus de place au repos : le compteur se décale seulement quand l'avion apparaît au survol, comme les outils en mode Organiser.
+- **Où coller un code de partage, plus clair.** Le message de copie dit maintenant de le coller dans le champ des mots-clés de TabulaPix (toujours visible, toujours vide). L'écran « + Ajouter une agence » l'indique aussi (« Collez-le dans « Page de résultats », même si elle est déjà remplie »), et un code collé dans « Mots-clés cherchés » est reconnu.
+- **Colonne : une ligne d'état qui ne fait plus bouger la liste.** La confirmation (« 8 onglets ouverts. ») et la proposition des groupes d'onglets partagent une ligne de hauteur réservée ; la proposition vient à la place de la confirmation quand celle-ci s'efface, après 15 secondes. Les agences sautées sont nommées plus court (« À autoriser : Abacapress. »).
+- **Le champ de recherche indique « Mots-clés… ou code de partage »**, pour la personne qui reçoit un code.
+- **Dossiers : le compteur reste près du bord et ne bouge plus.** L'avion d'envoi ne prend pas de place au repos et apparaît, au survol, à gauche du compteur.
+- Petites corrections : la consigne clavier « Alt + ↑ / ↓ » n'est plus relue par les lecteurs d'écran sur chaque case (annoncée une fois) ; la consigne du champ de recherche reste lisible en mode Organiser ; plus de filet pointillé sous le titre d'une agence en modification ; la consigne de la saisie manuelle n'est plus en vert ; « 4 agences sont déjà chez vous, inchangées. » sur l'écran du code de partage.
 
 ## 3.7.6 — 27 novembre 2026 (Chrome Web Store)
 
