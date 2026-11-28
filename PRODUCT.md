@@ -40,6 +40,7 @@ TabulaPix lets them type their keywords once and opens one tab per agency with t
 
 ## Brand Commitments
 
+- Audience term: “iconographes” in French, “picture editors” in English, one term only (not a list of job titles); French texts use gender-neutral wording.
 - Name: TabulaPix. Tagline: "Une recherche, toutes vos agences photo." / "One search, all your picture agencies."
 - Icon: a text cursor in a rounded white frame with a red magnifying glass (`extension/icons/`).
 - Accent red of the extension's Search button.

@@ -6,7 +6,7 @@
 
 **[Installer depuis le Chrome Web Store](https://chromewebstore.google.com/detail/gdggcpmgjoaobfjlnbfmgfnjfgodgikp)** · site : [tabulapix.com](https://tabulapix.com)
 
-Extension Chrome pour les services photo, les iconographes, les éditrices et éditeurs photo : tapez vos mots-clés une fois et cherchez sur toutes vos agences photo en même temps. TabulaPix ouvre un onglet par agence, résultats prêts, avec vos propres comptes. Aucun scraping, aucune clé d'API, aucun mot de passe enregistré. Interface en français et en anglais.
+Extension Chrome pour les iconographes : tapez vos mots-clés une fois et cherchez sur toutes vos agences photo en même temps. TabulaPix ouvre un onglet par agence, résultats prêts, avec vos propres comptes. Aucun scraping, aucune clé d'API, aucun mot de passe enregistré. Interface en français et en anglais.
 
 Tout se règle depuis l'extension (mode **Organiser** et options **⚙**), sans modifier de fichier : agences affichées, ordre, dossiers, agences ajoutées avec détection automatique, adresses et repérages modifiables, langue, sous-domaine Pixpalace. Les agences cochées et leur ordre sont mémorisés d'une utilisation à l'autre.
 
