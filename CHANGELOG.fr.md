@@ -6,6 +6,15 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+## 3.7.7 — 28 novembre 2026 (Chrome Web Store)
+
+- **Import d'un code ou d'un fichier : plus de fenêtre de Chrome d'emblée.** Les agences qui remplissent un champ arrivent cochées, avec la pastille « à autoriser » et le bandeau **Autoriser**, comme toute agence à autoriser ; la recherche les saute en attendant. (Seule l'option des groupes d'onglets d'un fichier est encore demandée tout de suite.)
+- **Où coller un code de partage, plus clair.** Le message de copie dit maintenant de le coller dans le champ des mots-clés de TabulaPix (toujours visible, toujours vide). L'écran « + Ajouter une agence » l'indique aussi (« Collez-le dans « Page de résultats », même si elle est déjà remplie »), et un code collé dans « Mots-clés cherchés » est reconnu.
+- **Colonne : une ligne d'état qui ne fait plus bouger la liste.** La confirmation (« 8 onglets ouverts. ») et la proposition des groupes d'onglets partagent une ligne de hauteur réservée ; la proposition vient à la place de la confirmation quand celle-ci s'efface, après 15 secondes. Les agences sautées sont nommées plus court (« À autoriser : Abacapress. »).
+- **Le champ de recherche indique « Mots-clés… ou code de partage »**, pour la personne qui reçoit un code.
+- **Dossiers : le compteur reste près du bord et ne bouge plus.** L'avion d'envoi ne prend pas de place au repos et apparaît, au survol, à gauche du compteur.
+- Petites corrections : la consigne clavier « Alt + ↑ / ↓ » n'est plus relue par les lecteurs d'écran sur chaque case (annoncée une fois) ; la consigne du champ de recherche reste lisible en mode Organiser ; plus de filet pointillé sous le titre d'une agence en modification ; la consigne de la saisie manuelle n'est plus en vert ; « 4 agences sont déjà chez vous, inchangées. » sur l'écran du code de partage.
+
 ## 3.7.6 — 27 novembre 2026 (Chrome Web Store)
 
 - **Groupes d'onglets proposés au bon moment.** Après une recherche qui ouvre des onglets de plusieurs dossiers, une ligne discrète propose « Regrouper les onglets par dossier ? **Activer** · **Non merci** » (dans la popup, à l'ouverture suivante). **Activer** demande l'autorisation à Chrome et coche l'option ; la proposition s'arrête après trois fois, **Non merci** ou un réglage dans ⚙ › Onglets. L'option n'est pas cochée d'office : l'autorisation qu'elle demande ne peut l'être qu'au clic, et la rendre obligatoire ajouterait un avertissement à l'installation et désactiverait l'extension chez les utilisateurs actuels jusqu'à leur accord.

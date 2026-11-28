@@ -17,10 +17,13 @@
         <button type="button" id="settings" class="icon-btn" title="Options" aria-label="Options" data-i18n-title="main.settings"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M12.51 7.09 L14.25 7.18 L14.25 8.82 L12.51 8.91 L11.83 10.54 L12.99 11.84 L11.84 12.99 L10.54 11.83 L8.91 12.51 L8.82 14.25 L7.18 14.25 L7.09 12.51 L5.46 11.83 L4.16 12.99 L3.01 11.84 L4.17 10.54 L3.49 8.91 L1.75 8.82 L1.75 7.18 L3.49 7.09 L4.17 5.46 L3.01 4.16 L4.16 3.01 L5.46 4.17 L7.09 3.49 L7.18 1.75 L8.82 1.75 L8.91 3.49 L10.54 4.17 L11.84 3.01 L12.99 4.16 L11.83 5.46Z"/><circle cx="8" cy="8" r="2"/></svg><span class="lbl" data-i18n="main.settings">Options</span></button>
       </header>
       <p id="headMsg" class="status err" role="alert"></p>
-      <input id="q" type="search" placeholder="Mots-clés…" data-i18n-placeholder="main.keywords" autocomplete="off" autofocus required>
+      <input id="q" type="search" placeholder="Mots-clés… ou code de partage" data-i18n-placeholder="main.keywords" autocomplete="off" autofocus required>
       <button type="submit" id="go"><span data-i18n="main.go">Lancer la recherche</span> <span id="goCount" class="go-count"></span><span class="go-paused" data-i18n="main.paused">Recherche en pause</span></button>
-      <p id="msg" role="status"></p>
-      <p id="tgOffer" class="tg-offer" hidden><span data-i18n="tg.offer">Regrouper les onglets par dossier ?</span> <span class="tg-actions"><button type="button" id="tgYes" class="link inline" data-i18n="tg.yes">Activer</button> · <button type="button" id="tgNo" class="link inline" data-i18n="tg.no">Non merci</button></span></p>
+      <!-- Ligne d'état : confirmation de recherche, puis proposition des groupes (hauteur réservée dans la colonne) -->
+      <div id="statusSlot" class="status-slot">
+        <p id="msg" role="status"></p>
+        <p id="tgOffer" class="tg-offer" hidden><span data-i18n="tg.offer">Regrouper les onglets par dossier ?</span> <span class="tg-actions"><button type="button" id="tgYes" class="link inline" data-i18n="tg.yes">Activer</button> · <button type="button" id="tgNo" class="link inline" data-i18n="tg.no">Non merci</button></span></p>
+      </div>
     </div>
     <div class="bar quick">
       <button type="button" id="all" data-i18n="main.all">Tout</button>
@@ -50,6 +53,7 @@
     <p id="step1Summary" class="step-summary" hidden><span id="step1Text"></span> <button type="button" id="step1Edit" class="link inline" data-i18n="ed.step1.edit">Modifier</button></p>
     <div id="step1">
       <p class="help" data-i18n="ed.step1.help">Faites une recherche sur le site de l'agence, puis collez ici l'adresse de la page de résultats et les mots-clés que vous avez tapés.</p>
+      <p class="help" id="shareHint" data-i18n="ed.shareHint">Code de partage reçu ? Collez-le dans « Page de résultats », même si elle est déjà remplie.</p>
       <div class="field">
         <label for="detUrl" data-i18n="ed.detUrl">Page de résultats</label>
         <input id="detUrl" autocomplete="off" spellcheck="false" placeholder="https://… (ou un code de partage)" data-i18n-placeholder="ed.detUrl.placeholder">
