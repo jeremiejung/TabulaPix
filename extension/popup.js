@@ -584,8 +584,9 @@ function writeMessage(el, message, warnings = []) {
 }
 
 // Message de l'étape « vérifier », en haut du formulaire.
-function showStep2(message, warnings = []) {
+function showStep2(message, warnings = [], { neutral = false } = {}) {
   ed.form.hidden = false;
+  ed.step2Msg.className = neutral ? "status" : "status ok"; // vert = réussite ; une consigne reste neutre
   writeMessage(ed.step2Msg, message, warnings);
   ed.step2Msg.hidden = !message && !warnings.length;
   validate();
@@ -771,7 +772,7 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
 ed.manualLink.addEventListener("click", async () => {
   if (!draft) draft = { id: newId(), editing: false, builtin: false, mode: "url", fill: null };
   setMode("url");
-  showStep2(t("ed.manual.msg"));
+  showStep2(t("ed.manual.msg"), [], { neutral: true });
   ed.url.focus();
   await saveDraft();
 });
@@ -1296,7 +1297,7 @@ function renderShareView(fx, nothing) {
     f.added && info.folder ? t("share.will.folder", { name: info.folder }) : "",
     f.filed ? t("share.will.filed", { n: f.filed }) : "",
     a.taken.length ? t("backup.added.taken", { n: a.taken.length }) + fxNames(a.taken) + "." : "",
-    a.present ? t("share.will.present", { n: a.present }) : "",
+    a.present ? t(a.present === 1 ? "share.will.present.one" : "share.will.present", { n: a.present }) : "",
     a.full ? t("backup.added.full", { n: a.full, max: MAX_CUSTOM }) : "",
   ];
   $id("shareEffects").textContent = will.filter(Boolean).join(" ");
@@ -1414,6 +1415,15 @@ input.addEventListener("input", () => {
   hideTabGroupsOffer();
 });
 
+// Consigne clavier (Alt + ↑ / ↓) annoncée une seule fois, au premier focus d'une case
+// de la liste : liée à chaque case, elle était relue sur toutes.
+let kbdHintSaid = false;
+list.addEventListener("focusin", (e) => {
+  if (kbdHintSaid || !e.target.matches?.("input.agency-box, input.folder-box")) return;
+  kbdHintSaid = true;
+  announce(t("main.organize.kbd"));
+});
+
 /* ---------- Lignes qui se déroulent ----------
    La confirmation de recherche et la proposition des groupes arrivent en se
    déroulant et partent en se repliant (sans effet si le système réduit les animations). */
@@ -1436,11 +1446,11 @@ function fold(el, done) {
   el.addEventListener("animationend", el._foldEnd);
 }
 let sweepMsgTimer = null;
-function clearSweepMsg() {
+function clearSweepMsg(then) {
   clearTimeout(sweepMsgTimer);
   if (msg.dataset.kind !== "sweep") return;
   delete msg.dataset.kind;
-  fold(msg, () => { if (!msg.dataset.kind) msg.textContent = ""; });
+  fold(msg, () => { if (!msg.dataset.kind) { msg.textContent = ""; if (then) then(); } });
 }
 function hideTabGroupsOffer() {
   if (tgOffer.hidden) return;
@@ -1716,7 +1726,6 @@ function agencyItem(a, checked, isHidden = false, inHiddenFolder = false) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "agency-box";
-  if (!isHidden) box.setAttribute("aria-describedby", "organizeKbd"); // consigne clavier lue au focus
   box.value = a.id;
   box.dataset.key = "a:" + a.id;
   // Masquée (ou dans un dossier masqué) : la coche est gardée et montrée, mais inactive ;
@@ -2006,7 +2015,6 @@ function folderHead(f, color, group) {
   const box = document.createElement("input");
   box.type = "checkbox";
   box.className = "folder-box";
-  box.setAttribute("aria-describedby", "organizeKbd");
   box.setAttribute("aria-label", f.name); // la case seule : le nom n'en fait plus partie
   box.disabled = Boolean(f.hidden); // dossier masqué : rien n'y est cherché
   box.dataset.key = "f:" + f.id;
@@ -2049,7 +2057,7 @@ function folderHead(f, color, group) {
     });
     const share = toolButton("share", t("share.folder", { name: f.name }), () => copyShareCode({ folderId: f.id }, msg));
     share.classList.add("row-share");
-    head.append(toggle, label, name, count, share, grip(t("folder.handle")));
+    head.append(toggle, label, name, share, count, grip(t("folder.handle"))); // l'avion à gauche du compteur : le compteur ne bouge pas
     group.append(head);
   }
   return head;
@@ -2422,10 +2430,10 @@ document.getElementById("form").addEventListener("submit", async (e) => {
     clearTimeout(sweepMsgTimer);
     msg.dataset.kind = "sweep";
     msg.textContent = [t(ids.length === 1 ? "main.started.one" : "main.started.many", { n: ids.length }),
-      skipped.length ? t("main.skipped", { n: skipped.length }) + fxNames(skipped) + "." : ""].filter(Boolean).join(" ");
+      skipped.length ? t("main.skipped", { names: skipped.slice(0, 3).join(", ") + (skipped.length > 3 ? ", …" : "") }) : ""].filter(Boolean).join(" ");
     unfold(msg);
-    sweepMsgTimer = setTimeout(clearSweepMsg, 15000); // elle se replie d'elle-même
-    if (severalFolders) showTabGroupsOffer();
+    // Elle s'efface d'elle-même après 15 s ; la proposition des groupes vient alors à sa place.
+    sweepMsgTimer = setTimeout(() => clearSweepMsg(severalFolders ? showTabGroupsOffer : null), 15000);
   }
 });
 
