@@ -376,6 +376,7 @@ async function showEditor(a) {
   if (a) startEdit(a);
   else if (!(await restoreDraft())) { resetEditor(); prefilled = await prefillFromActiveTab(); }
   showView(editorView);
+  $id("shareHint").hidden = Boolean(draft && draft.editing); // ajout seulement : en modification, un code n'a pas sa place
   if (draft && draft.editing) ed.name.focus();
   else if (prefilled === "both") detectBtn.focus();     // il ne reste qu'à cliquer « Détecter »
   else if (prefilled === "url") ed.detQ.focus();
@@ -1399,6 +1400,13 @@ async function checkShareCode(field, origin) {
   return true;
 }
 ed.detUrl.addEventListener("input", () => checkShareCode(ed.detUrl, "editor"));
+// Un code collé par erreur dans « Mots-clés cherchés » est reconnu aussi.
+ed.detQ.addEventListener("input", () => {
+  if (!/TabulaPix:\d+:/.test(ed.detQ.value)) return;
+  ed.detUrl.value = ed.detQ.value;
+  ed.detQ.value = "";
+  checkShareCode(ed.detUrl, "editor");
+});
 // Code de partage collé dans les mots-clés : on le passe à « + Ajouter une agence ».
 // La confirmation de la recherche précédente s'efface dès qu'on tape la suivante.
 input.addEventListener("input", () => {

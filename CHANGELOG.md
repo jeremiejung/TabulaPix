@@ -6,6 +6,8 @@ Versions published on the [Chrome Web Store](https://chromewebstore.google.com/d
 
 ## [Unreleased]
 
+- **Where to paste a share code, clearer.** The copy message now says to paste it into the TabulaPix keywords field (always visible, always empty). The “+ Add an agency” screen says it too (“Paste it into “Results page”, even if it is already filled in”), and a code pasted into “Keywords searched” is recognised.
+
 - **Importing a code or a file: no Chrome window right away.** Agencies that fill in a field arrive ticked, with the “to allow” badge and the **Allow** banner, like any agency to allow; searches skip them until then. (Only a file's tab groups option is still requested at once.)
 - **Folder counter closer to the edge.** The send icon takes no space at rest: the counter only moves aside when the plane appears on hover, like the tools in Organise mode.
 

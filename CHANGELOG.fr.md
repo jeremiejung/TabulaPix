@@ -6,6 +6,8 @@ Les versions publiées sur le [Chrome Web Store](https://chromewebstore.google.c
 
 ## [Non publié]
 
+- **Où coller un code de partage, plus clair.** Le message de copie dit maintenant de le coller dans le champ des mots-clés de TabulaPix (toujours visible, toujours vide). L'écran « + Ajouter une agence » l'indique aussi (« Collez-le dans « Page de résultats », même si elle est déjà remplie »), et un code collé dans « Mots-clés cherchés » est reconnu.
+
 - **Import d'un code ou d'un fichier : plus de fenêtre de Chrome d'emblée.** Les agences qui remplissent un champ arrivent cochées, avec la pastille « à autoriser » et le bandeau **Autoriser**, comme toute agence à autoriser ; la recherche les saute en attendant. (Seule l'option des groupes d'onglets d'un fichier est encore demandée tout de suite.)
 - **Compteur des dossiers plus près du bord.** L'avion d'envoi ne prend plus de place au repos : le compteur se décale seulement quand l'avion apparaît au survol, comme les outils en mode Organiser.
 
